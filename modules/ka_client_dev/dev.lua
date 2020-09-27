@@ -9,6 +9,9 @@ local devCheckBox
 local drawBoxesCheckBox
 local hideMapCheckBox
 
+local tempIp   = ClientEnterGame.clientIp
+local tempPort = 7171
+
 
 
 local function onServerChange(self)
@@ -23,18 +26,22 @@ end
 
 local function onLocalCheckBoxChange(self, value)
   if value then
-    ClientEnterGame.setUniqueServer(ClientEnterGame.localIp, g_settings.get('port'), 1099)
+    tempIp = ClientEnterGame.localIp
+    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
   else
-    ClientEnterGame.setUniqueServer(ClientEnterGame.clientIp, g_settings.get('port'), 1099)
+    tempIp = ClientEnterGame.clientIp
+    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
   end
   onServerChange(self)
 end
 
 local function onDevCheckBoxChange(self, value)
   if value then
-    ClientEnterGame.setUniqueServer(g_settings.get('host'), 7175, 1099)
+    tempPort = 7175
+    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
   else
-    ClientEnterGame.setUniqueServer(g_settings.get('host'), 7171, 1099)
+    tempPort = 7171
+    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
   end
   onServerChange(self)
 end
@@ -112,7 +119,9 @@ function ClientDev.terminate()
   hideMapCheckBox   = nil
 
   -- Set IP to default server
-  ClientEnterGame.setUniqueServer(ClientEnterGame.clientIp, 7171, 1099)
+  tempIp   = ClientEnterGame.clientIp
+  tempPort = 7171
+  ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
 
   _G.ClientDev = nil
 end
