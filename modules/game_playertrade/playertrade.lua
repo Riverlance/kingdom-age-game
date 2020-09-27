@@ -1,27 +1,44 @@
+_G.GamePlayerTrade = { }
+GamePlayerTrade.m  = modules.game_playertrade -- Alias
+
+
+
 tradeWindow = nil
 
-function init()
+function GamePlayerTrade.init()
   g_ui.importStyle('tradewindow')
 
-  connect(g_game, { onOwnTrade = onGameOwnTrade,
-                    onCounterTrade = onGameCounterTrade,
-                    onCloseTrade = onGameCloseTrade,
-                    onGameEnd = onGameCloseTrade })
+  connect(g_game, {
+    onOwnTrade     = GamePlayerTrade.onGameOwnTrade,
+    onCounterTrade = GamePlayerTrade.onGameCounterTrade,
+    onCloseTrade   = GamePlayerTrade.onGameCloseTrade,
+    onGameEnd      = GamePlayerTrade.onGameCloseTrade
+  })
 end
 
-function terminate()
-  disconnect(g_game, { onOwnTrade = onGameOwnTrade,
-                       onCounterTrade = onGameCounterTrade,
-                       onCloseTrade = onGameCloseTrade,
-                       onGameEnd = onGameCloseTrade })
+function GamePlayerTrade.terminate()
+  disconnect(g_game, {
+    onOwnTrade     = GamePlayerTrade.onGameOwnTrade,
+    onCounterTrade = GamePlayerTrade.onGameCounterTrade,
+    onCloseTrade   = GamePlayerTrade.onGameCloseTrade,
+    onGameEnd      = GamePlayerTrade.onGameCloseTrade
+  })
 
   if tradeWindow then
     tradeWindow:destroy()
   end
+
+  _G.GamePlayerTrade = nil
 end
 
-function createTrade()
-  tradeWindow = g_ui.createWidget('TradeWindow', modules.game_interface.getRightPanel())
+function GamePlayerTrade.createTrade()
+  tradeWindow = g_ui.createWidget('TradeWindow')
+
+  if not GameInterface.addToPanels(tradeWindow) then
+    tradeWindow = nil
+    return
+  end
+
   tradeWindow.onClose = function()
     g_game.rejectTrade()
     tradeWindow:hide()
@@ -29,9 +46,9 @@ function createTrade()
   tradeWindow:setup()
 end
 
-function fillTrade(name, items, counter)
+function GamePlayerTrade.fillTrade(name, items, counter)
   if not tradeWindow then
-    createTrade()
+    GamePlayerTrade.createTrade()
   end
 
   local tradeItemWidget = tradeWindow:getChildById('tradeItem')
@@ -61,15 +78,15 @@ function fillTrade(name, items, counter)
   end
 end
 
-function onGameOwnTrade(name, items)
-  fillTrade(name, items, false)
+function GamePlayerTrade.onGameOwnTrade(name, items)
+  GamePlayerTrade.fillTrade(name, items, false)
 end
 
-function onGameCounterTrade(name, items)
-  fillTrade(name, items, true)
+function GamePlayerTrade.onGameCounterTrade(name, items)
+  GamePlayerTrade.fillTrade(name, items, true)
 end
 
-function onGameCloseTrade()
+function GamePlayerTrade.onGameCloseTrade()
   if tradeWindow then
     tradeWindow:destroy()
     tradeWindow = nil

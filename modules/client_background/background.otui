@@ -1,6 +1,6 @@
 Panel
   id: background
-  image-source: /images/background
+  image-source: /images/ui/enter_game/client_background
   image-smooth: true
   image-fixed-ratio: true
   anchors.top: topMenu.bottom

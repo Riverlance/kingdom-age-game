@@ -1,38 +1,51 @@
+_G.GameVipList = { }
+GameVipList.m  = modules.game_viplist -- Alias
+
+
+
 vipWindow = nil
-vipButton = nil
+vipTopMenuButton = nil
 addVipWindow = nil
 editVipWindow = nil
+contentsPanel = nil
 vipInfo = {}
 
-function init()
-  connect(g_game, { onGameStart = refresh,
-                    onGameEnd = clear,
-                    onAddVip = onAddVip,
-                    onVipStateChange = onVipStateChange })
 
 
-  g_keyboard.bindKeyDown('Ctrl+F', toggle)
+function GameVipList.init()
+  connect(g_game, {
+    onGameStart      = GameVipList.online,
+    onGameEnd        = GameVipList.offline,
+    onAddVip         = GameVipList.onAddVip,
+    onVipStateChange = GameVipList.onVipStateChange
+  })
 
-  vipButton = modules.client_topmenu.addLeftGameButton('vipListButton', tr('VIP List') .. ' (Ctrl+F)', '/images/topbuttons/viplist', toggle)
-  vipButton:setOn(true)
-  vipWindow = g_ui.loadUI('viplist', modules.game_interface.getRightPanel())
+  g_keyboard.bindKeyDown('Ctrl+F', GameVipList.toggle)
+
+  vipWindow = g_ui.loadUI('viplist')
+  vipTopMenuButton = ClientTopMenu.addRightGameToggleButton('vipTopMenuButton', tr('VIP List') .. ' (Ctrl+F)', '/images/ui/top_menu/viplist', GameVipList.toggle)
+  contentsPanel = vipWindow:getChildById('contentsPanel')
+
+  vipWindow.topMenuButton = vipTopMenuButton
+  contentsPanel.onMousePress = GameVipList.onVipListMousePress
 
   if not g_game.getFeature(GameAdditionalVipInfo) then
-    loadVipInfo()
+    GameVipList.loadVipInfo()
   end
-  refresh()
-  vipWindow:setup()
+  GameVipList.online()
 end
 
-function terminate()
+function GameVipList.terminate()
   g_keyboard.unbindKeyDown('Ctrl+F')
-  disconnect(g_game, { onGameStart = refresh,
-                       onGameEnd = clear,
-                       onAddVip = onAddVip,
-                       onVipStateChange = onVipStateChange })
+  disconnect(g_game, {
+    onGameStart      = GameVipList.online,
+    onGameEnd        = GameVipList.offline,
+    onAddVip         = GameVipList.onAddVip,
+    onVipStateChange = GameVipList.onVipStateChange
+  })
 
   if not g_game.getFeature(GameAdditionalVipInfo) then
-    saveVipInfo()
+    GameVipList.saveVipInfo()
   end
 
   if addVipWindow then
@@ -44,10 +57,12 @@ function terminate()
   end
 
   vipWindow:destroy()
-  vipButton:destroy()
+  vipTopMenuButton:destroy()
+
+  _G.GameVipList = nil
 end
 
-function loadVipInfo()
+function GameVipList.loadVipInfo()
   local settings = g_settings.getNode('VipList')
   if not settings then
     vipInfo = {}
@@ -56,48 +71,40 @@ function loadVipInfo()
   vipInfo = settings['VipInfo'] or {}
 end
 
-function saveVipInfo()
+function GameVipList.saveVipInfo()
   settings = {}
   settings['VipInfo'] = vipInfo
   g_settings.mergeNode('VipList', settings)
 end
 
+function GameVipList.clear()
+  contentsPanel:destroyChildren()
+end
 
-function refresh()
-  clear()
+function GameVipList.online()
+  GameInterface.setupMiniWindow(vipWindow, vipTopMenuButton)
+
+  GameVipList.clear()
   for id,vip in pairs(g_game.getVips()) do
-    onAddVip(id, unpack(vip))
-  end
-
-  vipWindow:setContentMinimumHeight(38)
-end
-
-function clear()
-  local vipList = vipWindow:getChildById('contentsPanel')
-  vipList:destroyChildren()
-end
-
-function toggle()
-  if vipButton:isOn() then
-    vipWindow:close()
-    vipButton:setOn(false)
-  else
-    vipWindow:open()
-    vipButton:setOn(true)
+    GameVipList.onAddVip(id, unpack(vip))
   end
 end
 
-function onMiniWindowClose()
-  vipButton:setOn(false)
+function GameVipList.offline()
+  GameVipList.clear()
 end
 
-function createAddWindow()
+function GameVipList.toggle()
+  GameInterface.toggleMiniWindow(vipWindow)
+end
+
+function GameVipList.createAddWindow()
   if not addVipWindow then
     addVipWindow = g_ui.displayUI('addvip')
   end
 end
 
-function createEditWindow(widget)
+function GameVipList.createEditWindow(widget)
   if editVipWindow then
     return
   end
@@ -132,8 +139,7 @@ function createEditWindow(widget)
   end
 
   local saveFunction = function()
-    local vipList = vipWindow:getChildById('contentsPanel')
-    if not widget or not vipList:hasChild(widget) then
+    if not widget or not contentsPanel:hasChild(widget) then
       cancelFunction()
       return
     end
@@ -155,7 +161,7 @@ function createEditWindow(widget)
     end
 
     widget:destroy()
-    onAddVip(id, name, state, description, iconId, notify)
+    GameVipList.onAddVip(id, name, state, description, iconId, notify)
 
     editVipWindow:destroy()
     iconRadioGroup:destroy()
@@ -169,25 +175,24 @@ function createEditWindow(widget)
   editVipWindow.onEnter = saveFunction
 end
 
-function destroyAddWindow()
+function GameVipList.destroyAddWindow()
   addVipWindow:destroy()
   addVipWindow = nil
 end
 
-function addVip()
+function GameVipList.addVip()
   g_game.addVip(addVipWindow:getChildById('name'):getText())
-  destroyAddWindow()
+  GameVipList.destroyAddWindow()
 end
 
-function removeVip(widgetOrName)
+function GameVipList.removeVip(widgetOrName)
   if not widgetOrName then
     return
   end
 
   local widget
-  local vipList = vipWindow:getChildById('contentsPanel')
   if type(widgetOrName) == 'string' then
-    local entries = vipList:getChildren()
+    local entries = contentsPanel:getChildren()
     for i = 1, #entries do
       if entries[i]:getText():lower() == widgetOrName:lower() then
         widget = entries[i]
@@ -204,22 +209,22 @@ function removeVip(widgetOrName)
   if widget then
     local id = widget:getId():sub(4)
     g_game.removeVip(id)
-    vipList:removeChild(widget)
+    contentsPanel:removeChild(widget)
     if vipInfo[id] and g_game.getFeature(GameAdditionalVipInfo) then
       vipInfo[id] = nil
     end
   end
 end
 
-function hideOffline(state)
+function GameVipList.hideOffline(state)
   settings = {}
   settings['hideOffline'] = state
   g_settings.mergeNode('VipList', settings)
 
-  refresh()
+  GameVipList.online()
 end
 
-function isHiddingOffline()
+function GameVipList.isHiddingOffline()
   local settings = g_settings.getNode('VipList')
   if not settings then
     return false
@@ -227,7 +232,7 @@ function isHiddingOffline()
   return settings['hideOffline']
 end
 
-function getSortedBy()
+function GameVipList.getSortedBy()
   local settings = g_settings.getNode('VipList')
   if not settings or not settings['sortedBy'] then
     return 'status'
@@ -235,19 +240,17 @@ function getSortedBy()
   return settings['sortedBy']
 end
 
-function sortBy(state)
+function GameVipList.sortBy(state)
   settings = {}
   settings['sortedBy'] = state
   g_settings.mergeNode('VipList', settings)
 
-  refresh()
+  GameVipList.online()
 end
 
-function onAddVip(id, name, state, description, iconId, notify)
-  local vipList = vipWindow:getChildById('contentsPanel')
-
+function GameVipList.onAddVip(id, name, state, description, iconId, notify)
   local label = g_ui.createWidget('VipListLabel')
-  label.onMousePress = onVipListLabelMousePress
+  label.onMousePress = GameVipList.onVipListLabelMousePress
   label:setId('vip' .. id)
   label:setText(name)
 
@@ -283,90 +286,95 @@ function onAddVip(id, name, state, description, iconId, notify)
   label.vipState = state
 
   label:setPhantom(false)
-  connect(label, { onDoubleClick = function () g_game.openPrivateChannel(label:getText()) return true end } )
 
-  if state == VipState.Offline and isHiddingOffline() then
+  connect(label, {
+    onDoubleClick = function()
+      g_game.openPrivateChannel(label:getText())
+      return true
+    end
+  })
+
+  if state == VipState.Offline and GameVipList.isHiddingOffline() then
     label:setVisible(false)
   end
 
   local nameLower = name:lower()
-  local childrenCount = vipList:getChildCount()
+  local childrenCount = contentsPanel:getChildCount()
 
   for i=1,childrenCount do
-    local child = vipList:getChildByIndex(i)
-    if (state == VipState.Online and child.vipState ~= VipState.Online and getSortedBy() == 'status')
-        or (label.iconId > child.iconId and getSortedBy() == 'type') then
-      vipList:insertChild(i, label)
+    local child = contentsPanel:getChildByIndex(i)
+    if (state == VipState.Online and child.vipState ~= VipState.Online and GameVipList.getSortedBy() == 'status')
+        or (label.iconId > child.iconId and GameVipList.getSortedBy() == 'type') then
+      contentsPanel:insertChild(i, label)
       return
     end
 
-    if (((state ~= VipState.Online and child.vipState ~= VipState.Online) or (state == VipState.Online and child.vipState == VipState.Online)) and getSortedBy() == 'status')
-        or (label.iconId == child.iconId and getSortedBy() == 'type') or getSortedBy() == 'name' then
+    if (((state ~= VipState.Online and child.vipState ~= VipState.Online) or (state == VipState.Online and child.vipState == VipState.Online)) and GameVipList.getSortedBy() == 'status')
+        or (label.iconId == child.iconId and GameVipList.getSortedBy() == 'type') or GameVipList.getSortedBy() == 'name' then
 
       local childText = child:getText():lower()
       local length = math.min(childText:len(), nameLower:len())
 
       for j=1,length do
         if nameLower:byte(j) < childText:byte(j) then
-          vipList:insertChild(i, label)
+          contentsPanel:insertChild(i, label)
           return
         elseif nameLower:byte(j) > childText:byte(j) then
           break
         elseif j == nameLower:len() then -- We are at the end of nameLower, and its shorter than childText, thus insert before
-          vipList:insertChild(i, label)
+          contentsPanel:insertChild(i, label)
           return
         end
       end
     end
   end
 
-  vipList:insertChild(childrenCount+1, label)
+  contentsPanel:insertChild(childrenCount+1, label)
 end
 
-function onVipStateChange(id, state)
-  local vipList = vipWindow:getChildById('contentsPanel')
-  local label = vipList:getChildById('vip' .. id)
+function GameVipList.onVipStateChange(id, state)
+  local label = contentsPanel:getChildById('vip' .. id)
   local name = label:getText()
   local description = label:getTooltip()
   local iconId = label.iconId
   local notify = label.notifyLogin
   label:destroy()
 
-  onAddVip(id, name, state, description, iconId, notify)
+  GameVipList.onAddVip(id, name, state, description, iconId, notify)
 
   if notify and state ~= VipState.Pending then
     if modules.game_textmessage then
-      modules.game_textmessage.displayFailureMessage(state == VipState.Online and tr('%s has logged in.', name) or tr('%s has logged out.', name))
+      GameTextMessage.displayFailureMessage(state == VipState.Online and tr('%s has logged in.', name) or tr('%s has logged out.', name))
     end
   end
 end
 
-function onVipListMousePress(widget, mousePos, mouseButton)
-  if mouseButton ~= MouseRightButton then return end
-
-  local vipList = vipWindow:getChildById('contentsPanel')
+function GameVipList.onVipListMousePress(widget, mousePos, mouseButton)
+  if mouseButton ~= MouseRightButton then
+    return
+  end
 
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
-  menu:addOption(tr('Add new VIP'), function() createAddWindow() end)
+  menu:addOption(tr('Add new VIP'), function() GameVipList.createAddWindow() end)
 
   menu:addSeparator()
-  if not isHiddingOffline() then
-    menu:addOption(tr('Hide offline'), function() hideOffline(true) end)
+  if not GameVipList.isHiddingOffline() then
+    menu:addOption(tr('Hide offline'), function() GameVipList.hideOffline(true) end)
   else
-    menu:addOption(tr('Show offline'), function() hideOffline(false) end)
+    menu:addOption(tr('Show offline'), function() GameVipList.hideOffline(false) end)
   end
 
-  if not(getSortedBy() == 'name') then
-    menu:addOption(tr('Sort by name'), function() sortBy('name') end)
+  if not(GameVipList.getSortedBy() == 'name') then
+    menu:addOption(tr('Sort by name'), function() GameVipList.sortBy('name') end)
   end
 
-  if not(getSortedBy() == 'status') then
-    menu:addOption(tr('Sort by status'), function() sortBy('status') end)
+  if not(GameVipList.getSortedBy() == 'status') then
+    menu:addOption(tr('Sort by status'), function() GameVipList.sortBy('status') end)
   end
 
-  if not(getSortedBy() == 'type') then
-    menu:addOption(tr('Sort by type'), function() sortBy('type') end)
+  if not(GameVipList.getSortedBy() == 'type') then
+    menu:addOption(tr('Sort by type'), function() GameVipList.sortBy('type') end)
   end
 
   menu:display(mousePos)
@@ -374,42 +382,42 @@ function onVipListMousePress(widget, mousePos, mouseButton)
   return true
 end
 
-function onVipListLabelMousePress(widget, mousePos, mouseButton)
-  if mouseButton ~= MouseRightButton then return end
-
-  local vipList = vipWindow:getChildById('contentsPanel')
+function GameVipList.onVipListLabelMousePress(widget, mousePos, mouseButton)
+  if mouseButton ~= MouseRightButton then
+    return
+  end
 
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
   menu:addOption(tr('Send message'), function() g_game.openPrivateChannel(widget:getText()) end)
-  menu:addOption(tr('Add new VIP'), function() createAddWindow() end)
-  menu:addOption(tr('Edit') .. ' ' .. widget:getText(), function() if widget then createEditWindow(widget) end end)
-  menu:addOption(tr('Remove') .. ' ' .. widget:getText(), function() if widget then removeVip(widget) end end)
+  menu:addOption(tr('Add new VIP'), function() GameVipList.createAddWindow() end)
+  menu:addOption(tr('Edit') .. ' ' .. widget:getText(), function() if widget then GameVipList.createEditWindow(widget) end end)
+  menu:addOption(tr('Remove') .. ' ' .. widget:getText(), function() if widget then GameVipList.removeVip(widget) end end)
   menu:addSeparator()
   menu:addOption(tr('Copy name'), function() g_window.setClipboardText(widget:getText()) end)
 
-  if modules.game_console and modules.game_console.getOwnPrivateTab() then
+  if GameConsole and GameConsole.getOwnPrivateTab() then
     menu:addSeparator()
     menu:addOption(tr('Invite to private chat'), function() g_game.inviteToOwnChannel(widget:getText()) end)
     menu:addOption(tr('Exclude from private chat'), function() g_game.excludeFromOwnChannel(widget:getText()) end)
   end
 
-  if not isHiddingOffline() then
-    menu:addOption(tr('Hide offline'), function() hideOffline(true) end)
+  if not GameVipList.isHiddingOffline() then
+    menu:addOption(tr('Hide offline'), function() GameVipList.hideOffline(true) end)
   else
-    menu:addOption(tr('Show offline'), function() hideOffline(false) end)
+    menu:addOption(tr('Show offline'), function() GameVipList.hideOffline(false) end)
   end
 
-  if not(getSortedBy() == 'name') then
-    menu:addOption(tr('Sort by name'), function() sortBy('name') end)
+  if not(GameVipList.getSortedBy() == 'name') then
+    menu:addOption(tr('Sort by name'), function() GameVipList.sortBy('name') end)
   end
 
-  if not(getSortedBy() == 'status') then
-    menu:addOption(tr('Sort by status'), function() sortBy('status') end)
+  if not(GameVipList.getSortedBy() == 'status') then
+    menu:addOption(tr('Sort by status'), function() GameVipList.sortBy('status') end)
   end
 
-  if not(getSortedBy() == 'type') then
-    menu:addOption(tr('Sort by type'), function() sortBy('type') end)
+  if not(GameVipList.getSortedBy() == 'type') then
+    menu:addOption(tr('Sort by type'), function() GameVipList.sortBy('type') end)
   end
 
   menu:display(mousePos)

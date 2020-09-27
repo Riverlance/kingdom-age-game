@@ -1,11 +1,16 @@
--- private variables
+_G.ClientTopMenu = { }
+ClientTopMenu.m  = modules.client_topmenu -- Alias
+
+
+
 local topMenu
 local leftButtonsPanel
 local rightButtonsPanel
 local leftGameButtonsPanel
 local rightGameButtonsPanel
 
--- private functions
+
+
 local function addButton(id, description, icon, callback, panel, toggle, front)
   local class
   if toggle then
@@ -35,12 +40,17 @@ local function addButton(id, description, icon, callback, panel, toggle, front)
   return button
 end
 
--- public functions
-function init()
-  connect(g_game, { onGameStart = online,
-                    onGameEnd = offline,
-                    onPingBack = updatePing })
-  connect(g_app, { onFps = updateFps })
+
+
+function ClientTopMenu.init()
+  connect(g_game, {
+    onGameStart = ClientTopMenu.online,
+    onGameEnd   = ClientTopMenu.offline,
+    onPingBack  = ClientTopMenu.updatePing
+  })
+  connect(g_app, {
+    onFps = ClientTopMenu.updateFps
+  })
 
   topMenu = g_ui.displayUI('topmenu')
 
@@ -52,24 +62,32 @@ function init()
   fpsLabel = topMenu:getChildById('fpsLabel')
 
   if g_game.isOnline() then
-    online()
+    ClientTopMenu.online()
   end
 end
 
-function terminate()
-  disconnect(g_game, { onGameStart = online,
-                       onGameEnd = offline,
-                       onPingBack = updatePing })
-  disconnect(g_app, { onFps = updateFps })
+function ClientTopMenu.terminate()
+  disconnect(g_app, {
+    onFps = ClientTopMenu.updateFps
+  })
+  disconnect(g_game, {
+    onGameStart = ClientTopMenu.online,
+    onGameEnd   = ClientTopMenu.offline,
+    onPingBack  = ClientTopMenu.updatePing
+  })
 
   topMenu:destroy()
+
+  _G.ClientTopMenu = nil
 end
 
-function online()
-  showGameButtons()
+
+
+function ClientTopMenu.online()
+  ClientTopMenu.showGameButtons()
 
   addEvent(function()
-    if modules.client_options.getOption('showPing') and (g_game.getFeature(GameClientPing) or g_game.getFeature(GameExtendedClientPing)) then
+    if ClientOptions.getOption('showPing') and (g_game.getFeature(GameClientPing) or g_game.getFeature(GameExtendedClientPing)) then
       pingLabel:show()
     else
       pingLabel:hide()
@@ -77,17 +95,17 @@ function online()
   end)
 end
 
-function offline()
-  hideGameButtons()
+function ClientTopMenu.offline()
+  ClientTopMenu.hideGameButtons()
   pingLabel:hide()
 end
 
-function updateFps(fps)
+function ClientTopMenu.updateFps(fps)
   text = 'FPS: ' .. fps
   fpsLabel:setText(text)
 end
 
-function updatePing(ping)
+function ClientTopMenu.updatePing(ping)
   local text = 'Ping: '
   local color
   if ping < 0 then
@@ -107,60 +125,60 @@ function updatePing(ping)
   pingLabel:setText(text)
 end
 
-function setPingVisible(enable)
+function ClientTopMenu.setPingVisible(enable)
   pingLabel:setVisible(enable)
 end
 
-function setFpsVisible(enable)
+function ClientTopMenu.setFpsVisible(enable)
   fpsLabel:setVisible(enable)
 end
 
-function addLeftButton(id, description, icon, callback, front)
+function ClientTopMenu.addLeftButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, leftButtonsPanel, false, front)
 end
 
-function addLeftToggleButton(id, description, icon, callback, front)
+function ClientTopMenu.addLeftToggleButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, leftButtonsPanel, true, front)
 end
 
-function addRightButton(id, description, icon, callback, front)
+function ClientTopMenu.addRightButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, rightButtonsPanel, false, front)
 end
 
-function addRightToggleButton(id, description, icon, callback, front)
+function ClientTopMenu.addRightToggleButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, rightButtonsPanel, true, front)
 end
 
-function addLeftGameButton(id, description, icon, callback, front)
+function ClientTopMenu.addLeftGameButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, leftGameButtonsPanel, false, front)
 end
 
-function addLeftGameToggleButton(id, description, icon, callback, front)
+function ClientTopMenu.addLeftGameToggleButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, leftGameButtonsPanel, true, front)
 end
 
-function addRightGameButton(id, description, icon, callback, front)
+function ClientTopMenu.addRightGameButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, rightGameButtonsPanel, false, front)
 end
 
-function addRightGameToggleButton(id, description, icon, callback, front)
+function ClientTopMenu.addRightGameToggleButton(id, description, icon, callback, front)
   return addButton(id, description, icon, callback, rightGameButtonsPanel, true, front)
 end
 
-function showGameButtons()
+function ClientTopMenu.showGameButtons()
   leftGameButtonsPanel:show()
   rightGameButtonsPanel:show()
 end
 
-function hideGameButtons()
+function ClientTopMenu.hideGameButtons()
   leftGameButtonsPanel:hide()
   rightGameButtonsPanel:hide()
 end
 
-function getButton(id)
+function ClientTopMenu.getButton(id)
   return topMenu:recursiveGetChildById(id)
 end
 
-function getTopMenu()
+function ClientTopMenu.getTopMenu()
   return topMenu
 end

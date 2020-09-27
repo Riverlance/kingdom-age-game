@@ -1,38 +1,45 @@
-AddServer = {}
+_G.ClientAddServer = { }
+ClientAddServer.m  = modules.client_serverlist -- Alias
 
--- private variables
+
+
 local addServerWindow = nil
 
--- public functions
-function AddServer.init()
+
+
+function ClientAddServer.init()
   addServerWindow = g_ui.displayUI('addserver')
 end
 
-function AddServer.terminate()
+function ClientAddServer.terminate()
   addServerWindow:destroy()
+
+  _G.ClientAddServer = nil
 end
 
-function AddServer.add()
+
+
+function ClientAddServer.add()
   local host = addServerWindow:getChildById('host'):getText()
   local port = addServerWindow:getChildById('port'):getText()
   local protocol = addServerWindow:getChildById('protocol'):getCurrentOption().text
 
-  local added, error = ServerList.add(host, port, protocol)
+  local added, error = ClientServerList.add(host, port, protocol)
   if not added then
     displayErrorBox(tr('Error'), tr(error))
   else
-    AddServer.hide()
+    ClientAddServer.hide()
   end
 end
 
-function AddServer.show()
+function ClientAddServer.show()
   addServerWindow:show()
   addServerWindow:raise()
   addServerWindow:focus()
   addServerWindow:lock()
 end
 
-function AddServer.hide()
+function ClientAddServer.hide()
   addServerWindow:hide()
   addServerWindow:unlock()
 end

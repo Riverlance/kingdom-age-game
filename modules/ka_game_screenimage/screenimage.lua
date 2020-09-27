@@ -1,3 +1,8 @@
+_G.GameScreenImage = { }
+GameScreenImage.m  = modules.ka_game_screenimage -- Alias
+
+
+
 screenImages = {}
 
 local SCREENPOS_CENTER = 1
@@ -10,44 +15,79 @@ local SCREENPOS_BOTTOMLEFT = 7
 local SCREENPOS_LEFT = 8
 local SCREENPOS_TOPLEFT = 9
 
-function init()
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerScreenImage, parseScreenImage)
+local function removeSingleImage(index, fadeOut)
+  local image = screenImages[index]
+  if image --[[and image.path == path]] and not image.destroyEvent then
+    if image.fadeEvent then
+      g_effects.cancelFade(image)
+    end
+
+    if fadeOut == 0 then
+      image:destroy()
+      table.remove(screenImages, index)
+    else
+      g_effects.fadeOut(image, fadeOut)
+      image.destroyEvent = scheduleEvent(function()
+        if image.fadeEvent then
+          g_effects.cancelFade(image)
+        end
+        for i = 1, #screenImages do
+          if image == screenImages[i] then
+            table.remove(screenImages, i)
+          end
+        end
+        image:destroy()
+      end, fadeOut)
+    end
+  end
+end
+
+
+
+function GameScreenImage.init()
+  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerScreenImage, GameScreenImage.parseScreenImage)
 
   g_ui.importStyle('screenimage.otui')
 
   connect(g_game, {
-    onGameStart = clearImages,
-    onGameEnd   = clearImages
+    onGameStart = GameScreenImage.clearImages,
+    onGameEnd   = GameScreenImage.clearImages
   })
 
-  connect(modules.game_interface.getMapPanel(), {
-    onGeometryChange = adjustPositions,
-    onViewModeChange = onViewModeChange
+  connect(GameInterface.getMapPanel(), {
+    onGeometryChange = GameScreenImage.onGeometryChange,
+    onViewModeChange = GameScreenImage.onViewModeChange
   })
 end
 
-function terminate()
+function GameScreenImage.terminate()
   ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerScreenImage)
 
-  clearImages()
+  GameScreenImage.clearImages()
 
   disconnect(g_game, {
-    onGameStart = clearImages,
-    onGameEnd   = clearImages
+    onGameStart = GameScreenImage.clearImages,
+    onGameEnd   = GameScreenImage.clearImages
   })
 
-  disconnect(modules.game_interface.getMapPanel(), {
-    onGeometryChange = adjustPositions,
-    onViewModeChange = onViewModeChange
+  disconnect(GameInterface.getMapPanel(), {
+    onGeometryChange = GameScreenImage.onGeometryChange,
+    onViewModeChange = GameScreenImage.onViewModeChange
   })
+
+  _G.GameScreenImage = nil
 end
 
-function onViewModeChange(mapWidget, newMode, oldMode)
-  adjustPositions()
+function GameScreenImage.onGeometryChange(self)
+  GameScreenImage.adjustPositions()
 end
 
-function adjustPosition(image)
-  local mapWidget = modules.game_interface.getMapPanel()
+function GameScreenImage.onViewModeChange(mapWidget, newMode, oldMode)
+  GameScreenImage.adjustPositions()
+end
+
+function GameScreenImage.adjustPosition(image)
+  local mapWidget = GameInterface.getMapPanel()
 
   addEvent(function()
     local marginVertical = math.floor((mapWidget:getHeight() - mapWidget:getPaddingTop() - mapWidget:getPaddingBottom() - mapWidget:getMapHeight()) / 2)
@@ -91,13 +131,13 @@ function adjustPosition(image)
   end)
 end
 
-function adjustPositions()
+function GameScreenImage.adjustPositions()
   for i = 1, #screenImages do
-    adjustPosition(screenImages[i])
+    GameScreenImage.adjustPosition(screenImages[i])
   end
 end
 
-function clearImages()
+function GameScreenImage.clearImages()
   for i = 1, #screenImages do
     local tmpImage = screenImages[i]
 
@@ -115,16 +155,18 @@ function clearImages()
   screenImages = {}
 end
 
-function getRootPath()
+function GameScreenImage.getRootPath()
   return '/screenimages/'
 end
 
-function addImage(path, fadeIn, position, resizeX, resizeY, screenBased)
-  if not path or not fadeIn or not position or not resizeX or not resizeY or not screenBased then return end
+function GameScreenImage.addImage(path, fadeIn, position, resizeX, resizeY, screenBased)
+  if not path or not fadeIn or not position or not resizeX or not resizeY or not screenBased then
+    return
+  end
 
-  local mapWidget = modules.game_interface.getMapPanel()
+  local mapWidget = GameInterface.getMapPanel()
   local image = g_ui.createWidget('ScreenImage', mapWidget)
-  image:setImageSource(string.format('%s%s', getRootPath(), path))
+  image:setImageSource(string.format('%s%s', GameScreenImage.getRootPath(), path))
 
   if fadeIn ~= 0 then
     g_effects.fadeIn(image, fadeIn)
@@ -175,38 +217,13 @@ function addImage(path, fadeIn, position, resizeX, resizeY, screenBased)
   end
 
   table.insert(screenImages, image)
-  adjustPosition(image)
+  GameScreenImage.adjustPosition(image)
 end
 
-local function removeSingleImage(index, fadeOut)
-  local image = screenImages[index]
-  if image --[[and image.path == path]] and not image.destroyEvent then
-    if image.fadeEvent then
-      g_effects.cancelFade(image)
-    end
-
-    if fadeOut == 0 then
-      image:destroy()
-      table.remove(screenImages, index)
-    else
-      g_effects.fadeOut(image, fadeOut)
-      image.destroyEvent = scheduleEvent(function()
-        if image.fadeEvent then
-          g_effects.cancelFade(image)
-        end
-        for i = 1, #screenImages do
-          if image == screenImages[i] then
-            table.remove(screenImages, i)
-          end
-        end
-        image:destroy()
-      end, fadeOut)
-    end
+function GameScreenImage.removeImage(path, fadeOut, mode)
+  if not path or not fadeOut or not mode then
+    return
   end
-end
-
-function removeImage(path, fadeOut, mode)
-  if not path or not fadeOut or not mode then return end
 
   if #screenImages < 1 then
     return
@@ -248,7 +265,7 @@ function removeImage(path, fadeOut, mode)
   end
 end
 
-function parseScreenImage(protocol, opcode, buffer)
+function GameScreenImage.parseScreenImage(protocol, opcode, buffer)
   local params = string.split(buffer, ':')
   local state = tonumber(params[1])
   if not state then
@@ -263,9 +280,12 @@ function parseScreenImage(protocol, opcode, buffer)
       if i >= 3 and i <= 7 then
         params[i] = tonumber(params[i])
       end
-      if not params[i] then return end
+
+      if not params[i] then
+        return
+      end
     end
-    addImage(params[2], params[3], params[4], params[5], params[6], params[7]) -- (path, fadeIn, position, resizeX, resizeY, screenBased)
+    GameScreenImage.addImage(params[2], params[3], params[4], params[5], params[6], params[7]) -- (path, fadeIn, position, resizeX, resizeY, screenBased)
 
   -- Remove
   else
@@ -274,8 +294,11 @@ function parseScreenImage(protocol, opcode, buffer)
       if i >= 3 and i <= 4 then
         params[i] = tonumber(params[i])
       end
-      if not params[i] then return end
+
+      if not params[i] then
+        return
+      end
     end
-    removeImage(params[2], params[3], params[4]) -- (path, fadeOut, mode)
+    GameScreenImage.removeImage(params[2], params[3], params[4]) -- (path, fadeOut, mode)
   end
 end

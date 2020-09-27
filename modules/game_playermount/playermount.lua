@@ -1,46 +1,57 @@
-function init()
+_G.GamePlayerMount = { }
+GamePlayerMount.m  = modules.game_playermount -- Alias
+
+
+
+function GamePlayerMount.init()
   connect(g_game, {
-    onGameStart = online,
-    onGameEnd = offline
+    onGameStart = GamePlayerMount.online,
+    onGameEnd   = GamePlayerMount.offline
   })
-  if g_game.isOnline() then online() end
-end
 
-function terminate()
-  disconnect(g_game, {
-    onGameStart = online,
-    onGameEnd = offline
-  })
-  offline()
-end
-
-function online()
-  if g_game.getFeature(GamePlayerMounts) then
-    g_keyboard.bindKeyDown('Ctrl+R', toggleMount)
+  if g_game.isOnline() then
+    GamePlayerMount.online()
   end
 end
 
-function offline()
+function GamePlayerMount.terminate()
+  disconnect(g_game, {
+    onGameStart = GamePlayerMount.online,
+    onGameEnd   = GamePlayerMount.offline
+  })
+
+  GamePlayerMount.offline()
+
+  _G.GamePlayerMount = nil
+end
+
+function GamePlayerMount.online()
+  if g_game.getFeature(GamePlayerMounts) then
+    g_keyboard.bindKeyDown('Ctrl+R', GamePlayerMount.toggleMount)
+  end
+end
+
+function GamePlayerMount.offline()
   if g_game.getFeature(GamePlayerMounts) then
     g_keyboard.unbindKeyDown('Ctrl+R')
   end
 end
 
-function toggleMount()
+function GamePlayerMount.toggleMount()
   local player = g_game.getLocalPlayer()
   if player then
     player:toggleMount()
   end
 end
 
-function mount()
+function GamePlayerMount.mount()
   local player = g_game.getLocalPlayer()
   if player then
     player:mount()
   end
 end
 
-function dismount()
+function GamePlayerMount.dismount()
   local player = g_game.getLocalPlayer()
   if player then
     player:dismount()

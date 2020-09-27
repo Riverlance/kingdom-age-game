@@ -32,7 +32,7 @@ QuestLineWindow < MainWindow
   !text: tr('Quest Log')
   size: 500 400
   @onEscape: |
-    modules.game_questlog.questLogWindowFocus()
+    GameQuestLog.questLogWindowFocus()
     self:destroy()
 
   TextList
@@ -91,7 +91,7 @@ QuestLineWindow < MainWindow
 
   Label
     id: rewardExperienceLabel
-    image-source: /images/game/questlog/reward_experience
+    image-source: /images/ui/quest_log/reward_experience
     anchors.bottom: rewardMoneyLabel.top
     anchors.left: parent.left
     margin-bottom: 5
@@ -112,7 +112,7 @@ QuestLineWindow < MainWindow
 
   Label
     id: rewardMoneyLabel
-    image-source: /images/game/questlog/reward_money
+    image-source: /images/ui/quest_log/reward_money
     anchors.bottom: closeButton.top
     anchors.left: parent.left
     margin-bottom: 5

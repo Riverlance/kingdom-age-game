@@ -6,8 +6,8 @@ Module
   reloadable: false
   sandboxed: true
   scripts: [ client ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: Client.init()
+  @onUnload: Client.terminate()
 
   load-later:
     - client_styles

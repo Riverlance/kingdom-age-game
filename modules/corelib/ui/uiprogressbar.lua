@@ -73,7 +73,10 @@ function UIProgressBar:getPercentPixels()
 end
 
 function UIProgressBar:getProgress()
-  if self.minimum == self.maximum then return 1 end
+  if self.minimum == self.maximum then
+    return 1
+  end
+
   return (self.value - self.minimum) / (self.maximum - self.minimum)
 end
 

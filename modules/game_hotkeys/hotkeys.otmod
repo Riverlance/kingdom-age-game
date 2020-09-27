@@ -4,7 +4,13 @@ Module
   author: andrefaramir, BeniS
   website: https://github.com/edubart/otclient
   sandboxed: true
-  scripts: [ hotkeys ]
+  scripts: [ hotkeys, powerhotkeys ]
   dependencies: [ client_topmenu, game_interface, game_console ]
-  @onLoad: init()
-  @onUnload: terminate()
+
+  @onLoad: |
+    GameHotkeys.init()
+    GamePowerHotkeys.init()
+
+  @onUnload: |
+    GamePowerHotkeys.terminate()
+    GameHotkeys.terminate()

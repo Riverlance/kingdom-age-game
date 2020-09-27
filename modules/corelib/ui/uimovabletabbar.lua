@@ -7,7 +7,9 @@ local function onTabClick(tab)
 end
 
 local function updateMargins(tabBar)
-  if #tabBar.tabs == 0 then return end
+  if #tabBar.tabs == 0 then
+    return
+  end
 
   local currentMargin = 0
   for i = 1, #tabBar.tabs do
@@ -55,7 +57,9 @@ local function updateIndexes(tabBar, tab, xoff)
 end
 
 local function getMaxMargin(tabBar, tab)
-  if #tabBar.tabs == 0 then return 0 end
+  if #tabBar.tabs == 0 then
+    return 0
+  end
 
   local maxMargin = 0
   for i = 1, #tabBar.tabs do
@@ -152,7 +156,10 @@ end
 
 local function onTabMousePress(tab, mousePos, mouseButton)
   if mouseButton == MouseRightButton then
-    if tab.menuCallback then tab.menuCallback(tab, mousePos, mouseButton) end
+    if tab.menuCallback then
+      tab.menuCallback(tab, mousePos, mouseButton)
+    end
+
     return true
   end
 end
@@ -256,7 +263,7 @@ function UIMoveableTabBar:addTab(text, panel, menuCallback)
   tab:setId('tab')
   tab:setDraggable(self.tabsMoveable)
   tab:setText(text)
-  tab:setWidth(tab:getTextSize().width + tab:getPaddingLeft() + tab:getPaddingRight())
+  tab:setWidth(math.max(tab.minWidth, tab:getTextSize().width) + tab:getPaddingLeft() + tab:getPaddingRight())
   tab.menuCallback = menuCallback or nil
   tab.onClick = onTabClick
   tab.onMousePress = onTabMousePress
@@ -291,7 +298,9 @@ end
 -- Additional function to move the tab by lua
 function UIMoveableTabBar:moveTab(tab, units)
   local index = table.find(self.tabs, tab)
-  if index == nil then return end
+  if index == nil then
+    return
+  end
 
   local focus = false
   if self.currentTab == tab then
@@ -303,7 +312,10 @@ function UIMoveableTabBar:moveTab(tab, units)
 
   local newIndex = math.min(#self.tabs+1, math.max(index + units, 1))
   table.insert(self.tabs, newIndex, tab)
-  if focus then self:selectTab(tab) end
+  if focus then
+    self:selectTab(tab)
+  end
+
   updateMargins(self)
   return newIndex
 end
@@ -366,7 +378,10 @@ function UIMoveableTabBar:getTab(text)
 end
 
 function UIMoveableTabBar:selectTab(tab)
-  if self.currentTab == tab then return end
+  if self.currentTab == tab then
+    return
+  end
+
   if self.contentWidget then
     local selectedWidget = self.contentWidget:getLastChild()
     if selectedWidget and selectedWidget.isTab then
@@ -468,7 +483,10 @@ function UIMoveableTabBar:selectPrevTab()
 end
 
 function UIMoveableTabBar:blinkTab(tab)
-  if tab:isChecked() then return end
+  if tab:isChecked() then
+    return
+  end
+
   tab.blinking = true
   tabBlink(tab)
 end

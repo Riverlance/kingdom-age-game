@@ -2,7 +2,7 @@ MainWindow
   id: waitingWindow
   !text: tr('Waiting List')
   size: 260 180
-  @onEscape: CharacterList.cancelWait()
+  @onEscape: ClientCharacterList.cancelWait()
 
   Label
     id: infoLabel
@@ -41,4 +41,4 @@ MainWindow
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    @onClick: CharacterList.cancelWait()
+    @onClick: ClientCharacterList.cancelWait()

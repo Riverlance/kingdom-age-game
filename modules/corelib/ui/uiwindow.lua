@@ -20,7 +20,9 @@ function UIWindow:onKeyDown(keyCode, keyboardModifiers)
 end
 
 function UIWindow:onFocusChange(focused)
-  if focused then self:raise() end
+  if focused then
+    self:raise()
+  end
 end
 
 function UIWindow:onDragEnter(mousePos)

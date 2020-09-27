@@ -6,5 +6,5 @@ Module
   sandboxed: true
   scripts: [ textwindow ]
   dependencies: [ game_interface ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameTextWindow.init()
+  @onUnload: GameTextWindow.terminate()

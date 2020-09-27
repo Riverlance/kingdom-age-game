@@ -5,5 +5,5 @@ Module
   sandboxed: true
   autoload: true
   scripts: [ blinkhit ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameBlinkHit.init()
+  @onUnload: GameBlinkHit.terminate()

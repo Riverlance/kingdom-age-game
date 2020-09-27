@@ -5,5 +5,5 @@ Module
   website: https://github.com/edubart/otclient
   sandboxed: true
   scripts: [ playermount ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GamePlayerMount.init()
+  @onUnload: GamePlayerMount.terminate()

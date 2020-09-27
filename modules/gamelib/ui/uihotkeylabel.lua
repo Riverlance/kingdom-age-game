@@ -21,6 +21,8 @@ function UIHotkeyLabel:onDestroy()
 end
 
 function UIHotkeyLabel:onMouseRelease(mousePosition, mouseButton)
-  if not self:containsPoint(mousePosition) then return false end
+  if not self:containsPoint(mousePosition) then
+    return false
+  end
   return false
 end

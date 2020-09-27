@@ -71,7 +71,9 @@ end
 
 function Player:hasVip(creatureName)
   for id, vip in pairs(g_game.getVips()) do
-    if (vip[1] == creatureName) then return true end
+    if (vip[1] == creatureName) then
+      return true
+    end
   end
   return false
 end
@@ -140,7 +142,9 @@ function Player:hasState(state, states)
 
   for i = 1, 32 do
     local pow = math.pow(2, i-1)
-    if pow > states then break end
+    if pow > states then
+      break
+    end
 
     local states = bit32.band(states, pow)
     if states == state then

@@ -5,7 +5,7 @@ Module
   website: https://github.com/edubart/otclient
   scripts: [ terminal ]
   dependencies: [ game_things ]
-  //dependencies: [ client_topmenu ]
+  // dependency also client_topmenu, if it is included to top menu
   sandboxed: true
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: ClientTerminal.init()
+  @onUnload: ClientTerminal.terminate()

@@ -1,15 +1,4 @@
 Panel
-  OptionCheckBox
-    id: showInfoMessagesInConsole
-    !text: tr('Show info messages in console')
-
-  OptionCheckBox
-    id: showEventMessagesInConsole
-    !text: tr('Show event messages in console')
-
-  OptionCheckBox
-    id: showStatusMessagesInConsole
-    !text: tr('Show status messages in console')
 
   OptionCheckBox
     id: showTimestampsInConsole
@@ -18,6 +7,22 @@ Panel
   OptionCheckBox
     id: showLevelsInConsole
     !text: tr('Show levels in console')
+
+  OptionHorizontalSeparator
+
+  OptionCheckBox
+    id: showInfoMessagesInConsole
+    !text: tr('Show info messages in console')
+    $!first:
+      margin-top: 10
+
+  OptionCheckBox
+    id: showEventMessagesInConsole
+    !text: tr('Show event messages in console')
+
+  OptionCheckBox
+    id: showStatusMessagesInConsole
+    !text: tr('Show status messages in console')
 
   OptionCheckBox
     id: showPrivateMessagesInConsole

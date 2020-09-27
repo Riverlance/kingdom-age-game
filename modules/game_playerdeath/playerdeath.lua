@@ -1,47 +1,63 @@
+_G.GamePlayerDeath = { }
+GamePlayerDeath.m  = modules.game_npctrade -- Alias
+
+
+
 deathWindow = nil
 
-local deathTexts = {
-  regular = {text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nSimply click on Ok to resume your journeys!', height = 140, width = 0},
-  unfair = {text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nThis death penalty has been reduced by %i%%.\n\nSimply click on Ok to resume your journeys!', height = 185, width = 0},
-  blessed = {text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back into this world.\n\nThis death penalty has been reduced by 100%%.\n\nSimply click on Ok to resume your journeys!', height = 170, width = 90}
+local deathTexts =
+{
+  regular = { text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nSimply click on Ok to resume your journeys!', height = 140, width = 0 },
+  unfair = { text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nThis death penalty has been reduced by %i%%.\n\nSimply click on Ok to resume your journeys!', height = 185, width = 0 },
+  blessed = { text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back into this world.\n\nThis death penalty has been reduced by 100%%.\n\nSimply click on Ok to resume your journeys!', height = 170, width = 90 }
 }
 
-function init()
+
+
+function GamePlayerDeath.init()
   g_ui.importStyle('deathwindow')
 
-  connect(g_game, { onDeath = display,
-                    onGameEnd = reset })
+  connect(g_game, {
+    onDeath   = GamePlayerDeath.display,
+    onGameEnd = GamePlayerDeath.reset
+  })
 end
 
-function terminate()
-  disconnect(g_game, { onDeath = display,
-                       onGameEnd = reset })
+function GamePlayerDeath.terminate()
+  disconnect(g_game, {
+    onDeath   = GamePlayerDeath.display,
+    onGameEnd = GamePlayerDeath.reset
+  })
 
-  reset()
+  GamePlayerDeath.reset()
+
+  _G.GamePlayerDeath = nil
 end
 
-function reset()
+function GamePlayerDeath.reset()
   if deathWindow then
     deathWindow:destroy()
     deathWindow = nil
   end
 end
 
-function display(deathType, penalty)
-  displayDeadMessage()
-  openWindow(deathType, penalty)
+function GamePlayerDeath.display(deathType, penalty)
+  GamePlayerDeath.displayDeadMessage()
+  GamePlayerDeath.openWindow(deathType, penalty)
 end
 
-function displayDeadMessage()
-  local advanceLabel = modules.game_interface.getRootPanel():recursiveGetChildById('middleCenterLabel')
-  if advanceLabel:isVisible() then return end
+function GamePlayerDeath.displayDeadMessage()
+  local advanceLabel = GameInterface.getRootPanel():recursiveGetChildById('middleCenterLabel')
+  if advanceLabel:isVisible() then
+    return
+  end
 
   if modules.game_textmessage then
-    modules.game_textmessage.displayGameMessage(tr('You are dead') .. '.')
+    GameTextMessage.displayGameMessage(tr('You are dead') .. '.')
   end
 end
 
-function openWindow(deathType, penalty)
+function GamePlayerDeath.openWindow(deathType, penalty)
   if deathWindow then
     deathWindow:destroy()
     return
@@ -70,7 +86,7 @@ function openWindow(deathType, penalty)
   local cancelButton = deathWindow:getChildById('buttonCancel')
 
   local okFunc = function()
-    CharacterList.doLogin()
+    ClientCharacterList.doLogin()
     okButton:getParent():destroy()
     deathWindow = nil
   end

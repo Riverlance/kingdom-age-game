@@ -13,7 +13,7 @@ function UIMinimap:onSetup()
   self.onAddAutomapFlag = function(pos, icon, description) self:addFlag(pos, icon, description) end
   self.onRemoveAutomapFlag = function(pos, icon, description) self:removeFlag(pos, icon, description) end
   connect(g_game, {
-    onAddAutomapFlag = self.onAddAutomapFlag,
+    onAddAutomapFlag    = self.onAddAutomapFlag,
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
   })
 end
@@ -24,7 +24,7 @@ function UIMinimap:onDestroy()
   end
   self.alternatives = {}
   disconnect(g_game, {
-    onAddAutomapFlag = self.onAddAutomapFlag,
+    onAddAutomapFlag    = self.onAddAutomapFlag,
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
   })
   self:destroyFlagWindow()
@@ -99,7 +99,7 @@ function UIMinimap:setCrossPosition(pos)
   local cross = self.cross
   if not self.cross then
     cross = g_ui.createWidget('MinimapCross', self)
-    cross:setIcon('/images/game/minimap/cross')
+    cross:setIcon('/images/ui/minimap/cross')
     self.cross = cross
   end
 
@@ -113,7 +113,10 @@ function UIMinimap:setCrossPosition(pos)
 end
 
 function UIMinimap:addFlag(pos, icon, description, temporary)
-  if not pos or not icon then return end
+  if not pos or not icon then
+    return
+  end
+
   local flag = self:getFlag(pos, icon, description)
   if flag or not icon then
     return
@@ -127,10 +130,11 @@ function UIMinimap:addFlag(pos, icon, description, temporary)
   flag.icon = icon
   flag.temporary = temporary
   if type(tonumber(icon)) == 'number' then
-    flag:setIcon('/images/game/minimap/flag' .. icon)
+    flag:setIcon('/images/ui/minimap/flag' .. icon)
   else
     flag:setIcon(resolvepath(icon, 1))
   end
+  flag:setIconClip({ width = 11, height = 11 })
   flag:setTooltip(description)
   flag.onMouseRelease = onFlagMouseRelease
   flag.onDestroy = function() table.removevalue(self.flags, flag) end
@@ -196,7 +200,10 @@ end
 function UIMinimap:move(x, y)
   local cameraPos = self:getCameraPosition()
   local scale = self:getScale()
-  if scale > 1 then scale = 1 end
+  if scale > 1 then
+    scale = 1
+  end
+
   local dx = x/scale
   local dy = y/scale
   local pos = {x = cameraPos.x - dx, y = cameraPos.y - dy, z = cameraPos.z}
@@ -223,11 +230,16 @@ function UIMinimap:onMousePress(pos, button)
 end
 
 function UIMinimap:onMouseRelease(pos, button)
-  if not self.allowNextRelease then return true end
+  if not self.allowNextRelease then
+    return true
+  end
+
   self.allowNextRelease = false
 
   local mapPos = self:getTilePosition(pos)
-  if not mapPos then return end
+  if not mapPos then
+    return
+  end
 
   if button == MouseLeftButton then
     local player = g_game.getLocalPlayer()
@@ -273,8 +285,13 @@ function UIMinimap:onStyleApply(styleName, styleNode)
 end
 
 function UIMinimap:createFlagWindow(pos)
-  if self.flagWindow then return end
-  if not pos then return end
+  if self.flagWindow then
+    return
+  end
+
+  if not pos then
+    return
+  end
 
   self.flagWindow = g_ui.createWidget('MinimapFlagWindow', rootWidget)
 

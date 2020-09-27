@@ -1,210 +1,225 @@
-AttributeLabel < Label
-  width: 77
-  anchors.left: parent.left
-  margin-top: 8
-  margin-left: 7
-  phantom: false
-
-AttributeAddButton < Button
-  text: +
-  color: green
-  size: 17 17
-  anchors.top: prev.top
+AttributeAddButton < UIButton
+  anchors.top: parent.top
   anchors.horizontalCenter: parent.horizontalCenter
+  margin-top: 4
+  size: 14 14
+  image-source: /images/ui/_button/mini_window
+  image-clip: 14 0 14 14
+
+  $hover:
+    image-clip: 14 14 14 14
+
+  $pressed:
+    image-clip: 14 28 14 14
+
+  $!first:
+    anchors.top: prev.outsideBottom
+
+AttributeLabel < Label
+  anchors.left: parent.left
+  margin-left: 4
+  phantom: false
 
 AttributeActLabel < Label
   text-align: right
-  anchors.top: prev.top
-  anchors.left: labelAct.left
-  anchors.right: labelAct.right
+  anchors.right: parent.right
+  margin-right: 4
   phantom: false
 
 MiniWindow
   icon: attributes
   id: attributeWindow
   !text: 'Attributes'
-  @onClose: onMiniWindowClose()
-  height: 286
+  height: 232
   &save: true
 
   Label
     text: ?
     text-align: center
-    phantom: false
+    color: #bcbcbc
+    image-source: /images/ui/_button/mini_window
+    image-clip: 112 0 14 14
     &tooltipAddons: { {{ text = '1. \'Distribution\' are points that you distributed manually.\n\n2. \'Alignment\' are recommended points that were\ndistributed automatically due to your vocation.\n\n3. \'Buff/Debuff\' are points that were increased or\ndecreased temporarily due to Powers.', align = AlignLeft }} }
-    anchors.top: minimizeButton.top
-    anchors.right: minimizeButton.left
-    margin-right: 3
+    anchors.verticalCenter: lockButton.verticalCenter
+    anchors.right: lockButton.outsideLeft
     size: 14 14
+    phantom: false
 
-  MiniWindowContents
-    padding: 0
 
-    Panel
-      id: topPanel
-      anchors.top: parent.top
-      anchors.left: parent.left
-      anchors.right: parent.right
-      height: 30
-      background: black
-      opacity: 0.2
+
+  MiniWindowHeader
+    height: 20
 
     Label
       id: labelAttribute
       !text: 'Attribute'
-      anchors.top: parent.top
+      text-align: left
+      anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
-      margin-top: 7
-      margin-left: 7
+      margin-left: 4
+      phantom: false
 
     Label
       id: labelAct
-      width: 45
-      text: Act
-      text-align: center
+      !text: 'Act'
+      text-align: right
       !tooltip: 'Actual points of the specific attribute.'
-      anchors.top: parent.top
+      anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
-      margin-top: 7
-      margin-right: 7
+      margin-right: 4
       phantom: false
+
+
+
+  MiniWindowContents
+
+    AttributeAddButton
+      id: attackAttributeAddButton
+
+    AttributeAddButton
+      id: defenseAttributeAddButton
+
+    AttributeAddButton
+      id: willPowerAttributeAddButton
+
+    AttributeAddButton
+      id: healthAttributeAddButton
+
+    AttributeAddButton
+      id: manaAttributeAddButton
+
+    AttributeAddButton
+      id: agilityAttributeAddButton
+
+    AttributeAddButton
+      id: dodgeAttributeAddButton
+
+    AttributeAddButton
+      id: walkingAttributeAddButton
+
+    AttributeAddButton
+      id: luckAttributeAddButton
+
 
 
     AttributeLabel
       id: attackAttributeLabel
       !text: 'Attack'
-      anchors.top: topPanel.bottom
-      margin-top: 10
-
-    AttributeAddButton
-      id: attackAttributeAddButton
-
-    AttributeActLabel
-      id: attackAttributeActLabel
-
+      anchors.verticalCenter: attackAttributeAddButton.verticalCenter
+      anchors.right: attackAttributeAddButton.left
 
     AttributeLabel
       id: defenseAttributeLabel
       !text: 'Defense'
-      anchors.top: attackAttributeLabel.bottom
-
-    AttributeAddButton
-      id: defenseAttributeAddButton
-
-    AttributeActLabel
-      id: defenseAttributeActLabel
-
+      anchors.verticalCenter: defenseAttributeAddButton.verticalCenter
+      anchors.right: defenseAttributeAddButton.left
 
     AttributeLabel
       id: willPowerAttributeLabel
-      !text: 'Will Power*'
-      anchors.top: defenseAttributeLabel.bottom
-
-    AttributeAddButton
-      id: willPowerAttributeAddButton
-
-    AttributeActLabel
-      id: willPowerAttributeActLabel
-
+      !text: 'Will Power'
+      anchors.verticalCenter: willPowerAttributeAddButton.verticalCenter
+      anchors.right: willPowerAttributeAddButton.left
 
     AttributeLabel
       id: healthAttributeLabel
       !text: 'Health'
-      anchors.top: willPowerAttributeLabel.bottom
-
-    AttributeAddButton
-      id: healthAttributeAddButton
-
-    AttributeActLabel
-      id: healthAttributeActLabel
-
+      anchors.verticalCenter: healthAttributeAddButton.verticalCenter
+      anchors.right: healthAttributeAddButton.left
 
     AttributeLabel
       id: manaAttributeLabel
       !text: 'Mana'
-      anchors.top: healthAttributeLabel.bottom
-
-    AttributeAddButton
-      id: manaAttributeAddButton
-
-    AttributeActLabel
-      id: manaAttributeActLabel
-
+      anchors.verticalCenter: manaAttributeAddButton.verticalCenter
+      anchors.right: manaAttributeAddButton.left
 
     AttributeLabel
       id: agilityAttributeLabel
-      !text: 'Agility*'
-      anchors.top: manaAttributeLabel.bottom
-
-    AttributeAddButton
-      id: agilityAttributeAddButton
-
-    AttributeActLabel
-      id: agilityAttributeActLabel
-
+      !text: 'Agility'
+      anchors.verticalCenter: agilityAttributeAddButton.verticalCenter
+      anchors.right: agilityAttributeAddButton.left
 
     AttributeLabel
       id: dodgeAttributeLabel
-      !text: 'Dodge*'
-      anchors.top: agilityAttributeLabel.bottom
-
-    AttributeAddButton
-      id: dodgeAttributeAddButton
-
-    AttributeActLabel
-      id: dodgeAttributeActLabel
-
+      !text: 'Dodge'
+      anchors.verticalCenter: dodgeAttributeAddButton.verticalCenter
+      anchors.right: dodgeAttributeAddButton.left
 
     AttributeLabel
       id: walkingAttributeLabel
-      !text: 'Walking*'
-      anchors.top: dodgeAttributeLabel.bottom
-
-    AttributeAddButton
-      id: walkingAttributeAddButton
-
-    AttributeActLabel
-      id: walkingAttributeActLabel
-
+      !text: 'Walking'
+      anchors.verticalCenter: walkingAttributeAddButton.verticalCenter
+      anchors.right: walkingAttributeAddButton.left
 
     AttributeLabel
       id: luckAttributeLabel
-      !text: 'Luck*'
-      anchors.top: walkingAttributeLabel.bottom
+      !text: 'Luck'
+      anchors.verticalCenter: luckAttributeAddButton.verticalCenter
+      anchors.right: luckAttributeAddButton.left
 
-    AttributeAddButton
-      id: luckAttributeAddButton
+
+
+    AttributeActLabel
+      id: attackAttributeActLabel
+      anchors.verticalCenter: attackAttributeAddButton.verticalCenter
+      anchors.left: attackAttributeAddButton.right
+
+    AttributeActLabel
+      id: defenseAttributeActLabel
+      anchors.verticalCenter: defenseAttributeAddButton.verticalCenter
+      anchors.left: defenseAttributeAddButton.right
+
+    AttributeActLabel
+      id: willPowerAttributeActLabel
+      anchors.verticalCenter: willPowerAttributeAddButton.verticalCenter
+      anchors.left: willPowerAttributeAddButton.right
+
+    AttributeActLabel
+      id: healthAttributeActLabel
+      anchors.verticalCenter: healthAttributeAddButton.verticalCenter
+      anchors.left: healthAttributeAddButton.right
+
+    AttributeActLabel
+      id: manaAttributeActLabel
+      anchors.verticalCenter: manaAttributeAddButton.verticalCenter
+      anchors.left: manaAttributeAddButton.right
+
+    AttributeActLabel
+      id: agilityAttributeActLabel
+      anchors.verticalCenter: agilityAttributeAddButton.verticalCenter
+      anchors.left: agilityAttributeAddButton.right
+
+    AttributeActLabel
+      id: dodgeAttributeActLabel
+      anchors.verticalCenter: dodgeAttributeAddButton.verticalCenter
+      anchors.left: dodgeAttributeAddButton.right
+
+    AttributeActLabel
+      id: walkingAttributeActLabel
+      anchors.verticalCenter: walkingAttributeAddButton.verticalCenter
+      anchors.left: walkingAttributeAddButton.right
 
     AttributeActLabel
       id: luckAttributeActLabel
+      anchors.verticalCenter: luckAttributeAddButton.verticalCenter
+      anchors.left: luckAttributeAddButton.right
 
 
-    Panel
-      id: bottomPanel
-      anchors.top: prev.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-top: 10
-      height: 30
-      background: black
-      opacity: 0.2
+
+  MiniWindowFooter
+    height: 20
 
     Label
       id: availablePointsLabel
-      !tooltip: 'Available points to distribute.'
       text-auto-resize: true
-      anchors.top: bottomPanel.top
+      anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
-      margin-top: 7
-      margin-left: 7
+      margin-left: 4
       phantom: false
 
     Label
       id: pointsCostLabel
-      !tooltip: 'Points cost to distribute.'
       text-auto-resize: true
-      anchors.top: bottomPanel.top
+      anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
-      margin-top: 7
-      margin-right: 7
+      margin-right: 4
       phantom: false

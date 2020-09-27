@@ -35,7 +35,7 @@ MapShaders = {
   { isFilter = true, name = 'Radial Blur', frag ='shaders/radial-blur.frag' },
   { isFilter = true, name = 'Zomg', frag ='shaders/zomg.frag' },
 
-  -- { name = 'Fog', frag = 'shaders/fog.frag', tex1 = 'images/clouds.png' }, -- Not that cool on local player walking
+  -- { name = 'Fog', frag = 'shaders/fog.frag', tex1 = '/shaders/clouds.png' }, -- Not that cool on local player walking
   -- { name = 'Pulse', frag = 'shaders/pulse.frag' }, -- Not that cool on local player walking
 }
 setmetatable(MapShaders, shadersMetatable)
@@ -48,14 +48,16 @@ setmetatable(ItemShaders, shadersMetatable)
 
 function setMapShader(option)
   local shaderConfig = MapShaders[option]
-  if not shaderConfig then return end
+  if not shaderConfig then
+    return
+  end
 
   if shaderConfig.isFilter then
     ShaderFilter = option
   end
 
   if modules.game_interface then
-    local map = modules.game_interface.getMapPanel()
+    local map = GameInterface.getMapPanel()
     map:setTextureSmooth(not shaderConfig.ignoreAntiAliasing)
     map:setMapShader(g_shaders.getShader(option))
   end
@@ -63,7 +65,9 @@ end
 
 function setItemShader(option)
   local shaderConfig = ItemShaders[option]
-  if not shaderConfig then return end
+  if not shaderConfig then
+    return
+  end
 
   -- TODO
 end

@@ -1,8 +1,13 @@
 EmoteWindow < UIWidget
   anchors.top: parent.top
-  anchors.right: parent.right
   anchors.left: parent.left
-  background-color: #00000066
+  anchors.right: parent.right
+  margin-top: 1
+  margin-bottom: 33
+  padding: 4
+  image-source: /images/ui/_background/default_stone_blue
+  image-repeated: true
+  border: 2 #98885e
   layout:
     type: grid
     cell-size: 32 32
@@ -10,21 +15,23 @@ EmoteWindow < UIWidget
     flow:true
     fit-children:true
     num-columns: 5
+  focusable: false
 
-EmoteWindowButton < TabButton
+EmoteWindowButton < Button
   !tooltip: tr('Toggle emoticon panel')
-  anchors.top: parent.top
+  size: 22 22
+  anchors.verticalCenter: parent.verticalCenter
   anchors.right: next.left
-  margin-top: 6
-  margin-right: 5
-  @onClick: toggleWindow()
+  margin-bottom: 1
+  margin-right: 3
+  @onClick: GameEmotes.toggleWindow()
 
 EmoteButton < UIButton
   $hover:
-    border: 1 white
+    border: 1 #98885e
   $!hover:
-    border: 0 white
-  @onClick: useEmote(self.id)
+    border: 0 #98885e
+  @onClick: GameEmotes.useEmote(self.id)
 
   UIWidget
     anchors.fill: parent
@@ -32,11 +39,3 @@ EmoteButton < UIButton
 
 EmoteWindow
   id: emoteWindow
-  margin-top: 30
-  margin-right: 30
-  margin-left: 30
-  margin-bottom: 30
-  image-source: /images/ui/panel_container
-  border: 2 #172027
-  image-repeated: true
-  focusable: false

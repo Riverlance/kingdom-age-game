@@ -3,11 +3,17 @@ g_keyboard = {}
 
 -- private functions
 function translateKeyCombo(keyCombo)
-  if not keyCombo or #keyCombo == 0 then return nil end
+  if not keyCombo or #keyCombo == 0 then
+    return nil
+  end
+
   local keyComboDesc = ''
   for k,v in pairs(keyCombo) do
     local keyDesc = KeyCodeDescs[v]
-    if keyDesc == nil then return nil end
+    if keyDesc == nil then
+      return nil
+    end
+
     keyComboDesc = keyComboDesc .. '+' .. keyDesc
   end
   keyComboDesc = keyComboDesc:sub(2)
@@ -73,7 +79,10 @@ function determineKeyComboDesc(keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyDown(widget, keyCode, keyboardModifiers)
-  if keyCode == KeyUnknown then return false end
+  if keyCode == KeyUnknown then
+    return false
+  end
+
   local callback = widget.boundAloneKeyDownCombos[determineKeyComboDesc(keyCode, KeyboardNoModifier)]
   signalcall(callback, widget, keyCode)
   callback = widget.boundKeyDownCombos[determineKeyComboDesc(keyCode, keyboardModifiers)]
@@ -81,7 +90,10 @@ local function onWidgetKeyDown(widget, keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyUp(widget, keyCode, keyboardModifiers)
-  if keyCode == KeyUnknown then return false end
+  if keyCode == KeyUnknown then
+    return false
+  end
+
   local callback = widget.boundAloneKeyUpCombos[determineKeyComboDesc(keyCode, KeyboardNoModifier)]
   signalcall(callback, widget, keyCode)
   callback = widget.boundKeyUpCombos[determineKeyComboDesc(keyCode, keyboardModifiers)]
@@ -89,28 +101,46 @@ local function onWidgetKeyUp(widget, keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyPress(widget, keyCode, keyboardModifiers, autoRepeatTicks)
-  if keyCode == KeyUnknown then return false end
+  if keyCode == KeyUnknown then
+    return false
+  end
+
   local callback = widget.boundKeyPressCombos[determineKeyComboDesc(keyCode, keyboardModifiers)]
   return signalcall(callback, widget, keyCode, autoRepeatTicks)
 end
 
 local function connectKeyDownEvent(widget)
-  if widget.boundKeyDownCombos then return end
-  connect(widget, { onKeyDown = onWidgetKeyDown })
+  if widget.boundKeyDownCombos then
+    return
+  end
+
+  connect(widget, {
+    onKeyDown = onWidgetKeyDown
+  })
   widget.boundKeyDownCombos = {}
   widget.boundAloneKeyDownCombos = {}
 end
 
 local function connectKeyUpEvent(widget)
-  if widget.boundKeyUpCombos then return end
-  connect(widget, { onKeyUp = onWidgetKeyUp })
+  if widget.boundKeyUpCombos then
+    return
+  end
+
+  connect(widget, {
+    onKeyUp = onWidgetKeyUp
+  })
   widget.boundKeyUpCombos = {}
   widget.boundAloneKeyUpCombos = {}
 end
 
 local function connectKeyPressEvent(widget)
-  if widget.boundKeyPressCombos then return end
-  connect(widget, { onKeyPress = onWidgetKeyPress })
+  if widget.boundKeyPressCombos then
+    return
+  end
+
+  connect(widget, {
+    onKeyPress = onWidgetKeyPress
+  })
   widget.boundKeyPressCombos = {}
 end
 
@@ -146,32 +176,49 @@ end
 
 local function getUnbindArgs(arg1, arg2)
   local callback
+  if type(arg1) == 'function' then
+    callback = arg1
+  elseif type(arg2) == 'function' then
+    callback = arg2
+  end
+
   local widget
-  if type(arg1) == 'function' then callback = arg1
-  elseif type(arg2) == 'function' then callback = arg2 end
-  if type(arg1) == 'userdata' then widget = arg1
-  elseif type(arg2) == 'userdata' then widget = arg2 end
+  if type(arg1) == 'userdata' then
+    widget = arg1
+  elseif type(arg2) == 'userdata' then
+    widget = arg2
+  end
   widget = widget or rootWidget
+
   return callback, widget
 end
 
 function g_keyboard.unbindKeyDown(keyComboDesc, arg1, arg2)
   local callback, widget = getUnbindArgs(arg1, arg2)
-  if widget.boundKeyDownCombos == nil then return end
+  if widget.boundKeyDownCombos == nil then
+    return
+  end
+
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
   disconnect(widget.boundKeyDownCombos, keyComboDesc, callback)
 end
 
 function g_keyboard.unbindKeyUp(keyComboDesc, arg1, arg2)
   local callback, widget = getUnbindArgs(arg1, arg2)
-  if widget.boundKeyUpCombos == nil then return end
+  if widget.boundKeyUpCombos == nil then
+    return
+  end
+
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
   disconnect(widget.boundKeyUpCombos, keyComboDesc, callback)
 end
 
 function g_keyboard.unbindKeyPress(keyComboDesc, arg1, arg2)
   local callback, widget = getUnbindArgs(arg1, arg2)
-  if widget.boundKeyPressCombos == nil then return end
+  if widget.boundKeyPressCombos == nil then
+    return
+  end
+
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
   disconnect(widget.boundKeyPressCombos, keyComboDesc, callback)
 end

@@ -34,27 +34,27 @@ TableHeaderRow < Label
 TableHeaderColumn < UITableHeaderColumn
   font: verdana-11px-antialised
   background-color: alpha
-  color: #dfdfdfff
+  color: #f2af4eff
   height: 23
   focusable: true
-  text-offset: 0 0
-  image-source: /images/ui/button
+  //text-offset: 0 0
+  image-source: /images/ui/_button/default_square
   image-color: #dfdfdf
-  image-clip: 0 0 22 23
-  image-border: 3
+  image-clip: 0 0 32 21
+  image-border: 4
   padding: 5 10 5 10
   enabled: false
   focusable: false
 
   $hover !disabled:
-    image-clip: 0 23 22 23
+    image-clip: 0 21 32 21
 
   $pressed:
-    image-clip: 0 46 22 23
-    text-offset: 1 1
+    image-clip: 0 42 32 21
+    //text-offset: 1 1
 
   $disabled:
-    color: #dfdfdf88
+    color: #f2af4e88
     opacity: 0.8
 
 SortableTableHeaderColumn < TableHeaderColumn

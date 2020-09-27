@@ -1,17 +1,24 @@
+_G.ClientTerminal = { }
+ClientTerminal.m  = modules.client_terminal -- Alias
+
+
+
 -- configs
-local LogColors = { [LogDebug] = 'pink',
-                    [LogInfo] = 'white',
-                    [LogWarning] = 'yellow',
-                    [LogError] = 'red' }
+local LogColors =
+{
+  [LogDebug]   = 'pink',
+  [LogInfo]    = 'white',
+  [LogWarning] = 'yellow',
+  [LogError]   = 'red'
+}
 
 local oldenv = getfenv(0)
 setfenv(0, _G)
 _G.commandEnv = runinsandbox('commands')
 setfenv(0, oldenv)
 
--- private variables
 local terminalWindow
---local terminalButton
+local clearButton
 local logLocked = false
 local commandTextEdit
 local terminalBuffer
@@ -30,7 +37,8 @@ local terminalLog = {}
 local MAX_LOGLINES = 500
 local MAX_LINES = 128
 
--- private functions
+
+
 local function navigateCommand(step)
   if commandTextEdit:isMultiline() then
     return
@@ -51,7 +59,9 @@ end
 
 local function completeCommand()
   local cursorPos = commandTextEdit:getCursorPos()
-  if cursorPos == 0 then return end
+  if cursorPos == 0 then
+    return
+  end
 
   local commandBegin = commandTextEdit:getText():sub(1, cursorPos)
   local possibleCommands = {}
@@ -104,7 +114,7 @@ end
 
 local function doCommand(textWidget)
   local currentCommand = textWidget:getText()
-  executeCommand(currentCommand)
+  ClientTerminal.executeCommand(currentCommand)
   textWidget:clearText()
   return true
 end
@@ -126,44 +136,55 @@ local function onCommandChange(textWidget, newText, oldText)
 end
 
 local function onLog(level, message, time)
-  if disabled then return end
+  if disabled then
+    return
+  end
+
   -- avoid logging while reporting logs (would cause a infinite loop)
-  if logLocked then return end
+  if logLocked then
+    return
+  end
 
   logLocked = true
-  addLine(message, LogColors[level])
+  ClientTerminal.addLine(message, LogColors[level])
   logLocked = false
 end
 
--- public functions
-function init()
+
+
+function ClientTerminal.init()
   terminalWindow = g_ui.displayUI('terminal')
+  clearButton = terminalWindow:getChildById('clearButton')
+
   terminalWindow:setVisible(false)
 
-  terminalWindow.onDoubleClick = popWindow
+  terminalWindow.onDoubleClick = function() ClientTerminal.popWindow() end
 
-  -- terminalButton = modules.client_topmenu.addLeftButton('terminalButton', tr('Terminal') .. ' (Ctrl+Shift+T)', '/images/topbuttons/terminal', toggle)
-  g_keyboard.bindKeyDown('Ctrl+Shift+T', toggle)
+  g_keyboard.bindKeyDown('Ctrl+Shift+T', ClientTerminal.toggle)
 
   commandTextEdit = terminalWindow:getChildById('commandTextEdit')
   commandTextEdit:setHeight(commandTextEdit.baseHeight)
-  connect(commandTextEdit, {onTextChange = onCommandChange})
+  connect(commandTextEdit, {
+    onTextChange = onCommandChange
+  })
   g_keyboard.bindKeyPress('Up', function() navigateCommand(1) end, commandTextEdit)
   g_keyboard.bindKeyPress('Down', function() navigateCommand(-1) end, commandTextEdit)
   g_keyboard.bindKeyPress('Ctrl+C',
     function()
-      if commandTextEdit:hasSelection() or not terminalSelectText:hasSelection() then return false end
+      if commandTextEdit:hasSelection() or not terminalSelectText:hasSelection() then
+        return false
+      end
       g_window.setClipboardText(terminalSelectText:getSelection())
     return true
     end, commandTextEdit)
   g_keyboard.bindKeyDown('Tab', completeCommand, commandTextEdit)
   g_keyboard.bindKeyPress('Shift+Enter', addNewline, commandTextEdit)
   g_keyboard.bindKeyDown('Enter', doCommand, commandTextEdit)
-  g_keyboard.bindKeyDown('Escape', hide, terminalWindow)
+  g_keyboard.bindKeyDown('Escape', ClientTerminal.hide, terminalWindow)
 
   terminalBuffer = terminalWindow:getChildById('terminalBuffer')
   terminalSelectText = terminalWindow:getChildById('terminalSelectText')
-  terminalSelectText.onDoubleClick = popWindow
+  terminalSelectText.onDoubleClick = function() ClientTerminal.popWindow() end
   terminalSelectText.onMouseWheel = function(a,b,c) terminalBuffer:onMouseWheel(b,c) end
   terminalBuffer.onScrollChange = function(self, value) terminalSelectText:setTextVirtualOffset(value) end
 
@@ -173,7 +194,7 @@ function init()
     g_logger.fireOldMessages()
   elseif _G.terminalLines then
     for _,line in pairs(_G.terminalLines) do
-      addLine(line.text, line.color)
+      ClientTerminal.addLine(line.text, line.color)
     end
   end
 
@@ -184,7 +205,7 @@ function init()
   terminalLog = terminalLogFile:getList('terminalLog') or {}
 end
 
-function terminate()
+function ClientTerminal.terminate()
   -- Keep terminal log after logout
   terminalLogFile:setList('terminalLog', terminalLog)
   terminalLogFile:save()
@@ -207,22 +228,24 @@ function terminate()
 
   g_keyboard.unbindKeyDown('Ctrl+Shift+T')
   g_logger.setOnLog(nil)
+
   terminalWindow:destroy()
-  --terminalButton:destroy()
+  terminalWindow = nil
+  clearButton = nil
+
   commandEnv = nil
   _G.terminalLines = allLines
+
+  _G.ClientTerminal = nil
 end
 
---[[
-function hideButton()
-  terminalButton:hide()
-end
-]]
+function ClientTerminal.popWindow(force)
+  local isForceBool = type(force) == "boolean"
 
-function popWindow()
-  if poped then
+  if force == true or not isForceBool and poped then
     oldPos = terminalWindow:getPosition()
-    oldSize = terminalWindow:getSize()
+    -- oldSize = terminalWindow:getSize()
+    oldSize = { width = g_window.getWidth()/2.5, height = g_window.getHeight()/4 }
     terminalWindow:fill('parent')
     terminalWindow:setOn(false)
     terminalWindow:getChildById('bottomResizeBorder'):disable()
@@ -231,13 +254,17 @@ function popWindow()
     terminalWindow:getChildById('terminalScroll'):setMarginTop(0)
     terminalWindow:getChildById('terminalScroll'):setMarginBottom(0)
     terminalWindow:getChildById('terminalScroll'):setMarginRight(0)
+
+    clearButton:setOn(true)
+
     poped = false
-  else
+  elseif force == false or not isForceBool and not poped then
     terminalWindow:breakAnchors()
     terminalWindow:setOn(true)
     local size = oldSize or { width = g_window.getWidth()/2.5, height = g_window.getHeight()/4 }
     terminalWindow:setSize(size)
-    local pos = oldPos or { x = 0, y = g_window.getHeight() }
+    -- local pos = oldPos or { x = 0, y = g_window.getHeight() }
+    local pos = oldPos or { x = 0, y = g_window.getHeight() / 2 }
     terminalWindow:setPosition(pos)
     terminalWindow:getChildById('bottomResizeBorder'):enable()
     terminalWindow:getChildById('rightResizeBorder'):enable()
@@ -246,48 +273,64 @@ function popWindow()
     terminalWindow:getChildById('terminalScroll'):setMarginBottom(1)
     terminalWindow:getChildById('terminalScroll'):setMarginRight(1)
     terminalWindow:bindRectToParent()
+
+    clearButton:setOn(false)
+
     poped = true
   end
 end
 
-function toggle()
+function ClientTerminal.toggle()
   if terminalWindow:isVisible() then
-    hide()
+    ClientTerminal.hide()
   else
     if not firstShown then
       local settings = g_settings.getNode('terminal-window')
       if settings then
-        if settings.size then oldSize = settings.size end
-        if settings.pos then oldPos = settings.pos end
-        if settings.poped then popWindow() end
+        if settings.size then
+          oldSize = settings.size
+        end
+
+        if settings.pos then
+          oldPos = settings.pos
+        end
+
+        if settings.poped then
+          ClientTerminal.popWindow()
+        end
       end
       firstShown = true
     end
-    show()
+    ClientTerminal.show()
   end
 end
 
-function show()
-  if g_game.isOnline() and g_game.getAccountType() > ACCOUNT_TYPE_NORMAL then
+function ClientTerminal.isVisible()
+  return terminalWindow:isVisible()
+end
+
+function ClientTerminal.show()
+  local hasAccess = commandTextEdit:isEnabled() or g_game.isOnline() and g_game.getAccountType() > ACCOUNT_TYPE_NORMAL
+  if hasAccess then
     commandTextEdit:setEnabled(true)
   end
+  terminalWindow:setFocusable(hasAccess)
   terminalWindow:show()
   terminalWindow:raise()
   terminalWindow:focus()
   commandTextEdit:focus()
 end
 
-function hide()
+function ClientTerminal.hide()
   terminalWindow:hide()
 end
 
-function disable()
-  --terminalButton:hide()
+function ClientTerminal.disable()
   g_keyboard.unbindKeyDown('Ctrl+Shift+T')
   disabled = true
 end
 
-function flushLines()
+function ClientTerminal.flushLines()
   local numLines = terminalBuffer:getChildCount() + #cachedLines
   local fulltext = terminalSelectText:getText()
 
@@ -320,20 +363,22 @@ function flushLines()
   flushEvent = nil
 end
 
-function addLine(text, color)
+function ClientTerminal.addLine(text, color)
   if not flushEvent then
-    flushEvent = scheduleEvent(flushLines, 10)
+    flushEvent = scheduleEvent(ClientTerminal.flushLines, 10)
   end
 
   text = string.gsub(text, '\t', '    ')
   table.insert(cachedLines, {text=text, color=color})
 end
 
-function executeCommand(command)
-  if command == nil or #string.gsub(command, '\n', '') == 0 then return end
+function ClientTerminal.executeCommand(command)
+  if command == nil or #string.gsub(command, '\n', '') == 0 then
+    return
+  end
 
   -- add command line
-  addLine("> " .. command, "#ffffff")
+  ClientTerminal.addLine("> " .. command, "#ffffff")
 
   -- Add new command to console log
   currentMessageIndex = 0
@@ -360,9 +405,9 @@ function executeCommand(command)
     if command_name then
       local args = string.split(command:match('^[%w_]+[%s]*(.*)'), ' ')
       if commandEnv[command_name] and type(commandEnv[command_name]) == 'function' then
-        func = function() modules.client_terminal.commandEnv[command_name](unpack(args)) end
+        func = function() commandEnv[command_name](unpack(args)) end
       elseif command_name == command then
-        addLine('ERROR: command not found', 'red')
+        ClientTerminal.addLine('ERROR: command not found', 'red')
         return
       end
     end
@@ -370,7 +415,7 @@ function executeCommand(command)
 
   -- check for syntax errors
   if not func then
-    addLine('ERROR: incorrect lua syntax: ' .. err:sub(5), 'red')
+    ClientTerminal.addLine('ERROR: incorrect lua syntax: ' .. err:sub(5), 'red')
     return
   end
 
@@ -381,13 +426,16 @@ function executeCommand(command)
   local ok, ret = pcall(func)
   if ok then
     -- if the command returned a value, print it
-    if ret then addLine(ret, 'white') end
+    if ret then
+      ClientTerminal.addLine(ret, 'white')
+    end
+
   else
-    addLine('ERROR: command failed: ' .. ret, 'red')
+    ClientTerminal.addLine('ERROR: command failed: ' .. ret, 'red')
   end
 end
 
-function clear()
+function ClientTerminal.clear()
   terminalBuffer:destroyChildren()
   terminalSelectText:setText('')
   cachedLines = {}

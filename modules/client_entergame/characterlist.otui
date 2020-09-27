@@ -45,8 +45,8 @@ MainWindow
   id: charactersWindow
   !text: tr('Character List')
   visible: false
-  @onEnter: CharacterList.doLogin()
-  @onEscape: CharacterList.hide(true)
+  @onEnter: ClientCharacterList.doLogin()
+  @onEscape: ClientCharacterList.hide(true)
   @onSetup: |
     g_keyboard.bindKeyPress('Up', function() self:getChildById('characters'):focusPreviousChild(KeyboardFocusReason) end, self)
     g_keyboard.bindKeyPress('Down', function() self:getChildById('characters'):focusNextChild(KeyboardFocusReason) end, self)
@@ -58,7 +58,6 @@ MainWindow
 
   TextList
     id: characters
-    background-color: #a9a9a9
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: characterListScrollBar.left
@@ -105,17 +104,6 @@ MainWindow
     anchors.bottom: next.top
     margin-bottom: 10
 
-  //CheckBox
-  //  id: charAutoLoginBox
-  //  !text: tr('Auto Login')
-  //  !tooltip: tr('Auto login selected character on next charlist load')
-  //  anchors.left: parent.left
-  //  anchors.right: parent.right
-  //  anchors.bottom: next.top
-  //  margin-bottom: 6
-  //  margin-left: 18
-  //  margin-right: 18
-
   Button
     id: buttonOk
     !text: tr('Ok')
@@ -123,7 +111,7 @@ MainWindow
     anchors.right: next.left
     anchors.bottom: parent.bottom
     margin-right: 10
-    @onClick: CharacterList.doLogin()
+    @onClick: ClientCharacterList.doLogin()
 
   Button
     id: buttonCancel
@@ -131,4 +119,4 @@ MainWindow
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    @onClick: CharacterList.hide(true)
+    @onClick: ClientCharacterList.hide(true)

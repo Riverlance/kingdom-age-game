@@ -10,10 +10,14 @@ end
 
 function UIGameMap:onDragEnter(mousePos)
   local tile = self:getTile(mousePos)
-  if not tile then return false end
+  if not tile then
+    return false
+  end
 
   local thing = tile:getTopMoveThing()
-  if not thing then return false end
+  if not thing then
+    return false
+  end
 
   self.currentDragThing = thing
 
@@ -34,23 +38,33 @@ function UIGameMap:onDragLeave(droppedWidget, mousePos)
 end
 
 function UIGameMap:onDrop(widget, mousePos)
-  if not self:canAcceptDrop(widget, mousePos) then return false end
+  if not self:canAcceptDrop(widget, mousePos) then
+    return false
+  end
 
   local tile = self:getTile(mousePos)
-  if not tile then return false end
+  if not tile then
+    return false
+  end
 
   local thing = widget.currentDragThing
   local thingPos = thing:getPosition()
-  if not thingPos then return false end
+  if not thingPos then
+    return false
+  end
 
   local thingTile = thing:getTile()
-  if thingPos.x ~= 65535 and not thingTile then return false end
+  if thingPos.x ~= 65535 and not thingTile then
+    return false
+  end
 
   local toPos = tile:getPosition()
-  if thingPos.x == toPos.x and thingPos.y == toPos.y and thingPos.z == toPos.z then return false end
+  if thingPos.x == toPos.x and thingPos.y == toPos.y and thingPos.z == toPos.z then
+    return false
+  end
 
   if thing:isItem() and thing:getCount() > 1 then
-    modules.game_interface.moveStackableItem(thing, toPos)
+    GameInterface.moveStackableItem(thing, toPos)
   else
     g_game.move(thing, toPos, 1)
   end
@@ -72,7 +86,9 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
   local autoWalkPos = self:getPosition(mousePosition)
 
   -- happens when clicking outside of map boundaries
-  if not autoWalkPos or (autoWalkPos.x == 0 and autoWalkPos.y == 0 and autoWalkPos.z == 0) then return false end
+  if not autoWalkPos or (autoWalkPos.x == 0 and autoWalkPos.y == 0 and autoWalkPos.z == 0) then
+    return false
+  end
 
   local localPlayerPos = g_game.getLocalPlayer():getPosition()
   if autoWalkPos.z ~= localPlayerPos.z then
@@ -100,7 +116,7 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
     attackCreature = autoWalkTile:getTopCreature()
   end
 
-  local ret = modules.game_interface.processMouseAction(mousePosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature)
+  local ret = GameInterface.processMouseAction(mousePosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature)
   if ret then
     self.allowNextRelease = false
   end
@@ -130,7 +146,9 @@ function UIGameMap:onDoubleClick(mousePosition)
 end
 
 function UIGameMap:canAcceptDrop(widget, mousePos)
-  if not widget or not widget.currentDragThing then return false end
+  if not widget or not widget.currentDragThing then
+    return false
+  end
 
   local children = rootWidget:recursiveGetChildrenByPos(mousePos)
   for i=1,#children do
@@ -154,6 +172,9 @@ end
 
 function UIGameMap:getPosition(mousePosition)
   local tile = self:getTile(mousePosition)
-  if not tile then return { x = 0, y = 0, z = 0 } end
+  if not tile then
+    return { x = 0, y = 0, z = 0 }
+  end
+
   return tile:getPosition()
 end

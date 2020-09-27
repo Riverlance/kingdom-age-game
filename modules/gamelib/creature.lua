@@ -55,19 +55,19 @@ end
 function getSkullImagePath(skullId)
   local path
   if skullId == SkullYellow then
-    path = '/images/game/skulls/skull_yellow'
+    path = '/images/game/creature/skull/yellow'
   elseif skullId == SkullGreen then
-    path = '/images/game/skulls/skull_green'
+    path = '/images/game/creature/skull/green'
   elseif skullId == SkullWhite then
-    path = '/images/game/skulls/skull_white'
+    path = '/images/game/creature/skull/white'
   elseif skullId == SkullRed then
-    path = '/images/game/skulls/skull_red'
+    path = '/images/game/creature/skull/red'
   elseif skullId == SkullBlack then
-    path = '/images/game/skulls/skull_black'
+    path = '/images/game/creature/skull/black'
   elseif skullId == SkullOrange then
-    path = '/images/game/skulls/skull_orange'
+    path = '/images/game/creature/skull/orange'
   elseif skullId == SkullProtected then
-    path = '/images/game/skulls/skull_protected'
+    path = '/images/game/creature/skull/protected'
   end
   return path
 end
@@ -75,27 +75,27 @@ end
 function getShieldImagePathAndBlink(shieldId)
   local path, blink
   if shieldId == ShieldWhiteYellow then
-    path, blink = '/images/game/shields/shield_yellow_white', false
+    path, blink = '/images/game/creature/shield/yellow_white', false
   elseif shieldId == ShieldWhiteBlue then
-    path, blink = '/images/game/shields/shield_blue_white', false
+    path, blink = '/images/game/creature/shield/blue_white', false
   elseif shieldId == ShieldBlue then
-    path, blink = '/images/game/shields/shield_blue', false
+    path, blink = '/images/game/creature/shield/blue', false
   elseif shieldId == ShieldYellow then
-    path, blink = '/images/game/shields/shield_yellow', false
+    path, blink = '/images/game/creature/shield/yellow', false
   elseif shieldId == ShieldBlueSharedExp then
-    path, blink = '/images/game/shields/shield_blue_shared', false
+    path, blink = '/images/game/creature/shield/blue_shared', false
   elseif shieldId == ShieldYellowSharedExp then
-    path, blink = '/images/game/shields/shield_yellow_shared', false
+    path, blink = '/images/game/creature/shield/yellow_shared', false
   elseif shieldId == ShieldBlueNoSharedExpBlink then
-    path, blink = '/images/game/shields/shield_blue_not_shared', true
+    path, blink = '/images/game/creature/shield/blue_not_shared', true
   elseif shieldId == ShieldYellowNoSharedExpBlink then
-    path, blink = '/images/game/shields/shield_yellow_not_shared', true
+    path, blink = '/images/game/creature/shield/yellow_not_shared', true
   elseif shieldId == ShieldBlueNoSharedExp then
-    path, blink = '/images/game/shields/shield_blue_not_shared', false
+    path, blink = '/images/game/creature/shield/blue_not_shared', false
   elseif shieldId == ShieldYellowNoSharedExp then
-    path, blink = '/images/game/shields/shield_yellow_not_shared', false
+    path, blink = '/images/game/creature/shield/yellow_not_shared', false
   elseif shieldId == ShieldGray then
-    path, blink = '/images/game/shields/shield_gray', false
+    path, blink = '/images/game/creature/shield/gray', false
   end
   return path, blink
 end
@@ -103,15 +103,15 @@ end
 function getEmblemImagePath(emblemId)
   local path
   if emblemId == EmblemGreen then
-    path = '/images/game/emblems/emblem_green'
+    path = '/images/game/creature/emblem/green'
   elseif emblemId == EmblemRed then
-    path = '/images/game/emblems/emblem_red'
+    path = '/images/game/creature/emblem/red'
   elseif emblemId == EmblemBlue then
-    path = '/images/game/emblems/emblem_blue'
+    path = '/images/game/creature/emblem/blue'
   elseif emblemId == EmblemMember then
-    path = '/images/game/emblems/emblem_member'
+    path = '/images/game/creature/emblem/member'
   elseif emblemId == EmblemOther then
-    path = '/images/game/emblems/emblem_other'
+    path = '/images/game/creature/emblem/other'
   end
   return path
 end
@@ -119,9 +119,9 @@ end
 function getCreatureTypeImagePath(typeId)
   local path
   if typeId == CreatureTypeSummonOwn then
-    path = '/images/game/creaturetype/summon_own'
+    path = '/images/game/creature/type/summon_own'
   elseif typeId == CreatureTypeSummonOther then
-    path = '/images/game/creaturetype/summon_other'
+    path = '/images/game/creature/type/summon_other'
   end
   return path
 end
@@ -129,13 +129,13 @@ end
 function getIconImagePath(iconId)
   local path
   if iconId == NpcIconChat then
-    path = '/images/game/npcicons/icon_chat'
+    path = '/images/game/creature/speech_bubble/chat'
   elseif iconId == NpcIconTrade then
-    path = '/images/game/npcicons/icon_trade'
+    path = '/images/game/creature/speech_bubble/trade'
   elseif iconId == NpcIconQuest then
-    path = '/images/game/npcicons/icon_quest'
+    path = '/images/game/creature/speech_bubble/quest'
   elseif iconId == NpcIconTradeQuest then
-    path = '/images/game/npcicons/icon_tradequest'
+    path = '/images/game/creature/speech_bubble/trade_quest'
   end
   return path
 end
@@ -143,7 +143,7 @@ end
 function getSpecialIconPath(iconId)
   local path
   if iconId == SpecialIconWanted then
-    path = '/images/game/specialicons/wanted'
+    path = '/images/game/creature/special_icon/wanted'
   end
   return path
 end

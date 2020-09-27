@@ -3,9 +3,9 @@ MoveableTabBar < UIMoveableTabBar
 MoveableTabBarPanel < Panel
 MoveableTabBarButton < UIButton
   size: 20 20
-  image-source: /images/ui/tabbutton_square
+  image-source: /images/ui/_button/tab_rounded
   image-color: white
-  image-clip: 0 0 20 20
+  image-clip: 0 0 260 102
   image-border: 3
   icon-color: white
   color: #aaaaaa
@@ -14,7 +14,6 @@ MoveableTabBarButton < UIButton
   padding: 5
 
   $hover !checked:
-    image-clip: 0 20 20 20
     color: white
 
   $disabled:
@@ -22,11 +21,11 @@ MoveableTabBarButton < UIButton
     icon-color: #888888
 
   $checked:
-    image-clip: 0 40 20 20
-    color: #D8E7F0
+    image-clip: 0 102 260 102
+    color: #f2af4e
 
   $on !checked:
-    color: #59EB59
+    color: #c83200
 
 TabBar < UITabBar
   size: 80 20
@@ -36,9 +35,9 @@ TabBar < UITabBar
 TabBarPanel < Panel
 TabBarButton < UIButton
   size: 20 20
-  image-source: /images/ui/tabbutton_square
+  image-source: /images/ui/_button/tab_square
   image-color: white
-  image-clip: 0 0 20 20
+  image-clip: 0 0 260 102
   image-border: 3
   icon-color: white
   color: #aaaaaa
@@ -53,7 +52,6 @@ TabBarButton < UIButton
     margin-left: 5
 
   $hover !checked:
-    image-clip: 0 20 20 20
     color: white
 
   $disabled:
@@ -61,27 +59,19 @@ TabBarButton < UIButton
     icon-color: #888888
 
   $checked:
-    image-clip: 0 40 20 20
+    image-clip: 0 102 260 102
     color: #80c7f8
 
   $on !checked:
-    color: #59EB59
+    color: #c83200
 
 TabBarRounded < TabBar
 TabBarRoundedPanel < TabBarPanel
 TabBarRoundedButton < TabBarButton
-  image-source: /images/ui/tabbutton_rounded
-  size: 22 23
-  image-clip: 0 0 22 23
-
-  $hover !checked:
-    image-clip: 0 23 22 23
-
-  $checked:
-    image-clip: 0 46 22 23
+  image-source: /images/ui/_button/tab_rounded
 
 TabBarVertical < UITabBar
-  width: 96
+  width: 80
   ScrollableFlatPanel
     id: buttonsPanel
     anchors.top: parent.top
@@ -123,4 +113,4 @@ TabBarVerticalButton < UIButton
     icon-color: #ffffff
     color: #80c7f8
   $on !checked:
-    color: #59EB59
+    color: #c83200

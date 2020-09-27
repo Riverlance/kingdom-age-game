@@ -1,0 +1,129 @@
+BattleTabButton < TabButton
+  size: 20 20
+  icon-source: /images/ui/battle_list/filter
+
+MiniWindow
+  id: battleWindow
+  !text: tr('Battle List')
+  icon: /images/ui/top_menu/battle_list
+  &save: true
+  &contentMinimumHeight: 31
+
+  UIButton
+    id: toggleFilterPanelButton
+    size: 14 14
+    !tooltip: tr('Show options')
+    image-source: /images/ui/_button/mini_window
+    image-clip: 56 0 14 14
+    anchors.verticalCenter: lockButton.verticalCenter
+    anchors.right: lockButton.outsideLeft
+    @onClick: GameBattleList.onClickFilterPanelButton(self)
+
+    $hover:
+      image-clip: 56 14 14 14
+
+    $pressed:
+      image-clip: 56 28 14 14
+
+    $on:
+      image-clip: 42 0 14 14
+      !tooltip: tr('Hide options')
+
+    $on hover:
+      image-clip: 42 14 14 14
+
+    $on pressed:
+      image-clip: 42 28 14 14
+
+  UIButton
+    id: sortMenuButton
+    size: 14 14
+    image-source: /images/ui/_button/mini_window
+    anchors.verticalCenter: prev.verticalCenter
+    anchors.right: prev.outsideLeft
+    @onClick: GameBattleList.createSortMenu()
+
+    $hover:
+      image-clip: 70 14 14 14
+
+    $pressed:
+      image-clip: 70 28 14 14
+
+    $!on:
+      image-clip: 70 0 14 14
+
+    $on:
+      image-clip: 70 28 14 14
+
+  MiniWindowHeader
+    height: 20
+
+    $on:
+      height: 0
+
+    Panel
+      id: filterPanel
+      size: 108 20
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.horizontalCenter: parent.horizontalCenter
+      layout:
+        type: horizontalBox
+        spacing: 2
+
+      BattleTabButton
+        id: filterPlayers
+        !tooltip: tr('Show players')
+        icon-clip: 60 0 20 20
+        @onClick: GameBattleList.onClickFilterPlayers(self)
+
+        $on:
+          !tooltip: tr('Hide players')
+
+      BattleTabButton
+        id: filterNPCs
+        !tooltip: tr('Show npcs')
+        icon-clip: 20 0 20 20
+        @onClick: GameBattleList.onClickFilterNPCs(self)
+
+        $on:
+          !tooltip: tr('Hide npcs')
+
+      BattleTabButton
+        id: filterMonsters
+        !tooltip: tr('Show monsters')
+        icon-clip: 0 0 20 20
+        @onClick: GameBattleList.onClickFilterMonsters(self)
+
+        $on:
+          !tooltip: tr('Hide monsters')
+
+      BattleTabButton
+        id: filterSkulls
+        !tooltip: tr('Show safe players')
+        icon-clip: 80 0 20 20
+        @onClick: GameBattleList.onClickFilterSkulls(self)
+
+        $on:
+          !tooltip: tr('Hide safe players')
+
+      BattleTabButton
+        id: filterParty
+        !tooltip: tr('Show party members')
+        icon-clip: 40 0 20 20
+        @onClick: GameBattleList.onClickFilterParty(self)
+
+        $on:
+          !tooltip: tr('Hide party members')
+
+  MiniWindowContents
+
+    Panel
+      id: battlePanel
+      focusable: false
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      padding: 4
+      layout:
+        type: verticalBox
+        fit-children: true

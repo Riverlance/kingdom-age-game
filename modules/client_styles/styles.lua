@@ -1,4 +1,9 @@
-function init()
+_G.ClientStyles = { }
+ClientStyles.m  = modules.client_styles -- Alias
+
+
+
+function ClientStyles.init()
   local files
   files = g_resources.listDirectoryFiles('/styles')
   for _,file in pairs(files) do
@@ -24,6 +29,6 @@ function init()
   g_mouse.loadCursors('/cursors/cursors')
 end
 
-function terminate()
+function ClientStyles.terminate()
+  _G.ClientStyles = nil
 end
-

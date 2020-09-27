@@ -1,15 +1,19 @@
-powersButton = nil
+_G.GamePowers = { }
+GamePowers.m  = modules.ka_game_powers -- Alias
+
+
+
 powersWindow = nil
+powersTopMenuButton = nil
+powersHeader = nil
 sortMenuButton = nil
 toggleFilterPanelButton = nil
 
 filterPanel = nil
-filterNonAggressiveButton = nil
-filterAggressiveButton = nil
+filterOffensiveButton = nil
+filterDefensiveButton = nil
 filterNonPremiumButton = nil
 filterPremiumButton = nil
-
-firstHorizontalSeparator = nil
 
 powersPanel = nil
 
@@ -20,21 +24,24 @@ POWERS_SORT_LEVEL = 3
 POWERS_ORDER_ASCENDING  = 1
 POWERS_ORDER_DESCENDING = 2
 
-local powersSortStr = {
+local powersSortStr =
+{
   [POWERS_SORT_NAME]  = 'Name',
   [POWERS_SORT_CLASS] = 'Class',
   [POWERS_SORT_LEVEL] = 'Level'
 }
 
-local powersOrderStr = {
+local powersOrderStr =
+{
   [POWERS_ORDER_ASCENDING]  = 'Ascending',
   [POWERS_ORDER_DESCENDING] = 'Descending'
 }
 
-local defaultValues = {
+local defaultValues =
+{
   filterPanel = true,
-  filterNonAggressive = true,
-  filterAggressive = true,
+  filterOffensive = true,
+  filterDefensive = true,
   filterNonPremium = true,
   filterPremium = true,
   sortType = POWERS_SORT_LEVEL,
@@ -50,209 +57,226 @@ local POWER_CLASS_SPECIAL   = 4
 local power_flag_updateList             = -3
 local power_flag_updateNonConstantPower = -4
 
-function init()
+
+
+function GamePowers.init()
   powersList = {}
   powerListByIndex = {}
 
   g_ui.importStyle('powersbutton')
-  g_keyboard.bindKeyDown('Ctrl+Shift+P', toggle)
+  g_keyboard.bindKeyDown('Ctrl+Shift+P', GamePowers.toggle)
 
-  powersButton = modules.client_topmenu.addRightGameToggleButton('powersButton', tr('Powers') .. ' (Ctrl+Shift+P)', 'powers', toggle)
-  powersButton:setOn(true)
+  powersWindow        = g_ui.loadUI('powers')
+  powersHeader        = powersWindow:getChildById('miniWindowHeader')
+  powersTopMenuButton = ClientTopMenu.addRightGameToggleButton('powersTopMenuButton', tr('Powers') .. ' (Ctrl+Shift+P)', '/images/ui/top_menu/powers', GamePowers.toggle)
 
-  powersWindow = g_ui.loadUI('powers', modules.game_interface.getRightPanel())
-  powersWindow:setContentMinimumHeight(80)
-  powersWindow:setup()
+  powersWindow.topMenuButton = powersTopMenuButton
 
   -- This disables scrollbar auto hiding
   local scrollbar = powersWindow:getChildById('miniwindowScrollBar')
   scrollbar:mergeStyle({ ['$!on'] = {} })
 
   sortMenuButton = powersWindow:getChildById('sortMenuButton')
-  setSortType(getSortType())
-  setSortOrder(getSortOrder())
+  GamePowers.setSortType(GamePowers.getSortType())
+  GamePowers.setSortOrder(GamePowers.getSortOrder())
 
-  toggleFilterPanelButton   = powersWindow:getChildById('toggleFilterPanelButton')
-  filterPanel               = powersWindow:recursiveGetChildById('filterPanel')
-  firstHorizontalSeparator  = powersWindow:recursiveGetChildById('firstHorizontalSeparator')
-  onClickFilterPanelButton(toggleFilterPanelButton, g_settings.getValue('Powers', 'filterPanel', defaultValues.filterPanel))
+  toggleFilterPanelButton = powersWindow:getChildById('toggleFilterPanelButton')
+  toggleFilterPanelButton:setOn(not g_settings.getValue('Powers', 'filterPanel', defaultValues.filterPanel))
+  GamePowers.onClickFilterPanelButton(toggleFilterPanelButton)
 
-  filterNonAggressiveButton = powersWindow:recursiveGetChildById('filterNonAggressive')
-  filterAggressiveButton    = powersWindow:recursiveGetChildById('filterAggressive')
-  filterNonPremiumButton    = powersWindow:recursiveGetChildById('filterNonPremium')
-  filterPremiumButton       = powersWindow:recursiveGetChildById('filterPremium')
-  filterNonAggressiveButton:setChecked(g_settings.getValue('Powers', 'filterNonAggressive', defaultValues.filterNonAggressive))
-  filterAggressiveButton:setChecked(g_settings.getValue('Powers', 'filterAggressive', defaultValues.filterAggressive))
-  filterNonPremiumButton:setChecked(g_settings.getValue('Powers', 'filterNonPremium', defaultValues.filterNonPremium))
-  filterPremiumButton:setChecked(g_settings.getValue('Powers', 'filterPremium', defaultValues.filterPremium))
-  onClickFilterNonAggressive(filterNonAggressiveButton)
-  onClickFilterAggressive(filterAggressiveButton)
-  onClickFilterNonPremium(filterNonPremiumButton)
-  onClickFilterPremium(filterPremiumButton)
+  filterPanel = powersHeader:getChildById('filterPanel')
 
-  powersPanel = powersWindow:recursiveGetChildById('powersPanel')
+  filterOffensiveButton  = filterPanel:getChildById('filterOffensive')
+  filterDefensiveButton  = filterPanel:getChildById('filterDefensive')
+  filterNonPremiumButton = filterPanel:getChildById('filterNonPremium')
+  filterPremiumButton    = filterPanel:getChildById('filterPremium')
+  filterOffensiveButton:setOn(not g_settings.getValue('Powers', 'filterOffensive', defaultValues.filterOffensive))
+  filterDefensiveButton:setOn(not g_settings.getValue('Powers', 'filterDefensive', defaultValues.filterDefensive))
+  filterNonPremiumButton:setOn(not g_settings.getValue('Powers', 'filterNonPremium', defaultValues.filterNonPremium))
+  filterPremiumButton:setOn(not g_settings.getValue('Powers', 'filterPremium', defaultValues.filterPremium))
+  GamePowers.onClickFilterOffensive(filterOffensiveButton)
+  GamePowers.onClickFilterDefensive(filterDefensiveButton)
+  GamePowers.onClickFilterNonPremium(filterNonPremiumButton)
+  GamePowers.onClickFilterPremium(filterPremiumButton)
+
+  powersPanel = powersWindow:getChildById('contentsPanel'):getChildById('powersPanel')
 
   connect(g_game, {
-    onGameStart        = online,
-    onGameEnd          = offline,
-    onPlayerPowersList = onPlayerPowersList
+    onGameStart        = GamePowers.online,
+    onGameEnd          = GamePowers.offline,
+    onPlayerPowersList = GamePowers.onPlayerPowersList
   })
 
-  refreshList()
+  GamePowers.refreshList()
 end
 
-function terminate()
+function GamePowers.terminate()
   powersList = {}
   powerListByIndex = {}
 
   disconnect(g_game, {
-    onGameStart        = online,
-    onGameEnd          = offline,
-    onPlayerPowersList = onPlayerPowersList
+    onGameStart        = GamePowers.online,
+    onGameEnd          = GamePowers.offline,
+    onPlayerPowersList = GamePowers.onPlayerPowersList
   })
 
-  powersButton:destroy()
+  powersTopMenuButton:destroy()
   powersWindow:destroy()
 
   g_keyboard.unbindKeyDown('Ctrl+Shift+P')
+
+  _G.GamePowers = nil
 end
 
-function online()
-  refreshList()
+function GamePowers.online()
+  GameInterface.setupMiniWindow(powersWindow, powersTopMenuButton)
+  GamePowers.refreshList()
 end
 
-function offline()
-  clearList()
+function GamePowers.offline()
+  GamePowers.clearList()
 end
 
--- Top menu button
-function toggle()
-  if powersButton:isOn() then
-    powersWindow:close()
-    powersButton:setOn(false)
-  else
-    powersWindow:open()
-    powersButton:setOn(true)
-  end
-end
-
-function onMiniWindowClose()
-  if powersButton then
-    powersButton:setOn(false)
-  end
+function GamePowers.toggle()
+  GameInterface.toggleMiniWindow(powersWindow)
 end
 
 -- Filtering
-function onClickFilterPanelButton(self, state) -- Needs 'state' because Button doesn't updates itself
-  g_settings.setValue('Powers', 'filterPanel', state)
-  toggleFilterPanelButton:setOn(state)
-  filterPanel:setOn(state)
-  firstHorizontalSeparator:setOn(state)
+function GamePowers.onClickFilterPanelButton(self)
+  local newState = not self:isOn()
+  toggleFilterPanelButton:setOn(newState)
+  powersHeader:setOn(not newState)
+  g_settings.setValue('Powers', 'filterPanel', newState)
 end
 
-function powersButtonFilter(powerButton)
-  local filterNonAggressive = not filterNonAggressiveButton:isChecked()
-  local filterAggressive    = not filterAggressiveButton:isChecked()
-  local filterNonPremium    = not filterNonPremiumButton:isChecked()
-  local filterPremium       = not filterPremiumButton:isChecked()
+function GamePowers.powersButtonFilter(powerButton)
+  local filterOffensive  = not filterOffensiveButton:isOn()
+  local filterDefensive  = not filterDefensiveButton:isOn()
+  local filterNonPremium = not filterNonPremiumButton:isOn()
+  local filterPremium    = not filterPremiumButton:isOn()
+
   local power = powerButton.power
-  return filterNonAggressive and not power.isOffensive or filterAggressive and power.isOffensive or filterNonPremium and not power.isPremium or filterPremium and power.isPremium or false
+  return filterOffensive and power.aggressive or filterDefensive and not power.aggressive or filterNonPremium and not power.premium or filterPremium and power.premium or false
 end
 
-function filterPowersButtons()
+function GamePowers.filterPowersButtons()
   for i, powerButton in pairs(powersList) do
-    powerButton:setOn(not powersButtonFilter(powerButton))
+    powerButton:setOn(not GamePowers.powersButtonFilter(powerButton))
   end
 end
 
-function onClickFilterNonAggressive(self)
-  g_settings.setValue('Powers', 'filterNonAggressive', self:isChecked())
-  filterPowersButtons()
+function GamePowers.onClickFilterOffensive(self)
+  local newState = not self:isOn()
+  filterOffensiveButton:setOn(newState)
+  g_settings.setValue('Powers', 'filterOffensive', newState)
+  GamePowers.filterPowersButtons()
 end
 
-function onClickFilterAggressive(self)
-  g_settings.setValue('Powers', 'filterAggressive', self:isChecked())
-  filterPowersButtons()
+function GamePowers.onClickFilterDefensive(self)
+  local newState = not self:isOn()
+  filterDefensiveButton:setOn(newState)
+  g_settings.setValue('Powers', 'filterDefensive', newState)
+  GamePowers.filterPowersButtons()
 end
 
-function onClickFilterNonPremium(self)
-  g_settings.setValue('Powers', 'filterNonPremium', self:isChecked())
-  filterPowersButtons()
+function GamePowers.onClickFilterNonPremium(self)
+  local newState = not self:isOn()
+  filterNonPremiumButton:setOn(newState)
+  g_settings.setValue('Powers', 'filterNonPremium', newState)
+  GamePowers.filterPowersButtons()
 end
 
-function onClickFilterPremium(self)
-  g_settings.setValue('Powers', 'filterPremium', self:isChecked())
-  filterPowersButtons()
+function GamePowers.onClickFilterPremium(self)
+  local newState = not self:isOn()
+  filterPremiumButton:setOn(newState)
+  g_settings.setValue('Powers', 'filterPremium', newState)
+  GamePowers.filterPowersButtons()
 end
 
 -- Sorting
-function getSortType()
+function GamePowers.getSortType()
   return g_settings.getValue('Powers', 'sortType', defaultValues.sortType)
 end
 
-function setSortType(state)
+function GamePowers.setSortType(state)
   g_settings.setValue('Powers', 'sortType', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', powersSortStr[state] or '', powersOrderStr[getSortOrder()] or ''))
-  updatePowersList()
+  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', powersSortStr[state] or '', powersOrderStr[GamePowers.getSortOrder()] or ''))
+  GamePowers.updatePowersList()
 end
 
-function getSortOrder()
+function GamePowers.getSortOrder()
   return g_settings.getValue('Powers', 'sortOrder', defaultValues.sortOrder)
 end
 
-function setSortOrder(state)
+function GamePowers.setSortOrder(state)
   g_settings.setValue('Powers', 'sortOrder', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', powersSortStr[getSortType()] or '', powersOrderStr[state] or ''))
-  updatePowersList()
+  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', powersSortStr[GamePowers.getSortType()] or '', powersOrderStr[state] or ''))
+  GamePowers.updatePowersList()
 end
 
-function createSortMenu()
+function GamePowers.createSortMenu()
   local menu = g_ui.createWidget('PopupMenu')
 
-  local sortOrder = getSortOrder()
+  local sortOrder = GamePowers.getSortOrder()
   if sortOrder == POWERS_ORDER_ASCENDING then
-    menu:addOption(tr('%s Order', powersOrderStr[POWERS_ORDER_DESCENDING]), function() setSortOrder(POWERS_ORDER_DESCENDING) end)
+    menu:addOption(tr('%s Order', powersOrderStr[POWERS_ORDER_DESCENDING]), function() GamePowers.setSortOrder(POWERS_ORDER_DESCENDING) end)
   elseif sortOrder == POWERS_ORDER_DESCENDING then
-    menu:addOption(tr('%s Order', powersOrderStr[POWERS_ORDER_ASCENDING]), function() setSortOrder(POWERS_ORDER_ASCENDING) end)
+    menu:addOption(tr('%s Order', powersOrderStr[POWERS_ORDER_ASCENDING]), function() GamePowers.setSortOrder(POWERS_ORDER_ASCENDING) end)
   end
 
   menu:addSeparator()
 
-  local sortType = getSortType()
+  local sortType = GamePowers.getSortType()
   if sortType ~= POWERS_SORT_NAME then
-    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_NAME]), function() setSortType(POWERS_SORT_NAME) end)
+    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_NAME]), function() GamePowers.setSortType(POWERS_SORT_NAME) end)
   end
   if sortType ~= POWERS_SORT_CLASS then
-    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_CLASS]), function() setSortType(POWERS_SORT_CLASS) end)
+    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_CLASS]), function() GamePowers.setSortType(POWERS_SORT_CLASS) end)
   end
   if sortType ~= POWERS_SORT_LEVEL then
-    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_LEVEL]), function() setSortType(POWERS_SORT_LEVEL) end)
+    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_LEVEL]), function() GamePowers.setSortType(POWERS_SORT_LEVEL) end)
   end
 
   menu:display()
 end
 
-function sortPowers()
+function GamePowers.sortPowers()
   local sortFunction
-  local sortOrder = getSortOrder()
-  local sortType  = getSortType()
+  local sortOrder = GamePowers.getSortOrder()
+  local sortType  = GamePowers.getSortType()
 
   if sortOrder == POWERS_ORDER_ASCENDING then
     if sortType == POWERS_SORT_NAME then
-      sortFunction = function(a,b) return a.power.name < b.power.name end
+      sortFunction = function(a,b)
+        return a.power.name < b.power.name
+      end
+
     elseif sortType == POWERS_SORT_CLASS then
-      sortFunction = function(a,b) return a.power.class < b.power.class end
+      sortFunction = function(a,b)
+        return a.power.class < b.power.class
+      end
+
     elseif sortType == POWERS_SORT_LEVEL then
-      sortFunction = function(a,b) return a.power.level < b.power.level end
+      sortFunction = function(a,b)
+        return a.power.level < b.power.level
+      end
     end
 
   elseif sortOrder == POWERS_ORDER_DESCENDING then
     if sortType == POWERS_SORT_NAME then
-      sortFunction = function(a,b) return a.power.name > b.power.name end
+      sortFunction = function(a,b)
+        return a.power.name > b.power.name
+      end
+
     elseif sortType == POWERS_SORT_CLASS then
-      sortFunction = function(a,b) return a.power.class > b.power.class end
+      sortFunction = function(a,b)
+        return a.power.class > b.power.class
+      end
+
     elseif sortType == POWERS_SORT_LEVEL then
-      sortFunction = function(a,b) return a.power.level > b.power.level end
+      sortFunction = function(a,b)
+        return a.power.level > b.power.level
+      end
     end
 
   end
@@ -262,39 +286,39 @@ function sortPowers()
   end
 end
 
-function updatePowersList()
-  sortPowers()
+function GamePowers.updatePowersList()
+  GamePowers.sortPowers()
   for i = 1, #powerListByIndex do
     powersPanel:moveChildToIndex(powerListByIndex[i], i)
     powerListByIndex[i].index = i
   end
-  filterPowersButtons()
+  GamePowers.filterPowersButtons()
   if modules.game_hotkeys then
-    modules.game_hotkeys.updateHotkeyList()
+    GameHotkeys.updateHotkeyList()
   end
   if modules.ka_game_hotkeybars then
-    modules.ka_game_hotkeybars.onUpdateHotkeys()
+    GameHotkeybars.onUpdateHotkeys()
   end
 end
 
-function clearList()
+function GamePowers.clearList()
   powersList = {}
   powerListByIndex = {}
   powersPanel:destroyChildren()
 end
 
-function refreshList()
+function GamePowers.refreshList()
   if not g_game.isOnline() then
     return
   end
 
-  clearList()
+  GamePowers.clearList()
 
   local ignoreMessage = 1
   g_game.sendPowerProtocolData(string.format("%d:%d:%d:%d", power_flag_updateList, ignoreMessage, 0, 0))
 end
 
-function add(power)
+function GamePowers.add(power)
   local powerButton = powersList[power.id]
   if powerButton then
     return false -- Already added
@@ -314,7 +338,7 @@ function add(power)
   return true -- New added successfully
 end
 
-function update(power)
+function GamePowers.update(power)
   local powerButton = powersList[power.id]
   if not powerButton then
     return false
@@ -325,7 +349,7 @@ function update(power)
   return true -- Updated successfully
 end
 
-function remove(powerId)
+function GamePowers.remove(powerId)
   if not powersList[powerId] then
     return false
   end
@@ -338,13 +362,15 @@ function remove(powerId)
   return true -- Removed successfully
 end
 
-function requestNonConstantPowerChanges(power)
-  if not g_game.isOnline() then return end
+function GamePowers.requestNonConstantPowerChanges(power)
+  if not g_game.isOnline() then
+    return
+  end
 
   g_game.sendPowerProtocolData(string.format("%d:%d:%d:%d", power_flag_updateNonConstantPower, power.id or 0, 0, 0))
 end
 
-function onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
+function GamePowers.onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
   local hasAdded   = false
   local hasRemoved = false
 
@@ -356,23 +382,23 @@ function onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
     power.name                 = powerData[2]
     power.level                = powerData[3]
     power.class                = powerData[4]
+    power.aggressive           = power.class == POWER_CLASS_OFFENSIVE -- If power is offensive, it is aggressive on combat
     power.mana                 = powerData[5]
     power.exhaustTime          = powerData[6]
     power.vocations            = powerData[7]
-    power.isPremium            = powerData[8]
+    power.premium              = powerData[8]
     power.description          = powerData[9]
     power.descriptionBoostNone = powerData[10]
     power.descriptionBoostLow  = powerData[11]
     power.descriptionBoostHigh = powerData[12]
-    power.isConstant           = powerData[13]
-    power.isOffensive          = power.class == POWER_CLASS_OFFENSIVE
+    power.constant             = powerData[13]
 
     power.onTooltipHoverChange =
     function(widget, hovered)
       if hovered then
         local power = widget.power
-        if power and not power.isConstant then
-          requestNonConstantPowerChanges(power)
+        if power and not power.constant then
+          GamePowers.requestNonConstantPowerChanges(power)
           return false -- Cancel old tooltip
         end
       end
@@ -383,14 +409,14 @@ function onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
     if not powerButton then
       if not updateNonConstantPower then
         -- Add
-        local ret = add(power)
+        local ret = GamePowers.add(power)
         if not hasAdded then
           hasAdded = ret
         end
       end
     else
       -- Update
-      update(power) -- No messages in this case, since is probably minor changes or nothing
+      GamePowers.update(power) -- No messages in this case, since is probably minor changes or nothing
     end
   end
 
@@ -409,7 +435,7 @@ function onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
 
       if not powerFound then
         -- Remove
-        local ret = remove(powerId)
+        local ret = GamePowers.remove(powerId)
         if not hasRemoved then
           hasRemoved = ret
         end
@@ -417,12 +443,12 @@ function onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
     end
   end
 
-  if not ignoreMessage and (hasAdded or hasRemoved) and modules.game_textmessage then
-    modules.game_textmessage.displayGameMessage(tr('Your power list has been updated.'))
+  if modules.game_textmessage and not ignoreMessage and (hasAdded or hasRemoved) then
+    GameTextMessage.displayGameMessage(tr('Your power list has been updated.'))
   end
 
   if not updateNonConstantPower then
-    updatePowersList() -- Update once after adding all powers
+    GamePowers.updatePowersList() -- Update once after adding all powers
   end
 
   if updateNonConstantPower then
@@ -433,11 +459,11 @@ function onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
   end
 end
 
-function getPowerButton(id)
+function GamePowers.getPowerButton(id)
   return id and powersList[id] or nil
 end
 
-function getPower(id)
-  local ret = getPowerButton(id)
+function GamePowers.getPower(id)
+  local ret = GamePowers.getPowerButton(id)
   return ret and ret.power or nil
 end

@@ -239,19 +239,28 @@ function getfsrcpath(depth)
 end
 
 function resolvepath(filePath, depth)
-  if not filePath then return nil end
+  if not filePath then
+    return nil
+  end
+
   depth = depth or 1
   if filePath then
     if filePath:sub(0, 1) ~= '/' then
       local basepath = getfsrcpath(depth+1)
-      if basepath:sub(#basepath) ~= '/' then basepath = basepath .. '/' end
+      if basepath:sub(#basepath) ~= '/' then
+        basepath = basepath .. '/'
+      end
       return  basepath .. filePath
+
     else
       return filePath
     end
   else
     local basepath = getfsrcpath(depth+1)
-    if basepath:sub(#basepath) ~= '/' then basepath = basepath .. '/' end
+    if basepath:sub(#basepath) ~= '/' then
+      basepath = basepath .. '/'
+    end
+
     return basepath
   end
 end
@@ -318,7 +327,9 @@ function signalcall(param, ...)
     for k,v in pairs(param) do
       local status, ret = pcall(v, ...)
       if status then
-        if ret then return true end
+        if ret then
+          return true
+        end
       else
         perror(ret)
       end

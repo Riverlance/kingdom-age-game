@@ -1,50 +1,55 @@
-ServerList = {}
+_G.ClientServerList = { }
+ClientServerList.m  = modules.client_serverlist -- Alias
 
--- private variables
+
+
 local serverListWindow = nil
 local serverTextList = nil
 local removeWindow = nil
 local servers = {}
 
--- public functions
-function ServerList.init()
+
+
+function ClientServerList.init()
   serverListWindow = g_ui.displayUI('serverlist')
   serverTextList = serverListWindow:getChildById('serverList')
 
   servers = g_settings.getNode('ServerList') or {}
   if servers then
-    ServerList.load()
+    ClientServerList.load()
   end
 end
 
-function ServerList.terminate()
-  ServerList.destroy()
+function ClientServerList.terminate()
+  ClientServerList.destroy()
 
   g_settings.setNode('ServerList', servers)
 
-  ServerList = nil
+  _G.ClientServerList = nil
 end
 
-function ServerList.load()
+
+
+function ClientServerList.load()
   for host, server in pairs(servers) do
-    ServerList.add(host, server.port, server.protocol, true)
+    ClientServerList.add(host, server.port, server.protocol, true)
   end
 end
 
-function ServerList.select()
+function ClientServerList.select()
   local selected = serverTextList:getFocusedChild()
   if selected then
     local server = servers[selected:getId()]
     if server then
-      EnterGame.setDefaultServer(selected:getId(), server.port, server.protocol)
-      EnterGame.setAccountName(server.account)
-      EnterGame.setPassword(server.password)
-      ServerList.hide()
+      ClientEnterGame.setDefaultServer(selected:getId(), server.port, server.protocol)
+      ClientEnterGame.setAccountName(server.account)
+      ClientEnterGame.setPassword(server.password)
+      ClientServerList.hide()
     end
   end
 end
 
-function ServerList.add(host, port, protocol, load)
+function ClientServerList.add(host, port, protocol, load)
   if not host or not port or not protocol then
     return false, 'Failed to load settings'
   elseif not load and servers[host] then
@@ -70,11 +75,16 @@ function ServerList.add(host, port, protocol, load)
   local proto = widget:getChildById('protocol')
   proto:setText(protocol)
 
-  connect(widget, { onDoubleClick = function () ServerList.select() return true end } )
+  connect(widget, {
+    onDoubleClick = function()
+      ClientServerList.select()
+      return true
+    end
+  })
   return true
 end
 
-function ServerList.remove(widget)
+function ClientServerList.remove(widget)
   local host = widget:getId()
 
   if removeWindow then
@@ -98,7 +108,7 @@ function ServerList.remove(widget)
       anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
 end
 
-function ServerList.destroy()
+function ClientServerList.destroy()
   if serverListWindow then
     serverTextList = nil
     serverListWindow:destroy()
@@ -106,7 +116,7 @@ function ServerList.destroy()
   end
 end
 
-function ServerList.show()
+function ClientServerList.show()
   if g_game.isOnline() then
     return
   end
@@ -115,17 +125,17 @@ function ServerList.show()
   serverListWindow:focus()
 end
 
-function ServerList.hide()
+function ClientServerList.hide()
   serverListWindow:hide()
 end
 
-function ServerList.setServerAccount(host, account)
+function ClientServerList.setServerAccount(host, account)
   if servers[host] then
     servers[host].account = account
   end
 end
 
-function ServerList.setServerPassword(host, password)
+function ClientServerList.setServerPassword(host, password)
   if servers[host] then
     servers[host].password = password
   end

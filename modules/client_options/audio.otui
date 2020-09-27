@@ -1,10 +1,11 @@
 Panel
+
   OptionCheckBox
     id: enableAudio
     !text: tr('Enable audio')
     &tooltipAddons: { {{ text = tr('Allows music, ambient sounds and effect sounds\nto be enabled.'), align = AlignLeft }} }
 
-
+  OptionHorizontalSeparator
 
   OptionCheckBox
     id: enableMusic
@@ -12,26 +13,17 @@ Panel
     $!first:
       margin-top: 10
 
-  Label
+  OptionLabel
     id: musicVolumeLabel
-    !text: tr('Music volume') .. ': max'
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    @onSetup: |
-      local value = getOption('musicVolume')
-      self:setText(tr('Music volume') .. ': ' .. (value < 100 and string.format('%d%%', value) or 'max'))
+    !text: tr('Music volume')
 
   OptionScrollbar
     id: musicVolume
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 3
     minimum: 0
     maximum: 100
+    symbol: %
 
-
+  OptionHorizontalSeparator
 
   OptionCheckBox
     id: enableSoundAmbient
@@ -39,26 +31,17 @@ Panel
     $!first:
       margin-top: 10
 
-  Label
+  OptionLabel
     id: soundAmbientVolumeLabel
-    !text: tr('Ambient sounds volume') .. ': max'
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    @onSetup: |
-      local value = getOption('soundAmbientVolume')
-      self:setText(tr('Ambient sounds volume') .. ': ' .. (value < 100 and string.format('%d%%', value) or 'max'))
+    !text: tr('Ambient sounds volume')
 
   OptionScrollbar
     id: soundAmbientVolume
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 3
     minimum: 0
     maximum: 100
+    symbol: %
 
-
+  OptionHorizontalSeparator
 
   OptionCheckBox
     id: enableSoundEffect
@@ -66,21 +49,12 @@ Panel
     $!first:
       margin-top: 10
 
-  Label
+  OptionLabel
     id: soundEffectVolumeLabel
-    !text: tr('Effect sounds volume') .. ': max'
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    @onSetup: |
-      local value = getOption('soundEffectVolume')
-      self:setText(tr('Effect sounds volume') .. ': ' .. (value < 100 and string.format('%d%%', value) or 'max'))
+    !text: tr('Effect sounds volume')
 
   OptionScrollbar
     id: soundEffectVolume
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 3
     minimum: 0
     maximum: 100
+    symbol: %

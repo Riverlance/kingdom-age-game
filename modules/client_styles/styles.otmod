@@ -5,5 +5,5 @@ Module
   website: https://github.com/edubart/otclient
   scripts: [ styles ]
   sandboxed: true
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: ClientStyles.init()
+  @onUnload: ClientStyles.terminate()

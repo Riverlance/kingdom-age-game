@@ -1,209 +1,212 @@
+_G.GameHotkeybars = { }
+GameHotkeybars.m  = modules.ka_game_hotkeybars -- Alias
+
+
+
 dofiles('ui')
 
 local showHotkeybars = false
-local currentViewmode = 0
 hotkeybars = { }
 
-function init()
+
+
+function GameHotkeybars.init()
   g_ui.importStyle('hotkeybars.otui')
-  initHotkeybars()
+  GameHotkeybars.initHotkeybars()
 
   connect(g_game, {
-    onGameStart = onGameStart,
-    onGameEnd = onGameEnd
+    onGameStart           = GameHotkeybars.online,
+    onGameEnd             = GameHotkeybars.offline,
+    onClientOptionChanged = GameHotkeybars.onClientOptionChanged,
   })
 
-  connect(modules.game_interface.getMapPanel(), {
-    onGeometryChange = onMapPanelGeometryChange,
-    onViewModeChange = onViewModeChange,
-    onZoomChange = onZoomChange,
+  connect(GameInterface.getMapPanel(), {
+    onGeometryChange = GameHotkeybars.onMapPanelGeometryChange,
+    onViewModeChange = GameHotkeybars.onViewModeChange,
+    onZoomChange     = GameHotkeybars.onZoomChange,
   })
 
   if g_game.isOnline() then
-    loadHotkeybars()
+    GameHotkeybars.loadHotkeybars()
   end
 end
 
-function terminate()
+function GameHotkeybars.terminate()
   if g_game.isOnline() then
-    saveHotkeybars()
+    GameHotkeybars.saveHotkeybars()
   end
 
-  deinitHotkeybars()
+  GameHotkeybars.deinitHotkeybars()
 
   disconnect(g_game, {
-    onGameStart = onGameStart,
-    onGameEnd = onGameEnd
+    onGameStart           = GameHotkeybars.online,
+    onGameEnd             = GameHotkeybars.offline,
+    onClientOptionChanged = GameHotkeybars.onClientOptionChanged,
   })
 
-  disconnect(modules.game_interface.getMapPanel(), {
-    onGeometryChange = onMapPanelGeometryChange,
-    onViewModeChange = onViewModeChange,
-    onZoomChange = onZoomChange,
+  disconnect(GameInterface.getMapPanel(), {
+    onGeometryChange = GameHotkeybars.onMapPanelGeometryChange,
+    onViewModeChange = GameHotkeybars.onViewModeChange,
+    onZoomChange     = GameHotkeybars.onZoomChange,
   })
+
+  _G.GameHotkeybars = nil
 end
 
-function onGameStart()
-  currentViewmode = 0
-  -- updateDisplay()
-  updateHotkeybarPositions()
-  loadHotkeybars()
-  connect(modules.game_console.consolePanel, 'onGeometryChange', onConsoleGeometryChange)
+function GameHotkeybars.online()
+  GameHotkeybars.updateHotkeybarPositions()
+  GameHotkeybars.loadHotkeybars()
+
+  if modules.game_console then
+    connect(GameConsole.m.consolePanel, {
+      onGeometryChange = GameHotkeybars.onGeometryChange
+    })
+  end
 end
 
-function onGameEnd()
-  disconnect(modules.game_console.consolePanel, 'onGeometryChange', onConsoleGeometryChange)
-  saveHotkeybars()
-  unloadHotkeybars()
+function GameHotkeybars.offline()
+  if modules.game_console then
+    disconnect(GameConsole.m.consolePanel, {
+      onGeometryChange = GameHotkeybars.onGeometryChange
+    })
+  end
+  GameHotkeybars.saveHotkeybars()
+  GameHotkeybars.unloadHotkeybars()
 end
 
-function onViewModeChange(mapWidget, viewMode, oldViewMode)
-  currentViewmode = viewMode
-
-  updateDisplay()
-  updateHotkeybarPositions()
+-- Console geometry has changes
+function GameHotkeybars.onGeometryChange(widget)
+  GameHotkeybars.updateHotkeybarPositions()
 end
 
-function onZoomChange(self, oldZoom, newZoom)
+function GameHotkeybars.onViewModeChange(mapWidget, viewMode, oldViewMode)
+  GameHotkeybars.updateHotkeybarPositions()
+end
+
+function GameHotkeybars.onZoomChange(self, oldZoom, newZoom)
   if oldZoom == newZoom then
     return
   end
 
-  -- updateDisplay()
-  updateHotkeybarPositions()
+  GameHotkeybars.updateHotkeybarPositions()
 end
 
-function updateLook()
+function GameHotkeybars.onClientOptionChanged(key, value, force, wasClientSettingUp)
+  GameHotkeybars.updateHotkeybarPositions()
+end
+
+-- Widget mapPanel geometry has changes
+function GameHotkeybars.onMapPanelGeometryChange(mapWidget)
+  GameHotkeybars.updateHotkeybarPositions()
+end
+
+function GameHotkeybars.updateLook()
   for i = 1, #hotkeybars do
     hotkeybars[i]:updateLook()
   end
 end
 
--- game_hotkeys has changes
-function onUpdateHotkeys()
-  updateLook()
+-- Module game_hotkeys has changes
+function GameHotkeybars.onUpdateHotkeys()
+  GameHotkeybars.updateLook()
 end
 
-
--- mapPanel geometry has changes
-function onMapPanelGeometryChange(mapWidget)
-  updateHotkeybarPositions()
-end
-
--- console geometry has changes
-function onConsoleGeometryChange(widget)
-  updateHotkeybarPositions()
-end
-
-function getHotkeyBars()
+function GameHotkeybars.getHotkeyBars()
   return hotkeybars
 end
 
--- adjust positions to viewmode and geometry
-function updateHotkeybarPositions()
-  local mapWidget = modules.game_interface.getMapPanel()
+-- Adjust positions according to viewmode and geometry
+function GameHotkeybars.updateHotkeybarPositions()
+  local mapWidget = GameInterface.getMapPanel()
   for alignment = 1, #hotkeybars do
     local tmpHotkeybar   = hotkeybars[alignment]
-    local isFullViewMode = ViewModes[modules.game_interface.getCurrentViewMode()].isFull
-    if alignment == AnchorTop then
-      if isFullViewMode then local topMenu = modules.client_topmenu.getTopMenu()
-                             addEvent(function() tmpHotkeybar:setMarginTop(topMenu:getHeight() + topMenu:getMarginTop() + tmpHotkeybar.mapMargin) end)
-      else                   addEvent(function() tmpHotkeybar:setMarginTop(math.floor((mapWidget:getHeight() - mapWidget:getMapHeight()) / 2) - tmpHotkeybar.height - tmpHotkeybar.mapMargin) end)
-      end
+    -- local isFullViewMode = GameInterface.isViewModeFull()
 
-    elseif alignment == AnchorLeft then
-      if isFullViewMode then addEvent(function() local leftPanel = modules.game_interface.getLeftPanel() local marginLeft = leftPanel and leftPanel:getWidth() or 0 tmpHotkeybar:setMarginLeft(marginLeft + tmpHotkeybar.mapMargin) tmpHotkeybar:setMarginBottom(modules.game_console.consolePanel:getHeight() / 2) end)
-      else                   addEvent(function() tmpHotkeybar:setMarginLeft(mapWidget:getX() + math.floor((mapWidget:getWidth() - mapWidget:getMapWidth()) / 2) - tmpHotkeybar.height - tmpHotkeybar.mapMargin) tmpHotkeybar:setMarginBottom(0) end)
-      end
+    -- Horizontal
+
+    if alignment == AnchorTop then
+      addEvent(function() tmpHotkeybar:setMarginTop( GameInterface.m.topMenuButton:getHeight() + tmpHotkeybar.mapMargin ) end)
 
     elseif alignment == AnchorBottom then
-      if isFullViewMode then addEvent(function() tmpHotkeybar:setMarginTop(mapWidget:getHeight() - modules.game_console.consolePanel:getHeight() - tmpHotkeybar.height - tmpHotkeybar.mapMargin) end)
-      else                   addEvent(function() tmpHotkeybar:setMarginTop(math.floor((mapWidget:getHeight() - mapWidget:getMapHeight()) / 2) + mapWidget:getMapHeight() + 2 --[[+ tmpHotkeybar.mapMargin]]) end)
-      end
+      addEvent(function() tmpHotkeybar:setMarginBottom( GameInterface.m.chatButton:getHeight() + tmpHotkeybar.mapMargin + (GameInterface.m.gameExpBar:isOn() and GameInterface.m.gameExpBar:getHeight() or 0) ) end)
+
+    -- Vertical
+
+    elseif alignment == AnchorLeft then
+      addEvent(function() tmpHotkeybar:setMarginLeft( GameInterface.m.leftPanelButton:getWidth() + tmpHotkeybar.mapMargin ) end)
 
     elseif alignment == AnchorRight then
-      if isFullViewMode then addEvent(function() local rightPanel = modules.game_interface.getRightPanel() local marginRight = rightPanel and rightPanel:getWidth() or 0 tmpHotkeybar:setMarginLeft(mapWidget:getWidth() - marginRight - tmpHotkeybar.height - tmpHotkeybar.mapMargin) tmpHotkeybar:setMarginBottom(modules.game_console.consolePanel:getHeight() / 2) end)
-      else                   addEvent(function() tmpHotkeybar:setMarginLeft(mapWidget:getX() + math.floor((mapWidget:getWidth() - mapWidget:getMapWidth()) / 2) + mapWidget:getMapWidth() + 2 --[[+ tmpHotkeybar.mapMargin]]) tmpHotkeybar:setMarginBottom(0) end)
-      end
+      addEvent(function() tmpHotkeybar:setMarginRight( GameInterface.m.rightPanelButton:getWidth() + tmpHotkeybar.mapMargin ) end)
     end
   end
 end
 
-function initHotkeybars()
+function GameHotkeybars.initHotkeybars()
   for i = AnchorTop, AnchorRight do
-    local hotkeybar = g_ui.createWidget('Hotkeybar', modules.game_interface.getRootPanel())
+    local hotkeybar = g_ui.createWidget('Hotkeybar', GameInterface.getRootPanel())
     hotkeybar:setHotkeybarId(i)
-    hotkeybar:setAlignment((i == AnchorTop or i == AnchorBottom) and 'horizontal' or 'vertical')
+    hotkeybar:setAlignment(i)
     hotkeybars[i] = hotkeybar
   end
 end
 
-function deinitHotkeybars()
+function GameHotkeybars.deinitHotkeybars()
   for i = 1, #hotkeybars do
     hotkeybars[i]:destroy()
   end
 end
 
-function saveHotkeybars()
+function GameHotkeybars.saveHotkeybars()
   for i = 1, #hotkeybars do
     hotkeybars[i]:save()
   end
 end
 
-function loadHotkeybars()
+function GameHotkeybars.loadHotkeybars()
   for i = 1, #hotkeybars do
     hotkeybars[i]:load()
   end
-  updateDraggable(false)
+  GameHotkeybars.updateDraggable(false)
 end
 
-function unloadHotkeybars()
+function GameHotkeybars.unloadHotkeybars()
   for i = 1, #hotkeybars do
     hotkeybars[i]:unload()
   end
 end
 
-function toggleHotkeybars(show)
+function GameHotkeybars.toggleHotkeybars(show)
   for i = 1, #hotkeybars do
     hotkeybars[i]:setVisible(show)
   end
 end
 
-function updateDraggable(bool)
+function GameHotkeybars.updateDraggable(bool)
   for i = 1, #hotkeybars do
     hotkeybars[i]:updateDraggable(bool)
   end
 end
 
-function updateDisplay()
-  if ViewModes[currentViewmode].isFull then
-    modules.game_interface.getMapPanel():setPadding(0)
-
-  else
-    modules.game_interface.getMapPanel():setPadding(showHotkeybars and 46 or 4)
-    -- [POG] Executes the splitter's callbacks
-    local splitter = modules.game_interface.getSplitter()
-    local margin   = splitter:getMarginBottom()
-    splitter:setMarginBottom(margin + 1)
-    addEvent(function() modules.game_interface.getSplitter():setMarginBottom(margin) end) -- Back to previous margin bottom value
-  end
-end
-
-function onDisplay(show)
+function GameHotkeybars.onDisplay(show)
   showHotkeybars = show
-  updateDisplay()
-  toggleHotkeybars(show)
+  GameHotkeybars.toggleHotkeybars(show)
 end
 
-function isHotkeybarsVisible()
+function GameHotkeybars.isHotkeybarsVisible()
   return showHotkeybars
 end
 
-function setPowerIcon(keyCombo, enabled)
-  local view = modules.game_hotkeys.getHotkey(keyCombo)
-  if not view then return end
+function GameHotkeybars.setPowerIcon(keyCombo, enabled)
+  if not modules.game_hotkeys then
+    return
+  end
 
-  local path = string.format('/images/game/powers/%d_%s', view.id, enabled and 'on' or 'off')
+  local view = GameHotkeys.getHotkey(keyCombo)
+  if not view then
+    return
+  end
+
+  local path = string.format('/images/ui/power/%d_%s', view.id, enabled and 'on' or 'off')
 
   for i = 1, #hotkeybars do
     local hotkeyWidget = hotkeybars[i]:getChildById(keyCombo)
@@ -216,7 +219,7 @@ function setPowerIcon(keyCombo, enabled)
   end
 end
 
-function addPowerSendingHotkeyEffect(keyCombo, boostLevel)
+function GameHotkeybars.addPowerSendingHotkeyEffect(keyCombo, boostLevel)
   for i = 1, #hotkeybars do
     local hotkeyWidget = hotkeybars[i]:getChildById(keyCombo)
     if hotkeyWidget then

@@ -7,6 +7,10 @@ AnchorLeft = 3
 AnchorRight = 4
 AnchorVerticalCenter = 5
 AnchorHorizontalCenter = 6
+AnchorOutsideTop = 7
+AnchorOutsideBottom = 8
+AnchorOutsideLeft = 9
+AnchorOutsideRight = 10
 
 LogDebug = 0
 LogInfo = 1
@@ -331,14 +335,14 @@ ViewModes = {
   [3] = { id = 3, isCropped = false, isFull = true,  name = 'Full' }, -- Default
 }
 
-local noneStickerDefaultPath = '/images/ui/stickers/sticker_0.png'
+local noneStickerDefaultPath = '/images/ui/color_alpha.png'
 PanelStickers = {
   [1] = { opt = 'None',      path = noneStickerDefaultPath },
-  [2] = { opt = 'Sticker 1', path = '/images/ui/stickers/sticker_1.png' },
-  [3] = { opt = 'Sticker 2', path = '/images/ui/stickers/sticker_2.png' },
-  [4] = { opt = 'Sticker 3', path = '/images/ui/stickers/sticker_3.png' },
-  [5] = { opt = 'Sticker 4', path = '/images/ui/stickers/sticker_4.png' },
-  [6] = { opt = 'Sticker 5', path = '/images/ui/stickers/sticker_5.png' }
+  [2] = { opt = 'Sticker 1', path = '/images/ui/sticker/sticker_1.png' },
+  [3] = { opt = 'Sticker 2', path = '/images/ui/sticker/sticker_2.png' },
+  [4] = { opt = 'Sticker 3', path = '/images/ui/sticker/sticker_3.png' },
+  [5] = { opt = 'Sticker 4', path = '/images/ui/sticker/sticker_4.png' },
+  [6] = { opt = 'Sticker 5', path = '/images/ui/sticker/sticker_5.png' }
 }
 
 setmetatable(PanelStickers, {

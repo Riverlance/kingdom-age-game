@@ -7,9 +7,8 @@ SpinBox < TextEdit
 
   Button
     id: up
-    size: 11 11
-    image-source: /images/ui/spinbox_up
-    image-border: 1
+    size: 10 10
+    image-source: /images/ui/_button/spinbox
     image-clip: 0 0 10 10
     anchors.top: parent.top
     anchors.right: parent.right
@@ -21,14 +20,13 @@ SpinBox < TextEdit
 
   Button
     id: down
-    size: 11 11
-    image-source: /images/ui/spinbox_down
-    image-border: 1
-    image-clip: 0 0 10 10
+    size: 10 10
+    image-source: /images/ui/_button/spinbox
+    image-clip: 10 0 10 10
     anchors.bottom: parent.bottom
     anchors.right: parent.right
 
     $hover:
-      image-clip: 0 10 10 10
+      image-clip: 10 10 10 10
     $pressed:
-      image-clip: 0 20 10 10
+      image-clip: 10 20 10 10

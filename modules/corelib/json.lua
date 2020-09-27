@@ -61,7 +61,9 @@ local function encode_table(val, stack)
   stack = stack or {}
 
   -- Circular reference?
-  if stack[val] then error("circular reference") end
+  if stack[val] then
+    error("circular reference")
+  end
 
   stack[val] = true
 
@@ -301,6 +303,7 @@ local function parse_array(str, i)
       i = i + 1
       break
     end
+
     -- Read token
     x, i = parse(str, i)
     res[n] = x
@@ -309,8 +312,14 @@ local function parse_array(str, i)
     i = next_char(str, i, space_chars, true)
     local chr = str:sub(i, i)
     i = i + 1
-    if chr == "]" then break end
-    if chr ~= "," then decode_error(str, i, "expected ']' or ','") end
+
+    if chr == "]" then
+      break
+    end
+
+    if chr ~= "," then
+      decode_error(str, i, "expected ']' or ','")
+    end
   end
   return res, i
 end
@@ -327,6 +336,7 @@ local function parse_object(str, i)
       i = i + 1
       break
     end
+
     -- Read key
     if str:sub(i, i) ~= '"' then
       decode_error(str, i, "expected string for key")
@@ -346,8 +356,14 @@ local function parse_object(str, i)
     i = next_char(str, i, space_chars, true)
     local chr = str:sub(i, i)
     i = i + 1
-    if chr == "}" then break end
-    if chr ~= "," then decode_error(str, i, "expected '}' or ','") end
+
+    if chr == "}" then
+      break
+    end
+
+    if chr ~= "," then
+      decode_error(str, i, "expected '}' or ','")
+    end
   end
   return res, i
 end

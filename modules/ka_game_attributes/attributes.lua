@@ -1,5 +1,11 @@
+_G.GameAttributes = { }
+GameAttributes.m  = modules.ka_game_attributes -- Alias
+
+
+
 attributeWindow = nil
-attributeButton = nil
+attributeFooter = nil
+attributeTopMenuButton = nil
 
 attackAttributeAddButton    = nil
 defenseAttributeAddButton   = nil
@@ -54,51 +60,52 @@ local attribute_flag_updateList = -1
 
 local _availablePoints = 0
 
--- Attribute
-Attribute = {}
 
-function init()
-  g_keyboard.bindKeyDown('Ctrl+Shift+U', toggle)
 
-  attributeButton = modules.client_topmenu.addRightGameToggleButton('attributeButton', tr('Attributes') .. ' (Ctrl+Shift+U)', 'attributes', toggle)
-  attributeButton:setOn(true)
+function GameAttributes.init()
+  g_keyboard.bindKeyDown('Ctrl+Shift+U', GameAttributes.toggle)
 
-  attributeWindow = g_ui.loadUI('attributes', modules.game_interface.getRightPanel())
+  attributeWindow = g_ui.loadUI('attributes')
+  attributeFooter = attributeWindow:getChildById('miniWindowFooter')
+  attributeTopMenuButton = ClientTopMenu.addRightGameToggleButton('attributeTopMenuButton', tr('Attributes') .. ' (Ctrl+Shift+U)', 'attributes', GameAttributes.toggle)
+
+  attributeWindow.topMenuButton = attributeTopMenuButton
   attributeWindow:disableResize()
-  attributeWindow:setup()
 
-  attackAttributeAddButton    = attributeWindow:recursiveGetChildById('attackAttributeAddButton')
-  defenseAttributeAddButton   = attributeWindow:recursiveGetChildById('defenseAttributeAddButton')
-  willPowerAttributeAddButton = attributeWindow:recursiveGetChildById('willPowerAttributeAddButton')
-  healthAttributeAddButton    = attributeWindow:recursiveGetChildById('healthAttributeAddButton')
-  manaAttributeAddButton      = attributeWindow:recursiveGetChildById('manaAttributeAddButton')
-  agilityAttributeAddButton   = attributeWindow:recursiveGetChildById('agilityAttributeAddButton')
-  dodgeAttributeAddButton     = attributeWindow:recursiveGetChildById('dodgeAttributeAddButton')
-  walkingAttributeAddButton   = attributeWindow:recursiveGetChildById('walkingAttributeAddButton')
-  luckAttributeAddButton      = attributeWindow:recursiveGetChildById('luckAttributeAddButton')
+  local contentsPanel = attributeWindow:getChildById('contentsPanel')
 
-  attackAttributeLabel    = attributeWindow:recursiveGetChildById('attackAttributeLabel')
-  defenseAttributeLabel   = attributeWindow:recursiveGetChildById('defenseAttributeLabel')
-  willPowerAttributeLabel = attributeWindow:recursiveGetChildById('willPowerAttributeLabel')
-  healthAttributeLabel    = attributeWindow:recursiveGetChildById('healthAttributeLabel')
-  manaAttributeLabel      = attributeWindow:recursiveGetChildById('manaAttributeLabel')
-  agilityAttributeLabel   = attributeWindow:recursiveGetChildById('agilityAttributeLabel')
-  dodgeAttributeLabel     = attributeWindow:recursiveGetChildById('dodgeAttributeLabel')
-  walkingAttributeLabel   = attributeWindow:recursiveGetChildById('walkingAttributeLabel')
-  luckAttributeLabel      = attributeWindow:recursiveGetChildById('luckAttributeLabel')
+  attackAttributeAddButton    = contentsPanel:getChildById('attackAttributeAddButton')
+  defenseAttributeAddButton   = contentsPanel:getChildById('defenseAttributeAddButton')
+  willPowerAttributeAddButton = contentsPanel:getChildById('willPowerAttributeAddButton')
+  healthAttributeAddButton    = contentsPanel:getChildById('healthAttributeAddButton')
+  manaAttributeAddButton      = contentsPanel:getChildById('manaAttributeAddButton')
+  agilityAttributeAddButton   = contentsPanel:getChildById('agilityAttributeAddButton')
+  dodgeAttributeAddButton     = contentsPanel:getChildById('dodgeAttributeAddButton')
+  walkingAttributeAddButton   = contentsPanel:getChildById('walkingAttributeAddButton')
+  luckAttributeAddButton      = contentsPanel:getChildById('luckAttributeAddButton')
 
-  attackAttributeActLabel    = attributeWindow:recursiveGetChildById('attackAttributeActLabel')
-  defenseAttributeActLabel   = attributeWindow:recursiveGetChildById('defenseAttributeActLabel')
-  willPowerAttributeActLabel = attributeWindow:recursiveGetChildById('willPowerAttributeActLabel')
-  healthAttributeActLabel    = attributeWindow:recursiveGetChildById('healthAttributeActLabel')
-  manaAttributeActLabel      = attributeWindow:recursiveGetChildById('manaAttributeActLabel')
-  agilityAttributeActLabel   = attributeWindow:recursiveGetChildById('agilityAttributeActLabel')
-  dodgeAttributeActLabel     = attributeWindow:recursiveGetChildById('dodgeAttributeActLabel')
-  walkingAttributeActLabel   = attributeWindow:recursiveGetChildById('walkingAttributeActLabel')
-  luckAttributeActLabel      = attributeWindow:recursiveGetChildById('luckAttributeActLabel')
+  attackAttributeLabel    = contentsPanel:getChildById('attackAttributeLabel')
+  defenseAttributeLabel   = contentsPanel:getChildById('defenseAttributeLabel')
+  willPowerAttributeLabel = contentsPanel:getChildById('willPowerAttributeLabel')
+  healthAttributeLabel    = contentsPanel:getChildById('healthAttributeLabel')
+  manaAttributeLabel      = contentsPanel:getChildById('manaAttributeLabel')
+  agilityAttributeLabel   = contentsPanel:getChildById('agilityAttributeLabel')
+  dodgeAttributeLabel     = contentsPanel:getChildById('dodgeAttributeLabel')
+  walkingAttributeLabel   = contentsPanel:getChildById('walkingAttributeLabel')
+  luckAttributeLabel      = contentsPanel:getChildById('luckAttributeLabel')
 
-  availablePointsLabel = attributeWindow:recursiveGetChildById('availablePointsLabel')
-  pointsCostLabel      = attributeWindow:recursiveGetChildById('pointsCostLabel')
+  attackAttributeActLabel    = contentsPanel:getChildById('attackAttributeActLabel')
+  defenseAttributeActLabel   = contentsPanel:getChildById('defenseAttributeActLabel')
+  willPowerAttributeActLabel = contentsPanel:getChildById('willPowerAttributeActLabel')
+  healthAttributeActLabel    = contentsPanel:getChildById('healthAttributeActLabel')
+  manaAttributeActLabel      = contentsPanel:getChildById('manaAttributeActLabel')
+  agilityAttributeActLabel   = contentsPanel:getChildById('agilityAttributeActLabel')
+  dodgeAttributeActLabel     = contentsPanel:getChildById('dodgeAttributeActLabel')
+  walkingAttributeActLabel   = contentsPanel:getChildById('walkingAttributeActLabel')
+  luckAttributeActLabel      = contentsPanel:getChildById('luckAttributeActLabel')
+
+  availablePointsLabel = attributeFooter:getChildById('availablePointsLabel')
+  pointsCostLabel      = attributeFooter:getChildById('pointsCostLabel')
 
   attributeLabel =
   {
@@ -136,33 +143,38 @@ function init()
   walkingAttributeAddButton.attributeId   = ATTRIBUTE_WALKING
   luckAttributeAddButton.attributeId      = ATTRIBUTE_LUCK
 
-  attackAttributeAddButton.onClick    = onClickAddButton
-  defenseAttributeAddButton.onClick   = onClickAddButton
-  willPowerAttributeAddButton.onClick = onClickAddButton
-  healthAttributeAddButton.onClick    = onClickAddButton
-  manaAttributeAddButton.onClick      = onClickAddButton
-  agilityAttributeAddButton.onClick   = onClickAddButton
-  dodgeAttributeAddButton.onClick     = onClickAddButton
-  walkingAttributeAddButton.onClick   = onClickAddButton
-  luckAttributeAddButton.onClick      = onClickAddButton
+  attackAttributeAddButton.onClick    = GameAttributes.onClickAddButton
+  defenseAttributeAddButton.onClick   = GameAttributes.onClickAddButton
+  willPowerAttributeAddButton.onClick = GameAttributes.onClickAddButton
+  healthAttributeAddButton.onClick    = GameAttributes.onClickAddButton
+  manaAttributeAddButton.onClick      = GameAttributes.onClickAddButton
+  agilityAttributeAddButton.onClick   = GameAttributes.onClickAddButton
+  dodgeAttributeAddButton.onClick     = GameAttributes.onClickAddButton
+  walkingAttributeAddButton.onClick   = GameAttributes.onClickAddButton
+  luckAttributeAddButton.onClick      = GameAttributes.onClickAddButton
 
   if g_game.isOnline() then
-    online()
+    GameAttributes.online()
   end
 
-  connect(g_game, { onGameStart        = online,
-                    onPlayerAttributes = onPlayerAttributes })
+  connect(g_game, {
+    onGameStart        = GameAttributes.online,
+    onPlayerAttributes = GameAttributes.onPlayerAttributes
+  })
 end
 
-function terminate()
-  disconnect(g_game, { onGameStart        = online,
-                       onPlayerAttributes = onPlayerAttributes })
+function GameAttributes.terminate()
+  disconnect(g_game, {
+    onGameStart        = GameAttributes.online,
+    onPlayerAttributes = GameAttributes.onPlayerAttributes
+  })
 
-  attributeButton:destroy()
+  attributeTopMenuButton:destroy()
   attributeWindow:destroy()
 
-  attributeButton = nil
+  attributeTopMenuButton = nil
   attributeWindow = nil
+  attributeFooter = nil
 
   attackAttributeAddButton    = nil
   defenseAttributeAddButton   = nil
@@ -198,31 +210,23 @@ function terminate()
   pointsCostLabel      = nil
 
   g_keyboard.unbindKeyDown('Ctrl+Shift+U')
+
+  _G.GameAttributes = nil
 end
 
-function toggle()
-  if attributeButton:isOn() then
-    attributeWindow:close()
-    attributeButton:setOn(false)
-  else
-    attributeWindow:open()
-    attributeButton:setOn(true)
-  end
+function GameAttributes.toggle()
+  GameInterface.toggleMiniWindow(attributeWindow)
 end
 
-function online()
-  clearWindow()
+function GameAttributes.online()
+  GameInterface.setupMiniWindow(attributeWindow, attributeTopMenuButton)
+
+  GameAttributes.clearWindow()
 
   g_game.sendAttributeProtocolData(string.format("%d", attribute_flag_updateList))
 end
 
-function onMiniWindowClose()
-  if attributeButton then
-    attributeButton:setOn(false)
-  end
-end
-
-function clearWindow()
+function GameAttributes.clearWindow()
   attackAttributeActLabel:setText(string.format('%.2f', 0))
   defenseAttributeActLabel:setText(string.format('%.2f', 0))
   willPowerAttributeActLabel:setText(string.format('%.2f', 0))
@@ -233,7 +237,7 @@ function clearWindow()
   walkingAttributeActLabel:setText(string.format('%.2f', 0))
   luckAttributeActLabel:setText(string.format('%.2f', 0))
 
-  availablePointsLabel:setText(string.format('Available Pts: %d', 0))
+  availablePointsLabel:setText(string.format('Pts to use: %d', 0))
   pointsCostLabel:setText(string.format('Cost: %d', 0))
 
   attackAttributeActLabel:setTooltip('')
@@ -246,8 +250,8 @@ function clearWindow()
   walkingAttributeActLabel:setTooltip('')
   luckAttributeActLabel:setTooltip('')
 
-  availablePointsLabel:setTooltip(string.format('Used Pts with cost: %d\nUsed Pts without cost: %d', 0, 0))
-  pointsCostLabel:setTooltip(string.format('Pts to increase cost: %d', 0))
+  availablePointsLabel:setTooltip(string.format('Used points with cost: %d\nUsed points without cost: %d', 0, 0))
+  pointsCostLabel:setTooltip(string.format('Points to increase cost: %d', 0))
 
   attackAttributeActLabel:setColor('white')
   defenseAttributeActLabel:setColor('white')
@@ -260,7 +264,7 @@ function clearWindow()
   luckAttributeActLabel:setColor('white')
 end
 
-function onPlayerAttributes(tooltips, attributes, availablePoints, usedPoints, distributionPoints, pointsCost, pointsToCostIncrease)
+function GameAttributes.onPlayerAttributes(tooltips, attributes, availablePoints, usedPoints, distributionPoints, pointsCost, pointsToCostIncrease)
   if not attributeLabel or not attributeActLabel then
     return
   end
@@ -294,18 +298,20 @@ function onPlayerAttributes(tooltips, attributes, availablePoints, usedPoints, d
   end
 
   _availablePoints = availablePoints
-  availablePointsLabel:setText(string.format('Available Pts: %d', availablePoints))
-  availablePointsLabel:setTooltip(string.format('Used Pts with cost: %d\nUsed Pts without cost: %d', usedPoints, distributionPoints))
+  availablePointsLabel:setText(string.format('Pts to use: %d', availablePoints))
+  availablePointsLabel:setTooltip(string.format('Used points with cost: %d\nUsed points without cost: %d', usedPoints, distributionPoints))
   pointsCostLabel:setText(string.format('Cost: %d', pointsCost))
-  pointsCostLabel:setTooltip(string.format('Pts to increase cost: %d', pointsToCostIncrease))
+  pointsCostLabel:setTooltip(string.format('Points to increase cost: %d', pointsToCostIncrease))
 end
 
-function Attribute:sendAdd(attributeId)
+function GameAttributes.sendAdd(attributeId)
   g_game.sendAttributeProtocolData(string.format("%d", attributeId))
 end
 
-function onClickAddButton(widget)
-  if not widget.attributeId then return end
+function GameAttributes.onClickAddButton(widget)
+  if not widget.attributeId then
+    return
+  end
 
-  Attribute:sendAdd(widget.attributeId)
+  GameAttributes.sendAdd(widget.attributeId)
 end

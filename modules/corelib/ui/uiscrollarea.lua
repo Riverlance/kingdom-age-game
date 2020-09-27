@@ -73,23 +73,27 @@ end
 
 function UIScrollArea:setVerticalScrollBar(scrollbar)
   self.verticalScrollBar = scrollbar
-  connect(self.verticalScrollBar, 'onValueChange', function(scrollbar, value)
-    local virtualOffset = self:getVirtualOffset()
-    virtualOffset.y = value
-    self:setVirtualOffset(virtualOffset)
-    signalcall(self.onScrollChange, self, virtualOffset)
-  end)
+  connect(self.verticalScrollBar, {
+    onValueChange = function(scrollbar, value)
+      local virtualOffset = self:getVirtualOffset()
+      virtualOffset.y = value
+      self:setVirtualOffset(virtualOffset)
+      signalcall(self.onScrollChange, self, virtualOffset)
+    end
+  })
   self:updateScrollBars()
 end
 
 function UIScrollArea:setHorizontalScrollBar(scrollbar)
   self.horizontalScrollBar = scrollbar
-  connect(self.horizontalScrollBar, 'onValueChange', function(scrollbar, value)
-    local virtualOffset = self:getVirtualOffset()
-    virtualOffset.x = value
-    self:setVirtualOffset(virtualOffset)
-    signalcall(self.onScrollChange, self, virtualOffset)
-  end)
+  connect(self.horizontalScrollBar, {
+    onValueChange = function(scrollbar, value)
+      local virtualOffset = self:getVirtualOffset()
+      virtualOffset.x = value
+      self:setVirtualOffset(virtualOffset)
+      signalcall(self.onScrollChange, self, virtualOffset)
+    end
+  })
   self:updateScrollBars()
 end
 
@@ -115,13 +119,13 @@ function UIScrollArea:onMouseWheel(mousePos, mouseWheel)
       if self.verticalScrollBar:getValue() <= minimum then
         return false
       end
-      self.verticalScrollBar:decrement()
+      self.verticalScrollBar:onDecrement()
     else
       local maximum = self.verticalScrollBar:getMaximum()
       if self.verticalScrollBar:getValue() >= maximum then
         return false
       end
-      self.verticalScrollBar:increment()
+      self.verticalScrollBar:onIncrement()
     end
   elseif self.horizontalScrollBar then
     if not self.horizontalScrollBar:isOn() then
@@ -132,13 +136,13 @@ function UIScrollArea:onMouseWheel(mousePos, mouseWheel)
       if self.horizontalScrollBar:getValue() >= maximum then
         return false
       end
-      self.horizontalScrollBar:increment()
+      self.horizontalScrollBar:onIncrement()
     else
       local minimum = self.horizontalScrollBar:getMinimum()
       if self.horizontalScrollBar:getValue() <= minimum then
         return false
       end
-      self.horizontalScrollBar:decrement()
+      self.horizontalScrollBar:onDecrement()
     end
   end
   return true

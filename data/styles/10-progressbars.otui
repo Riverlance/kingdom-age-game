@@ -1,7 +1,7 @@
 ProgressBar < UIProgressBar
   height: 16
   background-color: red
-  image-source: /images/ui/progressbar
+  image-source: /images/ui/_background/progress_bar
   image-border: 1
   font: verdana-11px-rounded
   text-offset: 0 2

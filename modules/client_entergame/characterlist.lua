@@ -1,6 +1,8 @@
-CharacterList = { }
+_G.ClientCharacterList = { }
+ClientCharacterList.m  = modules.client_entergame -- Alias
 
--- private variables
+
+
 local charactersWindow
 local loadBox
 local characterList
@@ -10,7 +12,8 @@ local updateWaitEvent
 local resendWaitEvent
 local loginEvent
 
--- private functions
+
+
 local function tryLogin(charInfo, tries)
   tries = tries or 1
 
@@ -26,16 +29,18 @@ local function tryLogin(charInfo, tries)
     return
   end
 
-  CharacterList.hide()
+  ClientCharacterList.hide()
 
   g_game.loginWorld(G.account, G.password, charInfo.worldName, charInfo.worldHost, charInfo.worldPort, charInfo.characterName, G.authenticatorToken, G.sessionKey)
 
   loadBox = displayCancelBox(tr('Loading'), tr('Connecting to game server...'))
-  connect(loadBox, { onCancel = function()
-                                  loadBox = nil
-                                  g_game.cancelLogin()
-                                  CharacterList.show()
-                                end })
+  connect(loadBox, {
+    onCancel = function()
+      loadBox = nil
+      g_game.cancelLogin()
+      ClientCharacterList.show()
+    end
+  })
 
   -- save last used character
   g_settings.set('last-used-character', charInfo.characterName)
@@ -90,7 +95,7 @@ local function resendWait()
 end
 
 local function onLoginWait(message, time)
-  CharacterList.destroyLoadBox()
+  ClientCharacterList.destroyLoadBox()
 
   waitingWindow = g_ui.displayUI('waitinglist')
 
@@ -101,69 +106,76 @@ local function onLoginWait(message, time)
   resendWaitEvent = scheduleEvent(resendWait, time * 1000)
 end
 
+
+
 function onGameLoginError(message)
-  CharacterList.destroyLoadBox()
+  ClientCharacterList.destroyLoadBox()
   errorBox = displayErrorBox(tr("Login Error"), message)
   errorBox.onOk = function()
     errorBox = nil
-    CharacterList.showAgain()
+    ClientCharacterList.showAgain()
   end
 end
 
 function onGameLoginToken(unknown)
-  CharacterList.destroyLoadBox()
+  ClientCharacterList.destroyLoadBox()
   -- TODO: make it possible to enter a new token here / prompt token
   errorBox = displayErrorBox(tr("Two-Factor Authentication"), tr('A new authentication token is required.\nLogin again.'))
   errorBox.onOk = function()
     errorBox = nil
-    EnterGame.show()
+    ClientEnterGame.show()
   end
 end
 
 function onGameConnectionError(message, code)
-  CharacterList.destroyLoadBox()
+  ClientCharacterList.destroyLoadBox()
   local text = translateNetworkError(code, g_game.getProtocolGame() and g_game.getProtocolGame():isConnecting(), message)
   errorBox = displayErrorBox(tr("Connection Error"), text)
   errorBox.onOk = function()
     errorBox = nil
-    CharacterList.showAgain()
+    ClientCharacterList.showAgain()
   end
 end
 
 function onGameUpdateNeeded(signature)
-  CharacterList.destroyLoadBox()
+  ClientCharacterList.destroyLoadBox()
   errorBox = displayErrorBox(tr("Update needed"), tr('Enter with your account again to update your client.'))
   errorBox.onOk = function()
     errorBox = nil
-    CharacterList.showAgain()
+    ClientCharacterList.showAgain()
   end
 end
 
--- public functions
-function CharacterList.init()
-  connect(g_game, { onLoginError = onGameLoginError })
-  connect(g_game, { onLoginToken = onGameLoginToken })
-  connect(g_game, { onUpdateNeeded = onGameUpdateNeeded })
-  connect(g_game, { onConnectionError = onGameConnectionError })
-  connect(g_game, { onGameStart = CharacterList.destroyLoadBox })
-  connect(g_game, { onLoginWait = onLoginWait })
-  connect(g_game, { onGameEnd = CharacterList.showAgain })
-  connect(g_game, { onLoginnameChange = CharacterList.updateLoginname })
+
+
+function ClientCharacterList.init()
+  connect(g_game, {
+    onLoginError = onGameLoginError,
+    onLoginToken = onGameLoginToken,
+    onUpdateNeeded = onGameUpdateNeeded,
+    onConnectionError = onGameConnectionError,
+    onGameStart = ClientCharacterList.destroyLoadBox,
+    onLoginWait = onLoginWait,
+    onGameEnd = ClientCharacterList.showAgain,
+    onLoginnameChange = ClientCharacterList.updateLoginname
+  })
 
   if G.characters then
-    CharacterList.create(G.characters, G.characterAccount)
+    ClientCharacterList.create(G.characters, G.characterAccount)
   end
 end
 
-function CharacterList.terminate()
-  disconnect(g_game, { onLoginError = onGameLoginError })
-  disconnect(g_game, { onLoginToken = onGameLoginToken })
-  disconnect(g_game, { onUpdateNeeded = onGameUpdateNeeded })
-  disconnect(g_game, { onConnectionError = onGameConnectionError })
-  disconnect(g_game, { onGameStart = CharacterList.destroyLoadBox })
-  disconnect(g_game, { onLoginWait = onLoginWait })
-  disconnect(g_game, { onGameEnd = CharacterList.showAgain })
-  disconnect(g_game, { onLoginnameChange = CharacterList.updateLoginname })
+function ClientCharacterList.terminate()
+  disconnect(g_game, {
+    onLoginError = onGameLoginError,
+    onLoginToken = onGameLoginToken,
+    onUpdateNeeded = onGameUpdateNeeded,
+    onConnectionError = onGameConnectionError,
+    onGameStart = ClientCharacterList.destroyLoadBox,
+    onLoginWait = onLoginWait,
+    onGameEnd = ClientCharacterList.showAgain,
+    onLoginnameChange = ClientCharacterList.updateLoginname
+  })
 
   if charactersWindow then
     characterList = nil
@@ -197,11 +209,13 @@ function CharacterList.terminate()
     loginEvent = nil
   end
 
-  CharacterList = nil
+  _G.ClientCharacterList = nil
 end
 
-function CharacterList.create(characters, account, otui)
-  if not otui then otui = 'characterlist' end
+function ClientCharacterList.create(characters, account, otui)
+  if not otui then
+    otui = 'characterlist'
+  end
 
   if charactersWindow then
     charactersWindow:destroy()
@@ -249,7 +263,12 @@ function CharacterList.create(characters, account, otui)
     widget.worldHost = characterInfo.worldIp
     widget.worldPort = characterInfo.worldPort
 
-    connect(widget, { onDoubleClick = function () CharacterList.doLogin() return true end } )
+    connect(widget, {
+      onDoubleClick = function()
+        ClientCharacterList.doLogin()
+        return true
+      end
+    })
 
     if i == 1 or (g_settings.get('last-used-character') == widget.characterName and g_settings.get('last-used-world') == widget.worldName) then
       focusLabel = widget
@@ -277,8 +296,8 @@ function CharacterList.create(characters, account, otui)
   end
 end
 
-function CharacterList.destroy()
-  CharacterList.hide(true)
+function ClientCharacterList.destroy()
+  ClientCharacterList.hide(true)
 
   if charactersWindow then
     characterList = nil
@@ -287,48 +306,54 @@ function CharacterList.destroy()
   end
 end
 
-function CharacterList.show()
-  if loadBox or errorBox or not charactersWindow then return end
+function ClientCharacterList.show()
+  if loadBox or errorBox or not charactersWindow then
+    return
+  end
+
   charactersWindow:show()
   charactersWindow:raise()
   charactersWindow:focus()
-  EnterGame.toggleLoginButton(true)
+  ClientEnterGame.toggleLoginButton(true)
 end
 
-function CharacterList.hide(showLogin)
+function ClientCharacterList.hide(showLogin)
   showLogin = showLogin or false
   if charactersWindow then
     charactersWindow:hide()
-    EnterGame.toggleLoginButton(false)
+    ClientEnterGame.toggleLoginButton(false)
   end
 
-  if showLogin and EnterGame and not g_game.isOnline() then
-    EnterGame.show()
+  if showLogin and not g_game.isOnline() then
+    ClientEnterGame.show()
   end
 end
 
-function CharacterList.showAgain()
+function ClientCharacterList.showAgain()
   if characterList and characterList:hasChildren() then
-    CharacterList.show()
+    ClientCharacterList.show()
   end
 end
 
-function CharacterList.isVisible()
+function ClientCharacterList.isVisible()
   if charactersWindow and charactersWindow:isVisible() then
     return true
   end
   return false
 end
 
-function CharacterList.doLogin()
+function ClientCharacterList.doLogin()
   local selected = characterList:getFocusedChild()
   if selected then
-    local charInfo = { worldHost = selected.worldHost,
-                       worldPort = selected.worldPort,
-                       worldName = selected.worldName,
-                       characterName = selected.characterName }
+    local charInfo =
+    {
+      worldHost     = selected.worldHost,
+      worldPort     = selected.worldPort,
+      worldName     = selected.worldName,
+      characterName = selected.characterName
+    }
     charactersWindow:hide()
-    EnterGame.toggleLoginButton(false)
+    ClientEnterGame.toggleLoginButton(false)
 
     if loginEvent then
       removeEvent(loginEvent)
@@ -340,14 +365,14 @@ function CharacterList.doLogin()
   end
 end
 
-function CharacterList.destroyLoadBox()
+function ClientCharacterList.destroyLoadBox()
   if loadBox then
     loadBox:destroy()
     loadBox = nil
   end
 end
 
-function CharacterList.cancelWait()
+function ClientCharacterList.cancelWait()
   if waitingWindow then
     waitingWindow:destroy()
     waitingWindow = nil
@@ -363,11 +388,11 @@ function CharacterList.cancelWait()
     resendWaitEvent = nil
   end
 
-  CharacterList.destroyLoadBox()
-  CharacterList.showAgain()
+  ClientCharacterList.destroyLoadBox()
+  ClientCharacterList.showAgain()
 end
 
-function CharacterList.updateLoginname(name, currentLoginname, newLoginname)
+function ClientCharacterList.updateLoginname(name, currentLoginname, newLoginname)
   local children = characterList:getChildren()
   if #children > 0 then
     for i = 1, #children do

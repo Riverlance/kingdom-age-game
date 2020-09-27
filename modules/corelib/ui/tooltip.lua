@@ -1,5 +1,8 @@
 -- @docclass
-g_tooltip = {}
+
+-- For put tooltip on labels, use 'phantom: false' on the label widget
+
+g_tooltip = { }
 
 -- private variables
 local fadeInTime = 100
@@ -9,7 +12,8 @@ local currentHoveredWidget
 local toolTipAddonLabels = {}
 local toolTipAddonGroupLabels = {} -- Rows background
 local toolTipAddonsBackgroundLabel
-local alignToAnchor = {
+local alignToAnchor =
+{
   [AlignLeft]   = AnchorLeft,
   [AlignRight]  = AnchorRight,
   [AlignCenter] = AnchorHorizontalCenter
@@ -111,10 +115,14 @@ function g_tooltip.init()
   addEvent(function()
     toolTipAddonsBackgroundLabel = g_ui.createWidget('UILabel', rootWidget)
     toolTipAddonsBackgroundLabel:setId('toolTipAddonsBackground')
+    toolTipAddonsBackgroundLabel:setBorderWidth(1)
+    toolTipAddonsBackgroundLabel:setBorderColor('#98885e')
 
     toolTipLabel = g_ui.createWidget('UILabel', rootWidget)
     toolTipLabel:setId('toolTip')
     toolTipLabel:setTextAlign(AlignCenter)
+    toolTipLabel:setBorderWidth(1)
+    toolTipLabel:setBorderColor('#98885e')
     toolTipLabel:hide()
   end)
 end
@@ -139,7 +147,10 @@ function g_tooltip.terminate()
 end
 
 function g_tooltip.display(widget)
-  if not widget.tooltip and not widget.tooltipAddons or not toolTipLabel then return end
+  if not widget.tooltip and not widget.tooltipAddons or not toolTipLabel then
+    return
+  end
+
   currentHoveredWidget = widget
 
   toolTipLabel:setBackgroundColor('#111111cc')
@@ -244,7 +255,10 @@ function g_tooltip.display(widget)
         addon:addAnchor(AnchorTop, toolTipAddonGroupLabelId, AnchorTop)
         addon:addAnchor(AnchorBottom, toolTipAddonGroupLabelId, AnchorBottom)
         addon:addAnchor(AnchorLeft, j < 2 and toolTipAddonGroupLabelId or string.format('toolTipAddon_%d_%d', i, j - 1), j < 2 and AnchorLeft or AnchorRight)
-        if j == #widget.tooltipAddons[i] then addon:addAnchor(AnchorRight, toolTipAddonGroupLabelId, AnchorRight) end
+
+        if j == #widget.tooltipAddons[i] then
+          addon:addAnchor(AnchorRight, toolTipAddonGroupLabelId, AnchorRight)
+        end
 
         if widget.tooltipAddons[i][j].backgroundColor then
           addon:setBackgroundColor(widget.tooltipAddons[i][j].backgroundColor)
@@ -394,10 +408,10 @@ end
 
   Custom:
     Lua:
-      widget:setTooltip({ {{ text = 'First message.\nSecond message.' }, backgroundColor = '#ffff0077', backgroundIcon = '/images/topbuttons/questlog', onGroupBackground = function(group, i) print_r(group:getSize(), i) end}, {{ icon = '/images/topbuttons/battle', size = { width = 20, height = 20 }, align = AlignCenter, onAddon = function(group, addon, i, j) print_r(group:getSize(), addon:getSize(), i, j) end }, { text = 'Duplicated!', color = 'green' }, backgroundColor = '#ff000077'}, {{ text = 'Left', backgroundColor = '#00ff0077', color = 'red', align = AlignLeft }}, {{ text = 'Right', align = AlignRight }} }, { backgroundColor = '#00007777', onAddonsBackground = function (widget) print_r(widget:getSize()) end })
+      widget:setTooltip({ {{ text = 'First message.\nSecond message.' }, backgroundColor = '#ffff0077', backgroundIcon = '/images/ui/top_menu/questlog', onGroupBackground = function(group, i) print_r(group:getSize(), i) end}, {{ icon = '/images/ui/top_menu/battle', size = { width = 20, height = 20 }, align = AlignCenter, onAddon = function(group, addon, i, j) print_r(group:getSize(), addon:getSize(), i, j) end }, { text = 'Duplicated!', color = 'green' }, backgroundColor = '#ff000077'}, {{ text = 'Left', backgroundColor = '#00ff0077', color = 'red', align = AlignLeft }}, {{ text = 'Right', align = AlignRight }} }, { backgroundColor = '#00007777', onAddonsBackground = function (widget) print_r(widget:getSize()) end })
     Otui:
       UIWidget
-        &tooltipAddons: { {{ text = 'First message.\nSecond message.' }, backgroundColor = '#ffff0077', backgroundIcon = '/images/topbuttons/questlog', onGroupBackground = function(group, i) print_r(group:getSize(), i) end}, {{ icon = '/images/topbuttons/battle', size = { width = 20, height = 20 }, align = AlignCenter, onAddon = function(group, addon, i, j) print_r(group:getSize(), addon:getSize(), i, j) end }, { text = 'Duplicated!', color = 'green' }, backgroundColor = '#ff000077'}, {{ text = 'Left', backgroundColor = '#00ff0077', color = 'red', align = AlignLeft }}, {{ text = 'Right', align = AlignRight }} }
+        &tooltipAddons: { {{ text = 'First message.\nSecond message.' }, backgroundColor = '#ffff0077', backgroundIcon = '/images/ui/top_menu/questlog', onGroupBackground = function(group, i) print_r(group:getSize(), i) end}, {{ icon = '/images/ui/top_menu/battle', size = { width = 20, height = 20 }, align = AlignCenter, onAddon = function(group, addon, i, j) print_r(group:getSize(), addon:getSize(), i, j) end }, { text = 'Duplicated!', color = 'green' }, backgroundColor = '#ff000077'}, {{ text = 'Left', backgroundColor = '#00ff0077', color = 'red', align = AlignLeft }}, {{ text = 'Right', align = AlignRight }} }
         &toolTipAddonsBackground: { backgroundColor = '#00007777', onAddonsBackground = function (widget) print_r(widget:getSize()) end }
 ]]
 
@@ -437,4 +451,6 @@ end
 -- @}
 
 g_tooltip.init()
-connect(g_app, { onTerminate = g_tooltip.terminate })
+connect(g_app, {
+  onTerminate = g_tooltip.terminate
+})

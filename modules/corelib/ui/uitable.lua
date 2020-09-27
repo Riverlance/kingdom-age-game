@@ -88,7 +88,10 @@ function UITable:onStyleApply(styleName, styleNode)
 end
 
 function UITable:setColumnWidth(width)
-  if self:hasHeader() then return end
+  if self:hasHeader() then
+    return
+  end
+
   self.columnWidth = width
 end
 
@@ -206,7 +209,9 @@ function UITable:addRow(data, height)
 
   local row = g_ui.createWidget(self.rowBaseStyle)
   row.table = self
-  if height then row:setHeight(height) end
+  if height then
+    row:setHeight(height)
+  end
 
   local rowId = #self.rows + 1
   row.rowId = rowId
@@ -325,7 +330,9 @@ function UITable:sort()
 end
 
 function UITable:selectRow(selectedRow)
-  if selectedRow == self.selectedRow then return end
+  if selectedRow == self.selectedRow then
+    return
+  end
 
   local previousSelectedRow = self.selectedRow
   self.selectedRow = selectedRow
@@ -392,7 +399,9 @@ UITableRow = extends(UIWidget, "UITableRow")
 
 function UITableRow:onFocusChange(focused)
   if focused then
-    if self.table then self.table:selectRow(self) end
+    if self.table then
+      self.table:selectRow(self)
+    end
   end
 end
 

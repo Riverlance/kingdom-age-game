@@ -2,8 +2,9 @@ Module
   name: ka_client_devmode
   description: Developer mode module
   author: River
+  dependencies: [ client_entergame ]
   sandboxed: true
   autoload: true
   scripts: [ dev ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: ClientDev.init()
+  @onUnload: ClientDev.terminate()

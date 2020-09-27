@@ -1,3 +1,8 @@
+_G.GameBlinkHit = { }
+GameBlinkHit.m  = modules.ka_game_blinkhit -- Alias
+
+
+
 local blinkTime = 250
 local events    = {}
 
@@ -11,10 +16,19 @@ local function removeBlink(id)
   events[id] = nil
 end
 
-Blink = {}
 
-Blink.remove =
-function (id, instantly)
+
+function GameBlinkHit.init()
+  GameBlinkHit.removeAll(true)
+  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerBlinkHit, GameBlinkHit.onBlinkHit)
+end
+
+function GameBlinkHit.terminate()
+  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerBlinkHit)
+  GameBlinkHit.removeAll(true)
+end
+
+function GameBlinkHit.remove(id, instantly)
   if instantly then
     removeBlink(id)
     return
@@ -24,20 +38,20 @@ function (id, instantly)
   events[id] = scheduleEvent(function() removeBlink(id) end, blinkTime)
 end
 
-Blink.removeAll =
-function (instantly)
+function GameBlinkHit.removeAll(instantly)
   for id, _ in ipairs(events) do
-    Blink.remove(id, instantly)
+    GameBlinkHit.remove(id, instantly)
   end
   if instantly then
     events = {}
   end
 end
 
-Blink.add =
-function (id)
+function GameBlinkHit.add(id)
   local creature = g_map.getCreatureById(id)
-  if not creature then return end
+  if not creature then
+    return
+  end
 
   -- Will keep enabled if another event is added before the last finishes
   if creature:getBlinkHitEffect() and events[id] then
@@ -45,22 +59,14 @@ function (id)
   end
   creature:setBlinkHitEffect(true)
 
-  Blink.remove(id)
+  GameBlinkHit.remove(id)
 end
 
-function init()
-  Blink.removeAll(true)
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerBlinkHit, onBlinkHit)
-end
-
-function terminate()
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerBlinkHit)
-  Blink.removeAll(true)
-end
-
-function onBlinkHit(protocol, opcode, buffer)
+function GameBlinkHit.onBlinkHit(protocol, opcode, buffer)
   local id = tonumber(buffer)
-  if not id then return end
+  if not id then
+    return
+  end
 
-  Blink.add(id)
+  GameBlinkHit.add(id)
 end

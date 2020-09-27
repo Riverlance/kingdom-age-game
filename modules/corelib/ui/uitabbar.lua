@@ -75,7 +75,10 @@ end
 
 function UITabBar:removeTab(tab)
   local index = table.find(self.tabs, tab)
-  if index == nil then return end
+  if index == nil then
+    return
+  end
+
   if self.currentTab == tab then
     self:selectPrevTab()
   end
@@ -92,7 +95,10 @@ function UITabBar:getTab(text)
 end
 
 function UITabBar:selectTab(tab)
-  if self.currentTab == tab then return end
+  if self.currentTab == tab then
+    return
+  end
+
   if self.contentWidget then
     local selectedWidget = self.contentWidget:getLastChild()
     if selectedWidget and selectedWidget.isTab then
@@ -117,20 +123,38 @@ function UITabBar:selectTab(tab)
 end
 
 function UITabBar:selectNextTab()
-  if self.currentTab == nil then return end
+  if self.currentTab == nil then
+    return
+  end
+
   local index = table.find(self.tabs, self.currentTab)
-  if index == nil then return end
+  if index == nil then
+    return
+  end
+
   local nextTab = self.tabs[index + 1] or self.tabs[1]
-  if not nextTab then return end
+  if not nextTab then
+    return
+  end
+
   self:selectTab(nextTab)
 end
 
 function UITabBar:selectPrevTab()
-  if self.currentTab == nil then return end
+  if self.currentTab == nil then
+    return
+  end
+
   local index = table.find(self.tabs, self.currentTab)
-  if index == nil then return end
+  if index == nil then
+    return
+  end
+
   local prevTab = self.tabs[index - 1] or self.tabs[#self.tabs]
-  if not prevTab then return end
+  if not prevTab then
+    return
+  end
+
   self:selectTab(prevTab)
 end
 

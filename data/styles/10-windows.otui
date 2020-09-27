@@ -2,27 +2,36 @@ Window < UIWindow
   font: verdana-11px-antialised
   size: 200 200
   opacity: 1
-  color: #dfdfdf
-  text-offset: 0 3
+  color: #c9bdab
+  text-offset: 0 10
   text-align: top
-  image-source: /images/ui/window
-  image-border: 6
-  image-border-top: 27
-  padding-top: 36
-  padding-left: 16
-  padding-right: 16
-  padding-bottom: 16
+  image-source: /images/ui/_background/window
+  image-border: 5
+  image-border-top: 30
+  padding-top: 38
+  padding-left: 9
+  padding-right: 9
+  padding-bottom: 9
 
   $disabled:
-    color: #dfdfdf88
+    color: #c9bdab88
 
   $dragging:
     opacity: 0.8
 
 HeadlessWindow < UIWindow
-  image-source: /images/ui/window_headless
+  size: 200 200
+  opacity: 1
+  color: #c9bdab
+  image-source: /images/ui/_background/window_headless
   image-border: 5
-  padding: 5
+  padding: 9
+
+  $disabled:
+    color: #c9bdab88
+
+  $dragging:
+    opacity: 0.8
 
 MainWindow < Window
   anchors.centerIn: parent

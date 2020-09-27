@@ -1,4 +1,4 @@
-g_mouseicon = {}
+g_mouseicon = { }
 
 -- private variables
 local fadeOutTime = 50
@@ -96,10 +96,10 @@ function g_mouseicon.display(filePath, opacity, size, subType) -- (filePath[, op
 end
 
 function g_mouseicon.displayItem(item, opacity, size, subType) -- (item[, opacity = option or defaultItemIconOpacity[, size = defaultSize[, subType = 1]]])
-  if modules.client_options and not modules.client_options.getOption('showMouseItemIcon') then
+  if not ClientOptions.getOption('showMouseItemIcon') then
     return
   end
-  g_mouseicon.display(item:getId(), opacity or (modules.client_options and modules.client_options.getOption('mouseItemIconOpacity') or defaultItemIconOpacity) / 100, size, subType or item:isStackable() and (g_keyboard and g_keyboard.isShiftPressed() and 1 or item:getCount()) or item:getSubType())
+  g_mouseicon.display(item:getId(), opacity or (ClientOptions.getOption('mouseItemIconOpacity') or defaultItemIconOpacity) / 100, size, subType or item:isStackable() and (g_keyboard and g_keyboard.isShiftPressed() and 1 or item:getCount()) or item:getSubType())
 end
 
 function g_mouseicon.hide()
@@ -112,4 +112,6 @@ function g_mouseicon.hide()
 end
 
 g_mouseicon.init()
-connect(g_app, { onTerminate = g_mouseicon.terminate })
+connect(g_app, {
+  onTerminate = g_mouseicon.terminate
+})

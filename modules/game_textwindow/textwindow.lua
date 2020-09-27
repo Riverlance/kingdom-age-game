@@ -1,29 +1,40 @@
+_G.GameTextWindow = { }
+GameTextWindow.m  = modules.game_textwindow -- Alias
+
+
+
 local windows = {}
 
-function init()
+function GameTextWindow.init()
   g_ui.importStyle('textwindow')
 
-  connect(g_game, { onEditText = onGameEditText,
-                    onEditList = onGameEditList,
-                    onGameEnd = destroyWindows })
+  connect(g_game, {
+    onEditText = GameTextWindow.onGameEditText,
+    onEditList = GameTextWindow.onGameEditList,
+    onGameEnd  = GameTextWindow.destroyWindows
+  })
 end
 
-function terminate()
-  disconnect(g_game, { onEditText = onGameEditText,
-                       onEditList = onGameEditList,
-                       onGameEnd = destroyWindows })
+function GameTextWindow.terminate()
+  disconnect(g_game, {
+    onEditText = GameTextWindow.onGameEditText,
+    onEditList = GameTextWindow.onGameEditList,
+    onGameEnd  = GameTextWindow.destroyWindows
+  })
 
-  destroyWindows()
+  GameTextWindow.destroyWindows()
+
+  _G.GameTextWindow = nil
 end
 
-function destroyWindows()
+function GameTextWindow.destroyWindows()
   for _,window in pairs(windows) do
     window:destroy()
   end
   windows = {}
 end
 
-function onGameEditText(id, itemId, maxLength, text, writer, time)
+function GameTextWindow.onGameEditText(id, itemId, maxLength, text, writer, time)
   local textWindow = g_ui.createWidget('TextWindow', rootWidget)
 
   local writeable = #text < maxLength and maxLength > 0
@@ -62,7 +73,9 @@ function onGameEditText(id, itemId, maxLength, text, writer, time)
   end
 
   local lines = #{string.find(desc, '\n')}
-  if lines < 2 then desc = desc .. '\n' end
+  if lines < 2 then
+    desc = desc .. '\n'
+  end
 
   description:setText(desc)
 
@@ -103,7 +116,7 @@ function onGameEditText(id, itemId, maxLength, text, writer, time)
   table.insert(windows, textWindow)
 end
 
-function onGameEditList(id, doorId, text)
+function GameTextWindow.onGameEditList(id, doorId, text)
   local textWindow = g_ui.createWidget('TextWindow', rootWidget)
 
   local textEdit = textWindow:getChildById('text')

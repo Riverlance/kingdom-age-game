@@ -7,5 +7,5 @@ Module
   sandboxed: true
   scripts: [ character ]
   dependencies: [ client_topmenu, game_interface ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameCharacter.init()
+  @onUnload: GameCharacter.terminate()

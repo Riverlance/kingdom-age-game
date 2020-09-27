@@ -1,8 +1,12 @@
 function UIItem:onDragEnter(mousePos)
-  if self:isVirtual() then return false end
+  if self:isVirtual() then
+    return false
+  end
 
   local item = self:getItem()
-  if not item then return false end
+  if not item then
+    return false
+  end
 
   self:setBorderWidth(1)
   self.currentDragThing = item
@@ -12,7 +16,9 @@ function UIItem:onDragEnter(mousePos)
 end
 
 function UIItem:onDragLeave(droppedWidget, mousePos)
-  if self:isVirtual() then return false end
+  if self:isVirtual() then
+    return false
+  end
   self.currentDragThing = nil
   g_mouseicon.hide()
   g_mouse.popCursor('target')
@@ -22,20 +28,28 @@ function UIItem:onDragLeave(droppedWidget, mousePos)
 end
 
 function UIItem:onDrop(widget, mousePos)
-  if not self:canAcceptDrop(widget, mousePos) then return false end
+  if not self:canAcceptDrop(widget, mousePos) then
+    return false
+  end
 
   local item = widget.currentDragThing
-  if not item:isItem() then return false end
+  if not item:isItem() then
+    return false
+  end
 
   local itemPos = item:getPosition()
   local itemTile = item:getTile()
-  if itemPos.x ~= 65535 and not itemTile then return false end
+  if itemPos.x ~= 65535 and not itemTile then
+    return false
+  end
 
   local toPos = self.position
-  if itemPos.x == toPos.x and itemPos.y == toPos.y and itemPos.z == toPos.z then return false end
+  if itemPos.x == toPos.x and itemPos.y == toPos.y and itemPos.z == toPos.z then
+    return false
+  end
 
   if item:getCount() > 1 then
-    modules.game_interface.moveStackableItem(item, toPos)
+    GameInterface.moveStackableItem(item, toPos)
   else
     g_game.move(item, toPos, 1)
   end
@@ -57,7 +71,9 @@ end
 function UIItem:onHoverChange(hovered)
   UIWidget.onHoverChange(self, hovered)
 
-  if self:isVirtual() or not self:isDraggable() then return end
+  if self:isVirtual() or not self:isDraggable() then
+    return
+  end
 
   local draggingWidget = g_ui.getDraggingWidget()
   if draggingWidget and self ~= draggingWidget then
@@ -79,20 +95,24 @@ function UIItem:onMouseRelease(mousePosition, mouseButton)
     return true
   end
 
-  if self:isVirtual() then return false end
+  if self:isVirtual() then
+    return false
+  end
 
   local item = self:getItem()
-  if not item or not self:containsPoint(mousePosition) then return false end
+  if not item or not self:containsPoint(mousePosition) then
+    return false
+  end
 
-  if --[[modules.client_options.getOption('classicControl') and]]
+  if --[[ClientOptions.getOption('classicControl') and]]
      ((g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton) or
       (g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton)) then
     self.cancelNextRelease = true
-    if modules.game_interface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil) then
+    if GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil) then
       return true
     end
     return false
-  elseif modules.game_interface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil) then
+  elseif GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil) then
     return true
   elseif g_ui.isMouseGrabbed() then -- For double click of item "use with" work
     return true
@@ -107,7 +127,9 @@ function UIItem:onDoubleClick(mousePosition)
   end
 
   local item = self:getItem()
-  if not item or not self:containsPoint(mousePosition) then return false end
+  if not item or not self:containsPoint(mousePosition) then
+    return false
+  end
 
   if g_keyboard.getModifiers() == KeyboardNoModifier then
     g_game.look(item)
@@ -116,8 +138,13 @@ function UIItem:onDoubleClick(mousePosition)
 end
 
 function UIItem:canAcceptDrop(widget, mousePos)
-  if self:isVirtual() or not self:isDraggable() then return false end
-  if not widget or not widget.currentDragThing then return false end
+  if self:isVirtual() or not self:isDraggable() then
+    return false
+  end
+
+  if not widget or not widget.currentDragThing then
+    return false
+  end
 
   local children = rootWidget:recursiveGetChildrenByPos(mousePos)
   for i=1,#children do

@@ -20,7 +20,10 @@ function UIComboBox:clearOptions()
 end
 
 function UIComboBox:isOption(text)
-  if not self.options then return false end
+  if not self.options then
+    return false
+  end
+
   for i,v in ipairs(self.options) do
     if v.text == text then
       return true
@@ -30,7 +33,10 @@ function UIComboBox:isOption(text)
 end
 
 function UIComboBox:setCurrentOption(text, dontSignal)
-  if not self.options then return end
+  if not self.options then
+    return
+  end
+
   for i,v in ipairs(self.options) do
     if v.text == text and self.currentIndex ~= i then
       self.currentIndex = i
@@ -45,7 +51,10 @@ end
 UIComboBox.setOption = UIComboBox.setCurrentOption
 
 function UIComboBox:setCurrentOptionByData(data, dontSignal)
-  if not self.options then return end
+  if not self.options then
+    return
+  end
+
   for i,v in ipairs(self.options) do
     if v.data == data and self.currentIndex ~= i then
       self.currentIndex = i
@@ -76,7 +85,10 @@ end
 function UIComboBox:addOption(text, data)
   table.insert(self.options, { text = text, data = data })
   local index = #self.options
-  if index == 1 then self:setOption(text) end
+  if index == 1 then
+    self:setOption(text)
+  end
+
   return index
 end
 
@@ -111,7 +123,13 @@ function UIComboBox:onMousePress(mousePos, mouseButton)
   end
   menu:setWidth(self:getWidth())
   menu:display({ x = self:getX(), y = self:getY() + self:getHeight() })
-  connect(menu, { onDestroy = function() self:setOn(false) end })
+
+  connect(menu, {
+    onDestroy = function()
+      self:setOn(false)
+    end
+  })
+
   self:setOn(true)
   return true
 end

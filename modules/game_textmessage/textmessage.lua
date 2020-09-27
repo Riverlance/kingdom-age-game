@@ -1,6 +1,12 @@
+_G.GameTextMessage = { }
+GameTextMessage.m  = modules.game_textmessage -- Alias
+
+
+
 DefaultFont = 'verdana-11px-rounded'
 
-MessageSettings = {
+MessageSettings =
+{
   none            = {},
   consoleRed      = { color = TextColors.red,       consoleTab='Default' },
   consoleOrange   = { color = TextColors.orange,    consoleTab='Default' },
@@ -11,13 +17,15 @@ MessageSettings = {
   bottomWhite     = { color = TextColors.white,     consoleTab='Server', screenTarget='statusLabel',       consoleOption='showEventMessagesInConsole' },
   status          = { color = TextColors.white,     consoleTab='Server', screenTarget='statusLabel',       consoleOption='showStatusMessagesInConsole' },
   statusSmall     = { color = TextColors.white,                          screenTarget='statusLabel' },
+  loot            = { color = TextColors.white,     consoleTab='Server' },
   private         = { color = TextColors.lightblue,                      screenTarget='privateLabel' },
   statusBigTop    = { color = '#e1e1e1',            consoleTab='Server', screenTarget='privateLabel',      consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
   statusBigCenter = { color = '#e1e1e1',            consoleTab='Server', screenTarget='middleCenterLabel', consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
   statusBigBottom = { color = '#e1e1e1',            consoleTab='Server', screenTarget='statusLabel',       consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
 }
 
-MessageTypes = {
+MessageTypes =
+{
   [MessageModes.MonsterSay] = MessageSettings.consoleOrange,
   [MessageModes.MonsterYell] = MessageSettings.consoleOrange,
   [MessageModes.BarkLow] = MessageSettings.consoleOrange,
@@ -28,7 +36,7 @@ MessageTypes = {
   [MessageModes.Status] = MessageSettings.status,
   [MessageModes.Warning] = MessageSettings.centerRed,
   [MessageModes.Look] = MessageSettings.centerGreen,
-  [MessageModes.Loot] = MessageSettings.centerGreen,
+  [MessageModes.Loot] = MessageSettings.loot,
   [MessageModes.Red] = MessageSettings.consoleRed,
   [MessageModes.Blue] = MessageSettings.consoleBlue,
   [MessageModes.PrivateFrom] = MessageSettings.consoleBlue,
@@ -63,86 +71,105 @@ MessageTypes = {
 messagesPanel = nil
 statusLabel = nil
 
-function init()
+
+
+function GameTextMessage.init()
   for messageMode, _ in pairs(MessageTypes) do
-    registerMessageMode(messageMode, displayMessage)
+    registerMessageMode(messageMode, GameTextMessage.displayMessage)
   end
 
-  connect(g_game, 'onGameEnd', clearMessages)
-  connect(modules.game_interface.getMapPanel(), {
-    onGeometryChange = onGeometryChange,
-    onViewModeChange = onViewModeChange,
-    onZoomChange = onZoomChange,
+  connect(g_game, {
+    onClientOptionChanged = GameTextMessage.onClientOptionChanged,
+    onGameEnd             = GameTextMessage.clearMessages,
+  })
+  connect(GameInterface.getMapPanel(), {
+    onGeometryChange = GameTextMessage.onGeometryChange,
+    onViewModeChange = GameTextMessage.onViewModeChange,
+    onZoomChange     = GameTextMessage.onZoomChange,
   })
 
-  messagesPanel = g_ui.loadUI('textmessage', modules.game_interface.getRootPanel())
+  messagesPanel = g_ui.loadUI('textmessage', GameInterface.getRootPanel())
   statusLabel = messagesPanel:getChildById('statusLabel')
 end
 
-function terminate()
+function GameTextMessage.terminate()
   for messageMode, _ in pairs(MessageTypes) do
-    unregisterMessageMode(messageMode, displayMessage)
+    unregisterMessageMode(messageMode, GameTextMessage.displayMessage)
   end
 
-  disconnect(modules.game_interface.getMapPanel(), {
-    onGeometryChange = onGeometryChange,
-    onViewModeChange = onViewModeChange,
-    onZoomChange = onZoomChange,
+  disconnect(GameInterface.getMapPanel(), {
+    onGeometryChange = GameTextMessage.onGeometryChange,
+    onViewModeChange = GameTextMessage.onViewModeChange,
+    onZoomChange     = GameTextMessage.onZoomChange,
   })
-  disconnect(g_game, 'onGameEnd', clearMessages)
+  disconnect(g_game, {
+    onClientOptionChanged = GameTextMessage.onClientOptionChanged,
+    onGameEnd             = GameTextMessage.clearMessages,
+  })
 
-  clearMessages()
+  GameTextMessage.clearMessages()
   messagesPanel:destroy()
+
+  _G.GameTextMessage = nil
 end
 
 local function updateStatusLabelPosition(label)
-  if not modules.game_interface then return end
+  local margin = GameInterface.m.chatButton:getHeight() + 4
 
-  local gameExpBar = modules.game_interface.getGameExpBar()
-
-  local margin
-  if ViewModes[modules.game_interface.getCurrentViewMode()].isFull then
-    margin = modules.game_interface.getSplitter():getMarginBottom() + (modules.ka_game_hotkeybars and modules.ka_game_hotkeybars.isHotkeybarsVisible() and 44 or gameExpBar:isOn() and gameExpBar:getHeight() or 0) + 4
-  else
-    local mapPanel = modules.game_interface.getMapPanel()
-    margin = math.floor((mapPanel:getHeight() - mapPanel:getMapHeight()) / 2) + (gameExpBar:isOn() and gameExpBar:getHeight() or 0) + 4
+  -- Hotkey bar
+  local firstHotkeybar = modules.ka_game_hotkeybars and GameHotkeybars.getHotkeyBars()[1] or nil
+  if firstHotkeybar and firstHotkeybar:isVisible() then
+    margin = margin + firstHotkeybar.height + firstHotkeybar.mapMargin
   end
+
+  -- Experience bar
+  if GameInterface.m.gameExpBar:isOn() then
+    margin = margin + GameInterface.m.gameExpBar:getHeight()
+  end
+
   label:setMarginBottom(margin)
 end
 
-function onGeometryChange(mapPanel)
+function GameTextMessage.onGeometryChange(mapPanel)
   updateStatusLabelPosition(statusLabel)
 end
 
-function onViewModeChange(mapWidget, viewMode, oldViewMode)
+function GameTextMessage.onViewModeChange(mapWidget, viewMode, oldViewMode)
   updateStatusLabelPosition(statusLabel)
 end
 
-function onZoomChange(self, oldZoom, newZoom) -- Is this callback necessary?
+function GameTextMessage.onClientOptionChanged(key, value, force, wasClientSettingUp)
+  updateStatusLabelPosition(statusLabel)
+end
+
+function GameTextMessage.onZoomChange(self, oldZoom, newZoom)
   if oldZoom == newZoom then
     return
   end
+
   addEvent(function() updateStatusLabelPosition(statusLabel) end)
 end
 
-function calculateVisibleTime(text)
+function GameTextMessage.calculateVisibleTime(text)
   return math.max(#text * 100, 4000)
 end
 
-function displayMessage(mode, text)
-  if not g_game.isOnline() then return end
+function GameTextMessage.displayMessage(mode, text)
+  if not g_game.isOnline() then
+    return
+  end
 
   local msgtype = MessageTypes[mode]
   if not msgtype then
     return
   end
 
-  if msgtype == MessageSettings.none then return end
+  if msgtype == MessageSettings.none then
+    return
+  end
 
-  if msgtype.consoleTab ~= nil and (msgtype.consoleOption == nil or modules.client_options.getOption(msgtype.consoleOption)) then
-    if modules.game_console then
-      modules.game_console.addText(text, msgtype, tr(msgtype.consoleTab))
-    end
+  if msgtype.consoleTab ~= nil and (msgtype.consoleOption == nil or ClientOptions.getOption(msgtype.consoleOption)) then
+    GameConsole.addText(text, msgtype, tr(msgtype.consoleTab))
     --TODO move to game_console
   end
 
@@ -156,31 +183,31 @@ function displayMessage(mode, text)
       updateStatusLabelPosition(label)
     end
     removeEvent(label.hideEvent)
-    label.hideEvent = scheduleEvent(function() label:setVisible(false) end, calculateVisibleTime(text))
+    label.hideEvent = scheduleEvent(function() label:setVisible(false) end, GameTextMessage.calculateVisibleTime(text))
   end
 end
 
-function displayPrivateMessage(text)
-  displayMessage(254, text)
+function GameTextMessage.displayPrivateMessage(text)
+  GameTextMessage.displayMessage(254, text)
 end
 
-function displayStatusMessage(text)
-  displayMessage(MessageModes.Status, text)
+function GameTextMessage.displayStatusMessage(text)
+  GameTextMessage.displayMessage(MessageModes.Status, text)
 end
 
-function displayFailureMessage(text)
-  displayMessage(MessageModes.Failure, text)
+function GameTextMessage.displayFailureMessage(text)
+  GameTextMessage.displayMessage(MessageModes.Failure, text)
 end
 
-function displayGameMessage(text)
-  displayMessage(MessageModes.Game, text)
+function GameTextMessage.displayGameMessage(text)
+  GameTextMessage.displayMessage(MessageModes.Game, text)
 end
 
-function displayBroadcastMessage(text)
-  displayMessage(MessageModes.Warning, text)
+function GameTextMessage.displayBroadcastMessage(text)
+  GameTextMessage.displayMessage(MessageModes.Warning, text)
 end
 
-function clearMessages()
+function GameTextMessage.clearMessages()
   for _i,child in pairs(messagesPanel:recursiveGetChildren()) do
     if child:getId():match('Label') then
       child:hide()
@@ -189,8 +216,10 @@ function clearMessages()
   end
 end
 
+
+
 function LocalPlayer:onAutoWalkFail(player)
   if modules.game_textmessage then
-    modules.game_textmessage.displayFailureMessage(tr('There is no way.'))
+    GameTextMessage.displayFailureMessage(tr('There is no way.'))
   end
 end

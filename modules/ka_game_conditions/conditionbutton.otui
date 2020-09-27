@@ -51,5 +51,4 @@ ConditionButton < UIConditionButton
     margin-left: 2
     margin-right: 2
     text-align: left
-    background-color: #2c374c77
     phantom: true

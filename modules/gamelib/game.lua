@@ -16,7 +16,10 @@ function g_game.findPlayerItem(itemId, subType)
 end
 
 function g_game.chooseRsa(host)
-  if G.currentRsa ~= CIPSOFT_RSA and G.currentRsa ~= OTSERV_RSA then return end
+  if G.currentRsa ~= CIPSOFT_RSA and G.currentRsa ~= OTSERV_RSA then
+    return
+  end
+
   if host:ends('.tibia.com') or host:ends('.cipsoft.com') then
     g_game.setRsa(CIPSOFT_RSA)
 

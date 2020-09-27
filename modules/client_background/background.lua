@@ -1,51 +1,67 @@
--- private variables
+_G.ClientBackground = { }
+ClientBackground.m  = modules.client_background -- Alias
+
+
+
 local background
 local clientVersionLabel
 
--- public functions
-function init()
+function ClientBackground.init()
   background = g_ui.displayUI('background')
   background:lower()
 
   clientVersionLabel = background:getChildById('clientVersionLabel')
-  clientVersionLabel:setText(g_app.getName() .. --[[' ' .. g_app.getVersion() ..]] '\n' ..
-                             'Version ' .. CLIENT_VERSION --[[.. '\n' ..
-                             'Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch() .. '\n' .. g_app.getBuildCompiler()]])
+  clientVersionLabel:setText(string.format('%s\nVersion %s', g_app.getName(), CLIENT_VERSION))
+  -- clientVersionLabel:setText(g_app.getName() .. --[[' ' .. g_app.getVersion() ..]] '\n' ..
+  --                            'Version ' .. CLIENT_VERSION --[[.. '\n' ..
+  --                            'Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch() .. '\n' .. g_app.getBuildCompiler()]])
 
   if not g_game.isOnline() then
-    addEvent(function() g_effects.fadeIn(clientVersionLabel, 1500) end)
+    addEvent(function() g_effects.fadeIn(clientVersionLabel, 3000) end)
   end
 
-  connect(g_game, { onGameStart = hide })
-  connect(g_game, { onGameEnd = show })
+  connect(g_game, {
+    onGameStart = ClientBackground.hide
+  })
+  connect(g_game, {
+    onGameEnd = ClientBackground.show
+  })
 end
 
-function terminate()
-  disconnect(g_game, { onGameStart = hide })
-  disconnect(g_game, { onGameEnd = show })
+function ClientBackground.terminate()
+  disconnect(g_game, {
+    onGameEnd = ClientBackground.show
+  })
+  disconnect(g_game, {
+    onGameStart = ClientBackground.hide
+  })
 
   g_effects.cancelFade(background:getChildById('clientVersionLabel'))
   background:destroy()
 
   background = nil
+
+  _G.ClientBackground = nil
 end
 
-function hide()
+function ClientBackground.hide()
   background:hide()
 end
 
-function show()
+function ClientBackground.show()
   background:show()
 end
 
-function hideVersionLabel()
+function ClientBackground.hideVersionLabel()
   background:getChildById('clientVersionLabel'):hide()
 end
 
-function setVersionText(text)
+function ClientBackground.setVersionText(text)
   clientVersionLabel:setText(text)
 end
 
-function getBackground()
+
+
+function ClientBackground.getBackground()
   return background
 end

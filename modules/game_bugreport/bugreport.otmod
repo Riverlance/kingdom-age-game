@@ -6,5 +6,5 @@ Module
   scripts: [ bugreport ]
   dependencies: [ client_topmenu ]
   sandboxed: true
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameBugReport.init()
+  @onUnload: GameBugReport.terminate()

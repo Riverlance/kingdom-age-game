@@ -1,23 +1,14 @@
--- HOTKEY = 'Ctrl+X'
+_G.GameShaders = { }
+GameShaders.m  = modules.game_shaders -- Alias
 
--- shadersPanel = nil
 
-function init()
+
+function GameShaders.init()
   g_ui.importStyle('shaders.otui')
 
-  -- g_keyboard.bindKeyDown(HOTKEY, toggle)
-
-  -- shadersPanel = g_ui.createWidget('ShadersPanel', modules.game_interface.getMapPanel())
-  -- shadersPanel:hide()
-
-  -- Combobox
-  -- local mapComboBox = shadersPanel:getChildById('mapComboBox')
-  -- mapComboBox.onOptionChange = function(combobox, option)
-  --   -- Update shader
-  --   setMapShader(option)
-  -- end
-
-  if not g_graphics.canUseShaders() then return end
+  if not g_graphics.canUseShaders() then
+    return
+  end
 
   for _, opts in pairs(MapShaders) do
     local shader = g_shaders.createFragmentShader(opts.name, opts.frag)
@@ -28,30 +19,21 @@ function init()
     if opts.tex2 then
       shader:addMultiTexture(opts.tex2)
     end
-
-    -- mapComboBox:addOption(opts.name)
   end
 
-  -- mapComboBox:setOption(ShaderFilter) -- Select default shader
-
   connect(g_game, {
-    onGameStart = online,
+    onGameStart = GameShaders.online,
   })
 end
 
-function terminate()
+function GameShaders.terminate()
   disconnect(g_game, {
-    onGameStart = online,
+    onGameStart = GameShaders.online,
   })
 
-  -- g_keyboard.unbindKeyDown(HOTKEY)
-  -- shadersPanel:destroy()
+  _G.GameShaders = nil
 end
 
--- function toggle()
---   shadersPanel:setVisible(not shadersPanel:isVisible())
--- end
-
-function online()
+function GameShaders.online()
   setMapShader(ShaderFilter) -- Set to default shader
 end

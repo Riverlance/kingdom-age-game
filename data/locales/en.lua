@@ -11,4 +11,4 @@ locale = {
   translation = {}
 }
 
-modules.client_locales.installLocale(locale)
+ClientLocales.installLocale(locale)

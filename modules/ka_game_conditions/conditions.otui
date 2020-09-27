@@ -1,43 +1,23 @@
-ConditionFilterIcon < UICheckBox
+ConditionTabButton < TabButton
   size: 20 20
-  image-color: white
-  image-rect: 0 0 20 20
-
-  $hover !disabled:
-    color: #cccccc
-
-  $!checked:
-    image-clip: 0 0 20 20
-
-  $hover !checked:
-    image-clip: 0 40 20 20
-
-  $checked:
-    image-clip: 0 20 20 20
-
-  $hover checked:
-    image-clip: 0 60 20 20
-
-  $disabled:
-    image-color: #ffffff88
+  icon-source: /images/ui/condition/filter
 
 MiniWindow
   id: conditionWindow
   !text: tr('Conditions')
-  height: 80
-  icon: /images/topbuttons/cooldowns
-  @onClose: onMiniWindowClose()
+  icon: /images/ui/top_menu/conditions
   &save: true
+  &contentMinimumHeight: 30
 
   UIButton
-    id: sortMenuButton
-    anchors.top: minimizeButton.top
-    anchors.right: minimizeButton.left
-    margin-right: 3
+    id: toggleFilterPanelButton
     size: 14 14
-    image-source: /images/ui/miniwindow_buttons
+    !tooltip: tr('Show options')
+    image-source: /images/ui/_button/mini_window
     image-clip: 56 0 14 14
-    @onClick: createSortMenu()
+    anchors.verticalCenter: lockButton.verticalCenter
+    anchors.right: lockButton.outsideLeft
+    @onClick: GameConditions.onClickFilterPanelButton(self)
 
     $hover:
       image-clip: 56 14 14 14
@@ -45,15 +25,23 @@ MiniWindow
     $pressed:
       image-clip: 56 28 14 14
 
+    $on:
+      image-clip: 42 0 14 14
+      !tooltip: tr('Hide options')
+
+    $on hover:
+      image-clip: 42 14 14 14
+
+    $on pressed:
+      image-clip: 42 28 14 14
 
   UIButton
-    id: toggleFilterPanelButton
-    anchors.top: sortMenuButton.top
-    anchors.right: sortMenuButton.left
-    margin-right: 3
+    id: sortMenuButton
     size: 14 14
-    image-source: /images/ui/miniwindow_buttons
-    @onClick: onClickFilterPanelButton(self, not self:isOn())
+    image-source: /images/ui/_button/mini_window
+    anchors.verticalCenter: prev.verticalCenter
+    anchors.right: prev.outsideLeft
+    @onClick: GameConditions.createSortMenu()
 
     $hover:
       image-clip: 70 14 14 14
@@ -63,128 +51,97 @@ MiniWindow
 
     $!on:
       image-clip: 70 0 14 14
-      !tooltip: tr('Show options')
 
     $on:
       image-clip: 70 28 14 14
-      !tooltip: tr('Hide options')
+
+  MiniWindowHeader
+    height: 20
+
+    $on:
+      height: 0
+
+    Panel
+      id: filterPanel
+      size: 108 20
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.horizontalCenter: parent.horizontalCenter
+      layout:
+        type: horizontalBox
+        spacing: 2
+
+      ConditionTabButton
+        id: filterDefault
+        !tooltip: tr('Show default conditions')
+        icon-clip: 0 0 20 20
+        @onClick: GameConditions.onClickFilterDefault(self)
+
+        $on:
+          !tooltip: tr('Hide default conditions')
+
+      ConditionTabButton
+        id: filterSelfPowers
+        !tooltip: tr('Show conditions caused by your powers')
+        icon-clip: 20 0 20 20
+        @onClick: GameConditions.onClickFilterSelfPowers(self)
+
+        $on:
+          !tooltip: tr('Hide conditions caused by your powers')
+
+      ConditionTabButton
+        id: filterOtherPowers
+        !tooltip: tr('Show conditions caused by powers from others')
+        icon-clip: 40 0 20 20
+        @onClick: GameConditions.onClickFilterOtherPowers(self)
+
+        $on:
+          !tooltip: tr('Hide conditions caused by powers from others')
+
+      ConditionTabButton
+        id: filterAggressive
+        !tooltip: tr('Show aggressive conditions')
+        icon-clip: 60 0 20 20
+        @onClick: GameConditions.onClickFilterAggressive(self)
+
+        $on:
+          !tooltip: tr('Hide aggressive conditions')
+
+      ConditionTabButton
+        id: filterNonAggressive
+        !tooltip: tr('Show non aggressive conditions')
+        icon-clip: 80 0 20 20
+        @onClick: GameConditions.onClickFilterNonAggressive(self)
+
+        $on:
+          !tooltip: tr('Hide non aggressive conditions')
 
   MiniWindowContents
 
     Panel
-      id: filterPanel
-      anchors.top: parent.top
-      anchors.left: parent.left
-      anchors.right: parent.right
-
-      $on:
-        height: 20
-
-      $!on:
-        height: 0
-
-      Panel
-        id: filterList
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        size: 120 20
-        layout:
-          type: horizontalBox
-          spacing: 5
-
-        ConditionFilterIcon
-          id: filterDefault
-          image-source: /images/game/conditions/filter_default
-          @onCheckChange: onClickFilterDefault(self)
-
-          $!checked:
-            !tooltip: tr('Show default conditions')
-          $checked:
-            !tooltip: tr('Hide default conditions')
-
-        ConditionFilterIcon
-          id: filterSelfPowers
-          image-source: /images/game/conditions/filter_ownpowers
-          @onCheckChange: onClickFilterSelfPowers(self)
-
-          $!checked:
-            !tooltip: tr('Show conditions caused by your powers')
-          $checked:
-            !tooltip: tr('Hide conditions caused by your powers')
-
-        ConditionFilterIcon
-          id: filterOtherPowers
-          image-source: /images/game/conditions/filter_nonownpowers
-          @onCheckChange: onClickFilterOtherPowers(self)
-
-          $!checked:
-            !tooltip: tr('Show conditions caused by powers of others')
-          $checked:
-            !tooltip: tr('Hide conditions caused by powers of others')
-
-        ConditionFilterIcon
-          id: filterNonAggressive
-          image-source: /images/game/conditions/filter_nonaggressive
-          @onCheckChange: onClickFilterNonAggressive(self)
-
-          $!checked:
-            !tooltip: tr('Show non aggressive conditions')
-          $checked:
-            !tooltip: tr('Hide non aggressive conditions')
-
-        ConditionFilterIcon
-          id: filterAggressive
-          image-source: /images/game/conditions/filter_aggressive
-          @onCheckChange: onClickFilterAggressive(self)
-
-          $!checked:
-            !tooltip: tr('Show aggressive conditions')
-          $checked:
-            !tooltip: tr('Hide aggressive conditions')
-
-    HorizontalSeparator
-      id: firstHorizontalSeparator
-      anchors.top: prev.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-
-      $on:
-        margin-top: 5
-
-      $!on:
-        margin-top: 0
-
-    Panel
-      id: defaultConditionPanel
-      layout:
-        type: horizontalBox
-      padding: 2
-      anchors.top: prev.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      //border-width: 1
-      //border-color: #00000077
-      background-color: #ffffff11
-
-      $on:
-        height: 22
-
-      $!on:
-        height: 0
-
-    HorizontalSeparator
-      id: secondHorizontalSeparator
-      anchors.top: prev.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-
-    Panel
       id: conditionPanel
       focusable: false
-      anchors.top: prev.bottom
+      anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
       padding: 5
       layout:
         type: verticalBox
         fit-children: true
+
+  MiniWindowFooter
+    image-source: /images/ui/_background/default_stone_blue
+    height: 23
+
+    $on:
+      height: 0
+
+    Panel
+      id: defaultConditionPanel
+      height: 18
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.left: parent.left
+      anchors.right: parent.right
+      layout:
+        type: horizontalBox
+      margin-top: 2
+      margin-bottom: 2

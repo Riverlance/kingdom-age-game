@@ -36,119 +36,121 @@ ConditionWidget < UIWidget
 
 InventoryItem < Item
   $on:
-    image-source: /images/ui/item-blessed
+    image-source: /images/ui/slot_item_blessed
 
 HeadSlot < InventoryItem
   id: slot1
-  image-source: /images/game/slots/head
+  image-source: /images/ui/slot/head
   &position: {x=65535, y=1, z=0}
   $on:
-    image-source: /images/game/slots/head-blessed
+    image-source: /images/ui/slot/head_blessed
 
 BodySlot < InventoryItem
   id: slot4
-  image-source: /images/game/slots/body
+  image-source: /images/ui/slot/body
   &position: {x=65535, y=4, z=0}
   $on:
-    image-source: /images/game/slots/body-blessed
+    image-source: /images/ui/slot/body_blessed
 
 LegSlot < InventoryItem
   id: slot7
-  image-source: /images/game/slots/legs
+  image-source: /images/ui/slot/legs
   &position: {x=65535, y=7, z=0}
   $on:
-    image-source: /images/game/slots/legs-blessed
+    image-source: /images/ui/slot/legs_blessed
 
 FeetSlot < InventoryItem
   id: slot8
-  image-source: /images/game/slots/feet
+  image-source: /images/ui/slot/feet
   &position: {x=65535, y=8, z=0}
   $on:
-    image-source: /images/game/slots/feet-blessed
+    image-source: /images/ui/slot/feet_blessed
 
 NeckSlot < InventoryItem
   id: slot2
-  image-source: /images/game/slots/neck
+  image-source: /images/ui/slot/neck
   &position: {x=65535, y=2, z=0}
   $on:
-    image-source: /images/game/slots/neck-blessed
+    image-source: /images/ui/slot/neck_blessed
 
 LeftSlot < InventoryItem
   id: slot6
-  image-source: /images/game/slots/left-hand
+  image-source: /images/ui/slot/left_hand
   &position: {x=65535, y=6, z=0}
   $on:
-    image-source: /images/game/slots/left-hand-blessed
+    image-source: /images/ui/slot/left_hand_blessed
 
 FingerSlot < InventoryItem
   id: slot9
-  image-source: /images/game/slots/finger
+  image-source: /images/ui/slot/finger
   &position: {x=65535, y=9, z=0}
   $on:
-    image-source: /images/game/slots/finger-blessed
+    image-source: /images/ui/slot/finger_blessed
 
 BackSlot < InventoryItem
   id: slot3
-  image-source: /images/game/slots/back
+  image-source: /images/ui/slot/back
   &position: {x=65535, y=3, z=0}
   $on:
-    image-source: /images/game/slots/back-blessed
+    image-source: /images/ui/slot/back_blessed
 
 RightSlot < InventoryItem
   id: slot5
-  image-source: /images/game/slots/right-hand
+  image-source: /images/ui/slot/right_hand
   &position: {x=65535, y=5, z=0}
   $on:
-    image-source: /images/game/slots/right-hand-blessed
+    image-source: /images/ui/slot/right_hand_blessed
 
 AmmoSlot < InventoryItem
   id: slot10
-  image-source: /images/game/slots/ammo
+  image-source: /images/ui/slot/ammo
   &position: {x=65535, y=10, z=0}
   $on:
-    image-source: /images/game/slots/ammo-blessed
-
-//PurseButton < Button
-  //id: purseButton
-  //size: 26 26
-  //!tooltip: tr('Open purse')
-  //icon-source: /images/game/slots/purse
-  //icon-size: 24 24
-  //icon-offset: 1 1
+    image-source: /images/ui/slot/ammo_blessed
 
 
 
 
 
-CombatBox < UICheckBox
+CombatBox < ButtonBoxRounded
   size: 20 20
-  image-clip: 0 0 20 20
-
-  $checked:
-    image-clip: 0 20 20 20
+  icon-source: /images/ui/combat_mode/control
 
 FightOffensiveBox < CombatBox
-  image-source: /images/game/combatmodes/fightoffensive
+  icon-clip: 0 0 20 20
+
+  $checked:
+    icon-clip: 0 20 20 20
+
 FightBalancedBox < CombatBox
-  image-source: /images/game/combatmodes/fightbalanced
+  icon-clip: 20 0 20 20
+
+  $checked:
+    icon-clip: 20 20 20 20
+
 FightDefensiveBox < CombatBox
-  image-source: /images/game/combatmodes/fightdefensive
+  icon-clip: 40 0 20 20
+
+  $checked:
+    icon-clip: 40 20 20 20
+
 ChaseModeBox < CombatBox
-  image-source: /images/game/combatmodes/chasemode
+  icon-clip: 60 0 20 20
+
+  $checked:
+    icon-clip: 60 20 20 20
+
 SafeFightBox < CombatBox
-  image-source: /images/game/combatmodes/safefight
+  icon-clip: 80 0 20 20
+
+  $checked:
+    icon-clip: 80 20 20 20
 
 MountButton < CombatBox
-  image-source: /images/game/combatmodes/mount
+  icon-clip: 100 0 20 20
 
-WhiteDoveBox < CombatBox
-  image-source: /images/game/combatmodes/whitedovemode
-WhiteHandBox < CombatBox
-  image-source: /images/game/combatmodes/whitehandmode
-YellowHandBox < CombatBox
-  image-source: /images/game/combatmodes/yellowhandmode
-RedFistBox < CombatBox
-  image-source: /images/game/combatmodes/redfistmode
+  $checked:
+    icon-clip: 100 20 20 20
 
 
 
@@ -157,20 +159,18 @@ RedFistBox < CombatBox
 MiniWindow
   id: inventoryWindow
   !text: tr('Character')
-  icon: /images/topbuttons/healthinfo
-  height: 287
-  @onClose: onMiniWindowClose()
+  icon: /images/ui/top_menu/healthinfo
+  height: 258
   &save: true
 
   UIButton
     id: ballButton
-    anchors.top: minimizeButton.top
-    anchors.right: minimizeButton.left
-    margin-right: 3
+    anchors.verticalCenter: lockButton.verticalCenter
+    anchors.right: lockButton.outsideLeft
     size: 14 14
-    image-source: /images/ui/miniwindow_buttons
+    image-source: /images/ui/_button/mini_window
     image-clip: 70 0 14 14
-    @onClick: onMiniWindowBallButton()
+    @onClick: GameCharacter.onMiniWindowBallButton()
 
     $hover:
       image-clip: 70 14 14 14
@@ -178,156 +178,134 @@ MiniWindow
     $pressed:
       image-clip: 70 28 14 14
 
-  MiniWindowContents
+  MiniWindowHeader
+    height: 55
+
     HealthBar
     ManaBar
     ExperienceBar
 
+  MiniWindowContents
+    Panel
+      id: centerPanel
+      // Same width as outfitCreatureBox
+      width: 70
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+
+    Panel
+      id: leftPanel
+      anchors.top: centerPanel.top
+      anchors.bottom: centerPanel.bottom
+      anchors.left: parent.left
+      anchors.right: centerPanel.outsideLeft
+
+    Panel
+      id: rightPanel
+      anchors.top: centerPanel.top
+      anchors.bottom: centerPanel.bottom
+      anchors.left: centerPanel.outsideRight
+      anchors.right: parent.right
+
     Creature
       id: outfitCreatureBox
-      anchors.top: prev.bottom
+      size: 70 70
+      anchors.top: centerPanel.top
       anchors.horizontalCenter: parent.horizontalCenter
-      image-source: /images/ui/alpha
-      size: 80 80
-      margin-top: 5
-      padding: 0
+      margin-top: 4
+      padding: 1
       fixed-creature-size: true
 
     HeadSlot
-      anchors.top: prev.top
-      anchors.left: parent.left
-      margin-left: 10
+      anchors.top: outfitCreatureBox.top
+      anchors.horizontalCenter: leftPanel.horizontalCenter
 
     BodySlot
-      anchors.top: prev.bottom
-      anchors.left: prev.left
-      margin-top: 3
+      anchors.top: prev.outsideBottom
+      anchors.horizontalCenter: prev.horizontalCenter
+      margin-top: 2
 
     LegSlot
       anchors.top: prev.bottom
-      anchors.left: prev.left
-      margin-top: 3
+      anchors.horizontalCenter: prev.horizontalCenter
+      margin-top: 2
 
     FeetSlot
       anchors.top: prev.bottom
-      anchors.left: prev.left
-      margin-top: 3
+      anchors.horizontalCenter: prev.horizontalCenter
+      margin-top: 2
 
     BackSlot
-      anchors.top: slot1.top
-      anchors.right: parent.right
-      margin-right: 10
+      anchors.top: outfitCreatureBox.top
+      anchors.horizontalCenter: rightPanel.horizontalCenter
 
     NeckSlot
-      anchors.top: prev.bottom
-      anchors.right: prev.right
-      margin-top: 3
+      anchors.top: prev.outsideBottom
+      anchors.horizontalCenter: prev.horizontalCenter
+      margin-top: 2
 
     FingerSlot
-      anchors.top: prev.bottom
-      anchors.right: prev.right
-      margin-top: 3
+      anchors.top: prev.outsideBottom
+      anchors.horizontalCenter: prev.horizontalCenter
+      margin-top: 2
 
     AmmoSlot
-      anchors.top: prev.bottom
-      anchors.right: prev.right
-      margin-top: 3
+      anchors.top: prev.outsideBottom
+      anchors.horizontalCenter: prev.horizontalCenter
+      margin-top: 2
 
     LeftSlot
-      anchors.top: outfitCreatureBox.bottom
-      anchors.left: outfitCreatureBox.left
-      margin-top: 5
+      anchors.top: outfitCreatureBox.outsideBottom
+      anchors.left: centerPanel.left
+      margin-top: 4
 
     RightSlot
-      anchors.top: prev.top
-      anchors.right: outfitCreatureBox.right
-
-    //PurseButton
-      //margin-top: 3
-      //anchors.top: prev.bottom
-      //anchors.horizontalCenter: prev.horizontalCenter
+      anchors.top: outfitCreatureBox.outsideBottom
+      anchors.right: centerPanel.right
+      margin-top: 4
 
     GameLabel
       id: combatControls
-      // CombatBox buttons size
-      // 58 40
       size: 64 42
-      anchors.top: prev.bottom
+      anchors.top: prev.outsideBottom
       anchors.horizontalCenter: parent.horizontalCenter
-      //anchors.verticalCenter: slot5.verticalCenter
-      //margin-right: 14
-      margin-top: 5
-      padding: 0
-      //border-width: 1
-      //border-color: #00000077
-      //background-color: #191919ff
+      margin-top: 4
+
+      layout:
+        type: grid
+        cell-size: 20 20
+        cell-spacing: 2
+        num-columns: 3
+        num-lines: 2
 
       FightOffensiveBox
         id: fightOffensiveBox
-        anchors.top: parent.top
-        anchors.left: parent.left
+
       FightBalancedBox
         id: fightBalancedBox
-        anchors.top: prev.top
-        anchors.left: prev.right
-        margin-left: 3
+
       FightDefensiveBox
         id: fightDefensiveBox
-        anchors.top: prev.top
-        anchors.left: prev.right
-        margin-left: 3
+
       ChaseModeBox
         id: chaseModeBox
-        anchors.top: prev.bottom
-        anchors.left: parent.left
-        margin-top: 3
+
       SafeFightBox
         id: safeFightBox
-        anchors.top: prev.top
-        anchors.left: prev.right
-        margin-left: 3
+
       MountButton
         id: mountButton
-        anchors.top: prev.top
-        anchors.left: prev.right
-        margin-left: 3
 
-    GameLabel
+  MiniWindowFooter
+    height: 14
+
+    Label
       id: capLabel
-      height: 14
-      color: white
-      font: verdana-11px-rounded
-      text-offset: 4 0
-      text-align: center
-      anchors.bottom: parent.bottom
+      anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
       anchors.right: parent.right
       padding: 2
-      //border-width: 1
-      //border-color: #00000077
-      background-color: #ffffff11
-
-    //Panel
-      //id: pvpModesPanel
-      //anchors.left: parent.left
-      //anchors.right: parent.right
-      //anchors.bottom: parent.bottom
-      //height: 20
-
-      //WhiteDoveBox
-        //id: whiteDoveBox
-        //anchors.left: parent.left
-        //anchors.bottom: parent.bottom
-        //margin: 2 1
-      //WhiteHandBox
-        //id: whiteHandBox
-        //anchors.left: prev.right
-        //anchors.bottom: parent.bottom
-      //YellowHandBox
-        //id: yellowHandBox
-        //anchors.left: prev.right
-        //anchors.bottom: parent.bottom
-      //RedFistBox
-        //id: redFistBox
-        //anchors.left: prev.right
-        //anchors.bottom: parent.bottom
+      font: verdana-11px-rounded
+      text-offset: 4 1
+      text-align: center

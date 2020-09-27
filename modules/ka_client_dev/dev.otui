@@ -1,54 +1,78 @@
-DevModeWindow < MainWindow
+// Note: Check commands.lua of modules.client_terminal
 
-DevModeWindow
-  id: devModeWindow
-  !text: tr('DEV Mode')
-  size: 170 110
+DevCheckBox < CheckBox
+
+  $first:
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+
+  $!first:
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 4
+
+DevLightButton < LightButton
+  anchors.top: prev.outsideBottom
+  anchors.left: parent.left
+  anchors.right: parent.right
+  margin-top: 4
+
+
+
+
+
+MainWindow
+  id: developmentWindow
+  !text: tr('Development')
+  size: 150 180
   focusable: false
 
-  CheckBox
-    id: localServerCheckBox
+  DevCheckBox
+    id: localCheckBox
     !text: tr('Local Server')
-    !tooltip: tr('Server running from 127.0.0.1')
-    anchors.left: parent.left
-    anchors.top: parent.top
-    width: 140
+    !tooltip: tr('Log on server from local host')
+    color: darkTeal
 
-    $!on:
-      color: white
-    $on:
-      color: red
-
-  CheckBox
-    id: devServerCheckBox
+  DevCheckBox
+    id: devCheckBox
     !text: tr('Dev Server (ports)')
-    !tooltip: tr('Update ports to log on dev server')
-    anchors.left: parent.left
-    anchors.top: prev.bottom
-    margin-top: 5
-    width: 140
+    !tooltip: tr('Log on server from devlopment host')
+    color: darkTeal
 
-    $!on:
-      color: white
-    $on:
-      color: red
-
-  CheckBox
-    id: drawBoxes
+  DevCheckBox
+    id: drawBoxesCheckBox
     !text: tr('Draw Boxes')
     !tooltip: tr('Draw debug boxes')
-    anchors.left: localServerCheckBox.left
-    anchors.top: prev.bottom
-    margin-top: 5
-    width: 140
-    @onClick: toggleOption(self, draw_debug_boxes)
+    color: green
 
-  // CheckBox
-    // id: hideMap
-    // !text: tr('Hide Map')
-    // !tooltip: tr('Hide the map panel')
-    // anchors.left: drawBoxes.left
-    // anchors.top: drawBoxes.bottom
-    // margin-top: 5
-    // width: 85
-    // @onClick: toggleOption(self, hide_map, show_map)
+  DevCheckBox
+    id: hideMapCheckBox
+    !text: tr('Hide Map')
+    !tooltip: tr('Hide game map panel')
+    color: orange
+
+  HorizontalSeparator
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+
+  DevLightButton
+    !text: tr('Terminal')
+    !tooltip: tr('Show terminal')
+    margin-top: 10
+    @onClick: |
+      ClientTerminal.toggle()
+      ClientTerminal.popWindow(false)
+
+  DevLightButton
+    !text: tr('Ping')
+    !tooltip: tr('Start ping test at terminal')
+    @onClick: |
+      if not ClientTerminal.isVisible() then
+        ClientTerminal.show()
+        ClientTerminal.popWindow(false)
+      end
+      ping()

@@ -41,6 +41,19 @@ UIWindow
     height: 18
     visible: false
 
+  Button
+    id: clearButton
+    !tooltip: tr('Clear terminal')
+    width: 18
+    icon: /images/ui/console/clear_channel
+    anchors.top: prev.top
+    anchors.bottom: prev.bottom
+    anchors.right: parent.right
+    @onClick: ClientTerminal.clear()
+
+    $on:
+      anchors.right: terminalScroll.left
+
   ScrollablePanel
     id: terminalBuffer
     focusable: false

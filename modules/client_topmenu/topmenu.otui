@@ -4,6 +4,9 @@ TopMenuPanel
   anchors.left: parent.left
   anchors.right: parent.right
 
+  $hidden:
+    height:0
+
   TopMenuButtonsPanel
     id: leftButtonsPanel
     anchors.top: parent.top

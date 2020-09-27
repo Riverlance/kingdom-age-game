@@ -3,9 +3,14 @@ Module
   description: Interface
   author: River
   website: https://github.com/edubart/otclient
-  reloadable: false
   sandboxed: true
   autoload: true
-  scripts: [ ui ]
-  @onLoad: init()
-  @onUnload: terminate()
+  scripts: [ expbar, levelup ]
+
+  @onLoad: |
+    GameUIExpBar.init()
+    GameLevelUp.init()
+
+  @onUnload: |
+    GameLevelUp.terminate()
+    GameUIExpBar.terminate()

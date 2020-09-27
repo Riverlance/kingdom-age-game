@@ -5,5 +5,5 @@ Module
   website: https://github.com/edubart/otclient
   sandboxed: true
   scripts: [ shaders.lua ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameShaders.init()
+  @onUnload: GameShaders.terminate()

@@ -6,38 +6,46 @@ Module
   sandboxed: true
   scripts: [ widgets/uigamemap, widgets/uiitem, interface ]
   dependencies: [ client_topmenu, client_background, client_options ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameInterface.init()
+  @onUnload: GameInterface.terminate()
 
   load-later:
+    // Base
     - game_things
-    - game_textmessage
-    - game_console
-    - game_outfit
-    - game_character
-    - game_skills
-    - game_containers
-    - game_battle
-    - game_minimap
-    - game_questlog
-    - game_npctrade
-    - game_textwindow
-    - game_playertrade
-    - game_bugreport
-    - game_hotkeys
-    - game_viplist
-    - game_playerdeath
-    - game_playermount
-    - game_ruleviolation
-    - game_market
-    - game_modaldialog
-    - game_unjustifiedpoints
     - game_shaders
+    - game_textmessage
+    - game_modaldialog
     - ka_game_screenimage
     - ka_game_hotkeybars
-    - ka_game_conditions
+    - ka_game_lootbar
+    - ka_game_blinkhit
+    - ka_game_ui
+
+    // Base windows
+    - game_textwindow
+    - game_npctrade
+    - game_playertrade
+    - game_playermount
+    - game_playerdeath
+    - game_outfit
+
+    // Windows
+    - game_containers
+    - game_console
+    - game_ruleviolation
+
+    // Top menu left buttons
+    - game_bugreport
+    - game_hotkeys
+    - game_questlog
+
+    // Top menu right buttons (mini windows)
+    - game_character
+    - game_skills
     - ka_game_attributes
     - ka_game_powers
-    - ka_game_blinkhit
-    - ka_game_lootbar
-    - ka_game_ui
+    - ka_game_conditions
+    - game_battlelist
+    - game_unjustifiedpoints
+    - game_minimap
+    - game_viplist

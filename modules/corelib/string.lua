@@ -158,3 +158,7 @@ end
 function string:getCompactPath() -- path/file.ext to path/file
   return self:match("(.+)%..-$")
 end
+
+function string.exists(value)
+  return value and value ~= ''
+end

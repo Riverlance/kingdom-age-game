@@ -4,7 +4,7 @@ Module
   author: River, Kamenuvol
   sandboxed: true
   autoload: true
-  scripts: [ condition, conditions ]
+  scripts: [ conditions ]
   dependencies: [ client_topmenu, game_interface ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameConditions.init()
+  @onUnload: GameConditions.terminate()

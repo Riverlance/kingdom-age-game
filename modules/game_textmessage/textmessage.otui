@@ -7,8 +7,8 @@ TextMessageLabel < UILabel
   visible: false
 
 Panel
-  anchors.fill: gameMapPanel
-  anchors.bottom: gameMapPanel.bottom
+  anchors.fill: gameScreenArea
+  anchors.bottom: gameScreenArea.bottom
   focusable: false
 
   Panel

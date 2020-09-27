@@ -12,8 +12,8 @@ function UISpinBox.create()
   spinbox.step = 1
   spinbox.firstchange = true
   spinbox.mouseScroll = true
-  spinbox:setText("1")
-  spinbox:setValue(1)
+  spinbox:setText('1')
+  spinbox:setValue(1, true)
   return spinbox
 end
 
@@ -121,7 +121,9 @@ function UISpinBox:setValue(value, dontSignal)
   value = value or 0
   value = math.max(math.min(self.maximum, value), self.minimum)
 
-  if value == self.value then return end
+  if value == self.value then
+    return
+  end
 
   self.value = value
   if self:getText():len() > 0 then

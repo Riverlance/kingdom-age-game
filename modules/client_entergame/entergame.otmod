@@ -3,14 +3,13 @@ Module
   description: Manages enter game and character list windows
   author: edubart
   website: https://github.com/edubart/otclient
+  scripts: [ entergame, characterlist ]
   dependencies: [ game_things, client_topmenu ]
 
   @onLoad: |
-    dofile 'entergame'
-    dofile 'characterlist'
-    EnterGame.init()
-    CharacterList.init()
+    ClientEnterGame.init()
+    ClientCharacterList.init()
 
   @onUnload: |
-    EnterGame.terminate()
-    CharacterList.terminate()
+    ClientEnterGame.terminate()
+    ClientCharacterList.terminate()

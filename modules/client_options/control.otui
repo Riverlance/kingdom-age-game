@@ -1,4 +1,5 @@
 Panel
+
   OptionCheckBox
     id: classicControl
     !text: tr('Classic control')
@@ -9,7 +10,7 @@ Panel
     !text: tr('Allow auto-chase override.')
     &tooltipAddons: { {{ text = tr('Your character stops to follow your target\nonce you walk.'), align = AlignLeft }} }
 
-
+  OptionHorizontalSeparator
 
   OptionCheckBox
     id: smoothWalk
@@ -28,101 +29,49 @@ Panel
     !text: tr('Enable auto bouncing keys')
     &tooltipAddons: { {{ text = tr('Whenever new key is pressed, will bounce\nprevious key.'), align = AlignLeft }} }
 
+  OptionHorizontalSeparator
 
-
-  Label
-    id: walkingSensitivityLabel
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 10
-    @onSetup: |
-      local value = getOption('walkingSensitivityScrollBar')
-      self:setText(tr('Walking keys sensitivity: %s', value < 100 and string.format('%d%%', value) or 'max'))
+  OptionLabel
+    !text: tr('Walking keys sensitivity')
 
   OptionScrollbar
     id: walkingSensitivityScrollBar
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 3
     minimum: 1
     maximum: 100
+    symbol: %
 
-  Label
-    id: walkingRepeatDelayLabel
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 5
-    @onSetup: |
-      local value = getOption('walkingRepeatDelayScrollBar')
-      self:setText(tr('Walking keys auto-repeat delay: %s', value < 200 and string.format('%d ms', value) or 'max'))
+  OptionLabel
+    !text: tr('Walking keys auto-repeat delay')
 
   OptionScrollbar
     id: walkingRepeatDelayScrollBar
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 3
     minimum: 10
     maximum: 200
+    symbol: ms
 
-  Label
-    id: bouncingKeysDelayLabel
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 5
-    @onSetup: |
-      local value = getOption('bouncingKeysDelayScrollBar')
-      self:setText(tr('Auto bouncing keys interval: %s', value < 1000 and string.format('%d ms', value) or 'max'))
+  OptionLabel
+    !text: tr('Auto bouncing keys interval')
 
   OptionScrollbar
     id: bouncingKeysDelayScrollBar
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 3
     minimum: 100
     maximum: 1000
+    symbol: ms
 
-  Label
-    id: turnDelayLabel
-    !text: tr('Turn delay: %sms', 30)
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 5
-    @onSetup: |
-      local value = modules.client_options.getOption('turnDelay')
-      self:setText(tr('Turn delay: %d ms', value))
+  OptionLabel
+    !text: tr('Turn delay')
 
   OptionScrollbar
     id: turnDelay
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 3
     minimum: 30
     maximum: 250
+    symbol: ms
 
-  Label
-    id: hotkeyDelayLabel
-    !text: tr('Hotkey delay: %dms', 30)
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 5
-    @onSetup: |
-      local value = modules.client_options.getOption('hotkeyDelay')
-      self:setText(tr('Hotkey delay: %d ms', value))
+  OptionLabel
+    !text: tr('Hotkey delay')
 
   OptionScrollbar
     id: hotkeyDelay
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    margin-top: 3
     minimum: 30
     maximum: 250
+    symbol: ms

@@ -35,7 +35,7 @@ MainWindow
   size: 450 450
   !text: tr('Module Manager')
 
-  @onEscape: hide()
+  @onEscape: ClientModuleManager.hide()
 
   TextList
     id: moduleList
@@ -63,7 +63,7 @@ MainWindow
     margin-top: 8
     !text: tr('Refresh')
     text-auto-resize: true
-    @onClick: refreshModules()
+    @onClick: ClientModuleManager.refreshModules()
 
   Button
     id: reloadAllModulesButton
@@ -72,7 +72,7 @@ MainWindow
     margin-top: 8
     !text: tr('Reload All')
     text-auto-resize: true
-    @onClick: reloadAllModules()
+    @onClick: ClientModuleManager.reloadAllModules()
 
   Panel
     id: moduleInfo
@@ -97,17 +97,6 @@ MainWindow
       text-wrap: true
       height: 100
 
-    //ModuleInfoLabel
-    //  !text: tr('Autoload')
-    //ModuleValueLabel
-    //  id: moduleAutoload
-
-    //ModuleInfoLabel
-    //  !text: tr('Autoload priority')
-    //ModuleValueLabel
-    //  id: moduleLoadPriority
-    //  text: 1000
-
     ModuleInfoLabel
       !text: tr('Author')
     ModuleValueLabel
@@ -131,7 +120,7 @@ MainWindow
     !text: tr('Load')
     enabled: false
     width: 90
-    @onClick: reloadCurrentModule()
+    @onClick: ClientModuleManager.reloadCurrentModule()
 
   Button
     id: moduleUnloadButton
@@ -142,7 +131,7 @@ MainWindow
     !text: tr('Unload')
     enabled: false
     width: 90
-    @onClick: unloadCurrentModule()
+    @onClick: ClientModuleManager.unloadCurrentModule()
 
   Button
     id: closeButton
@@ -150,5 +139,5 @@ MainWindow
     anchors.right: parent.right
     !text: tr('Close')
     width: 90
-    @onClick: hide()
+    @onClick: ClientModuleManager.hide()
 

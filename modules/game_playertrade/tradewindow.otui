@@ -95,7 +95,9 @@ TradeWindow < MiniWindow
       anchors.right: parent.horizontalCenter
       margin-right: 2
       enabled: false
-      @onClick: g_game.acceptTrade(); self:disable()
+      @onClick: |
+        g_game.acceptTrade()
+        self:disable()
 
     Button
       !text: tr('Reject')

@@ -1,4 +1,6 @@
-if not UIWindow then dofile 'uiwindow' end
+if not UIWindow then
+  dofile 'uiwindow'
+end
 
 -- @docclass
 UIInputBox = extends(UIWindow, "UIInputBox")
@@ -33,19 +35,37 @@ function UIInputBox:addLabel(text)
 end
 
 function UIInputBox:addLineEdit(labelText, defaultText, maxLength)
-  if labelText then self:addLabel(labelText) end
+  if labelText then
+    self:addLabel(labelText)
+  end
+
   local lineEdit = g_ui.createWidget('InputBoxLineEdit', self)
-  if defaultText then lineEdit:setText(defaultText) end
-  if maxLength then lineEdit:setMaxLength(maxLength) end
+  if defaultText then
+    lineEdit:setText(defaultText)
+  end
+
+  if maxLength then
+    lineEdit:setMaxLength(maxLength)
+  end
+
   table.insert(self.inputs, function() return lineEdit:getText() end)
   return lineEdit
 end
 
 function UIInputBox:addTextEdit(labelText, defaultText, maxLength, visibleLines)
-  if labelText then self:addLabel(labelText) end
+  if labelText then
+    self:addLabel(labelText)
+  end
+
   local textEdit = g_ui.createWidget('InputBoxTextEdit', self)
-  if defaultText then textEdit:setText(defaultText) end
-  if maxLength then textEdit:setMaxLength(maxLength) end
+  if defaultText then
+    textEdit:setText(defaultText)
+  end
+
+  if maxLength then
+    textEdit:setMaxLength(maxLength)
+  end
+
   visibleLines = visibleLines or 1
   textEdit:setHeight(textEdit:getHeight() * visibleLines)
   table.insert(self.inputs, function() return textEdit:getText() end)
@@ -61,7 +81,10 @@ function UIInputBox:addCheckBox(text, checked)
 end
 
 function UIInputBox:addComboBox(labelText, ...)
-  if labelText then self:addLabel(labelText) end
+  if labelText then
+    self:addLabel(labelText)
+  end
+
   local comboBox = g_ui.createWidget('InputBoxComboBox', self)
   local options = {...}
   for i=1,#options do
@@ -72,7 +95,10 @@ function UIInputBox:addComboBox(labelText, ...)
 end
 
 function UIInputBox:addSpinBox(labelText, minimum, maximum, value, step)
-  if labelText then self:addLabel(labelText) end
+  if labelText then
+    self:addLabel(labelText)
+  end
+
   local spinBox = g_ui.createWidget('InputBoxSpinBox', self)
   spinBox:setMinimum(minimum)
   spinBox:setMaximum(maximum)

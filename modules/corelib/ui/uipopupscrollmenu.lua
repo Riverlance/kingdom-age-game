@@ -61,17 +61,27 @@ end
 
 function UIPopupScrollMenu:onGeometryChange(oldRect, newRect)
   local parent = self:getParent()
-  if not parent then return end
+  if not parent then
+    return
+  end
+
   local ymax = parent:getY() + parent:getHeight()
   local xmax = parent:getX() + parent:getWidth()
+
   if newRect.y + newRect.height > ymax then
     local newy = newRect.y - newRect.height
-    if newy > 0 and newy + newRect.height < ymax then self:setY(newy) end
+    if newy > 0 and newy + newRect.height < ymax then
+      self:setY(newy)
+    end
   end
+
   if newRect.x + newRect.width > xmax then
     local newx = newRect.x - newRect.width
-    if newx > 0 and newx + newRect.width < xmax then self:setX(newx) end
+    if newx > 0 and newx + newRect.width < xmax then
+      self:setX(newx)
+    end
   end
+
   self:bindRectToParent()
 end
 
@@ -126,4 +136,7 @@ local function onRootGeometryUpdate()
     currentMenu:destroy()
   end
 end
-connect(rootWidget, { onGeometryChange = onRootGeometryUpdate} )
+
+connect(rootWidget, {
+  onGeometryChange = onRootGeometryUpdate
+})

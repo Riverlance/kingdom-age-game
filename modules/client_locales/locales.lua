@@ -1,7 +1,12 @@
-dofile 'neededtranslations'
+_G.ClientLocales = { }
+ClientLocales.m  = modules.client_locales -- Alias
 
--- private variables
-local defaultLocaleName = 'en'
+
+
+localesWindow = nil
+
+
+
 local installedLocales
 local currentLocale
 local GAMELANGUAGE_EN      = 1
@@ -13,6 +18,7 @@ local GAMELANGUAGE_SV      = 6
 local GAMELANGUAGE_FIRST   = GAMELANGUAGE_EN
 local GAMELANGUAGE_LAST    = GAMELANGUAGE_SV
 local GAMELANGUAGE_DEFAULT = GAMELANGUAGE_EN
+local defaultLocaleName    = 'en'
 local language =
 {
   ['en'] = GAMELANGUAGE_EN,
@@ -23,7 +29,9 @@ local language =
   ['sv'] = GAMELANGUAGE_SV
 }
 
-function sendLocale(localeName)
+
+
+function ClientLocales.sendLocale(localeName)
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientLocale, localeName)
@@ -33,9 +41,9 @@ function sendLocale(localeName)
   return false
 end
 
-function createWindow()
+function ClientLocales.createWindow()
   localesWindow = g_ui.displayUI('locales')
-  localesWindow.onEscape = destroyWindow
+  localesWindow.onEscape = ClientLocales.destroyWindow
   local localesPanel = localesWindow:getChildById('localesPanel')
   local layout = localesPanel:getLayout()
   local spacing = layout:getCellSpacing()
@@ -44,72 +52,82 @@ function createWindow()
   local count = 0
   for name,locale in pairs(installedLocales) do
     local widget = g_ui.createWidget('LocalesButton', localesPanel)
-    widget:setImageSource('/images/flags/' .. name .. '')
+    widget:setImageSource('/images/ui/flags/' .. name .. '')
     widget:setText(locale.languageName)
-    widget.onClick = function() selectFirstLocale(name) end
+    widget.onClick = function() ClientLocales.selectFirstLocale(name) end
     count = count + 1
   end
 
   count = math.max(1, math.min(count, 3))
   localesPanel:setWidth(size.width*count + spacing*(count-1))
 
-  addEvent(function() addEvent(function() localesWindow:raise() localesWindow:focus() end) end)
+  addEvent(function() localesWindow:raise() localesWindow:focus() end)
 end
 
-function destroyWindow()
+function ClientLocales.destroyWindow()
   if localesWindow then
     localesWindow:destroy()
     localesWindow = nil
   end
 end
 
-function selectFirstLocale(name)
-  destroyWindow()
-  if setLocale(name) then
+function ClientLocales.selectFirstLocale(name)
+  ClientLocales.destroyWindow()
+  if ClientLocales.setLocale(name) then
     g_modules.reloadModules()
   end
 end
 
--- hooked functions
-function onGameStart()
-  sendLocale(currentLocale.name)
+function ClientLocales.onGameStart()
+  ClientLocales.sendLocale(currentLocale.name)
 end
 
-function onExtendedLocales(protocol, opcode, buffer)
+function ClientLocales.onExtendedLocales(protocol, opcode, buffer)
   local locale = installedLocales[buffer]
-  if locale and setLocale(locale.name) then
+  if locale and ClientLocales.setLocale(locale.name) then
     g_modules.reloadModules()
   end
 end
 
--- public functions
-function init()
+function ClientLocales.init()
   installedLocales = {}
 
-  installLocales('/locales')
+  ClientLocales.installLocales('/locales')
 
   local userLocaleName = g_settings.get('locale', 'false')
-  if userLocaleName ~= 'false' and setLocale(userLocaleName) then
+  if userLocaleName ~= 'false' and ClientLocales.setLocale(userLocaleName) then
     -- pdebug('Using configured locale: ' .. userLocaleName)
   else
-    setLocale(defaultLocaleName)
-    connect(g_app, { onRun = createWindow })
+    ClientLocales.setLocale(defaultLocaleName)
+    connect(g_app, {
+      onRun = ClientLocales.createWindow
+    })
   end
 
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerLocale, onExtendedLocales)
-  connect(g_game, { onGameStart = onGameStart })
+  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerLocale, ClientLocales.onExtendedLocales)
+  connect(g_game, {
+    onGameStart = ClientLocales.onGameStart
+  })
 end
 
-function terminate()
+function ClientLocales.terminate()
   installedLocales = nil
   currentLocale = nil
 
   ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerLocale)
-  disconnect(g_app, { onRun = createWindow })
-  disconnect(g_game, { onGameStart = onGameStart })
+
+  disconnect(g_app, {
+    onRun = ClientLocales.createWindow
+  })
+
+  disconnect(g_game, {
+    onGameStart = ClientLocales.onGameStart
+  })
+
+  _G.ClientLocales = nil
 end
 
-function generateNewTranslationTable(localename)
+function ClientLocales.generateNewTranslationTable(localename)
   local locale = installedLocales[localename]
   for _i,k in pairs(neededTranslations) do
     local trans = locale.translation[k]
@@ -129,12 +147,14 @@ function generateNewTranslationTable(localename)
   end
 end
 
-function installLocale(locale)
+function ClientLocales.installLocale(locale)
   if not locale or not locale.name then
     error('Unable to install locale.')
   end
 
-  if _G.allowedLocales and not _G.allowedLocales[locale.name] then return end
+  if _G.allowedLocales and not _G.allowedLocales[locale.name] then
+    return
+  end
 
   if locale.name ~= defaultLocaleName then
     local updatesNamesMissing = {}
@@ -162,11 +182,11 @@ function installLocale(locale)
   end
 end
 
-function installLocales(directory)
+function ClientLocales.installLocales(directory)
   dofiles(directory)
 end
 
-function setLocale(name)
+function ClientLocales.setLocale(name)
   local locale = installedLocales[name]
   if locale == currentLocale then
     g_settings.set('locale', name)
@@ -177,21 +197,26 @@ function setLocale(name)
     return false
   end
   if currentLocale then
-    sendLocale(locale.name)
+    ClientLocales.sendLocale(locale.name)
   end
   currentLocale = locale
   g_settings.set('locale', name)
-  if onLocaleChanged then onLocaleChanged(name) end
+  if onLocaleChanged then
+    onLocaleChanged(name)
+  end
+
   return true
 end
 
-function getInstalledLocales()
+function ClientLocales.getInstalledLocales()
   return installedLocales
 end
 
-function getCurrentLocale()
+function ClientLocales.getCurrentLocale()
   return currentLocale
 end
+
+
 
 -- global function used to translate texts
 function _G.tr(text, ...)

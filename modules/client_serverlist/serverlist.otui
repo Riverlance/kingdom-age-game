@@ -51,15 +51,15 @@ ServerWidget < UIWidget
     anchors.right: parent.right
     margin-right: 4
     margin-top: 1
-    @onClick: ServerList.remove(self:getParent())
+    @onClick: ClientServerList.remove(self:getParent())
 
 MainWindow
   id: serverListWindow
   !text: tr('Server List')
   size: 340 290
   visible: false
-  @onEnter: ServerList.select()
-  @onEscape: ServerList.hide()
+  @onEnter: ClientServerList.select()
+  @onEscape: ClientServerList.hide()
   @onSetup: |
     g_keyboard.bindKeyPress('Up', function() self:getChildById('serverList'):focusPreviousChild(KeyboardFocusReason) end, self)
     g_keyboard.bindKeyPress('Down', function() self:getChildById('serverList'):focusNextChild(KeyboardFocusReason) end, self)
@@ -90,7 +90,7 @@ MainWindow
     !tooltip: tr('Add new server')
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    @onClick: AddServer.show()
+    @onClick: ClientAddServer.show()
 
   Button
     id: buttonOk
@@ -99,7 +99,7 @@ MainWindow
     anchors.right: next.left
     anchors.bottom: parent.bottom
     margin-right: 10
-    @onClick: ServerList.select()
+    @onClick: ClientServerList.select()
 
   Button
     id: buttonCancel
@@ -107,4 +107,4 @@ MainWindow
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    @onClick: ServerList.hide()
+    @onClick: ClientServerList.hide()

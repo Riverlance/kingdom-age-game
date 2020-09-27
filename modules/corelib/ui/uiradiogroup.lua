@@ -29,7 +29,9 @@ function UIRadioGroup:removeWidget(widget)
 end
 
 function UIRadioGroup:selectWidget(selectedWidget, dontSignal)
-  if selectedWidget == self.selectedWidget then return end
+  if selectedWidget == self.selectedWidget then
+    return
+  end
 
   local previousSelectedWidget = self.selectedWidget
   self.selectedWidget = selectedWidget
@@ -48,7 +50,9 @@ function UIRadioGroup:selectWidget(selectedWidget, dontSignal)
 end
 
 function UIRadioGroup:clearSelected()
-  if not self.selectedWidget then return end
+  if not self.selectedWidget then
+    return
+  end
 
   local previousSelectedWidget = self.selectedWidget
   self.selectedWidget:setChecked(false)
@@ -63,4 +67,35 @@ end
 
 function UIRadioGroup:getFirstWidget()
   return self.widgets[1]
+end
+
+function UIRadioGroup:getAvailableWidget()
+  for _, widget in ipairs(self.widgets) do
+    if widget:isEnabled() then
+      return widget
+    end
+  end
+  return nil
+end
+
+function UIRadioGroup:getAvailableWidgetsCount()
+  local count = 0
+  for _, widget in ipairs(self.widgets) do
+    if widget:isEnabled() then
+      count = count + 1
+    end
+  end
+  return count
+end
+
+function UIRadioGroup:isUniqueAvailableWidget(widget)
+  local availableWidgetsCount = self:getAvailableWidgetsCount()
+  if availableWidgetsCount == 0 then
+    return nil
+  elseif availableWidgetsCount > 1 then
+    return false
+  end
+
+  local availableWidget = self:getAvailableWidget()
+  return availableWidget and availableWidget == widget
 end

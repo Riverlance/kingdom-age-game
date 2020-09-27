@@ -508,4 +508,4 @@ locale = {
   }
 }
 
-modules.client_locales.installLocale(locale)
+ClientLocales.installLocale(locale)

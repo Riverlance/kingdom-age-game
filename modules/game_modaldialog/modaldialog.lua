@@ -1,10 +1,17 @@
+_G.GameModalDialog = { }
+GameModalDialog.m  = modules.game_modaldialog -- Alias
+
+
+
 modalDialog = nil
 
-function init()
+function GameModalDialog.init()
   g_ui.importStyle('modaldialog')
 
-  connect(g_game, { onModalDialog = onModalDialog,
-                    onGameEnd = destroyDialog })
+  connect(g_game, {
+    onModalDialog = GameModalDialog.onModalDialog,
+    onGameEnd     = GameModalDialog.destroyDialog
+  })
 
   local dialog = rootWidget:recursiveGetChildById('modalDialog')
   if dialog then
@@ -12,20 +19,23 @@ function init()
   end
 end
 
-function terminate()
-  disconnect(g_game, { onModalDialog = onModalDialog,
-                       onGameEnd = destroyDialog })
+function GameModalDialog.terminate()
+  disconnect(g_game, {
+    onModalDialog = GameModalDialog.onModalDialog,
+    onGameEnd     = GameModalDialog.destroyDialog
+  })
+
+  _G.GameModalDialog = nil
 end
 
-function destroyDialog()
+function GameModalDialog.destroyDialog()
   if modalDialog then
     modalDialog:destroy()
     modalDialog = nil
   end
 end
 
-function onModalDialog(id, title, message, spectatorId, buttons, enterButton, escapeButton, choices, priority)
-  -- priority parameter is unused, not sure what its use is.
+function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons, enterButton, escapeButton, choices, priority) -- priority parameter is unused, not sure what its use is.
   if modalDialog then
     return
   end
@@ -76,7 +86,7 @@ function onModalDialog(id, title, message, spectatorId, buttons, enterButton, es
         choiceKey = focusedChoice.choiceKey
       end
       g_game.answerModalDialog(id, buttonId, buttons[i] and buttons[i][2] or '', choice, choices[choiceKey] and choices[choiceKey][2] or '', spectatorId)
-      destroyDialog()
+      GameModalDialog.destroyDialog()
     end
 
     buttonsWidth = buttonsWidth + button:getWidth() + button:getMarginLeft() + button:getMarginRight()
@@ -114,7 +124,7 @@ function onModalDialog(id, title, message, spectatorId, buttons, enterButton, es
       end
     end
     g_game.answerModalDialog(id, enterButton, buttonTxT, choice, choices[choiceKey] and choices[choiceKey][2] or '', spectatorId)
-    destroyDialog()
+    GameModalDialog.destroyDialog()
   end
 
   local escapeFunc = function()
@@ -133,7 +143,7 @@ function onModalDialog(id, title, message, spectatorId, buttons, enterButton, es
       end
     end
     g_game.answerModalDialog(id, escapeButton, buttonTxT, choice, choices[choiceKey] and choices[choiceKey][2] or '', spectatorId)
-    destroyDialog()
+    GameModalDialog.destroyDialog()
   end
 
   choiceList.onDoubleClick = enterFunc

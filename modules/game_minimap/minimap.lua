@@ -1,12 +1,20 @@
+_G.GameMinimap = { }
+GameMinimap.m  = modules.game_minimap -- Alias
+
+
+
 minimapWindow = nil
-minimapButton = nil
+minimapTopMenuButton = nil
 minimapWidget = nil
-minimapFloorUpButton = nil
-minimapFloorDownButton = nil
-minimapZoomInButton = nil
-minimapZoomOutButton = nil
-minimapResetButton = nil
+
+minimapBar = nil
 minimapOpacityScrollbar = nil
+positionLabel = nil
+
+arrowButton = nil
+ballButton = nil
+infoLabel = nil
+
 otmm = true
 preloaded = false
 fullmapView = false
@@ -15,74 +23,106 @@ oldPos = nil
 instanceId = 0
 instanceName = ""
 
-function init()
-  minimapButton = modules.client_topmenu.addRightGameToggleButton('minimapButton', tr('Minimap') .. ' (Ctrl+M)', '/images/topbuttons/minimap', toggle)
-  minimapButton:setOn(true)
 
-  minimapWindow = g_ui.loadUI('minimap', modules.game_interface.getRightPanel())
-  minimapWindow:setContentMinimumHeight(64)
+local lastMinimapMarkId = 19
 
-  minimapWidget = minimapWindow:recursiveGetChildById('minimap')
-  minimapFloorUpButton = minimapWindow:recursiveGetChildById('floorUp')
-  minimapFloorDownButton = minimapWindow:recursiveGetChildById('floorDown')
-  minimapZoomInButton = minimapWindow:recursiveGetChildById('zoomIn')
-  minimapZoomOutButton = minimapWindow:recursiveGetChildById('zoomOut')
-  minimapResetButton = minimapWindow:recursiveGetChildById('reset')
+local function updatePositionLabel()
+  local text
 
-  minimapOpacityScrollbar = minimapWindow:recursiveGetChildById('minimapOpacity')
+  -- Default map
+  if instanceId < 1 then
+    local player = g_game.getLocalPlayer()
+    if not player then
+      return
+    end
+    local pos = player:getPosition()
+    if not pos then
+      return
+    end
+
+    text = tr('%d, %d, %d', pos.x, pos.y, pos.z)
+
+  -- Instance map
+  else
+    text = instanceName
+  end
+
+  positionLabel:setText(text)
+  positionLabel:setTooltip(text)
+end
+
+
+
+function GameMinimap.init()
+  minimapWindow        = g_ui.loadUI('minimap')
+  local contentsPanel  = minimapWindow:getChildById('contentsPanel')
+  minimapTopMenuButton = ClientTopMenu.addRightGameToggleButton('minimapTopMenuButton', tr('Minimap') .. ' (Ctrl+M)', '/images/ui/top_menu/minimap', GameMinimap.toggle)
+
+  minimapWindow.topMenuButton = minimapTopMenuButton
+
+  minimapWidget = contentsPanel:getChildById('minimap')
+
+  minimapBar = contentsPanel:getChildById('minimapBar')
+  minimapOpacityScrollbar = contentsPanel:getChildById('minimapOpacity')
   minimapOpacityScrollbar:setValue(g_settings.getValue('Minimap', 'opacity', 100))
-  minimapWidget:setOpacity(1.0)
+  positionLabel = contentsPanel:getChildById('positionLabel')
 
-  local gameRootPanel = modules.game_interface.getRootPanel()
+  arrowButton = minimapWindow:getChildById('arrowButton')
+  ballButton = minimapWindow:getChildById('ballButton')
+  infoLabel = minimapWindow:getChildById('infoLabel')
+
+  for i = 1, lastMinimapMarkId do
+    g_textures.preload(string.format('/images/ui/minimap/flag%d', i))
+  end
+
+  local gameRootPanel = GameInterface.getRootPanel()
   g_keyboard.bindKeyPress('Alt+Left', function() minimapWidget:move(1,0) end, gameRootPanel)
   g_keyboard.bindKeyPress('Alt+Right', function() minimapWidget:move(-1,0) end, gameRootPanel)
   g_keyboard.bindKeyPress('Alt+Up', function() minimapWidget:move(0,1) end, gameRootPanel)
   g_keyboard.bindKeyPress('Alt+Down', function() minimapWidget:move(0,-1) end, gameRootPanel)
-  g_keyboard.bindKeyDown('Ctrl+M', toggle)
-  g_keyboard.bindKeyDown('Ctrl+Shift+M', toggleFullMap)
-  g_keyboard.bindKeyDown('Escape', function() if fullmapView then toggleFullMap() end end)
+  g_keyboard.bindKeyDown('Ctrl+M', GameMinimap.toggle)
+  g_keyboard.bindKeyDown('Ctrl+Shift+M', GameMinimap.toggleFullMap)
+  g_keyboard.bindKeyDown('Escape', function() if fullmapView then GameMinimap.toggleFullMap() end end)
 
-  minimapWindow:setup()
-
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerInstanceInfo, onInstanceInfo)
+  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerInstanceInfo, GameMinimap.onInstanceInfo)
 
   connect(g_game, {
-    onGameStart = online,
-    onGameEnd = offline
+    onGameStart = GameMinimap.online,
+    onGameEnd   = GameMinimap.offline
   })
 
   connect(LocalPlayer, {
-    onPositionChange = updateCameraPosition
+    onPositionChange = GameMinimap.updateCameraPosition
   })
 
   if g_game.isOnline() then
-    online()
+    GameMinimap.online()
   end
 end
 
-function terminate()
+function GameMinimap.terminate()
   if g_game.isOnline() then
-    saveMap()
+    GameMinimap.saveMap()
   end
 
   if fullmapView then
-    toggleFullMap()
+    GameMinimap.toggleFullMap()
   end
 
   g_settings.setValue('Minimap', 'opacity', minimapOpacityScrollbar:getValue())
 
   disconnect(g_game, {
-    onGameStart = online,
-    onGameEnd = offline
+    onGameStart = GameMinimap.online,
+    onGameEnd   = GameMinimap.offline
   })
 
   disconnect(LocalPlayer, {
-    onPositionChange = updateCameraPosition
+    onPositionChange = GameMinimap.updateCameraPosition
   })
 
   ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerInstanceInfo)
 
-  local gameRootPanel = modules.game_interface.getRootPanel()
+  local gameRootPanel = GameInterface.getRootPanel()
   g_keyboard.unbindKeyPress('Alt+Left', gameRootPanel)
   g_keyboard.unbindKeyPress('Alt+Right', gameRootPanel)
   g_keyboard.unbindKeyPress('Alt+Up', gameRootPanel)
@@ -92,50 +132,43 @@ function terminate()
   g_keyboard.unbindKeyDown('Escape')
 
   minimapWindow:destroy()
-  minimapButton:destroy()
+  minimapTopMenuButton:destroy()
+
+  _G.GameMinimap = nil
 end
 
-function toggle()
+function GameMinimap.toggle()
   if fullmapView then
-    toggleFullMap()
+    GameMinimap.toggleFullMap()
   end
-  if minimapButton:isOn() then
-    minimapWindow:close()
-    minimapButton:setOn(false)
-  else
-    minimapWindow:open()
-    minimapButton:setOn(true)
-  end
+  GameInterface.toggleMiniWindow(minimapWindow)
 end
 
-function onMiniWindowClose()
-  minimapButton:setOn(false)
-end
-
-function preload()
-  loadMap(false)
+function GameMinimap.preload()
+  GameMinimap.loadMap(false)
   preloaded = true
 end
 
-function online()
-  loadMap(not preloaded)
-  updateCameraPosition()
+function GameMinimap.online()
+  GameInterface.setupMiniWindow(minimapWindow, minimapTopMenuButton)
 
-  instanceId = 0
+  GameMinimap.loadMap(not preloaded)
+
+  instanceId   = 0
   instanceName = ""
-  local instanceWidget = minimapWidget:recursiveGetChildById('instanceLabel')
-  instanceWidget:setText("")
-  instanceWidget:setVisible(false)
+  GameMinimap.updateCameraPosition()
+
+  minimapWidget:setOpacity(1.0)
 end
 
-function offline()
-  saveMap()
+function GameMinimap.offline()
+  GameMinimap.saveMap()
   if fullmapView then
-    toggleFullMap()
+    GameMinimap.toggleFullMap()
   end
 end
 
-function loadMap(clean)
+function GameMinimap.loadMap(clean)
   local clientVersion = g_game.getClientVersion()
 
   if clean then
@@ -156,7 +189,7 @@ function loadMap(clean)
   minimapWidget:load()
 end
 
-function saveMap()
+function GameMinimap.saveMap()
   local clientVersion = g_game.getClientVersion()
   if otmm then
     local minimapFile = '/minimap.otmm'
@@ -168,15 +201,22 @@ function saveMap()
   minimapWidget:save()
 end
 
-function updateCameraPosition()
+function GameMinimap.updateCameraPosition()
   local player = g_game.getLocalPlayer()
-  if not player then return end
+  if not player then
+    return
+  end
   local pos = player:getPosition()
-  if not pos then return end
+  if not pos then
+    return
+  end
 
-  local positionWidget = minimapWidget:recursiveGetChildById('positionLabel')
-  positionWidget:setText(tr('X: %d | Y: %d | Z: %d', pos.x, pos.y, pos.z))
-  positionWidget:setOpacity(0.80)
+  if instanceId < 1 then
+    local text = tr('%d, %d, %d', pos.x, pos.y, pos.z)
+
+    positionLabel:setText(text)
+    positionLabel:setTooltip(text)
+  end
 
   if not minimapWidget:isDragging() then
     if not fullmapView then
@@ -186,77 +226,102 @@ function updateCameraPosition()
   end
 end
 
-function toggleFullMap()
-  local parent
-  if not fullmapView then
-    fullmapView = true
-    parent = modules.game_interface.getRootPanel()
-    minimapWindow:hide()
-    minimapWidget:setParent(parent)
-    minimapWidget:fill('parent')
-    minimapWidget:setAlternativeWidgetsVisible(true)
-    minimapOpacityScrollbar:show()
-    minimapWidget:setOpacity(minimapOpacityScrollbar:getValue()/100)
-  else
-    fullmapView = false
-    parent = minimapWindow:getChildById('contentsPanel')
-    minimapOpacityScrollbar:hide()
-    minimapWidget:setParent(parent)
-    minimapWidget:fill('parent')
-    minimapWindow:show()
-    minimapWidget:setAlternativeWidgetsVisible(false)
-    minimapWidget:setOpacity(1.0)
+function GameMinimap.toggleFullMap()
+  -- Try to open fullscreen without minimap being opened
+  if not fullmapView and not minimapWindow:isVisible() then
+    return
   end
 
-  minimapFloorUpButton:setParent(parent)
-  minimapFloorDownButton:setParent(parent)
-  minimapZoomInButton:setParent(parent)
-  minimapZoomOutButton:setParent(parent)
-  minimapResetButton:setParent(parent)
+  fullmapView = not fullmapView
+
+  -- Update parent
+
+  local rootPanel = GameInterface.getRootPanel()
+  local parent    = fullmapView and rootPanel or minimapWindow:getChildById('contentsPanel')
+
+  minimapWidget:setParent(parent)
+  minimapBar:setParent(parent)
+  positionLabel:setParent(parent)
   minimapOpacityScrollbar:setParent(parent)
 
-  -- All other buttons anchoring to northwest
-  minimapFloorUpButton:addAnchor(AnchorRight, 'parent', AnchorRight)
-  minimapFloorUpButton:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-  minimapFloorDownButton:addAnchor(AnchorRight, 'parent', AnchorRight)
-  minimapFloorDownButton:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-  minimapZoomInButton:addAnchor(AnchorRight, 'parent', AnchorRight)
-  minimapZoomInButton:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-  minimapZoomOutButton:addAnchor(AnchorRight, 'parent', AnchorRight)
-  minimapZoomOutButton:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-  minimapOpacityScrollbar:addAnchor(AnchorRight, 'parent', AnchorRight)
-  minimapOpacityScrollbar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+  arrowButton:setParent(fullmapView and rootPanel or minimapWindow)
+  ballButton:setParent(fullmapView and rootPanel or minimapWindow)
+  infoLabel:setParent(fullmapView and rootPanel or minimapWindow)
 
-  minimapResetButton:breakAnchors()
+  -- Update anchors and others
+
+  positionLabel:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+  positionLabel:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+  positionLabel:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
+  minimapOpacityScrollbar:addAnchor(AnchorBottom, 'positionLabel', AnchorOutsideTop)
+  minimapOpacityScrollbar:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+  minimapOpacityScrollbar:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
+  minimapOpacityScrollbar:setVisible(fullmapView)
+
   if fullmapView then
-    -- Reset button anchoring to southeast
-    minimapResetButton:addAnchor(AnchorRight, 'parent', AnchorRight)
-    minimapResetButton:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-    minimapResetButton:setMarginBottom(52)
+    minimapWindow:hide()
+    minimapWidget:fill('parent')
+    minimapWidget:setAlternativeWidgetsVisible(true)
+    minimapWidget:setOpacity(minimapOpacityScrollbar:getValue() / 100)
+
+    minimapBar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+    minimapBar:addAnchor(AnchorRight, 'parent', AnchorRight)
+
+    arrowButton:addAnchor(AnchorTop, 'minimapBar', AnchorTop)
+    arrowButton:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
+    arrowButton:setTooltip(tr('Hide entire game map (%s)', 'Ctrl+Shift+M'))
+    arrowButton:setOn(true)
+    ballButton:addAnchor(AnchorTop, 'prev', AnchorBottom)
+    ballButton:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
+    ballButton:setMarginTop(3)
+    infoLabel:addAnchor(AnchorTop, 'prev', AnchorBottom)
+    infoLabel:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
+    infoLabel:setMarginTop(3)
   else
-    -- Reset button anchoring to northwest
-    minimapResetButton:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-    minimapResetButton:addAnchor(AnchorTop, 'parent', AnchorTop)
-    minimapResetButton:setMarginBottom(0)
+    minimapWindow:show()
+    minimapWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
+    minimapWidget:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+    minimapWidget:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+    minimapWidget:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
+    minimapWidget:setAlternativeWidgetsVisible(false)
+    minimapWidget:setOpacity(1.0)
+
+    minimapBar:addAnchor(AnchorTop, 'parent', AnchorTop)
+    minimapBar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+    minimapBar:addAnchor(AnchorRight, 'parent', AnchorRight)
+
+    arrowButton:addAnchor(AnchorVerticalCenter, 'lockButton', AnchorVerticalCenter)
+    arrowButton:addAnchor(AnchorRight, 'lockButton', AnchorOutsideLeft)
+    arrowButton:setTooltip(tr('Show entire game map (%s)', 'Ctrl+Shift+M'))
+    arrowButton:setOn(false)
+    ballButton:addAnchor(AnchorTop, 'prev', AnchorTop)
+    ballButton:addAnchor(AnchorRight, 'prev', AnchorLeft)
+    ballButton:setMarginTop(0)
+    infoLabel:addAnchor(AnchorTop, 'prev', AnchorTop)
+    infoLabel:addAnchor(AnchorRight, 'prev', AnchorLeft)
+    infoLabel:setMarginTop(0)
   end
 
+  -- Update zoom
+
   local zoom = oldZoom or 0
-  local pos = oldPos or minimapWidget:getCameraPosition()
-  oldZoom = minimapWidget:getZoom()
-  oldPos = minimapWidget:getCameraPosition()
+  oldZoom    = minimapWidget:getZoom()
   minimapWidget:setZoom(zoom)
-  minimapWidget:setCameraPosition(pos)
+
+  -- Update camera position
+
+  GameMinimap.updateCameraPosition()
 end
 
-function getMinimapWidget()
+function GameMinimap.getMinimapWidget()
   return minimapWidget
 end
 
-function getInstanceLabel()
-  return minimapWidget:recursiveGetChildById('instanceLabel')
+function GameMinimap.getMinimapBar()
+  return minimapBar
 end
 
-function onInstanceInfo(protocol, opcode, buffer)
+function GameMinimap.onInstanceInfo(protocol, opcode, buffer)
   local params = string.split(buffer, ':')
 
   local id, name
@@ -275,7 +340,5 @@ function onInstanceInfo(protocol, opcode, buffer)
   instanceId   = id
   instanceName = name
 
-  local instanceWidget = minimapWidget:recursiveGetChildById('instanceLabel')
-  instanceWidget:setText(name)
-  instanceWidget:setVisible(name ~= "")
+  updatePositionLabel()
 end

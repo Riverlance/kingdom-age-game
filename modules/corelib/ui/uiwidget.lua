@@ -1,5 +1,27 @@
 -- @docclass UIWidget
 
+function UIWidget:onSetup()
+  local id = self:getId()
+
+  local isMiniWindowHeader = id == "miniWindowHeader"
+  local isMiniWindowFooter = id == "miniWindowFooter"
+
+  if isMiniWindowHeader or isMiniWindowFooter then
+    local miniWindow          = self:getParent()
+    local miniwindowScrollBar = miniWindow:getChildById('miniwindowScrollBar') -- We use scrollbar because contentsPanel follow its top/down anchors
+
+    local isMiniWindowHeaderCreated = isMiniWindowHeader or miniWindow:getChildById('miniWindowHeader') ~= nil
+    local isMiniWindowFooterCreated = isMiniWindowFooter or miniWindow:getChildById('miniWindowFooter') ~= nil
+
+    miniwindowScrollBar:breakAnchors()
+
+    miniwindowScrollBar:addAnchor(AnchorTop, isMiniWindowHeaderCreated and 'miniWindowHeader' or 'miniwindowTopBar', AnchorOutsideBottom)
+    miniwindowScrollBar:addAnchor(AnchorBottom, isMiniWindowFooterCreated and 'miniWindowFooter' or 'bottomResizeBorder', AnchorOutsideTop)
+
+    miniwindowScrollBar:addAnchor(AnchorRight, 'parent', AnchorRight)
+  end
+end
+
 function UIWidget:setMargin(...)
   local params = {...}
   if #params == 1 then
@@ -51,12 +73,12 @@ function UIWidget:onDrop(widget, mousePos)
       widget.lastPanel:addChild(widget)
     end
 
-    widget.lastPanel:fitAll(widget)
+    signalcall(widget.lastPanel.onFitAll, widget.lastPanel, self)
   end
 
   if widget:getClassName() == 'UIHotkeybarContainer' then
     local parent = widget:getParentBar()
-    if not parent or not modules.game_hotkeys or not modules.game_hotkeys.isOpen() then
+    if not parent or not modules.game_hotkeys or not GameHotkeys.isOpen() then
       return false
     end
 
@@ -71,4 +93,28 @@ function UIWidget:onDrop(widget, mousePos)
   end
 
   return false
+end
+
+function UIWidget:getHorizontalMargin(withoutWidth)
+  return (not withoutWidth and self:getWidth() or 0) + self:getMarginLeft() + self:getMarginRight()
+end
+
+function UIWidget:getHorizontalPadding(withoutWidth)
+  return (not withoutWidth and self:getWidth() or 0) + self:getPaddingLeft() + self:getPaddingRight()
+end
+
+function UIWidget:getHorizontalLength(marginOnly)
+  return self:getWidth() + self:getHorizontalMargin(true) + (not marginOnly and self:getHorizontalPadding(true) or 0)
+end
+
+function UIWidget:getVerticalMargin(withoutHeight)
+  return (not withoutHeight and self:getHeight() or 0) + self:getMarginTop() + self:getMarginBottom()
+end
+
+function UIWidget:getVerticalPadding(withoutHeight)
+  return (not withoutHeight and self:getHeight() or 0) + self:getPaddingTop() + self:getPaddingBottom()
+end
+
+function UIWidget:getVerticalLength(marginOnly)
+  return self:getHeight() + self:getVerticalMargin(true) + (not marginOnly and self:getVerticalPadding(true) or 0)
 end

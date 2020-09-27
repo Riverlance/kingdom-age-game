@@ -6,5 +6,5 @@ Module
   autoload: true
   scripts: [ powers ]
   dependencies: [ client_topmenu, game_interface ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GamePowers.init()
+  @onUnload: GamePowers.terminate()

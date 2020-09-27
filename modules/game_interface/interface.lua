@@ -1,11 +1,24 @@
+_G.GameInterface = { }
+GameInterface.m  = modules.game_interface -- Alias
+
+
+
 WALK_STEPS_RETRY = 10
 
 gameRootPanel = nil
 gameMapPanel = nil
-gameRightPanel = nil
-gameLeftPanel = nil
-gameRightPanelBackground = nil
-gameLeftPanelBackground = nil
+gameRightFirstPanel = nil
+gameRightSecondPanel = nil
+gameRightThirdPanel = nil
+gameLeftFirstPanel = nil
+gameLeftSecondPanel = nil
+gameLeftThirdPanel = nil
+gameRightFirstPanelContainer = nil
+gameRightSecondPanelContainer = nil
+gameRightThirdPanelContainer = nil
+gameLeftFirstPanelContainer = nil
+gameLeftSecondPanelContainer = nil
+gameLeftThirdPanelContainer = nil
 gameBottomPanel = nil
 logoutButton = nil
 mouseGrabberWidget = nil
@@ -24,8 +37,14 @@ smartWalkDir = nil
 walkFunction = nil
 hookedMenuOptions = {}
 lastDirTime = g_clock.millis()
+gamePanels = {}
+gamePanelsContainer = {}
 
-function init()
+-- List of panels, even if panelsPriority is not set
+local _gamePanels = {}
+local _gamePanelsContainer = {}
+
+function GameInterface.init()
   g_ui.importStyle('styles/countwindow')
 
   gameRootPanel = g_ui.displayUI('interface')
@@ -41,177 +60,231 @@ function init()
   topMenuButton = gameRootPanel:getChildById('topMenuButton')
   chatButton = gameRootPanel:getChildById('chatButton')
   gameMapPanel = gameRootPanel:getChildById('gameMapPanel')
-  gameRightPanel = gameRootPanel:getChildById('gameRightPanel')
-  gameLeftPanel = gameRootPanel:getChildById('gameLeftPanel')
-  gameRightPanelBackground = gameRootPanel:getChildById('gameRightPanelBackground')
-  gameLeftPanelBackground = gameRootPanel:getChildById('gameLeftPanelBackground')
+  gameRightFirstPanel = gameRootPanel:getChildById('gameRightFirstPanel')
+  gameRightSecondPanel = gameRootPanel:getChildById('gameRightSecondPanel')
+  gameRightThirdPanel = gameRootPanel:getChildById('gameRightThirdPanel')
+  gameLeftFirstPanel = gameRootPanel:getChildById('gameLeftFirstPanel')
+  gameLeftSecondPanel = gameRootPanel:getChildById('gameLeftSecondPanel')
+  gameLeftThirdPanel = gameRootPanel:getChildById('gameLeftThirdPanel')
+  gameRightFirstPanelContainer = gameRightFirstPanel:getChildById('gameRightFirstPanelContainer')
+  gameRightSecondPanelContainer = gameRightSecondPanel:getChildById('gameRightSecondPanelContainer')
+  gameRightThirdPanelContainer = gameRightThirdPanel:getChildById('gameRightThirdPanelContainer')
+  gameLeftFirstPanelContainer = gameLeftFirstPanel:getChildById('gameLeftFirstPanelContainer')
+  gameLeftSecondPanelContainer = gameLeftSecondPanel:getChildById('gameLeftSecondPanelContainer')
+  gameLeftThirdPanelContainer = gameLeftThirdPanel:getChildById('gameLeftThirdPanelContainer')
   gameBottomPanel = gameRootPanel:getChildById('gameBottomPanel')
+
+  _gamePanels = {
+    gameRightFirstPanel,
+    gameLeftFirstPanel,
+    gameRightSecondPanel,
+    gameLeftSecondPanel,
+    gameRightThirdPanel,
+    gameLeftThirdPanel,
+  }
+  _gamePanelsContainer = {
+    gameRightFirstPanelContainer,
+    gameLeftFirstPanelContainer,
+    gameRightSecondPanelContainer,
+    gameLeftSecondPanelContainer,
+    gameRightThirdPanelContainer,
+    gameLeftThirdPanelContainer,
+  }
+
+  GameInterface.setupPanels()
 
   -- Call load AFTER game window has been created and
   -- resized to a stable state, otherwise the saved
   -- settings can get overridden by false onGeometryChange
   -- events
   connect(g_app, {
-    onRun = load,
-    onExit = save,
+    onRun  = GameInterface.load,
+    onExit = GameInterface.save,
   })
 
   connect(g_game, {
-    onGameStart = onGameStart,
-    onGameEnd = onGameEnd,
-    onLoginAdvice = onLoginAdvice,
+    onGameStart   = GameInterface.onGameStart,
+    onGameEnd     = GameInterface.onGameEnd,
+    onLoginAdvice = GameInterface.onLoginAdvice,
   }, true)
 
   connect(gameRootPanel, {
-    onGeometryChange = updateStretchShrink,
-    onFocusChange = stopSmartWalk,
+    onGeometryChange = GameInterface.updateStretchShrink,
+    onFocusChange    = GameInterface.stopSmartWalk,
   })
 
   connect(mouseGrabberWidget, {
-    onMouseRelease = onMouseGrabberRelease,
+    onMouseRelease = GameInterface.onMouseGrabberRelease,
   })
 
-  -- connect(gameLeftPanel, { onVisibilityChange = onLeftPanelVisibilityChange })
+  for i = 1, #_gamePanelsContainer do
+    connect(_gamePanelsContainer[i], {
+      onFitAll = GameInterface.fitAllPanelChildren,
+    })
+  end
 
-  logoutButton = modules.client_topmenu.addLeftButton('logoutButton', tr('Exit'),
-    '/images/topbuttons/logout', tryLogout, true)
+  connect(bottomSplitter, {
+    onDoubleClick = GameInterface.onSplitterDoubleClick,
+  })
 
-  bindKeys()
+  logoutButton = ClientTopMenu.addLeftButton('logoutButton', tr('Exit'), '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
+
+  GameInterface.bindKeys()
 
   if g_game.isOnline() then
-    show()
+    GameInterface.show()
   end
 end
 
-function bindKeys()
-  gameRootPanel:setAutoRepeatDelay(200)
-
-  bindWalkKey('Up', North)
-  bindWalkKey('Right', East)
-  bindWalkKey('Down', South)
-  bindWalkKey('Left', West)
-  bindWalkKey('Numpad8', North)
-  bindWalkKey('Numpad9', NorthEast)
-  bindWalkKey('Numpad6', East)
-  bindWalkKey('Numpad3', SouthEast)
-  bindWalkKey('Numpad2', South)
-  bindWalkKey('Numpad1', SouthWest)
-  bindWalkKey('Numpad4', West)
-  bindWalkKey('Numpad7', NorthWest)
-
-  bindTurnKey('Ctrl+Up', North)
-  bindTurnKey('Ctrl+Left', West)
-  bindTurnKey('Ctrl+Down', South)
-  bindTurnKey('Ctrl+Right', East)
-  bindTurnKey('Ctrl+Numpad8', North)
-  bindTurnKey('Ctrl+Numpad4', West)
-  bindTurnKey('Ctrl+Numpad2', South)
-  bindTurnKey('Ctrl+Numpad6', East)
-  g_keyboard.bindKeyPress('Escape', function() g_game.cancelAttackAndFollow() end, gameRootPanel)
-  g_keyboard.bindKeyPress('Ctrl+=', function() gameMapPanel:zoomIn() modules.client_options.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Ctrl+-', function() gameMapPanel:zoomOut() modules.client_options.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
-  g_keyboard.bindKeyDown('Ctrl+L', function() tryLogout(false) end, gameRootPanel)
-  -- g_keyboard.bindKeyDown('Ctrl+W', function() g_map.cleanTexts() if modules.game_textmessage then modules.game_textmessage.clearMessages() end end, gameRootPanel)
-  g_keyboard.bindKeyDown('Ctrl+.', nextViewMode, gameRootPanel)
+function GameInterface.bindWalkKey(key, dir)
+  g_keyboard.bindKeyDown(key, function() GameInterface.changeWalkDir(dir) end, gameRootPanel, true)
+  g_keyboard.bindKeyUp(key, function() GameInterface.changeWalkDir(dir, true) end, gameRootPanel, true)
+  g_keyboard.bindKeyPress(key, function() GameInterface.smartWalk(dir) end, gameRootPanel)
 end
 
-function bindWalkKey(key, dir)
-  g_keyboard.bindKeyDown(key, function() changeWalkDir(dir) end, gameRootPanel, true)
-  g_keyboard.bindKeyUp(key, function() changeWalkDir(dir, true) end, gameRootPanel, true)
-  g_keyboard.bindKeyPress(key, function() smartWalk(dir) end, gameRootPanel)
-end
-
-function unbindWalkKey(key)
+function GameInterface.unbindWalkKey(key)
   g_keyboard.unbindKeyDown(key, gameRootPanel)
   g_keyboard.unbindKeyUp(key, gameRootPanel)
   g_keyboard.unbindKeyPress(key, gameRootPanel)
 end
 
-function bindTurnKey(key, dir)
+function GameInterface.bindTurnKey(key, dir)
   local function callback(widget, code, repeatTicks)
-    if g_clock.millis() - lastDirTime >= modules.client_options.getOption('turnDelay') then
+    if g_clock.millis() - lastDirTime >= ClientOptions.getOption('turnDelay') then
       g_game.turn(dir)
-      changeWalkDir(dir)
+      GameInterface.changeWalkDir(dir)
       lastDirTime = g_clock.millis()
     end
   end
   g_keyboard.bindKeyPress(key, callback, gameRootPanel)
 end
 
-function terminate()
-  hide()
+function GameInterface.bindKeys()
+  gameRootPanel:setAutoRepeatDelay(200)
+
+  GameInterface.bindWalkKey('Up', North)
+  GameInterface.bindWalkKey('Right', East)
+  GameInterface.bindWalkKey('Down', South)
+  GameInterface.bindWalkKey('Left', West)
+  GameInterface.bindWalkKey('Numpad8', North)
+  GameInterface.bindWalkKey('Numpad9', NorthEast)
+  GameInterface.bindWalkKey('Numpad6', East)
+  GameInterface.bindWalkKey('Numpad3', SouthEast)
+  GameInterface.bindWalkKey('Numpad2', South)
+  GameInterface.bindWalkKey('Numpad1', SouthWest)
+  GameInterface.bindWalkKey('Numpad4', West)
+  GameInterface.bindWalkKey('Numpad7', NorthWest)
+
+  GameInterface.bindTurnKey('Ctrl+Up', North)
+  GameInterface.bindTurnKey('Ctrl+Left', West)
+  GameInterface.bindTurnKey('Ctrl+Down', South)
+  GameInterface.bindTurnKey('Ctrl+Right', East)
+  GameInterface.bindTurnKey('Ctrl+Numpad8', North)
+  GameInterface.bindTurnKey('Ctrl+Numpad4', West)
+  GameInterface.bindTurnKey('Ctrl+Numpad2', South)
+  GameInterface.bindTurnKey('Ctrl+Numpad6', East)
+
+  g_keyboard.bindKeyPress('Escape', function() g_game.cancelAttackAndFollow() end, gameRootPanel)
+  g_keyboard.bindKeyPress('Ctrl+=', function() gameMapPanel:zoomIn() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
+  g_keyboard.bindKeyPress('Ctrl+-', function() gameMapPanel:zoomOut() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
+  g_keyboard.bindKeyDown('Ctrl+L', function() GameInterface.tryLogout(false) end, gameRootPanel)
+  -- g_keyboard.bindKeyDown('Ctrl+W', function() g_map.cleanTexts() if modules.game_textmessage then GameTextMessage.clearMessages() end end, gameRootPanel)
+  g_keyboard.bindKeyDown('Ctrl+.', GameInterface.nextViewMode, gameRootPanel)
+
+  g_keyboard.bindKeyDown('Ctrl+Shift+Q', function() ClientOptions.setOption('showTopMenu', not ClientOptions.getOption('showTopMenu')) end)
+  g_keyboard.bindKeyDown('Ctrl+Shift+W', function() ClientOptions.setOption('showChat', not ClientOptions.getOption('showChat')) end)
+  g_keyboard.bindKeyDown('Ctrl+Shift+A', function() ClientOptions.setOption('showLeftPanel', not ClientOptions.getOption('showLeftPanel')) end)
+  g_keyboard.bindKeyDown('Ctrl+Shift+S', function() ClientOptions.setOption('showRightPanel', not ClientOptions.getOption('showRightPanel')) end)
+end
+
+function GameInterface.terminate()
+  GameInterface.hide()
 
   hookedMenuOptions = {}
+  GameInterface.stopSmartWalk()
 
-  stopSmartWalk()
+  disconnect(bottomSplitter, {
+    onDoubleClick = GameInterface.onSplitterDoubleClick,
+  })
 
-  -- disconnect(gameLeftPanel, { onVisibilityChange = onLeftPanelVisibilityChange })
+  for i = #_gamePanelsContainer, 1, -1 do
+    disconnect(_gamePanelsContainer[i], {
+      onFitAll = GameInterface.fitAllPanelChildren,
+    })
+  end
 
   disconnect(mouseGrabberWidget, {
-    onMouseRelease = onMouseGrabberRelease,
+    onMouseRelease = GameInterface.onMouseGrabberRelease,
   })
 
   disconnect(gameRootPanel, {
-    onGeometryChange = updateStretchShrink,
-    onFocusChange = stopSmartWalk,
+    onGeometryChange = GameInterface.updateStretchShrink,
+    onFocusChange    = GameInterface.stopSmartWalk,
   })
 
   disconnect(g_game, {
-    onGameStart = onGameStart,
-    onGameEnd = onGameEnd,
-    onLoginAdvice = onLoginAdvice
+    onGameStart   = GameInterface.onGameStart,
+    onGameEnd     = GameInterface.onGameEnd,
+    onLoginAdvice = GameInterface.onLoginAdvice
   })
 
   disconnect(g_app, {
-    onRun = load,
-    onExit = save,
+    onRun  = GameInterface.load,
+    onExit = GameInterface.save,
   })
+
+  _gamePanelsContainer = {}
+  _gamePanels = {}
+  gamePanelsContainer = {}
+  gamePanels = {}
 
   logoutButton:destroy()
   gameRootPanel:destroy()
+
+  _G.GameInterface = nil
 end
 
-function onGameStart()
+function GameInterface.onGameStart()
   local localPlayer = g_game.getLocalPlayer()
   g_window.setTitle(g_app.getName() .. (localPlayer and " - " .. localPlayer:getName() or ""))
+  GameInterface.show()
 
-  show()
+  -- Panels width
+  ClientOptions.updateOption('rightFirstPanelWidth')
+  ClientOptions.updateOption('rightSecondPanelWidth')
+  ClientOptions.updateOption('rightThirdPanelWidth')
+  ClientOptions.updateOption('leftFirstPanelWidth')
+  ClientOptions.updateOption('leftSecondPanelWidth')
+  ClientOptions.updateOption('leftThirdPanelWidth')
 
-  -- Panels Stickers
-  modules.client_options.updateStickers()
+  -- Panels stickers
+  ClientOptions.updateStickers()
 
-  -- open tibia has delay in auto walking
-  -- if not g_game.isOfficialTibia() then
-    g_game.enableFeature(GameForceFirstAutoWalkStep)
-  -- else
-    -- g_game.disableFeature(GameForceFirstAutoWalkStep)
-  -- end
+  g_game.enableFeature(GameForceFirstAutoWalkStep)
 end
 
-function onGameEnd()
+function GameInterface.onGameEnd()
   g_window.setTitle(g_app.getName())
-
-  hide()
+  GameInterface.hide()
 end
 
-function show()
-  connect(g_app, { onClose = tryExit })
-  modules.client_background.hide()
+function GameInterface.show()
+  connect(g_app, {
+    onClose = GameInterface.tryExit
+  })
+  ClientBackground.hide()
   gameRootPanel:show()
   gameRootPanel:focus()
   gameMapPanel:followCreature(g_game.getLocalPlayer())
-  updateViewMode()
-  updateStretchShrink()
+  GameInterface.updateViewMode()
+  GameInterface.updateStretchShrink()
   logoutButton:setTooltip(tr('Logout'))
-
-  -- addEvent(function()
-  --   gameMapPanel:setMaxZoomOut(19) -- Default: 11
-  --   gameMapPanel:setLimitVisibleRange(true)
-  -- end)
 end
 
-function hide()
-  disconnect(g_app, { onClose = tryExit })
+function GameInterface.hide()
+  disconnect(g_app, {
+    onClose = GameInterface.tryExit
+  })
   logoutButton:setTooltip(tr('Exit'))
 
   if logoutWindow then
@@ -227,40 +300,38 @@ function hide()
     countWindow = nil
   end
   gameRootPanel:hide()
-  modules.client_background.show()
+  ClientBackground.show()
 end
 
-function save()
+function GameInterface.save()
   local settings = {}
-  settings.splitterMarginBottom = bottomSplitter:getMarginBottom()
+  settings.splitterMarginBottom = bottomSplitter.currentMargin
   g_settings.setNode('game_interface', settings)
 end
 
-function load()
+function GameInterface.load()
   local settings = g_settings.getNode('game_interface')
-  if settings then
-    if settings.splitterMarginBottom then
-      bottomSplitter:setMarginBottom(settings.splitterMarginBottom)
-    end
-  end
+
+  bottomSplitter.currentMargin = settings and settings.splitterMarginBottom or bottomSplitter.defaultMargin
+  bottomSplitter:updateMargin()
 end
 
-function onLoginAdvice(message)
+function GameInterface.onLoginAdvice(message)
   displayInfoBox(tr("For Your Information"), message)
 end
 
-function forceExit()
+function GameInterface.forceExit()
   g_game.cancelLogin()
   scheduleEvent(exit, 10)
   return true
 end
 
-function tryExit()
+function GameInterface.tryExit()
   if exitWindow then
     return true
   end
 
-  local exitFunc = function() g_game.safeLogout() forceExit() end
+  local exitFunc = function() g_game.safeLogout() GameInterface.forceExit() end
   local logoutFunc = function() g_game.safeLogout() exitWindow:destroy() exitWindow = nil end
   local cancelFunc = function() exitWindow:destroy() exitWindow = nil end
 
@@ -273,7 +344,7 @@ function tryExit()
   return true
 end
 
-function tryLogout(prompt)
+function GameInterface.tryLogout(prompt)
   if type(prompt) ~= "boolean" then
     prompt = true
   end
@@ -328,16 +399,16 @@ function tryLogout(prompt)
   end
 end
 
-function stopSmartWalk()
+function GameInterface.stopSmartWalk()
   smartWalkDirs = {}
   smartWalkDir = nil
 end
 
-function changeWalkDir(dir, pop)
+function GameInterface.changeWalkDir(dir, pop)
   while table.removevalue(smartWalkDirs, dir) do end
   if pop then
     if #smartWalkDirs == 0 then
-      stopSmartWalk()
+      GameInterface.stopSmartWalk()
       return
     end
   else
@@ -345,7 +416,7 @@ function changeWalkDir(dir, pop)
   end
 
   smartWalkDir = smartWalkDirs[1]
-  if modules.client_options.getOption('smartWalk') and #smartWalkDirs > 1 then
+  if ClientOptions.getOption('smartWalk') and #smartWalkDirs > 1 then
     for _,d in pairs(smartWalkDirs) do
       if (smartWalkDir == North and d == West) or (smartWalkDir == West and d == North) then
         smartWalkDir = NorthWest
@@ -364,13 +435,13 @@ function changeWalkDir(dir, pop)
   end
 end
 
-function smartWalk(dir)
+function GameInterface.smartWalk(dir)
   if g_keyboard.getModifiers() == KeyboardNoModifier then
     local func = walkFunction
     if not func then
       local dire = smartWalkDir or dir
-      if modules.client_options.getOption('smoothWalk') then
-        local sensitivity = modules.client_options.getOption('walkingSensitivityScrollBar')
+      if ClientOptions.getOption('smoothWalk') then
+        local sensitivity = ClientOptions.getOption('walkingSensitivityScrollBar')
         g_game.smoothWalk(dire, sensitivity)
       else
         g_game.walk(dire)
@@ -381,12 +452,12 @@ function smartWalk(dir)
   return false
 end
 
-function setWalkingRepeatDelay(value)
-   gameRootPanel:setAutoRepeatDelay(value)
+function GameInterface.setWalkingRepeatDelay(value)
+  gameRootPanel:setAutoRepeatDelay(value)
 end
 
-function updateStretchShrink()
-  if not modules.client_options.getOption('dontStretchShrink') or alternativeView then
+function GameInterface.updateStretchShrink()
+  if not ClientOptions.getOption('dontStretchShrink') or alternativeView then
     return
   end
 
@@ -396,38 +467,398 @@ function updateStretchShrink()
   bottomSplitter:setMarginBottom(bottomSplitter:getMarginBottom() + (gameMapPanel:getHeight() - 32 * 11) - 10)
 end
 
-function addToPanels(uiWidget)
-  uiWidget.onRemoveFromContainer = function(widget)
-    if gameLeftPanel:isOn() then
-      if widget:getParent():getId() == 'gameRightPanel' then
-        if gameLeftPanel:getEmptySpaceHeight() - widget:getHeight() >= 0 then
-          widget:setParent(gameLeftPanel)
-        end
-      elseif widget:getParent():getId() == 'gameLeftPanel' then
-        if gameRightPanel:getEmptySpaceHeight() - widget:getHeight() >= 0 then
-          widget:setParent(gameRightPanel)
-        end
+function GameInterface.onSplitterDoubleClick(mousePosition)
+  bottomSplitter:setMarginBottom(bottomSplitter.defaultMargin)
+end
+
+local function tryChangeChild(selfHeight, childrenHeight, _childList, changeValidateCondition, changeConditionValidated, changeCondition)
+  local oldChildrenHeight = childrenHeight
+
+  local childList = {}
+
+  for i = #_childList, 1, -1 do
+    local child = _childList[i]
+
+    local childOldHeight      = child:getHeight()
+    local otherChildrenHeight = childrenHeight - childOldHeight
+
+    if changeValidateCondition(child, childOldHeight, otherChildrenHeight) then
+      childrenHeight = changeConditionValidated(child, childOldHeight, otherChildrenHeight, childList)
+    end
+
+    -- If fits enough, then resize all of childList (if not, do not resize any)
+    if childrenHeight <= selfHeight then
+      for _, childValue in ipairs(childList) do
+        changeCondition(childValue)
       end
+      return childrenHeight
     end
   end
-  if not gameLeftPanel:isOn() then uiWidget:setParent(gameRightPanel) return end
-  if gameRightPanel:getEmptySpaceHeight() - uiWidget:getHeight() >= 0 then
-    uiWidget:setParent(gameRightPanel)
+
+  return oldChildrenHeight
+end
+local function tryResizeChildList(selfHeight, childrenHeight, _childList, noRemoveChild, resizeCondition)
+  local changeValidateCondition = function(child, childOldHeight, otherChildrenHeight)
+    local availableHeight = selfHeight - otherChildrenHeight -- Possible child new height
+    return child:isVisible() and child:isResizeable() and child:getMinimumHeight() <= availableHeight and child:getMaximumHeight() >= availableHeight and availableHeight ~= childOldHeight and (not resizeCondition or resizeCondition(child, noRemoveChild))
+  end
+
+  local changeConditionValidated = function(child, childOldHeight, otherChildrenHeight, childList)
+    local availableHeight = selfHeight - otherChildrenHeight -- Child new height
+    table.insert(childList, { widget = child, height = availableHeight })
+    return otherChildrenHeight + availableHeight
+  end
+
+  local changeCondition = function(childValue)
+    -- addEvent(function() childValue.widget:setHeight(childValue.height) end)
+    childValue.widget:setHeight(childValue.height, false, true)
+  end
+
+  return tryChangeChild(selfHeight, childrenHeight, _childList, changeValidateCondition, changeConditionValidated, changeCondition)
+end
+local function tryMinimizeChildList(selfHeight, childrenHeight, _childList, noRemoveChild, minimizeCondition)
+  local changeValidateCondition = function(child, childOldHeight, otherChildrenHeight)
+    local minimizeButton = child:getChildById('minimizeButton')
+    return child:isVisible() and not minimizeButton:isOn() and (not minimizeCondition or minimizeCondition(child, noRemoveChild))
+  end
+
+  local changeConditionValidated = function(child, childOldHeight, otherChildrenHeight, childList)
+    table.insert(childList, child)
+    return otherChildrenHeight + child.minimizedHeight
+  end
+
+  local changeCondition = function(childValue)
+    childValue:minimize(false, true)
+  end
+
+  return tryChangeChild(selfHeight, childrenHeight, _childList, changeValidateCondition, changeConditionValidated, changeCondition)
+end
+local function tryCloseChildList(selfHeight, childrenHeight, _childList, noRemoveChild, closeCondition)
+  local changeValidateCondition = function(child, childOldHeight, otherChildrenHeight)
+    return child:isVisible() and (not closeCondition or closeCondition(child, noRemoveChild))
+  end
+
+  local changeConditionValidated = function(child, childOldHeight, otherChildrenHeight, childList)
+    table.insert(childList, child)
+    return otherChildrenHeight
+  end
+
+  local changeCondition = function(childValue)
+    childValue:close(false)
+  end
+
+  return tryChangeChild(selfHeight, childrenHeight, _childList, changeValidateCondition, changeConditionValidated, changeCondition)
+end
+local function isNoRemoveChild(child, noRemoveChild)
+  return child == noRemoveChild
+end
+local function isUnsavableChildren(child, noRemoveChild)
+  return child ~= noRemoveChild and not child.save
+end
+local function isSavableChildren(child, noRemoveChild)
+  return child ~= noRemoveChild and child.save
+end
+-- TODO: connect to window onResize event?
+function GameInterface.fitAllPanelChildren(miniWindowContainer, noRemoveChild)
+  local children = miniWindowContainer:getChildren()
+
+  local hadNoRemoveChild = noRemoveChild ~= nil
+
+  if not noRemoveChild then
+    if #children == 0 then
+      return
+    end
+
+    noRemoveChild = children[#children]
+  end
+
+  local selfHeight     = miniWindowContainer:getSpaceHeight()
+  local childrenHeight = miniWindowContainer:getChildrenSpaceHeight()
+
+
+
+  -- Try to resize noRemoveChild
+  if childrenHeight <= selfHeight then
+    return
+  end
+  childrenHeight = tryResizeChildList(selfHeight, childrenHeight, children, noRemoveChild, isNoRemoveChild)
+
+  -- Try to resize unsavable widgets
+  if childrenHeight <= selfHeight then
+    return
+  end
+  childrenHeight = tryResizeChildList(selfHeight, childrenHeight, children, noRemoveChild, isUnsavableChildren)
+
+  -- Try to resize savable widgets
+  if childrenHeight <= selfHeight then
+    return
+  end
+  childrenHeight = tryResizeChildList(selfHeight, childrenHeight, children, noRemoveChild, isSavableChildren)
+
+
+
+  -- Try move noRemoveChild (useful for savable widgets that are always loaded on same panel)
+  if childrenHeight <= selfHeight then
+    return
+  end
+  if hadNoRemoveChild then
+    local nextAvailablePanel, nextAvailablePanelKey = GameInterface.getNextPanel(function(_gamePanel, k) return gamePanelsContainer[k] ~= miniWindowContainer and _gamePanel:isVisible() and gamePanelsContainer[k]:getEmptySpaceHeight() - noRemoveChild:getHeight() >= 0 end)
+    if nextAvailablePanel then
+      noRemoveChild:setParent(gamePanelsContainer[nextAvailablePanelKey])
+      return
+    end
+  end
+
+
+
+  -- Try to minimize unsavable widgets
+  if childrenHeight <= selfHeight then
+    return
+  end
+  childrenHeight = tryMinimizeChildList(selfHeight, childrenHeight, children, noRemoveChild, isUnsavableChildren)
+
+  -- Try to remove unsavable widgets
+  if childrenHeight <= selfHeight then
+    return
+  end
+  childrenHeight = tryCloseChildList(selfHeight, childrenHeight, children, noRemoveChild, isUnsavableChildren)
+
+
+
+  -- Try to minimize savable widgets
+  if childrenHeight <= selfHeight then
+    return
+  end
+  childrenHeight = tryMinimizeChildList(selfHeight, childrenHeight, children, noRemoveChild, isSavableChildren)
+
+  -- Try to remove savable widgets
+  if childrenHeight <= selfHeight then
+    return
+  end
+  childrenHeight = tryCloseChildList(selfHeight, childrenHeight, children, noRemoveChild, isSavableChildren)
+end
+
+function GameInterface.setupPanels()
+  local panelsPriority = ClientOptions.getOption('panelsPriority')
+
+  -- Right
+  if panelsPriority == 1 then
+    -- Priority order
+    gamePanels[1]          = gameRightFirstPanel
+    gamePanels[2]          = gameRightSecondPanel
+    gamePanels[3]          = gameRightThirdPanel
+    gamePanels[4]          = gameLeftFirstPanel
+    gamePanels[5]          = gameLeftSecondPanel
+    gamePanels[6]          = gameLeftThirdPanel
+    gamePanelsContainer[1] = gameRightFirstPanelContainer
+    gamePanelsContainer[2] = gameRightSecondPanelContainer
+    gamePanelsContainer[3] = gameRightThirdPanelContainer
+    gamePanelsContainer[4] = gameLeftFirstPanelContainer
+    gamePanelsContainer[5] = gameLeftSecondPanelContainer
+    gamePanelsContainer[6] = gameLeftThirdPanelContainer
+
+  -- Left
+  elseif panelsPriority == -1 then
+    -- Priority order
+    gamePanels[1]          = gameLeftFirstPanel
+    gamePanels[2]          = gameLeftSecondPanel
+    gamePanels[3]          = gameLeftThirdPanel
+    gamePanels[4]          = gameRightFirstPanel
+    gamePanels[5]          = gameRightSecondPanel
+    gamePanels[6]          = gameRightThirdPanel
+    gamePanelsContainer[1] = gameLeftFirstPanelContainer
+    gamePanelsContainer[2] = gameLeftSecondPanelContainer
+    gamePanelsContainer[3] = gameLeftThirdPanelContainer
+    gamePanelsContainer[4] = gameRightFirstPanelContainer
+    gamePanelsContainer[5] = gameRightSecondPanelContainer
+    gamePanelsContainer[6] = gameRightThirdPanelContainer
+
+  -- None
   else
-    uiWidget:setParent(gameLeftPanel)
+    gamePanels          = {}
+    gamePanelsContainer = {}
   end
 end
 
-function onMouseGrabberRelease(self, mousePosition, mouseButton)
-  if selectedThing == nil then return false end
+function GameInterface.getNextPanel(condition)
+  condition = condition or function(_gamePanel, k) return _gamePanel:isVisible() end
+
+  for gamePanelKey, gamePanel in ipairs(gamePanels) do
+    if condition(gamePanel, gamePanelKey) then
+      return gamePanel, gamePanelKey
+    end
+  end
+  return nil, -1
+end
+
+function GameInterface.addToPanels(miniWindow, force)
+  if #gamePanels == 0 then
+    return false
+  end
+
+  -- Mini window within panel container already
+  local parent = miniWindow:getParent()
+  if not force and parent and parent:getClassName() == 'UIMiniWindowContainer' then
+    return false
+  end
+
+  local nextAvailablePanel, nextAvailablePanelKey = GameInterface.getNextPanel(function(_gamePanel, k) return _gamePanel:isVisible() and gamePanelsContainer[k]:getEmptySpaceHeight() - miniWindow:getHeight() >= 0 end)
+
+  -- No available panel
+  if not nextAvailablePanel then
+    return false
+  end
+
+  -- Attach it to available panel
+  miniWindow:setParent(gamePanelsContainer[nextAvailablePanelKey])
+
+  return true
+end
+
+function GameInterface.onContainerMiniWindowOpen(containerWindow, previousContainer)
+  if not previousContainer then -- Opened in new window
+    if GameInterface.addToPanels(containerWindow) then
+      containerWindow:setup()
+    end
+  end
+end
+
+function GameInterface.toggleMiniWindow(miniWindow) -- To use on each top menu mini window
+  if not miniWindow.topMenuButton then
+    return
+  end
+
+  if miniWindow.topMenuButton:isOn() then
+    miniWindow:close()
+  else
+    if not miniWindow:getSettings(true) or not miniWindow:getParent() then -- Opened for the first time or has not parent
+      if not GameInterface.addToPanels(miniWindow) then
+        return
+      end
+    end
+
+    miniWindow:open()
+  end
+end
+
+function GameInterface.setupMiniWindow(miniWindow, miniWindowButton) -- To use on each top menu mini window
+  if not miniWindow or not miniWindowButton then
+    return
+  end
+
+  local parent = miniWindow:getParent()
+  if parent and not parent:isVisible() then
+    return
+  end
+
+  -- Attach top menu button to mini window
+  miniWindow.topMenuButton = miniWindowButton
+
+  miniWindow:setup()
+
+  if miniWindow:getSettings(true) then -- Opened once before
+    if miniWindow:isVisible() then
+      miniWindowButton:setOn(true)
+    end
+  end
+end
+
+function GameInterface.isRightPanel(panel)
+  return panel.sidePanelId % 2 == 1
+end
+
+function GameInterface.isLeftPanel(panel)
+  return panel.sidePanelId % 2 == 0
+end
+
+function GameInterface.isDefaultPanel(panel)
+  return gamePanels[1] and panel == gamePanels[1]
+end
+
+function GameInterface.isRightPanelContainer(panelContainer)
+  return isRightPanel(panelContainer:getParent())
+end
+
+function GameInterface.isLeftPanelContainer(panelContainer)
+  return GameInterface.isLeftPanel(panelContainer:getParent())
+end
+
+function GameInterface.getDefaultPanel()
+  return gamePanels[1]
+end
+
+function GameInterface.getDefaultPanelContainer()
+  return gamePanelsContainer[1]
+end
+
+function GameInterface.setRightPanels(on)
+  if on == nil then
+    on = ClientOptions.getOption('showRightPanel')
+  end
+
+  gameRightFirstPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightFirstPanel))
+  ClientOptions.updateOption('rightFirstPanelWidth')
+
+  gameRightSecondPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightSecondPanel))
+  ClientOptions.updateOption('rightSecondPanelWidth')
+
+  gameRightThirdPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightThirdPanel))
+  ClientOptions.updateOption('rightThirdPanelWidth')
+
+  rightPanelButton:setOn(on)
+end
+
+function GameInterface.setLeftPanels(on)
+  if on == nil then
+    on = ClientOptions.getOption('showLeftPanel')
+  end
+
+  gameLeftFirstPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftFirstPanel))
+  ClientOptions.updateOption('leftFirstPanelWidth')
+
+  gameLeftSecondPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftSecondPanel))
+  ClientOptions.updateOption('leftSecondPanelWidth')
+
+  gameLeftThirdPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftThirdPanel))
+  ClientOptions.updateOption('leftThirdPanelWidth')
+
+  leftPanelButton:setOn(on)
+end
+
+function GameInterface.movePanelMiniWindows(panelContainer)
+  local children = panelContainer:getChildren()
+  for _, child in ipairs(children) do
+    GameInterface.addToPanels(child, true)
+  end
+end
+
+function GameInterface.moveHiddenPanelMiniWindows()
+  for i = 1, #gamePanelsContainer do
+    if not gamePanels[i]:isVisible() then
+      GameInterface.movePanelMiniWindows(gamePanelsContainer[i])
+    end
+  end
+end
+
+function GameInterface.isPanelEnabled(panel)
+  if GameInterface.isLeftPanel(panel) then
+    return panel.sidePanelId / 2 <= (ClientOptions.getOption('enabledLeftPanels') or 0)
+  end
+  return math.floor(panel.sidePanelId / 2) + 1 <= (ClientOptions.getOption('enabledRightPanels') or 0)
+end
+
+function GameInterface.onMouseGrabberRelease(self, mousePosition, mouseButton)
+  if selectedThing == nil then
+    return false
+  end
 
   if mouseButton == MouseLeftButton then
     local clickedWidget = gameRootPanel:recursiveGetChildByPos(mousePosition, false)
     if clickedWidget then
       if selectedType == 'use' then
-        onUseWith(clickedWidget, mousePosition)
+        GameInterface.onUseWith(clickedWidget, mousePosition)
       elseif selectedType == 'trade' then
-        onTradeWith(clickedWidget, mousePosition)
+        GameInterface.onTradeWith(clickedWidget, mousePosition)
       end
     end
   end
@@ -438,7 +869,7 @@ function onMouseGrabberRelease(self, mousePosition, mouseButton)
   return true
 end
 
-function onUseWith(clickedWidget, mousePosition)
+function GameInterface.onUseWith(clickedWidget, mousePosition)
   if clickedWidget:getClassName() == 'UIGameMap' then
     local tile = clickedWidget:getTile(mousePosition)
     if tile then
@@ -459,7 +890,7 @@ function onUseWith(clickedWidget, mousePosition)
   end
 end
 
-function onTradeWith(clickedWidget, mousePosition)
+function GameInterface.onTradeWith(clickedWidget, mousePosition)
   if clickedWidget:getClassName() == 'UIGameMap' then
     local tile = clickedWidget:getTile(mousePosition)
     if tile then
@@ -473,8 +904,11 @@ function onTradeWith(clickedWidget, mousePosition)
   end
 end
 
-function startUseWith(thing)
-  if not thing then return end
+function GameInterface.startUseWith(thing)
+  if not thing then
+    return
+  end
+
   if g_ui.isMouseGrabbed() then
     if selectedThing then
       selectedThing = thing
@@ -488,8 +922,11 @@ function startUseWith(thing)
   g_mouse.pushCursor('target')
 end
 
-function startTradeWith(thing)
-  if not thing then return end
+function GameInterface.startTradeWith(thing)
+  if not thing then
+    return
+  end
+
   if g_ui.isMouseGrabbed() then
     if selectedThing then
       selectedThing = thing
@@ -503,16 +940,18 @@ function startTradeWith(thing)
   g_mouse.pushCursor('target')
 end
 
-function isMenuHookCategoryEmpty(category)
+function GameInterface.isMenuHookCategoryEmpty(category)
   if category then
     for _,opt in pairs(category) do
-      if opt then return false end
+      if opt then
+        return false
+      end
     end
   end
   return true
 end
 
-function addMenuHook(category, name, callback, condition, shortcut)
+function GameInterface.addMenuHook(category, name, callback, condition, shortcut)
   if not hookedMenuOptions[category] then
     hookedMenuOptions[category] = {}
   end
@@ -523,7 +962,7 @@ function addMenuHook(category, name, callback, condition, shortcut)
   }
 end
 
-function removeMenuHook(category, name)
+function GameInterface.removeMenuHook(category, name)
   if not name then
     hookedMenuOptions[category] = {}
   else
@@ -531,21 +970,33 @@ function removeMenuHook(category, name)
   end
 end
 
-function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
-  if not g_game.isOnline() then return end
+function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+  if not g_game.isOnline() then
+    return
+  end
 
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
 
-  local classic = modules.client_options.getOption('classicControl')
+  local classic = ClientOptions.getOption('classicControl')
   local shortcut = nil
 
-  if not classic then shortcut = '(Shift)' else shortcut = nil end
+  if not classic then
+    shortcut = '(Shift)'
+  else
+    shortcut = nil
+  end
+
   if lookThing then
     menu:addOption(tr('Look'), function() g_game.look(lookThing) end, shortcut)
   end
 
-  if not classic then shortcut = '(Ctrl)' else shortcut = nil end
+  if not classic then
+    shortcut = '(Ctrl)'
+  else
+    shortcut = nil
+  end
+
   if useThing then
     if useThing:isContainer() then
       if useThing:getParentContainer() then
@@ -556,7 +1007,7 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
       end
     else
       if useThing:isMultiUse() then
-        menu:addOption(tr('Use with') .. ' ...', function() startUseWith(useThing) end, shortcut)
+        menu:addOption(tr('Use with') .. ' ...', function() GameInterface.startUseWith(useThing) end, shortcut)
       else
         menu:addOption(tr('Use'), function() g_game.use(useThing) end, shortcut)
       end
@@ -573,7 +1024,7 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
 
   if lookThing and not lookThing:isCreature() and not lookThing:isNotMoveable() and lookThing:isPickupable() then
     menu:addSeparator()
-    menu:addOption(tr('Trade with') .. ' ...', function() startTradeWith(lookThing) end)
+    menu:addOption(tr('Trade with') .. ' ...', function() GameInterface.startTradeWith(lookThing) end)
   end
 
   if lookThing then
@@ -613,21 +1064,31 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
       if g_game.getAccountType() >= ACCOUNT_TYPE_GAMEMASTER then
         menu:addSeparator()
 
-        menu:addOption(tr('View rule violations'), function() if modules.game_ruleviolation then modules.game_ruleviolation.showViewWindow() end end)
-        menu:addOption(tr('View bugs'), function() if modules.game_bugreport then modules.game_bugreport.showViewWindow() end end)
+        menu:addOption(tr('View rule violations'), function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow() end end)
+        menu:addOption(tr('View bugs'), function() if modules.game_bugreport then GameBugReport.showViewWindow() end end)
       end
 
     else
       local localPosition = localPlayer:getPosition()
       if creatureThing:getPosition().z == localPosition.z then
-        if not classic then shortcut = '(Alt)' else shortcut = nil end
+        if not classic then
+          shortcut = '(Alt)'
+        else
+          shortcut = nil
+        end
+
         if g_game.getAttackingCreature() ~= creatureThing then
           menu:addOption(tr('Attack'), function() g_game.attack(creatureThing) end, shortcut)
         else
           menu:addOption(tr('Stop attack'), function() g_game.cancelAttack() end, shortcut)
         end
 
-        if not classic then shortcut = '(Ctrl+Shift)' else shortcut = nil end
+        if not classic then
+          shortcut = '(Ctrl+Shift)'
+        else
+          shortcut = nil
+        end
+
         if g_game.getFollowingCreature() ~= creatureThing then
           menu:addOption(tr('Follow'), function() g_game.follow(creatureThing) end, shortcut)
         else
@@ -640,7 +1101,7 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
 
         menu:addOption(tr('Message to') .. ' ' .. creatureName, function() g_game.openPrivateChannel(creatureName) end)
 
-        if modules.game_console and modules.game_console.getOwnPrivateTab() then
+        if GameConsole and GameConsole.getOwnPrivateTab() then
           menu:addOption(tr('Invite to private chat'), function() g_game.inviteToOwnChannel(creatureName) end)
           menu:addOption(tr('Exclude from private chat'), function() g_game.excludeFromOwnChannel(creatureName) end) -- [TODO] must be removed after message's popup labels been implemented
         end
@@ -648,10 +1109,10 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
           menu:addOption(tr('Add to VIP list'), function() g_game.addVip(creatureName) end)
         end
 
-        if modules.game_console.isIgnored(creatureName) then
-          menu:addOption(tr('Unignore') .. ' ' .. creatureName, function() if modules.game_console then modules.game_console.removeIgnoredPlayer(creatureName) end end)
+        if GameConsole and GameConsole.isIgnored(creatureName) then
+          menu:addOption(tr('Unignore') .. ' ' .. creatureName, function() if GameConsole then GameConsole.removeIgnoredPlayer(creatureName) end end)
         else
-          menu:addOption(tr('Ignore') .. ' ' .. creatureName, function() if modules.game_console then modules.game_console.addIgnoredPlayer(creatureName) end end)
+          menu:addOption(tr('Ignore') .. ' ' .. creatureName, function() if GameConsole then GameConsole.addIgnoredPlayer(creatureName) end end)
         end
 
         local localPlayerShield = localPlayer:getShield()
@@ -681,13 +1142,13 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
           menu:addSeparator()
 
           if g_game.getAccountType() >= ACCOUNT_TYPE_GAMEMASTER then
-            menu:addOption(tr('Add rule violation'), function() if modules.game_ruleviolation then modules.game_ruleviolation.showViewWindow(creatureName) end end)
+            menu:addOption(tr('Add rule violation'), function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow(creatureName) end end)
           end
 
           local REPORT_TYPE_NAME      = 0
           local REPORT_TYPE_VIOLATION = 2
-          menu:addOption(tr('Report name'), function() if modules.game_ruleviolation then modules.game_ruleviolation.showRuleViolationReportWindow(REPORT_TYPE_NAME, creatureName) end end)
-          menu:addOption(tr('Report violation'), function() if modules.game_ruleviolation then modules.game_ruleviolation.showRuleViolationReportWindow(REPORT_TYPE_VIOLATION, creatureName) end end)
+          menu:addOption(tr('Report name'), function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_NAME, creatureName) end end)
+          menu:addOption(tr('Report violation'), function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_VIOLATION, creatureName) end end)
         end
       end
     end
@@ -699,7 +1160,7 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
 
   -- hooked menu options
   for _,category in pairs(hookedMenuOptions) do
-    if not isMenuHookCategoryEmpty(category) then
+    if not GameInterface.isMenuHookCategoryEmpty(category) then
       menu:addSeparator()
       for name,opt in pairs(category) do
         if opt and opt.condition(menuPosition, lookThing, useThing, creatureThing) then
@@ -717,14 +1178,14 @@ local function getDistanceBetween(p1, p2)
   return math.max(math.abs(p1.x - p2.x), math.abs(p1.y - p2.y))
 end
 
-function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature)
+function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature)
   local player = g_game.getLocalPlayer()
   local keyboardModifiers = g_keyboard.getModifiers()
   local isMouseBothPressed = g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton or g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton
 
-  if not modules.client_options.getOption('classicControl') then
+  if not ClientOptions.getOption('classicControl') then
     if keyboardModifiers == KeyboardNoModifier and mouseButton == MouseRightButton and not g_mouse.isPressed(MouseLeftButton) then
-      createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing)
       return true
     elseif creatureThing and getDistanceBetween(creatureThing:getPosition(), player:getPosition()) >= 1 and (creatureThing:getPosition().z == autoWalkPos.z and g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) or not creatureThing:isMonster() and isMouseBothPressed) then
       g_game.follow(creatureThing)
@@ -741,7 +1202,7 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
           g_game.open(useThing, useThing:getParentContainer() and not isMouseBothPressed and useThing:getParentContainer() or nil)
           return true
         elseif useThing:isMultiUse() then
-          startUseWith(useThing)
+          GameInterface.startUseWith(useThing)
           return true
         end
       end
@@ -766,7 +1227,7 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
           g_game.open(useThing, useThing:getParentContainer() and useThing:getParentContainer() or nil)
           return true
         elseif useThing:isMultiUse() then
-          startUseWith(useThing)
+          GameInterface.startUseWith(useThing)
           return true
         end
       end
@@ -779,7 +1240,7 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
       g_game.look(lookThing)
       return true
     elseif useThing and keyboardModifiers == KeyboardCtrlModifier and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
-      createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing)
       return true
     elseif attackCreature and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
       g_game.attack(attackCreature)
@@ -802,7 +1263,7 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
   return false
 end
 
-function moveStackableItem(item, toPos)
+function GameInterface.moveStackableItem(item, toPos)
   if countWindow then
     return
   end
@@ -845,11 +1306,15 @@ function moveStackableItem(item, toPos)
     end
   end
   g_keyboard.bindKeyPress("Up", function() check() spinbox:up() end, spinbox)
-  g_keyboard.bindKeyPress("Down", function() check() spinbox:down() end, spinbox)
   g_keyboard.bindKeyPress("Right", function() check() spinbox:up() end, spinbox)
+  g_keyboard.bindKeyPress("Down", function() check() spinbox:down() end, spinbox)
   g_keyboard.bindKeyPress("Left", function() check() spinbox:down() end, spinbox)
   g_keyboard.bindKeyPress("PageUp", function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
+  g_keyboard.bindKeyPress("Shift+Up", function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
+  g_keyboard.bindKeyPress("Shift+Right", function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
   g_keyboard.bindKeyPress("PageDown", function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
+  g_keyboard.bindKeyPress("Shift+Down", function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
+  g_keyboard.bindKeyPress("Shift+Left", function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
 
   scrollbar.onValueChange = function(self, value)
     itembox:setItemCount(value)
@@ -889,207 +1354,158 @@ function moveStackableItem(item, toPos)
   cancelButton.onClick = cancelFunc
 end
 
-function getRootPanel()
+function GameInterface.getRootPanel()
   return gameRootPanel
 end
 
-function getMapPanel()
+function GameInterface.getMapPanel()
   return gameMapPanel
 end
 
-function getRightPanel()
-  return gameRightPanel
+function GameInterface.getRightFirstPanel()
+  return gameRightFirstPanel
 end
 
-function getLeftPanel()
-  return gameLeftPanel
+function GameInterface.getRightSecondPanel()
+  return gameRightSecondPanel
 end
 
-function getGameRightPanelBackground()
-  return gameRightPanelBackground
+function GameInterface.getRightThirdPanel()
+  return gameRightThirdPanel
 end
 
-function getGameLeftPanelBackground()
-  return gameLeftPanelBackground
+function GameInterface.getLeftFirstPanel()
+  return gameLeftFirstPanel
 end
 
-function getBottomPanel()
+function GameInterface.getLeftSecondPanel()
+  return gameLeftSecondPanel
+end
+
+function GameInterface.getLeftThirdPanel()
+  return gameLeftThirdPanel
+end
+
+function GameInterface.getRightFirstPanelContainer()
+  return gameRightFirstPanelContainer
+end
+
+function GameInterface.getRightSecondPanelContainer()
+  return gameRightSecondPanelContainer
+end
+
+function GameInterface.getRightThirdPanelContainer()
+  return gameRightThirdPanelContainer
+end
+
+function GameInterface.getLeftFirstPanelContainer()
+  return gameLeftFirstPanelContainer
+end
+
+function GameInterface.getLeftSecondPanelContainer()
+  return gameLeftSecondPanelContainer
+end
+
+function GameInterface.getLeftThirdPanelContainer()
+  return gameLeftThirdPanelContainer
+end
+
+function GameInterface.getBottomPanel()
   return gameBottomPanel
 end
 
-function getSplitter()
+function GameInterface.getSplitter()
   return bottomSplitter
 end
 
-function getGameExpBar()
+function GameInterface.getGameExpBar()
   return gameExpBar
 end
 
-function getLeftPanelButton()
+function GameInterface.getLeftPanelButton()
   return leftPanelButton
 end
 
-function getRightPanelButton()
+function GameInterface.getRightPanelButton()
   return rightPanelButton
 end
 
-function getTopMenuButton()
+function GameInterface.getTopMenuButton()
   return topMenuButton
 end
 
-function getChatButton()
+function GameInterface.getChatButton()
   return chatButton
 end
 
--- function onLeftPanelVisibilityChange(leftPanel, visible)
---   if not visible and g_game.isOnline() then
---     local children = leftPanel:getChildren()
---     for i=1,#children do
---       children[i]:setParent(gameRightPanel)
---     end
---   end
--- end
-
-function getCurrentViewMode()
+function GameInterface.getCurrentViewMode()
   return currentViewMode
 end
 
-function nextViewMode()
-  setupViewMode((currentViewMode + 1) % table.size(ViewModes))
+function GameInterface.isViewModeFull()
+  return ViewModes[currentViewMode].isFull
 end
 
-function updateViewMode()
+function GameInterface.nextViewMode()
+  GameInterface.setupViewMode((currentViewMode + 1) % table.size(ViewModes))
+end
+
+function GameInterface.updateViewMode()
   local viewMode    = ViewModes[0]
-  local viewModeStr = modules.client_options.getOption('viewModeComboBox')
+  local viewModeStr = ClientOptions.getOption('viewModeComboBox')
   for k = 0, #ViewModes do
     if viewModeStr == ViewModes[k].name then
       viewMode = ViewModes[k]
       break
     end
   end
-  setupViewMode(viewMode.id)
+  GameInterface.setupViewMode(viewMode.id)
 end
 
-function setupViewMode(mode)
+function GameInterface.setupViewMode(mode)
   if mode == currentViewMode then
     return
   end
 
   g_game.changeMapAwareRange(18, 14)
 
-  local topMenu = modules.client_topmenu.getTopMenu()
+  local viewMode = ViewModes[mode]
 
   -- Anchor
-  gameMapPanel:breakAnchors()
-  gameRootPanel:breakAnchors()
-
-
-
-  -- Normal
-  if mode == 0 then
-    -- Anchor
-    gameMapPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
-    gameMapPanel:addAnchor(AnchorLeft, 'gameLeftPanel', AnchorRight)
-    gameMapPanel:addAnchor(AnchorRight, 'gameRightPanel', AnchorLeft)
-    gameMapPanel:addAnchor(AnchorBottom, 'gameBottomPanel', AnchorTop)
-    gameRootPanel:addAnchor(AnchorTop, 'topMenu', AnchorBottom)
-    gameRootPanel:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-    gameRootPanel:addAnchor(AnchorRight, 'parent', AnchorRight)
-    gameRootPanel:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-
-    -- Margin
-    topMenuButton:setMarginTop(10)
-    gameLeftPanel:setMarginTop(0)
-    gameRightPanel:setMarginTop(0)
-
-    -- Range
-    gameMapPanel:setKeepAspectRatio(true)
-    gameMapPanel:setLimitVisibleRange(false)
-
-    topMenu:setImageColor('white')
-    gameLeftPanelBackground:setImageColor('white')
-    gameRightPanelBackground:setImageColor('white')
-    gameBottomPanel:setImageColor('white')
-
-
-
-  -- Crop
-  elseif mode == 1 then
-    -- Anchor
-    gameMapPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
-    gameMapPanel:addAnchor(AnchorLeft, 'gameLeftPanel', AnchorRight)
-    gameMapPanel:addAnchor(AnchorRight, 'gameRightPanel', AnchorLeft)
-    gameMapPanel:addAnchor(AnchorBottom, 'gameBottomPanel', AnchorTop)
-    gameRootPanel:addAnchor(AnchorTop, 'topMenu', AnchorBottom)
-    gameRootPanel:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-    gameRootPanel:addAnchor(AnchorRight, 'parent', AnchorRight)
-    gameRootPanel:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-
-    -- Margin
-    topMenuButton:setMarginTop(10)
-    gameLeftPanel:setMarginTop(0)
-    gameRightPanel:setMarginTop(0)
-
-    -- Range
-    gameMapPanel:setKeepAspectRatio(false)
-    gameMapPanel:setLimitVisibleRange(true)
-
-    topMenu:setImageColor('white')
-    gameLeftPanelBackground:setImageColor('white')
-    gameRightPanelBackground:setImageColor('white')
-    gameBottomPanel:setImageColor('white')
-
-
-
-  -- Crop Full
-  elseif mode == 2 then
-    -- Anchor
+  if viewMode.isFull then
     gameMapPanel:fill('parent')
-    gameRootPanel:fill('parent')
-
-    -- Margin
-    local isTopMenuVisible = topMenu and topMenu:getMarginTop() >= 0 or false
-    topMenuButton:setMarginTop((isTopMenuVisible and topMenu:getHeight() - gameRightPanel:getPaddingTop() or 0) + 10)
-    gameLeftPanel:setMarginTop(isTopMenuVisible and topMenu:getHeight() - gameLeftPanel:getPaddingTop() or 0)
-    gameRightPanel:setMarginTop(isTopMenuVisible and topMenu:getHeight() - gameRightPanel:getPaddingTop() or 0)
-
-    -- Range
-    gameMapPanel:setKeepAspectRatio(false)
-    gameMapPanel:setLimitVisibleRange(true)
-
-    topMenu:setImageColor('#ffffff66')
-    gameLeftPanelBackground:setImageColor('#ffffff66')
-    gameRightPanelBackground:setImageColor('#ffffff66')
-    gameBottomPanel:setImageColor('#ffffff66')
-
-
-
-  -- Full
-  elseif mode == 3 then
-    -- Anchor
-    gameMapPanel:fill('parent')
-    gameRootPanel:fill('parent')
-
-    -- Margin
-    local isTopMenuVisible = topMenu and topMenu:getMarginTop() >= 0 or false
-    topMenuButton:setMarginTop((isTopMenuVisible and topMenu:getHeight() - gameRightPanel:getPaddingTop() or 0) + 10)
-    gameLeftPanel:setMarginTop(isTopMenuVisible and topMenu:getHeight() - gameLeftPanel:getPaddingTop() or 0)
-    gameRightPanel:setMarginTop(isTopMenuVisible and topMenu:getHeight() - gameRightPanel:getPaddingTop() or 0)
-
-    -- Range
-    gameMapPanel:setKeepAspectRatio(true)
-    gameMapPanel:setLimitVisibleRange(false)
-
-    -- In some dimensions, panels can be above gamescreen, so the panels should be transparent
-    topMenu:setImageColor('#ffffff66')
-    gameLeftPanelBackground:setImageColor('#ffffff66')
-    gameRightPanelBackground:setImageColor('#ffffff66')
-    gameBottomPanel:setImageColor('#ffffff66')
+  else
+    gameMapPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
+    gameMapPanel:addAnchor(AnchorBottom, 'gameBottomPanel', AnchorOutsideTop)
+    gameMapPanel:addAnchor(AnchorLeft, 'gameLeftThirdPanel', AnchorOutsideRight)
+    gameMapPanel:addAnchor(AnchorRight, 'gameRightThirdPanel', AnchorOutsideLeft)
   end
 
+  gameBottomPanel:setOn(viewMode.isFull)
+
+  -- Range
+  gameMapPanel:setKeepAspectRatio(not viewMode.isCropped)
+  gameMapPanel:setLimitVisibleRange(viewMode.isCropped)
+
+  -- In some dimensions, panels can be above gamescreen, so the panels should be transparent
+  if viewMode.isFull then
+    color = '#ffffff66'
+  else
+    color = 'white'
+  end
+
+  ClientTopMenu.getTopMenu():setImageColor(color)
+  gameLeftFirstPanel:setImageColor(color)
+  gameLeftSecondPanel:setImageColor(color)
+  gameLeftThirdPanel:setImageColor(color)
+  gameRightFirstPanel:setImageColor(color)
+  gameRightSecondPanel:setImageColor(color)
+  gameRightThirdPanel:setImageColor(color)
+  gameBottomPanel:setImageColor(color)
+
+  -- Event
   gameMapPanel:changeViewMode(mode, currentViewMode)
-
-  modules.client_options.setOption('viewModeComboBox', ViewModes[mode].name, false)
-
   currentViewMode = mode
+
+  ClientOptions.setOption('viewModeComboBox', viewMode.name, false)
 end

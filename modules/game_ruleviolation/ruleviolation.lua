@@ -1,3 +1,8 @@
+_G.GameRuleViolation = { }
+GameRuleViolation.m  = modules.game_questlog -- Alias
+
+
+
 local minimumCommentSize = 50
 local textPattern        = "[^%w%s!?%+-*/=@%(%)%[%]%{%}.,]+" -- Find symbols that are NOT letters, numbers, spaces and !?+-*/=@()[]{}.,
 
@@ -16,9 +21,15 @@ local REPORT_TYPE_VIOLATION = 2
 local REPORT_TYPE_NOTATIONS = 3
 
 local function sendNewReport(_type, targetName, reasonId, comment, statement, translation)
-  if not statement or statement == '' then statement = '-' end
+  if not statement or statement == '' then
+    statement = '-'
+  end
+
   statement = statement:gsub(':', ';') -- Replace all ':' with ';' for avoid errors on opcodes
-  if not translation or translation == '' then translation = '-' end
+  if not translation or translation == '' then
+    translation = '-'
+  end
+
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientRuleViolation, string.format("%d:%d:%s:%d:%s:%s:%s", REPORT_MODE_NEWREPORT, _type, targetName, reasonId, comment:trim(), statement:trim(), translation:trim()))
@@ -47,7 +58,10 @@ local function sendRemoveRow(row)
 end
 
 local function sendAddAction(_type, targetName, reasonId, comment, actionId, days, row)
-  if comment == '' then comment = '-' end
+  if comment == '' then
+    comment = '-'
+  end
+
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientRuleViolation, string.format("%d:%d:%s:%d:%s:%d:%d:%d", REPORT_MODE_ACTION, _type, targetName, reasonId, comment:trim(), actionId, days, row and row.id or 0))
@@ -139,18 +153,20 @@ local reasonId = 0
 
 
 
-function init()
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerRuleViolation, parseRuleViolationsReports) -- View List
+function GameRuleViolation.init()
+  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerRuleViolation, GameRuleViolation.parseRuleViolationsReports) -- View List
 end
 
-function terminate()
+function GameRuleViolation.terminate()
   ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerRuleViolation) -- View List
 
-  destroyRuleViolationReportWindow()
-  destroyRVViewWindow()
+  GameRuleViolation.destroyRuleViolationReportWindow()
+  GameRuleViolation.destroyRVViewWindow()
+
+  _G.GameRuleViolation = nil
 end
 
-function showRuleViolationReportWindow(_type, targetName, statement)
+function GameRuleViolation.showRuleViolationReportWindow(_type, targetName, statement)
   if not g_game.isOnline() then
     return
   end
@@ -178,7 +194,7 @@ function showRuleViolationReportWindow(_type, targetName, statement)
     statementTextEdit:setText(statement)
   end
 
-  typeComboBox.onOptionChange = onChangeReasonId
+  typeComboBox.onOptionChange = GameRuleViolation.onChangeReasonId
   if reasons[typeId] then
     for reasonId = 0, #reasons[typeId] do
       local reason = reasons[typeId][reasonId]
@@ -210,7 +226,7 @@ function showRuleViolationReportWindow(_type, targetName, statement)
   end
 end
 
-function destroyRuleViolationReportWindow()
+function GameRuleViolation.destroyRuleViolationReportWindow()
   if rvWindow then
     rvWindow:destroy()
   end
@@ -229,7 +245,7 @@ end
 
 
 
-function onChangeReasonId(comboBox, option)
+function GameRuleViolation.onChangeReasonId(comboBox, option)
   if not reasons[typeId] then
     return
   end
@@ -247,7 +263,7 @@ function onChangeReasonId(comboBox, option)
   reasonMultilineTextEdit:setText(typeId and reasonId >= 0 and reasons[typeId][reasonId] and reasons[typeId][reasonId].description or '')
 end
 
-function report()
+function GameRuleViolation.report()
   if not g_game.isOnline() then
     return
   end
@@ -273,7 +289,7 @@ function report()
   end
 
   sendNewReport(typeId, targetName, reasonId, comment, statement or '', translation or '')
-  destroyRuleViolationReportWindow()
+  GameRuleViolation.destroyRuleViolationReportWindow()
 end
 
 
@@ -402,8 +418,11 @@ end
 
 
 
-function listOnChildFocusChange(textList, focusedChild)
-  if not textList then return end
+function GameRuleViolation.listOnChildFocusChange(textList, focusedChild)
+  if not textList then
+    return
+  end
+
   -- Update Report Rows Style
   local children = textList:getChildren()
   for i = 1, #children do
@@ -413,7 +432,9 @@ function listOnChildFocusChange(textList, focusedChild)
       children[i]:setOn(true)
     end
   end
-  if not focusedChild then return end
+  if not focusedChild then
+    return
+  end
 
   if rvViewTargetNameTextEdit then
     rvViewActionTargetNameLabel:destroy()
@@ -425,7 +446,7 @@ function listOnChildFocusChange(textList, focusedChild)
   end
 end
 
-function showViewWindow(_targetName, _comment)
+function GameRuleViolation.showViewWindow(_targetName, _comment)
   if not g_game.isOnline() or not hasViewAccess() then
     return
   end
@@ -458,26 +479,26 @@ function showViewWindow(_targetName, _comment)
   rvViewTypeComboBox = rvViewWindow:getChildById('rvViewTypeComboBox')
   rvViewReasonComboBox = rvViewWindow:getChildById('rvViewReasonComboBox')
 
-  rvViewList.onChildFocusChange = listOnChildFocusChange
-  updateRowsPerPageLabel(getRowsPerPage())
+  rvViewList.onChildFocusChange = GameRuleViolation.listOnChildFocusChange
+  GameRuleViolation.updateRowsPerPageLabel(GameRuleViolation.getRowsPerPage())
 
   -- Action Type ComboBox
   for _type = REPORT_TYPE_NAME, REPORT_TYPE_VIOLATION do
     rvViewTypeActionComboBox:addOption(types[_type])
   end
-  rvViewTypeActionComboBox.onOptionChange = onViewChangeActionType
+  rvViewTypeActionComboBox.onOptionChange = GameRuleViolation.onViewChangeActionType
   rvViewTypeActionComboBox:setOption(types[viewActionType])
-  onViewChangeActionType(rvViewTypeActionComboBox) -- Actions ComboBox
-  rvViewDetachRow() -- Target Name Text Edit
+  GameRuleViolation.onViewChangeActionType(rvViewTypeActionComboBox) -- Actions ComboBox
+  GameRuleViolation.rvViewDetachRow() -- Target Name Text Edit
 
   -- Action ComboBox
-  rvViewActionComboBox.onOptionChange = onViewChangeAction
+  rvViewActionComboBox.onOptionChange = GameRuleViolation.onViewChangeAction
   rvViewActionComboBox:setOption(actions[viewActionType][viewAction].title)
 
   -- Action Reason ComboBox
-  rvViewActionReasonComboBox.onOptionChange = onViewChangeActionReason
+  rvViewActionReasonComboBox.onOptionChange = GameRuleViolation.onViewChangeActionReason
   rvViewActionReasonComboBox:setOption(reasons[viewActionType][viewActionReason].title)
-  onViewChangeActionReason(rvViewActionReasonComboBox)
+  GameRuleViolation.onViewChangeActionReason(rvViewActionReasonComboBox)
 
   -- Action Target Name MultilineTextEdit
   if rvViewTargetNameTextEdit then
@@ -492,7 +513,7 @@ function showViewWindow(_targetName, _comment)
   for state = REPORT_STATE_NEW, REPORT_STATE_DONE do
     rvViewStateComboBox:addOption(states[state])
   end
-  rvViewStateComboBox.onOptionChange = onViewChangeState
+  rvViewStateComboBox.onOptionChange = GameRuleViolation.onViewChangeState
   rvViewStateComboBox:setOption(states[viewState])
 
   -- Type ComboBox
@@ -500,20 +521,20 @@ function showViewWindow(_targetName, _comment)
   for _type = REPORT_TYPE_NAME, REPORT_TYPE_VIOLATION do
     rvViewTypeComboBox:addOption(types[_type])
   end
-  rvViewTypeComboBox.onOptionChange = onViewChangeType
+  rvViewTypeComboBox.onOptionChange = GameRuleViolation.onViewChangeType
   rvViewTypeComboBox:setOption(types[viewType])
-  onViewChangeType(rvViewTypeComboBox)
+  GameRuleViolation.onViewChangeType(rvViewTypeComboBox)
 
   -- Reason ComboBox
-  rvViewReasonComboBox.onOptionChange = onViewChangeReason
+  rvViewReasonComboBox.onOptionChange = GameRuleViolation.onViewChangeReason
   if viewType ~= REPORT_TYPE_ALL then
     rvViewReasonComboBox:setOption(reasons[viewType][viewReason].title)
   end
 
-  updatePage() -- Fill list
+  GameRuleViolation.updatePage() -- Fill list
 end
 
-function destroyRVViewWindow()
+function GameRuleViolation.destroyRVViewWindow()
   if rvViewWindow then
     rvViewWindow:destroy()
   end
@@ -535,7 +556,7 @@ function destroyRVViewWindow()
   rvViewReasonComboBox             = nil
 end
 
-function clearViewWindow()
+function GameRuleViolation.clearViewWindow()
   viewPage         = 1
   maxPages         = 1
   viewActionType   = REPORT_TYPE_NAME
@@ -548,7 +569,7 @@ function clearViewWindow()
   viewReason       = 0
 
   rvViewPage:setText('1')
-  updateRowsPerPageLabel(getRowsPerPage())
+  GameRuleViolation.updateRowsPerPageLabel(GameRuleViolation.getRowsPerPage())
 
   rvViewTypeActionComboBox:setOption(types[viewActionType])
   rvViewActionComboBox:setOption(actions[viewActionType][viewAction].title)
@@ -563,10 +584,10 @@ function clearViewWindow()
     rvViewReasonComboBox:setOption(reasons[viewType][viewReason].title)
   end
 
-  updatePage() -- Fill list
+  GameRuleViolation.updatePage() -- Fill list
 end
 
-function openRow(row)
+function GameRuleViolation.openRow(row)
   if not g_game.isOnline() or not hasViewAccess() then
     return
   end
@@ -576,7 +597,7 @@ function openRow(row)
     return
   end
 
-  showRuleViolationReportWindow(row.type, row.targetName, row.statement)
+  GameRuleViolation.showRuleViolationReportWindow(row.type, row.targetName, row.statement)
   if rvWindow then
     rvViewWindow:unlock()
     rvViewWindow:hide()
@@ -620,14 +641,26 @@ function openRow(row)
     commentMultilineTextEdit:setEditable(false)
 
     okButton:hide()
-    cancelButton.onClick = function() if rvViewTargetNameTextEdit then viewTargetName = rvViewTargetNameTextEdit:getText() end viewComment = rvViewCommentMultilineTextEdit:getText() rvWindow:unlock() destroyRuleViolationReportWindow() showViewWindow() rvViewWindow:lock() listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild()) end
+    cancelButton.onClick = function()
+      if rvViewTargetNameTextEdit then
+        viewTargetName = rvViewTargetNameTextEdit:getText()
+      end
+
+      viewComment = rvViewCommentMultilineTextEdit:getText()
+
+      rvWindow:unlock()
+      GameRuleViolation.destroyRuleViolationReportWindow()
+      GameRuleViolation.showViewWindow()
+      rvViewWindow:lock()
+      GameRuleViolation.listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild())
+    end
     rvWindow.onEscape = cancelButton.onClick
   end
 end
 
 
 
-function onRVViewPageChange(self)
+function GameRuleViolation.onRVViewPageChange(self)
   local text   = self:getText()
   local number = tonumber(text) or 0
   if text:match('[^0-9]+') or number > maxPages then -- Pattern: Cannot have non numbers (Correct: '7', '777' | Wrong: 'A7', '-7')
@@ -637,27 +670,50 @@ function onRVViewPageChange(self)
   end
 end
 
-function getRowsPerPage() return rvViewRowsPerPageOptionScrollbar and rvViewRowsPerPageOptionScrollbar:getValue() or 1 end
-function updateRowsPerPageLabel(value) if not rvViewRowsPerPageLabel then return end rvViewRowsPerPageLabel:setText('Rows per page: ' .. value) end
+function GameRuleViolation.getRowsPerPage()
+  return rvViewRowsPerPageOptionScrollbar and rvViewRowsPerPageOptionScrollbar:getValue() or 1
+end
 
-function onViewChangeState(comboBox, option)
+function GameRuleViolation.updateRowsPerPageLabel(value)
+  if not rvViewRowsPerPageLabel then
+    return
+  end
+
+  rvViewRowsPerPageLabel:setText('Rows per page: ' .. value)
+end
+
+function GameRuleViolation.onViewChangeState(comboBox, option)
   if option then
     local newViewState = nil
     for k, v in pairs(states) do
-      if v == option then newViewState = k break end
+      if v == option then
+        newViewState = k
+        break
+      end
     end
-    if not newViewState then return end
+
+    if not newViewState then
+      return
+    end
+
     viewState = newViewState
   end
 end
 
-function onViewChangeType(comboBox, option)
+function GameRuleViolation.onViewChangeType(comboBox, option)
   if option then
     local newViewType = nil
     for k, v in pairs(types) do
-      if v == option then newViewType = k break end
+      if v == option then
+        newViewType = k
+        break
+      end
     end
-    if not newViewType then return end
+
+    if not newViewType then
+      return
+    end
+
     viewType = newViewType
   end
 
@@ -669,42 +725,56 @@ function onViewChangeType(comboBox, option)
   end
 end
 
-function onViewChangeReason(comboBox, option)
+function GameRuleViolation.onViewChangeReason(comboBox, option)
   if option then
-    if viewType == REPORT_TYPE_ALL then return end
+    if viewType == REPORT_TYPE_ALL then
+      return
+    end
 
     local newViewReason = nil
     for k, v in pairs(reasons[viewType]) do
-      if v.title == option then newViewReason = k break end
+      if v.title == option then
+        newViewReason = k
+        break
+      end
     end
 
-    if not newViewReason then return end
+    if not newViewReason then
+      return
+    end
+
     viewReason = newViewReason
   end
 end
 
-function rvViewUpdatePage()
+function GameRuleViolation.rvViewUpdatePage()
   local page = tonumber(rvViewPage:getText()) or 1
-  if page < 1 or page > maxPages then return end
+  if page < 1 or page > maxPages then
+    return
+  end
+
   viewPage = page
-  updatePage()
+  GameRuleViolation.updatePage()
 end
 
-function rvViewPreviousPage()
+function GameRuleViolation.rvViewPreviousPage()
   viewPage = math.max(1, viewPage - 1)
   rvViewPage:setText(viewPage)
-  updatePage()
+  GameRuleViolation.updatePage()
 end
 
-function rvViewNextPage()
+function GameRuleViolation.rvViewNextPage()
   viewPage = math.min(viewPage + 1, maxPages)
   rvViewPage:setText(viewPage)
-  updatePage()
+  GameRuleViolation.updatePage()
 end
 
-function updatePage()
-  if not getWindowState() then return end
-  sendUpdateSearch(viewType, viewReason, viewPage, getRowsPerPage(), viewState)
+function GameRuleViolation.updatePage()
+  if not getWindowState() then
+    return
+  end
+
+  sendUpdateSearch(viewType, viewReason, viewPage, GameRuleViolation.getRowsPerPage(), viewState)
 end
 
 
@@ -713,8 +783,10 @@ local function updateReportRowTitle(row)
   row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. types[row.type] .. '] ' .. row.comment:sub(0, 35) .. (#row.comment > 35 and "..." or ""))
 end
 
-function parseRuleViolationsReports(protocol, opcode, buffer)
-  if not getWindowState() then return end
+function GameRuleViolation.parseRuleViolationsReports(protocol, opcode, buffer)
+  if not getWindowState() then
+    return
+  end
 
   -- Clear list
   local children = rvViewList:getChildren()
@@ -724,10 +796,12 @@ function parseRuleViolationsReports(protocol, opcode, buffer)
   end
 
   local _buffer = string.split(buffer, ':::')
-  if #_buffer ~= 2 then return end
+  if #_buffer ~= 2 then
+    return
+  end
 
   maxPages = tonumber(_buffer[1]) or 1
-  maxPages = math.ceil(maxPages / getRowsPerPage())
+  maxPages = math.ceil(maxPages / GameRuleViolation.getRowsPerPage())
 
   local reports = string.split(_buffer[2], '::')
   for _, report in ipairs(reports) do
@@ -745,33 +819,39 @@ function parseRuleViolationsReports(protocol, opcode, buffer)
     row.comment     = string.format('%s', data[10])
     row.playerName  = string.format('%s', data[11])
     updateReportRowTitle(row)
-    row.onDoubleClick = openRow
+    row.onDoubleClick = GameRuleViolation.openRow
   end
 
-  rvViewDetachRow()
-  listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild())
+  GameRuleViolation.rvViewDetachRow()
+  GameRuleViolation.listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild())
 end
 
 
 
 -- For avoid multiple confirm windows
 local confirmWindowLock = false
-function setConfirmWindowLock(lock) confirmWindowLock = lock end
+function GameRuleViolation.setConfirmWindowLock(lock)
+  confirmWindowLock = lock
+end
 
-function removeRow(rvViewList, row) -- After confirm button
-  if not getWindowState() then return end
+function GameRuleViolation.removeRow(rvViewList, row) -- After confirm button
+  if not getWindowState() then
+    return
+  end
 
   sendRemoveRow(row)
 
   rvViewList:removeChild(row)
   row:destroy()
 
-  rvViewDetachRow()
-  listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild())
+  GameRuleViolation.rvViewDetachRow()
+  GameRuleViolation.listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild())
 end
 
-function rvViewRemoveRow()
-  if not getWindowState() then return end
+function GameRuleViolation.rvViewRemoveRow()
+  if not getWindowState() then
+    return
+  end
 
   local row = rvViewList:getFocusedChild()
   if not row then
@@ -780,13 +860,28 @@ function rvViewRemoveRow()
   end
 
   if not confirmWindowLock then
-    displayCustomBox('Warning', 'Are you sure that you want to remove the row id ' .. row.id .. '?', {{ text = 'Yes', buttonCallback = function() if modules.game_ruleviolation then modules.game_ruleviolation.removeRow(rvViewList, row) modules.game_ruleviolation.setConfirmWindowLock(false) end end }}, 1, 'No', function() if modules.game_ruleviolation then modules.game_ruleviolation.setConfirmWindowLock(false) end end, nil)
-    setConfirmWindowLock(true)
+    local buttonCallback = function()
+      if modules.game_ruleviolation then
+        GameRuleViolation.removeRow(rvViewList, row)
+        GameRuleViolation.setConfirmWindowLock(false)
+      end
+    end
+
+    local onCancelCallback = function()
+      if modules.game_ruleviolation then
+        GameRuleViolation.setConfirmWindowLock(false)
+      end
+    end
+
+    displayCustomBox('Warning', 'Are you sure that you want to remove the row id ' .. row.id .. '?', {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
+    GameRuleViolation.setConfirmWindowLock(true)
   end
 end
 
-function rvViewSetReportState()
-  if not getWindowState() then return end
+function GameRuleViolation.rvViewSetReportState()
+  if not getWindowState() then
+    return
+  end
 
   local err
   local row = rvViewList:getFocusedChild()
@@ -804,13 +899,13 @@ function rvViewSetReportState()
   sendUpdateState(row)
   updateReportRowTitle(row)
 
-  rvViewDetachRow()
-  listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild())
+  GameRuleViolation.rvViewDetachRow()
+  GameRuleViolation.listOnChildFocusChange(rvViewList, rvViewList:getFocusedChild())
 end
 
 
 
-function rvViewDetachRow()
+function GameRuleViolation.rvViewDetachRow()
   rvViewList:focusChild(nil)
 
   if not rvViewTargetNameTextEdit or not rvViewTargetNameTextEdit:isVisible() then
@@ -833,13 +928,20 @@ function rvViewDetachRow()
   end
 end
 
-function onViewChangeActionType(comboBox, option)
+function GameRuleViolation.onViewChangeActionType(comboBox, option)
   if option then
     local newViewActionType = nil
     for k, v in pairs(types) do
-      if v == option then newViewActionType = k break end
+      if v == option then
+        newViewActionType = k
+        break
+      end
     end
-    if not newViewActionType then return end
+
+    if not newViewActionType then
+      return
+    end
+
     viewActionType = newViewActionType
   end
 
@@ -854,26 +956,38 @@ function onViewChangeActionType(comboBox, option)
   end
 end
 
-function onViewChangeAction(comboBox, option)
+function GameRuleViolation.onViewChangeAction(comboBox, option)
   if option then
     local newViewAction = nil
     for k, v in pairs(actions[viewActionType]) do
-      if v.title == option then newViewAction = k break end
+      if v.title == option then
+        newViewAction = k
+        break
+      end
     end
 
-    if not newViewAction then return end
+    if not newViewAction then
+      return
+    end
+
     viewAction = newViewAction
   end
 end
 
-function onViewChangeActionReason(comboBox, option)
+function GameRuleViolation.onViewChangeActionReason(comboBox, option)
   if option then
     local newViewActionReason = nil
     for k, v in pairs(reasons[viewActionType]) do
-      if v.title == option then newViewActionReason = k break end
+      if v.title == option then
+        newViewActionReason = k
+        break
+      end
     end
 
-    if not newViewActionReason then return end
+    if not newViewActionReason then
+      return
+    end
+
     viewActionReason = newViewActionReason
   end
 
@@ -896,8 +1010,10 @@ local function checkActionFields(row, targetName)
   return true
 end
 
-function action(row, targetName)
-  if not getWindowState() or not checkActionFields(row, targetName) then return end
+function GameRuleViolation.action(row, targetName)
+  if not getWindowState() or not checkActionFields(row, targetName) then
+    return
+  end
 
   local action = actions[viewActionType][viewAction].actionType
   local days   = actions[viewActionType][viewAction].days or 0
@@ -908,15 +1024,19 @@ function action(row, targetName)
     updateReportRowTitle(row)
   end
 
-  updatePage()
+  GameRuleViolation.updatePage()
 end
 
-function rvViewAction()
-  if not getWindowState() then return end
+function GameRuleViolation.rvViewAction()
+  if not getWindowState() then
+    return
+  end
 
   local row = rvViewList:getFocusedChild()
   local targetName = not row and rvViewTargetNameTextEdit and rvViewTargetNameTextEdit:getText() or row and row.targetName or ''
-  if not checkActionFields(row, targetName) then return end
+  if not checkActionFields(row, targetName) then
+    return
+  end
 
   local message = 'Are you sure that you want to add the action \'' .. actions[viewActionType][viewAction].title .. '\' to player \'' .. targetName .. '\'?'
 
@@ -942,7 +1062,20 @@ function rvViewAction()
   end
 
   if not confirmWindowLock then
-    displayCustomBox('Warning', message, {{ text = 'Yes', buttonCallback = function() if modules.game_ruleviolation then modules.game_ruleviolation.action(row, targetName) modules.game_ruleviolation.setConfirmWindowLock(false) end end }}, 1, 'No', function() if modules.game_ruleviolation then modules.game_ruleviolation.setConfirmWindowLock(false) end end, nil)
-    setConfirmWindowLock(true)
+    local buttonCallback = function()
+      if modules.game_ruleviolation then
+        GameRuleViolation.action(row, targetName)
+        GameRuleViolation.setConfirmWindowLock(false)
+      end
+    end
+
+    local onCancelCallback = function()
+      if modules.game_ruleviolation then
+        GameRuleViolation.setConfirmWindowLock(false)
+      end
+    end
+
+    displayCustomBox('Warning', message, {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
+    GameRuleViolation.setConfirmWindowLock(true)
   end
 end

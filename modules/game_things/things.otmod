@@ -3,6 +3,6 @@ Module
   description: Contains things spr and dat
   reloadable: false
   sandboxed: true
-  scripts: [things]
-  @onLoad: init()
-  @onUnload: terminate()
+  scripts: [ things ]
+  @onLoad: GameThings.init()
+  @onUnload: GameThings.terminate()

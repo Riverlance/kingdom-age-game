@@ -1,6 +1,6 @@
 local function pcolored(text, color)
   color = color or 'white'
-  modules.client_terminal.addLine(tostring(text), color)
+  ClientTerminal.addLine(tostring(text), color)
 end
 
 function draw_debug_boxes()
@@ -11,14 +11,14 @@ function hide_map()
   if not modules.game_interface then
     return
   end
-  modules.game_interface.getMapPanel():hide()
+  GameInterface.getMapPanel():hide()
 end
 
 function show_map()
   if not modules.game_interface then
     return
   end
-  modules.game_interface.getMapPanel():show()
+  GameInterface.getMapPanel():show()
 end
 
 function live_textures_reload()
@@ -68,12 +68,12 @@ function live_module_reload(name)
       local newtime = g_resources.getFileTime(filepath)
       if newtime > time then
         pcolored('Reloading ' .. name, 'green')
-        modules.client_terminal.flushLines()
+        ClientTerminal.flushLines()
         module:reload()
         files[filepath] = newtime
 
         if name == 'client_terminal' then
-          modules.client_terminal.show()
+          ClientTerminal.show()
         end
         break
       end
@@ -102,12 +102,14 @@ function live_sprites_reload()
       local newtime = g_resources.getFileTime(filepath)
       if newtime > time then
         pcolored('Reloading sprites...', 'green')
-        modules.client_terminal.flushLines()
-        modules.game_things.load()
+        ClientTerminal.flushLines()
+        -- if modules.game_things then
+        --   GameThings.load()
+        -- end
         files[filepath] = newtime
 
         if name == 'client_terminal' then
-          modules.client_terminal.show()
+          ClientTerminal.show()
         end
         break
       end
@@ -126,25 +128,29 @@ function ping()
   if pinging then
     pcolored('Ping stopped.')
     g_game.setPingDelay(1000)
-    disconnect(g_game, 'onPingBack', pingBack)
+    disconnect(g_game, {
+      onPingBack = pingBack
+    })
   else
-    if not (g_game.getFeature(GameClientPing) or g_game.getFeature(GameExtendedClientPing)) then
-      pcolored('this server does not support ping', 'red')
+    if not g_game.isOnline() then
+      pcolored('Ping command is only allowed when online.', 'red')
       return
-    elseif not g_game.isOnline() then
-      pcolored('ping command is only allowed when online', 'red')
+    elseif not (g_game.getFeature(GameClientPing) or g_game.getFeature(GameExtendedClientPing)) then
+      pcolored('This server does not support ping.', 'red')
       return
     end
 
     pcolored('Starting ping...')
     g_game.setPingDelay(0)
-    connect(g_game, 'onPingBack', pingBack)
+    connect(g_game, {
+      onPingBack = pingBack
+    })
   end
   pinging = not pinging
 end
 
 function clear()
-  modules.client_terminal.clear()
+  ClientTerminal.clear()
 end
 
 function ls(path)

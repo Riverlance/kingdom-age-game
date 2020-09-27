@@ -33,7 +33,7 @@ end
 function UIHotkeybarContainer:updateLook()
   local tooltipText = '[' .. self.keyCombo .. ']'
   self:setTooltip(tooltipText)
-  self.powerid = nil
+  self.powerId = nil
 
   local itemWidget = self:getChildById('item')
   if itemWidget then
@@ -49,16 +49,16 @@ function UIHotkeybarContainer:updateLook()
   self:setText('')
 
   if modules.game_hotkeys then
-    local view = modules.game_hotkeys.getHotkey(self.keyCombo)
+    local view = GameHotkeys.getHotkey(self.keyCombo)
     if view then
 
       if view.type == 'text' then
         self:setText('TxT')
         tooltipText = tooltipText .. (view.autoSend and ' (auto send)' or '') .. '\n' .. view.value
       elseif view.type == 'power' and powerWidget then
-        powerWidget:setImageSource('/images/game/powers/' .. view.id .. '_off')
+        powerWidget:setImageSource('/images/ui/power/' .. view.id .. '_off')
         powerWidget:setVisible(true)
-        self.powerid = view.id
+        self.powerId = view.id
         if view.name and view.level then
           tooltipText = string.format("%s %s (level %d)", tooltipText, view.name, view.level)
         else
@@ -68,11 +68,11 @@ function UIHotkeybarContainer:updateLook()
         itemWidget:setVisible(true)
         itemWidget:setItemId(view.id)
 
-        if view.useType == modules.game_hotkeys.HOTKEY_MANAGER_USEONSELF then
+        if view.useType == GameHotkeys.m.HOTKEY_MANAGER_USEONSELF then
           tooltipText = tooltipText .. '\nUse on self'
-        elseif view.useType == modules.game_hotkeys.HOTKEY_MANAGER_USEONTARGET then
+        elseif view.useType == GameHotkeys.m.HOTKEY_MANAGER_USEONTARGET then
           tooltipText = tooltipText .. '\nUse on target'
-        elseif view.useType == modules.game_hotkeys.HOTKEY_MANAGER_USEWITH then
+        elseif view.useType == GameHotkeys.m.HOTKEY_MANAGER_USEWITH then
           tooltipText = tooltipText .. '\nUse with'
         end
       end

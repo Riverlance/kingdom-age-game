@@ -1,43 +1,43 @@
-TabArrowButton < UIButton
-  size: 20 20
-  image-color: white
-  image-rect: 0 0 20 20
+GameSidePanel < Panel
+  // Do not put padding on it
+  anchors.top: parent.top
+  anchors.bottom: parent.bottom
+  image-source: /images/ui/_background/panel_side
+  image-border: 7
+  width: 189
+  focusable: false
+  phantom: true
 
-  $hover !disabled:
-    color: #cccccc
+  $hidden:
+    width: 0
 
-  $!checked:
-    image-clip: 0 0 20 20
-
-  $hover !checked:
-    image-clip: 0 40 20 20
-
-  $checked:
-    image-clip: 0 20 20 20
-
-  $hover checked:
-    image-clip: 0 60 20 20
-
-  $disabled:
-    image-color: #ffffff88
-
-GameSidePanel < UIMiniWindowContainer
-  //image-source: /images/ui/panel_side
-  //image-border: 4
-  padding: 4
-  width: 198
+GameSideContainer < UIMiniWindowContainer
+  // Do not put margin on it
+  anchors.fill: parent
   layout:
     type: verticalBox
-    //spacing: 1
+  focusable: false
+
+GameSidePanelSticker < UIWidget
+  anchors.bottom: parent.bottom
+  anchors.horizontalCenter: parent.horizontalCenter
+  image-auto-resize: true
+  focusable: false
+  phantom: true
 
 GameBottomPanel < Panel
-  image-source: /images/ui/panel_bottom
-  image-border: 4
+  image-source: /images/ui/_background/panel_bottom
+  image-border: 2
+  image-clip: 0 0 258 102
+
+  $on:
+    image-clip: 0 102 258 102
 
 GameMapPanel < UIGameMap
-  padding: 4
-  image-source: /images/ui/panel_map
-  image-border: 4
+  padding: 7
+  image-source: /images/ui/_background/panel_map
+  image-border: 7
+  focusable: false
 
   $on:
     padding: 0
@@ -45,103 +45,117 @@ GameMapPanel < UIGameMap
 UIWidget
   id: gameRootPanel
   anchors.fill: parent
-  anchors.top: topMenu.bottom
+  anchors.top: topMenu.outsideBottom
+
+  // Used for anchoring purposes
+  UIWidget
+    id: gameScreenArea
+    anchors.top: parent.top
+    anchors.bottom: gameBottomPanel.outsideTop
+    anchors.left: gameLeftThirdPanel.outsideRight
+    anchors.right: gameRightThirdPanel.outsideLeft
+    focusable: false
 
   GameMapPanel
     id: gameMapPanel
-    anchors.left: gameLeftPanel.right
-    anchors.right: gameRightPanel.left
-    anchors.top: parent.top
-    anchors.bottom: gameBottomPanel.top
-    focusable: false
+    anchors.top: gameScreenArea.top
+    anchors.bottom: gameScreenArea.bottom
+    anchors.left: gameScreenArea.left
+    anchors.right: gameScreenArea.right
+
+  GameSidePanel
+    id: gameLeftFirstPanel
+    anchors.left: parent.left
+    &sidePanelId: 2
+
+    GameSidePanelSticker
+      id: gameLeftPanelSticker
+
+    GameSideContainer
+      id: gameLeftFirstPanelContainer
+
+  GameSidePanel
+    id: gameLeftSecondPanel
+    anchors.left: prev.outsideRight
+    &sidePanelId: 4
+
+    GameSideContainer
+      id: gameLeftSecondPanelContainer
+
+  GameSidePanel
+    id: gameLeftThirdPanel
+    anchors.left: prev.outsideRight
+    &sidePanelId: 6
+
+    GameSideContainer
+      id: gameLeftThirdPanelContainer
+
+  GameSidePanel
+    id: gameRightFirstPanel
+    anchors.right: parent.right
+    &sidePanelId: 1
+
+    GameSidePanelSticker
+      id: gameRightPanelSticker
+
+    GameSideContainer
+      id: gameRightFirstPanelContainer
+
+  GameSidePanel
+    id: gameRightSecondPanel
+    anchors.right: prev.outsideLeft
+    &sidePanelId: 3
+
+    GameSideContainer
+      id: gameRightSecondPanelContainer
+
+  GameSidePanel
+    id: gameRightThirdPanel
+    anchors.right: prev.outsideLeft
+    &sidePanelId: 5
+
+    GameSideContainer
+      id: gameRightThirdPanelContainer
 
   GameBottomPanel
     id: gameBottomPanel
-    anchors.left: gameLeftPanel.right
-    anchors.right: gameRightPanel.left
     anchors.top: bottomSplitter.top
     anchors.bottom: parent.bottom
-
-  UIWidget
-    id: gameLeftPanelBackground
-    anchors.top: gameLeftPanel.top
-    anchors.bottom: gameLeftPanel.bottom
-    anchors.left: gameLeftPanel.left
-    anchors.right: gameLeftPanel.right
-    image-source: /images/ui/panel_side
-    image-border: 4
-    focusable: false
-    phantom: true
-
-  UIWidget
-    id: gameLeftPanelSticker
-    anchors.bottom: next.bottom
-    anchors.left: next.left
-    anchors.right: next.right
-    focusable: false
-    phantom: true
-
-  GameSidePanel
-    id: gameLeftPanel
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    anchors.top: parent.top
-    focusable: false
-    phantom: true
-    visible: true
-    on: true
-    $!on:
-      width: 0
-      visible: false
-
-  UIWidget
-    id: gameRightPanelBackground
-    anchors.top: gameRightPanel.top
-    anchors.bottom: gameRightPanel.bottom
-    anchors.left: gameRightPanel.left
-    anchors.right: gameRightPanel.right
-    image-source: /images/ui/panel_side
-    image-border: 4
-    focusable: false
-    phantom: true
-
-  UIWidget
-    id: gameRightPanelSticker
-    anchors.bottom: next.bottom
-    anchors.left: next.left
-    anchors.right: next.right
-    focusable: false
-    phantom: true
-
-  GameSidePanel
-    id: gameRightPanel
-    anchors.bottom: parent.bottom
-    anchors.right: parent.right
-    anchors.top: parent.top
-    focusable: false
-    phantom: true
-    visible: true
-    on: true
-    $!on:
-      width: 0
-      visible: false
+    anchors.left: gameLeftThirdPanel.outsideRight
+    anchors.right: gameRightThirdPanel.outsideLeft
 
   Splitter
     id: bottomSplitter
-    anchors.left: gameLeftPanel.right
-    anchors.right: gameRightPanel.left
+    height: 4
     anchors.bottom: parent.bottom
-    relative-margin: bottom
-    margin-bottom: 172
-    @canUpdateMargin: function(self, newMargin) if modules.client_options.getOption('dontStretchShrink') then return self:getMarginBottom() end return math.max(math.min(newMargin, self:getParent():getHeight() - 300), 100) end
-    @onGeometryChange: function(self) self:setMarginBottom(math.min(math.max(self:getParent():getHeight() - 300, 100), self:getMarginBottom())) end
+    anchors.left: gameLeftThirdPanel.outsideRight
+    anchors.right: gameRightThirdPanel.outsideLeft
+    // Save value as margin-bottom
+    &defaultMargin: 167
+
+    @canUpdateMargin: |
+      function(self, newMargin)
+        if ClientOptions.getOption('dontStretchShrink') then
+          return self:getMarginBottom()
+        end
+
+        return math.max(math.min(newMargin, self:getParent():getHeight() - 300), self.defaultMargin)
+      end
+
+    @onGeometryChange: |
+      function(self)
+        self:setMarginBottom(math.min(math.max(self:getParent():getHeight() - 300, self.defaultMargin), self:getMarginBottom()))
+      end
+
+    $hidden:
+      height: 0
 
   UIWidget
     id: gameExpBar
-    anchors.bottom: prev.top
-    anchors.left: prev.left
-    anchors.right: prev.right
     height: 8
+    anchors.bottom: gameScreenArea.bottom
+    anchors.left: gameScreenArea.left
+    anchors.right: gameScreenArea.right
     visible: true
     focusable: false
     on: true
@@ -152,7 +166,7 @@ UIWidget
 
     UIWidget
       id: empty
-      image-source: /images/ui/expbar/center_empty
+      image-source: /images/ui/experience/bar_empty
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: parent.right
@@ -162,7 +176,7 @@ UIWidget
 
     UIWidget
       id: full
-      image-source: /images/ui/expbar/center_full
+      image-source: /images/ui/experience/bar_full
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       margin-left: 8
@@ -171,77 +185,141 @@ UIWidget
 
     UIWidget
       id: leftBar
-      image-source: /images/ui/expbar/left
+      image-source: /images/ui/experience/bar_side_left
       anchors.bottom: parent.bottom
       anchors.left: parent.left
 
     UIWidget
       id: rightBar
-      image-source: /images/ui/expbar/right
+      image-source: /images/ui/experience/bar_side_right
       anchors.bottom: parent.bottom
       anchors.right: parent.right
 
-  TabArrowButton
+  UIButton
     id: topMenuButton
+    size: 20 7
     anchors.top: parent.top
-    anchors.right: bottomSplitter.right
-    margin-top: 10
-    margin-right: 10
-    image-source: /images/game/interface/tabarrow_up
+    anchors.horizontalCenter: gameBottomPanel.horizontalCenter
+    image-source: /images/ui/_button/sidebar_vertical
     !tooltip: tr('Hide top menu (%s)', 'Ctrl+Shift+Q')
     on: true
     @onClick: |
-      modules.client_options.setOption('showTopMenu', not modules.client_options.getOption('showTopMenu'))
+      ClientOptions.setOption('showTopMenu', not ClientOptions.getOption('showTopMenu'))
+
+    $on:
+      image-clip: 0 0 20 7
+
+    $on hover:
+      image-clip: 0 7 20 7
+
+    $on pressed:
+      image-clip: 0 14 20 7
 
     $!on:
-      image-source: /images/game/interface/tabarrow_down
+      image-clip: 20 0 20 7
       !tooltip: tr('Show top menu (%s)', 'Ctrl+Shift+Q')
 
-  TabArrowButton
+    $!on hover:
+      image-clip: 20 7 20 7
+
+    $!on pressed:
+      image-clip: 20 14 20 7
+
+  UIButton
     id: leftPanelButton
-    anchors.bottom: bottomSplitter.top
-    anchors.left: bottomSplitter.left
-    margin-bottom: 10
-    margin-left: 10
-    image-source: /images/game/interface/tabarrow_left
-    !tooltip: tr('Hide left panel (%s)', 'Ctrl+Shift+A')
+    size: 7 20
+    anchors.verticalCenter: gameScreenArea.verticalCenter
+    anchors.left: gameLeftThirdPanel.outsideRight
+    image-source: /images/ui/_button/sidebar_horizontal
+    !tooltip: tr('Hide enabled left panels (%s)', 'Ctrl+Shift+A')
     on: true
     @onClick: |
-      modules.client_options.setOption('showLeftPanel', not modules.client_options.getOption('showLeftPanel'))
+      ClientOptions.setOption('showLeftPanel', not ClientOptions.getOption('showLeftPanel'))
+
+    $hidden:
+      size: 0 0
+
+    $on:
+      image-clip: 0 0 7 20
+
+    $on hover:
+      image-clip: 0 20 7 20
+
+    $on pressed:
+      image-clip: 0 40 7 20
 
     $!on:
-      image-source: /images/game/interface/tabarrow_right
-      !tooltip: tr('Show left panel (%s)', 'Ctrl+Shift+A')
+      image-clip: 7 0 7 20
+      !tooltip: tr('Show enabled left panels (%s)', 'Ctrl+Shift+A')
 
-  TabArrowButton
+    $!on hover:
+      image-clip: 7 20 7 20
+
+    $!on pressed:
+      image-clip: 7 40 7 20
+
+  UIButton
     id: rightPanelButton
-    anchors.top: prev.top
-    anchors.right: bottomSplitter.right
-    margin-right: 10
-    image-source: /images/game/interface/tabarrow_right
-    !tooltip: tr('Hide right panel (%s)', 'Ctrl+Shift+S')
+    size: 7 20
+    anchors.verticalCenter: gameScreenArea.verticalCenter
+    anchors.right: gameRightThirdPanel.outsideLeft
+    image-source: /images/ui/_button/sidebar_horizontal
+    !tooltip: tr('Hide enabled right panels (%s)', 'Ctrl+Shift+S')
     on: true
     @onClick: |
-      modules.client_options.setOption('showRightPanel', not modules.client_options.getOption('showRightPanel'))
+      ClientOptions.setOption('showRightPanel', not ClientOptions.getOption('showRightPanel'))
+
+    $hidden:
+      size: 0 0
+
+    $on:
+      image-clip: 14 0 7 20
+
+    $on hover:
+      image-clip: 14 20 7 20
+
+    $on pressed:
+      image-clip: 14 40 7 20
 
     $!on:
-      image-source: /images/game/interface/tabarrow_left
-      !tooltip: tr('Show right panel (%s)', 'Ctrl+Shift+S')
+      image-clip: 21 0 7 20
+      !tooltip: tr('Show enabled right panels (%s)', 'Ctrl+Shift+S')
 
-  TabArrowButton
+    $!on hover:
+      image-clip: 21 20 7 20
+
+    $!on pressed:
+      image-clip: 21 40 7 20
+
+  UIButton
     id: chatButton
-    anchors.top: prev.top
-    anchors.right: prev.left
-    margin-right: 2
-    image-source: /images/game/interface/tabarrow_down
+    size: 20 7
+    anchors.bottom: gameExpBar.outsideTop
+    anchors.horizontalCenter: gameBottomPanel.horizontalCenter
+    image-source: /images/ui/_button/sidebar_vertical
     !tooltip: tr('Hide chat (%s)', 'Ctrl+Shift+W')
     on: true
     @onClick: |
-      modules.client_options.setOption('showChat', not modules.client_options.getOption('showChat'))
+      ClientOptions.setOption('showChat', not ClientOptions.getOption('showChat'))
+
+    $on:
+      image-clip: 40 0 20 7
+
+    $on hover:
+      image-clip: 40 7 20 7
+
+    $on pressed:
+      image-clip: 40 14 20 7
 
     $!on:
-      image-source: /images/game/interface/tabarrow_up
+      image-clip: 60 0 20 7
       !tooltip: tr('Show chat (%s)', 'Ctrl+Shift+W')
+
+    $!on hover:
+      image-clip: 60 7 20 7
+
+    $!on pressed:
+      image-clip: 60 14 20 7
 
   UIWidget
     id: mouseGrabber

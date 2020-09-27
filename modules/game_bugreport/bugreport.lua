@@ -1,41 +1,17 @@
+_G.GameBugReport = { }
+GameBugReport.m  = modules.game_bugreport -- Alias
+
+
+
 local maximumXYValue     = 9999
 local maximumZValue      = 15
 local minimumCommentSize = 50
 local textPattern     = "[^%w%s!?%+-*/=@%(%)%[%]%{%}.,]+" -- Find symbols that are NOT letters, numbers, spaces and !?+-*/=@()[]{}.,
 
-
-
 local REPORT_MODE_NEWREPORT    = 0
 local REPORT_MODE_UPDATESEARCH = 1
 local REPORT_MODE_UPDATESTATE  = 2
 local REPORT_MODE_REMOVEROW    = 3
-
-local function sendNewReport(category, comment, position)
-  position = position or { x = 0, y = 0, z = 0 }
-  local protocolGame = g_game.getProtocolGame()
-  if not protocolGame then return end
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%s;%d;%d;%d", REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
-end
-
-local function sendUpdateSearch(category, page, rowsPerPage, state)
-  local protocolGame = g_game.getProtocolGame()
-  if not protocolGame then return end
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%d;%d;%d", REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
-end
-
-local function sendUpdateState(row)
-  local protocolGame = g_game.getProtocolGame()
-  if not protocolGame then return end
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%d", REPORT_MODE_UPDATESTATE, row.state, row.id))
-end
-
-local function sendRemoveRow(row)
-  local protocolGame = g_game.getProtocolGame()
-  if not protocolGame then return end
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d", REPORT_MODE_REMOVEROW, row.id))
-end
-
-
 
 bugReportWindow             = nil
 bugLabel                    = nil
@@ -47,8 +23,6 @@ bugPositionY                = nil
 bugPositionZ                = nil
 bugOkButton                 = nil
 bugCancelButton             = nil
-
-
 
 local REPORT_CATEGORY_ALL       = 255
 local REPORT_CATEGORY_MAP       = 0
@@ -65,16 +39,78 @@ local categories =
   [REPORT_CATEGORY_OTHER]     = 'Other'
 }
 
-
-
 local bugCategory = REPORT_CATEGORY_MAP
 
+local function sendNewReport(category, comment, position)
+  position = position or { x = 0, y = 0, z = 0 }
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%s;%d;%d;%d", REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
+end
+
+local function sendUpdateSearch(category, page, rowsPerPage, state)
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%d;%d;%d", REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
+end
+
+local function sendUpdateState(row)
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%d", REPORT_MODE_UPDATESTATE, row.state, row.id))
+end
+
+local function sendRemoveRow(row)
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d", REPORT_MODE_REMOVEROW, row.id))
+end
+
+local function clearBugReportWindow()
+  bugCategoryComboBox:setOption('Map')
+  bugCategoryComboBox:setEnabled(true)
+  bugPositionX:setText(0)
+  bugPositionY:setText(0)
+  bugPositionZ:setText(0)
+  bugPositionX:setEnabled(true)
+  bugPositionY:setEnabled(true)
+  bugPositionZ:setEnabled(true)
+  bugCommentMultilineTextEdit:setText('')
+  bugCommentMultilineTextEdit:setEditable(true)
+  bugLabel:setText('Use this dialog to only report bug or idea!\nONLY IN ENGLISH!\n\n[Bad Example] :(\nFound a fucking bug! msg me! fast!!!\n\n[Nice Example] :)\nGood morning!\nI found a map bug on my actual position.\nHere is the details: ...')
+  bugOkButton:show()
+  bugOkButton.onClick = GameBugReport.doReport
+  bugCancelButton:setText('Cancel')
+  bugCancelButton.onClick = GameBugReport.hideReportWindow
+  bugReportWindow.onEscape = bugCancelButton.onClick
+  bugCommentMultilineTextEdit:focus()
+end
+
+local function onPositionTextChange(self, maxValue)
+  local text = self:getText()
+  if text:match("[^0-9]+") or (tonumber(text) or 0) > maxValue then
+    self:setText(maxValue)
+  end
+end
 
 
-function init()
+
+function GameBugReport.init()
   g_ui.importStyle('bugreport')
 
-  bugReportButton = modules.client_topmenu.addLeftGameButton('bugReportButton', tr('Report Bug/Problem/Idea') .. ' (Ctrl+,)', '/images/topbuttons/bugreport', toggle)
+  bugReportButton = ClientTopMenu.addLeftGameButton('bugReportButton', tr('Report Bug/Problem/Idea') .. ' (Ctrl+,)', '/images/ui/top_menu/bugreport', GameBugReport.toggle, true)
 
   bugReportWindow = g_ui.createWidget('BugReportWindow', rootWidget)
   bugReportWindow:hide()
@@ -89,23 +125,27 @@ function init()
   bugCategoryComboBox:addOption('Typo')
   bugCategoryComboBox:addOption('Technical')
   bugCategoryComboBox:addOption('Other')
-  bugCategoryComboBox.onOptionChange = onChangeCategory
-  onChangeCategory(bugCategoryComboBox, 'map') -- For update the tooltip when init the window
+  bugCategoryComboBox.onOptionChange = GameBugReport.onChangeCategory
+  GameBugReport.onChangeCategory(bugCategoryComboBox, 'map') -- For update the tooltip when init the window
   bugCommentMultilineTextEdit = bugReportWindow:getChildById('bugCommentMultilineTextEdit')
 
-  g_keyboard.bindKeyDown('Ctrl+,', toggle)
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerBugReport, parseBugReports) -- View List
+  g_keyboard.bindKeyDown('Ctrl+,', GameBugReport.toggle)
+  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerBugReport, GameBugReport.parseBugReports) -- View List
 end
 
-function terminate()
+function GameBugReport.terminate()
   ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerBugReport) -- View List
   g_keyboard.unbindKeyDown('Ctrl+,')
 
-  destroyBugReportWindow()
-  destroyBugReportViewWindow()
+  GameBugReport.destroyBugReportWindow()
+  GameBugReport.destroyBugReportViewWindow()
+
+  _G.GameBugReport = nil
 end
 
-function destroyBugReportWindow()
+
+
+function GameBugReport.destroyBugReportWindow()
   if bugReportWindow then
     bugReportWindow:destroy()
   end
@@ -122,27 +162,7 @@ function destroyBugReportWindow()
   bugCancelButton             = nil
 end
 
-local function clearBugReportWindow()
-  bugCategoryComboBox:setOption('Map')
-  bugCategoryComboBox:setEnabled(true)
-  bugPositionX:setText(0)
-  bugPositionY:setText(0)
-  bugPositionZ:setText(0)
-  bugPositionX:setEnabled(true)
-  bugPositionY:setEnabled(true)
-  bugPositionZ:setEnabled(true)
-  bugCommentMultilineTextEdit:setText('')
-  bugCommentMultilineTextEdit:setEditable(true)
-  bugLabel:setText('Use this dialog to only report bug or idea!\nONLY IN ENGLISH!\n\n[Bad Example] :(\nFound a fucking bug! msg me! fast!!!\n\n[Nice Example] :)\nGood morning!\nI found a map bug on my actual position.\nHere is the details: ...')
-  bugOkButton:show()
-  bugOkButton.onClick = doReport
-  bugCancelButton:setText('Cancel')
-  bugCancelButton.onClick = hideReportWindow
-  bugReportWindow.onEscape = bugCancelButton.onClick
-  bugCommentMultilineTextEdit:focus()
-end
-
-function showReportWindow()
+function GameBugReport.showReportWindow()
   if not g_game.isOnline() then
     return
   end
@@ -154,24 +174,35 @@ function showReportWindow()
   bugReportButton:setOn(true)
 end
 
-function hideReportWindow()
+function GameBugReport.hideReportWindow()
   clearBugReportWindow()
   bugReportWindow:hide()
   bugReportButton:setOn(false)
 end
 
-function toggle()
-  if not bugReportWindow:isVisible() then showReportWindow() else hideReportWindow() end
+function GameBugReport.toggle()
+  if not bugReportWindow:isVisible() then
+    GameBugReport.showReportWindow()
+  else
+    GameBugReport.hideReportWindow()
+  end
 end
 
 
 
-function onChangeCategory(comboBox, option)
+function GameBugReport.onChangeCategory(comboBox, option)
   local newCategory = nil
   for k, v in pairs(categories) do
-    if v == option then newCategory = k break end
+    if v == option then
+      newCategory = k
+      break
+    end
   end
-  if not newCategory then return end
+
+  if not newCategory then
+    return
+  end
+
   bugCategory = newCategory
 
   local isMap = bugCategory == REPORT_CATEGORY_MAP
@@ -186,29 +217,24 @@ function onChangeCategory(comboBox, option)
   bugPositionZ:setEnabled(isMap)
 end
 
-local function onPositionTextChange(self, maxValue)
-  local text = self:getText()
-  if text:match("[^0-9]+") or (tonumber(text) or 0) > maxValue then
-    self:setText(maxValue)
-  end
-end
-
-function onPositionXTextChange(self)
+function GameBugReport.onPositionXTextChange(self)
   onPositionTextChange(self, maximumXYValue)
 end
 
-function onPositionYTextChange(self)
+function GameBugReport.onPositionYTextChange(self)
   onPositionTextChange(self, maximumXYValue)
 end
 
-function onPositionZTextChange(self)
+function GameBugReport.onPositionZTextChange(self)
   onPositionTextChange(self, maximumZValue)
 end
 
 
 
-function doReport()
-  if not g_game.canPerformGameAction() then return end
+function GameBugReport.doReport()
+  if not g_game.canPerformGameAction() then
+    return
+  end
 
   local position =
   {
@@ -230,7 +256,7 @@ function doReport()
   end
 
   sendNewReport(bugCategory, comment, position)
-  hideReportWindow()
+  GameBugReport.hideReportWindow()
 end
 
 
@@ -252,8 +278,6 @@ local bugViewRowsPerPageOptionScrollbar = nil
 local bugViewStateComboBox              = nil
 local bugViewCategoryComboBox           = nil
 
-
-
 local REPORT_STATE_UNDONE  = 255
 local REPORT_STATE_NEW     = 0
 local REPORT_STATE_WORKING = 1
@@ -266,8 +290,6 @@ local states =
   [REPORT_STATE_WORKING] = 'Working',
   [REPORT_STATE_DONE]    = 'Done'
 }
-
-
 
 local viewPage     = 1
 local maxPages     = 1
@@ -282,10 +304,41 @@ local function getWindowState()
   return g_game.isOnline() and bugReportViewWindow and hasViewAccess()
 end
 
+local function clearBugReportViewWindow(row)
+  bugPositionX:setText(row.mapposx)
+  bugPositionY:setText(row.mapposy)
+  bugPositionZ:setText(row.mapposz)
+
+  bugCategoryComboBox:setEnabled(false)
+  bugPositionX:setEnabled(false)
+  bugPositionY:setEnabled(false)
+  bugPositionZ:setEnabled(false)
+  bugCommentMultilineTextEdit:setText(row.comment)
+  bugCommentMultilineTextEdit:setTextAlign(AlignTopLeft)
+  bugCommentMultilineTextEdit:setEditable(false)
+  bugOkButton:hide()
+  bugCancelButton:setText('Close')
+  bugCancelButton.onClick = function()
+    bugReportWindow:unlock()
+    GameBugReport.hideReportWindow()
+    bugReportViewWindow:show()
+    bugReportViewWindow:lock()
+    GameBugReport.listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild())
+  end
+  bugReportWindow.onEscape = bugCancelButton.onClick
+end
+
+local function updateReportRowTitle(row)
+  row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. categories[row.category] .. '] ' .. row.comment:sub(0, 35) .. (#row.comment > 35 and "..." or ""))
+end
 
 
-function listOnChildFocusChange(textList, focusedChild)
-  if not textList then return end
+
+function GameBugReport.listOnChildFocusChange(textList, focusedChild)
+  if not textList then
+    return
+  end
+
   -- Update Report Rows Style
   local children = bugViewList:getChildren()
   for i = 1, #children do
@@ -295,10 +348,12 @@ function listOnChildFocusChange(textList, focusedChild)
       children[i]:setOn(true)
     end
   end
-  if not focusedChild then return end
+  if not focusedChild then
+    return
+  end
 end
 
-function showViewWindow()
+function GameBugReport.showViewWindow()
   if not g_game.isOnline() or not hasViewAccess() then
     return
   end
@@ -319,25 +374,25 @@ function showViewWindow()
   bugViewStateComboBox = bugReportViewWindow:getChildById('bugViewStateComboBox')
   bugViewCategoryComboBox = bugReportViewWindow:getChildById('bugViewCategoryComboBox')
 
-  bugViewList.onChildFocusChange = listOnChildFocusChange
-  updateRowsPerPageLabel(getRowsPerPage())
+  bugViewList.onChildFocusChange = GameBugReport.listOnChildFocusChange
+  GameBugReport.updateRowsPerPageLabel(GameBugReport.getRowsPerPage())
 
   bugViewStateComboBox:addOption(states[REPORT_STATE_UNDONE])
   for state = REPORT_STATE_NEW, REPORT_STATE_DONE do
     bugViewStateComboBox:addOption(states[state])
   end
-  bugViewStateComboBox.onOptionChange = onViewChangeState
+  bugViewStateComboBox.onOptionChange = GameBugReport.onViewChangeState
 
   bugViewCategoryComboBox:addOption(categories[REPORT_CATEGORY_ALL])
   for category = REPORT_CATEGORY_MAP, REPORT_CATEGORY_OTHER do
     bugViewCategoryComboBox:addOption(categories[category])
   end
-  bugViewCategoryComboBox.onOptionChange = onViewChangeCategory
+  bugViewCategoryComboBox.onOptionChange = GameBugReport.onViewChangeCategory
 
-  updatePage() -- Fill list
+  GameBugReport.updatePage() -- Fill list
 end
 
-function destroyBugReportViewWindow()
+function GameBugReport.destroyBugReportViewWindow()
   if bugReportViewWindow then
     bugReportViewWindow:destroy()
   end
@@ -351,40 +406,22 @@ function destroyBugReportViewWindow()
   bugViewCategoryComboBox           = nil
 end
 
-function clearViewWindow()
+function GameBugReport.clearViewWindow()
   viewPage     = 1
   maxPages     = 1
   viewState    = REPORT_STATE_UNDONE
   viewCategory = REPORT_CATEGORY_ALL
 
   bugViewPage:setText('1')
-  updateRowsPerPageLabel(getRowsPerPage())
+  GameBugReport.updateRowsPerPageLabel(GameBugReport.getRowsPerPage())
 
   bugViewStateComboBox:setOption(states[viewState])
   bugViewCategoryComboBox:setOption(categories[viewCategory])
 
-  updatePage() -- Fill list
+  GameBugReport.updatePage() -- Fill list
 end
 
-local function clearBugReportViewWindow(row)
-  bugPositionX:setText(row.mapposx)
-  bugPositionY:setText(row.mapposy)
-  bugPositionZ:setText(row.mapposz)
-
-  bugCategoryComboBox:setEnabled(false)
-  bugPositionX:setEnabled(false)
-  bugPositionY:setEnabled(false)
-  bugPositionZ:setEnabled(false)
-  bugCommentMultilineTextEdit:setText(row.comment)
-  bugCommentMultilineTextEdit:setTextAlign(AlignTopLeft)
-  bugCommentMultilineTextEdit:setEditable(false)
-  bugOkButton:hide()
-  bugCancelButton:setText('Close')
-  bugCancelButton.onClick = function() bugReportWindow:unlock() hideReportWindow() bugReportViewWindow:show() bugReportViewWindow:lock() listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild()) end
-  bugReportWindow.onEscape = bugCancelButton.onClick
-end
-
-function openRow(row)
+function GameBugReport.openRow(row)
   if not g_game.isOnline() or not hasViewAccess() then
     return
   end
@@ -394,7 +431,7 @@ function openRow(row)
     return
   end
 
-  showReportWindow()
+  GameBugReport.showReportWindow()
   if bugReportWindow then
     bugReportViewWindow:unlock()
     bugReportViewWindow:hide()
@@ -412,7 +449,7 @@ end
 
 
 
-function onBugViewPageChange(self)
+function GameBugReport.onBugViewPageChange(self)
   local text   = self:getText()
   local number = tonumber(text) or 0
   if text:match('[^0-9]+') or number > maxPages then -- Pattern: Cannot have non numbers (Correct: '7', '777' | Wrong: 'A7', '-7')
@@ -422,59 +459,85 @@ function onBugViewPageChange(self)
   end
 end
 
-function getRowsPerPage() return bugViewRowsPerPageOptionScrollbar and bugViewRowsPerPageOptionScrollbar:getValue() or 1 end
-function updateRowsPerPageLabel(value) if not bugViewRowsPerPageLabel then return end bugViewRowsPerPageLabel:setText('Rows per page: ' .. value) end
+function GameBugReport.getRowsPerPage()
+  return bugViewRowsPerPageOptionScrollbar and bugViewRowsPerPageOptionScrollbar:getValue() or 1
+end
 
-function onViewChangeCategory(comboBox, option)
+function GameBugReport.updateRowsPerPageLabel(value)
+  if not bugViewRowsPerPageLabel then
+    return
+  end
+  bugViewRowsPerPageLabel:setText('Rows per page: ' .. value)
+end
+
+function GameBugReport.onViewChangeCategory(comboBox, option)
   local newViewCategory = nil
   for k, v in pairs(categories) do
-    if v == option then newViewCategory = k break end
+    if v == option then
+      newViewCategory = k
+      break
+    end
   end
-  if not newViewCategory then return end
+
+  if not newViewCategory then
+    return
+  end
+
   viewCategory = newViewCategory
 end
 
-function onViewChangeState(comboBox, option)
+function GameBugReport.onViewChangeState(comboBox, option)
   local newViewState = nil
   for k, v in pairs(states) do
-    if v == option then newViewState = k break end
+    if v == option then
+      newViewState = k
+      break
+    end
   end
-  if not newViewState then return end
+
+  if not newViewState then
+    return
+  end
+
   viewState = newViewState
 end
 
-function bugViewUpdatePage()
+function GameBugReport.bugViewUpdatePage()
   local page = tonumber(bugViewPage:getText()) or 1
-  if page < 1 or page > maxPages then return end
+  if page < 1 or page > maxPages then
+    return
+  end
+
   viewPage = page
-  updatePage()
+  GameBugReport.updatePage()
 end
 
-function bugViewPreviousPage()
+function GameBugReport.bugViewPreviousPage()
   viewPage = math.max(1, viewPage - 1)
   bugViewPage:setText(viewPage)
-  updatePage()
+  GameBugReport.updatePage()
 end
 
-function bugViewNextPage()
+function GameBugReport.bugViewNextPage()
   viewPage = math.min(viewPage + 1, maxPages)
   bugViewPage:setText(viewPage)
-  updatePage()
+  GameBugReport.updatePage()
 end
 
-function updatePage()
-  if not g_game.canPerformGameAction() or not getWindowState() then return end
-  sendUpdateSearch(viewCategory, viewPage, getRowsPerPage(), viewState)
+function GameBugReport.updatePage()
+  if not g_game.canPerformGameAction() or not getWindowState() then
+    return
+  end
+
+  sendUpdateSearch(viewCategory, viewPage, GameBugReport.getRowsPerPage(), viewState)
 end
 
 
 
-local function updateReportRowTitle(row)
-  row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. categories[row.category] .. '] ' .. row.comment:sub(0, 35) .. (#row.comment > 35 and "..." or ""))
-end
-
-function parseBugReports(protocol, opcode, buffer)
-  if not getWindowState() then return end
+function GameBugReport.parseBugReports(protocol, opcode, buffer)
+  if not getWindowState() then
+    return
+  end
 
   -- Clear list
   local children = bugViewList:getChildren()
@@ -484,10 +547,12 @@ function parseBugReports(protocol, opcode, buffer)
   end
 
   local _buffer = string.split(buffer, ';:')
-  if #_buffer ~= 2 then return end
+  if #_buffer ~= 2 then
+    return
+  end
 
   maxPages = tonumber(_buffer[1]) or 1
-  maxPages = math.ceil(maxPages / getRowsPerPage())
+  maxPages = math.ceil(maxPages / GameBugReport.getRowsPerPage())
 
   local reports = string.split(_buffer[2], ';')
   for _, report in ipairs(reports) do
@@ -506,20 +571,24 @@ function parseBugReports(protocol, opcode, buffer)
     row.playerposz = tonumber(data[11])
     row.comment    = string.format('%s', data[12])
     updateReportRowTitle(row)
-    row.onDoubleClick = openRow
+    row.onDoubleClick = GameBugReport.openRow
   end
 
-  listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild())
+  GameBugReport.listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild())
 end
 
 
 
 -- For avoid multiple remove row confirm windows
 local removeConfirmWindowLock = false
-function setRemoveConfirmWindowLock(lock) removeConfirmWindowLock = lock end
+function GameBugReport.setRemoveConfirmWindowLock(lock)
+  removeConfirmWindowLock = lock
+end
 
-function removeRow(bugViewList, row) -- After confirm button
-  if not g_game.canPerformGameAction() or not getWindowState() then return end
+function GameBugReport.removeRow(bugViewList, row) -- After confirm button
+  if not g_game.canPerformGameAction() or not getWindowState() then
+    return
+  end
 
   -- Ignored fields
   local _bugCategory = 255
@@ -533,11 +602,13 @@ function removeRow(bugViewList, row) -- After confirm button
   bugViewList:removeChild(row)
   row:destroy()
 
-  listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild())
+  GameBugReport.listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild())
 end
 
-function bugViewRemoveRow()
-  if not getWindowState() then return end
+function GameBugReport.bugViewRemoveRow()
+  if not getWindowState() then
+    return
+  end
 
   local row = bugViewList:getFocusedChild()
   if not row then
@@ -546,13 +617,27 @@ function bugViewRemoveRow()
   end
 
   if not removeConfirmWindowLock then
-    displayCustomBox('Warning', 'Are you sure that you want to remove the row id ' .. row.id .. '?', {{ text = 'Yes', buttonCallback = function() if modules.game_bugreport then modules.game_bugreport.removeRow(bugViewList, row) modules.game_bugreport.setRemoveConfirmWindowLock(false) end end }}, 1, 'No', function() if modules.game_bugreport then modules.game_bugreport.setRemoveConfirmWindowLock(false) end end, nil)
-    setRemoveConfirmWindowLock(true)
+    local buttonCallback = function()
+      if GameBugReport then
+        GameBugReport.removeRow(bugViewList, row) GameBugReport.setRemoveConfirmWindowLock(false)
+      end
+    end
+
+    local onCancelCallback = function()
+      if GameBugReport then
+        GameBugReport.setRemoveConfirmWindowLock(false)
+      end
+    end
+
+    displayCustomBox('Warning', 'Are you sure that you want to remove the row id ' .. row.id .. '?', {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
+    GameBugReport.setRemoveConfirmWindowLock(true)
   end
 end
 
-function bugViewSetReportState()
-  if not g_game.canPerformGameAction() or not getWindowState() then return end
+function GameBugReport.bugViewSetReportState()
+  if not g_game.canPerformGameAction() or not getWindowState() then
+    return
+  end
 
   local err
   local row = bugViewList:getFocusedChild()
@@ -577,5 +662,5 @@ function bugViewSetReportState()
   sendUpdateState(row)
 
   updateReportRowTitle(row)
-  listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild())
+  GameBugReport.listOnChildFocusChange(bugViewList, bugViewList:getFocusedChild())
 end

@@ -1,33 +1,19 @@
-SkullProgressBar < ProgressBar
-  height: 13
-  margin: 4 18 0 10
-  anchors.top: prev.bottom
-  anchors.left: parent.left
-  anchors.right: parent.right
-
 SkullWidget < UIWidget
   size: 11 11
-  margin: 1
-  margin-right: 2
   anchors.right: parent.right
-  image-source: /images/game/skull_socket
+  image-source: /images/game/creature/skull/socket
 
 MiniWindow
   id: unjustifiedPointsWindow
-  !text: 'Unjustified Frags'
-  // old height: 114
-  height: 90
-  icon: /images/topbuttons/unjustifiedpoints
-  @onOpen: onMiniWindowOpen()
-  @onClose: onMiniWindowClose()
+  !text: tr('Frags')
+  height: 88
+  icon: /images/ui/top_menu/unjustifiedpoints
+  @onOpen: GameUnjustifiedPoints.onMiniWindowOpen()
+  @onClose: GameUnjustifiedPoints.onMiniWindowClose()
   &save: true
 
-  MiniWindowContents
-    SkullWidget
-      id: currentSkullWidget
-      anchors.top: parent.top
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.right: none
+  MiniWindowHeader
+    height: 14
 
     Label
       id: skullTimeLabel
@@ -39,19 +25,44 @@ MiniWindow
       font: verdana-11px-rounded
       phantom: false
 
-    SkullProgressBar
-      id: redSkullProgressBar
-      margin-top: 5
+  MiniWindowContents
 
     SkullWidget
       id: redSkullSkullWidget
-      anchors.top: prev.top
-      image-source: /images/game/skulls/skull_red
-
-    SkullProgressBar
-      id: blackSkullProgressBar
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin: 4
+      image-source: /images/game/creature/skull/red
 
     SkullWidget
       id: blackSkullSkullWidget
-      anchors.top: prev.top
-      image-source: /images/game/skulls/skull_black
+      anchors.top: prev.bottom
+      anchors.right: parent.right
+      margin: 4
+      image-source: /images/game/creature/skull/black
+
+    ProgressBar
+      id: redSkullProgressBar
+      height: 13
+      anchors.verticalCenter: redSkullSkullWidget.verticalCenter
+      anchors.left: parent.left
+      anchors.right: redSkullSkullWidget.left
+      margin-left: 4
+      margin-right: 4
+
+    ProgressBar
+      id: blackSkullProgressBar
+      height: 13
+      anchors.verticalCenter: blackSkullSkullWidget.verticalCenter
+      anchors.left: parent.left
+      anchors.right: blackSkullSkullWidget.left
+      margin-left: 4
+      margin-right: 4
+
+  MiniWindowFooter
+    height: 15
+
+    SkullWidget
+      id: currentSkullWidget
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.horizontalCenter: parent.horizontalCenter

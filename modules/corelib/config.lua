@@ -25,7 +25,9 @@ function Config:set(key, value)
 end
 
 function Config:setDefault(key, value)
-  if self:exists(key) then return false end
+  if self:exists(key) then
+    return false
+  end
   self:set(key, value)
   return true
 end

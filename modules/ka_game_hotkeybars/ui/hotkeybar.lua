@@ -53,7 +53,13 @@ function UIHotkeybar:addHotkey(keyCombo, mousePos)
   hotkeyWidget:setDraggable(true)
 
   connect(hotkeyWidget, {
-    onMousePress = function () modules.game_hotkeys.doKeyCombo(keyCombo, hotkeyWidget) end
+    onMousePress = function()
+      if not modules.game_hotkeys then
+        return
+      end
+
+      GameHotkeys.doKeyCombo(keyCombo, hotkeyWidget)
+    end
   })
 
   local isVertical = (self.alignment == 'vertical')
@@ -105,7 +111,9 @@ function UIHotkeybar:addHotkey(keyCombo, mousePos)
 end
 
 function UIHotkeybar:removeHotkey(widget)
-  modules.game_hotkeys.cancelPower(true)
+  if modules.game_hotkeys then
+    GamePowerHotkeys.cancel(true)
+  end
 
   local keyCombo = widget.keyCombo
   if #self.hotkeys > 0 then
@@ -155,7 +163,7 @@ function UIHotkeybar:updateDraggable(bool)
 end
 
 function UIHotkeybar:load()
-  local settings = modules.game_things.getPlayerSettings()
+  local settings = Client.getPlayerSettings()
   local hotkeyBars = settings:getNode('hotkeybars') or {}
 
   if table.empty(hotkeyBars) then
@@ -179,7 +187,7 @@ function UIHotkeybar:load()
 end
 
 function UIHotkeybar:save()
-  local settings = modules.game_things.getPlayerSettings()
+  local settings = Client.getPlayerSettings()
   local hotkeyBars = settings:getNode('hotkeybars') or {}
 
   for k, v in pairs(hotkeyBars) do
@@ -199,7 +207,7 @@ function UIHotkeybar:save()
 end
 
 function UIHotkeybar:updateSize()
-  local content = #self.hotkeys * (self.hotkeySize + self.hotkeyMargin) + 25
+  local content = #self.hotkeys * (self.hotkeySize + self.hotkeyMargin) + 26 -- 26 = Hotkey arrows width (or height when vertical) + 2 of margin between then
   if self.alignment == 'vertical' then
     self:setSize(string.format('%i %i', self.height, content))
   elseif self.alignment == 'horizontal' then
@@ -209,17 +217,22 @@ function UIHotkeybar:updateSize()
   end
 end
 
-function UIHotkeybar:setAlignment(align)
-  if align == 'vertical' then
-    table.insert(self.arrows, g_ui.createWidget('HotkeybarArrowTop', self))
-    table.insert(self.arrows, g_ui.createWidget('HotkeybarArrowBottom', self))
-    self:addAnchor(AnchorVerticalCenter, 'gameMapPanel', AnchorVerticalCenter)
-    self:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-  elseif align == 'horizontal' then
+function UIHotkeybar:setAlignment(anchor)
+  local align = (anchor == AnchorTop or anchor == AnchorBottom) and 'horizontal' or 'vertical'
+
+  self:addAnchor(anchor, 'gameScreenArea', anchor)
+
+  if align == 'horizontal' then
     table.insert(self.arrows, g_ui.createWidget('HotkeybarArrowLeft', self))
     table.insert(self.arrows, g_ui.createWidget('HotkeybarArrowRight', self))
-    self:addAnchor(AnchorHorizontalCenter, 'gameMapPanel', AnchorHorizontalCenter)
-    self:addAnchor(AnchorTop, 'parent', AnchorTop)
+
+    self:addAnchor(AnchorHorizontalCenter, 'gameScreenArea', AnchorHorizontalCenter)
+
+  elseif align == 'vertical' then
+    table.insert(self.arrows, g_ui.createWidget('HotkeybarArrowTop', self))
+    table.insert(self.arrows, g_ui.createWidget('HotkeybarArrowBottom', self))
+
+    self:addAnchor(AnchorVerticalCenter, 'gameScreenArea', AnchorVerticalCenter)
   end
 
   self.alignment = align
@@ -260,22 +273,33 @@ function UIHotkeybar:onDrop(widget, mousePos)
   local isPowerButton = widget:getClassName() == 'UIPowerButton'
   local isItemButton = widget:getClassName() == 'UIItem'
   local isGameItem = widget:getClassName() == 'UIGameMap'
-  if not self:canAcceptDrop(widget, mousePos) or (not(isHotkeyLabel) and not(isHotkeybarContainer) and not(isPowerButton) and not(isItemButton) and not(isGameItem)) then return false end
+  if not self:canAcceptDrop(widget, mousePos) or (not(isHotkeyLabel) and not(isHotkeybarContainer) and not(isPowerButton) and not(isItemButton) and not(isGameItem)) then
+    return false
+  end
 
   if isPowerButton then
-    modules.game_hotkeys.addHotkey({hotkeyBar = self, powerId = widget.power.id, mousePos = mousePos})
+    if modules.game_hotkeys then
+      GameHotkeys.addHotkey({hotkeyBar = self, powerId = widget.power.id, mousePos = mousePos})
+    end
     return true
   end
 
   if isItemButton then
-    modules.game_hotkeys.addHotkey({hotkeyBar = self, item = widget:getItem(), mousePos = mousePos})
+    if modules.game_hotkeys then
+      GameHotkeys.addHotkey({hotkeyBar = self, item = widget:getItem(), mousePos = mousePos})
+    end
     return true
   end
 
   if isGameItem then
     local item = widget.currentDragThing
-    if not item:isItem() or not item:isPickupable() then return false end
-    modules.game_hotkeys.addHotkey({hotkeyBar = self, item = widget.currentDragThing, mousePos = mousePos})
+    if not item:isItem() or not item:isPickupable() then
+      return false
+    end
+
+    if modules.game_hotkeys then
+      GameHotkeys.addHotkey({hotkeyBar = self, item = widget.currentDragThing, mousePos = mousePos})
+    end
     return true
   end
 
@@ -294,7 +318,9 @@ function UIHotkeybar:onDrop(widget, mousePos)
 end
 
 function UIHotkeybar:canAcceptDrop(widget, mousePos)
-  if not widget then return false end
+  if not widget then
+    return false
+  end
 
   local children = rootWidget:recursiveGetChildrenByPos(mousePos)
   for i=1,#children do

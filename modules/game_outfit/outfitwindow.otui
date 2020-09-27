@@ -7,8 +7,8 @@ MainWindow
   !text: tr('Select Outfit')
   size: 338 375
 
-  @onEnter: modules.game_outfit.accept()
-  @onEscape: modules.game_outfit.destroy()
+  @onEnter: GameOutfit.accept()
+  @onEscape: GameOutfit.destroy()
 
   // Creature Boxes
   Creature
@@ -35,7 +35,7 @@ MainWindow
     anchors.verticalCenter: outfitCreatureBox.verticalCenter
     margin-left: 3
     enabled: true
-    @onClick: modules.game_outfit.nextOutfitType()
+    @onClick: GameOutfit.nextOutfitType()
 
   PrevOutfitButton
     id: outfitPrevButton
@@ -43,7 +43,7 @@ MainWindow
     anchors.verticalCenter: outfitCreatureBox.verticalCenter
     margin-right: 3
     enabled: true
-    @onClick: modules.game_outfit.previousOutfitType()
+    @onClick: GameOutfit.previousOutfitType()
 
   Creature
     id: mountCreatureBox
@@ -69,7 +69,7 @@ MainWindow
     anchors.verticalCenter: mountCreatureBox.verticalCenter
     margin-left: 3
     enabled: true
-    @onClick: modules.game_outfit.nextMountType()
+    @onClick: GameOutfit.nextMountType()
 
   PrevMountButton
     id: mountPrevButton
@@ -77,7 +77,7 @@ MainWindow
     anchors.verticalCenter: mountCreatureBox.verticalCenter
     margin-right: 3
     enabled: true
-    @onClick: modules.game_outfit.previousMountType()
+    @onClick: GameOutfit.previousMountType()
 
   // Addon Check Boxes
 
@@ -99,14 +99,6 @@ MainWindow
     anchors.left: prev.right
     enabled: false
 
-//  CheckBox
-//    id: addon3
-//    !text: tr('Addon') .. ' 3'
-//    width: 80
-//    anchors.top: prev.top
-//    anchors.left: prev.right
-//    enabled: false
-
   // Body Selection Buttons
 
   ButtonBox
@@ -116,39 +108,38 @@ MainWindow
     anchors.left: addon1.left
     margin-top: 5
     checked: true
-    width: 76
+    width: 75
 
   ButtonBox
     id: primary
     !text: tr('Primary')
     anchors.top: prev.top
-    anchors.left: prev.right
-    width: 76
+    anchors.left: prev.outsideRight
+    width: 75
 
   ButtonBox
     id: secondary
     !text: tr('Secondary')
     anchors.top: prev.top
-    anchors.left: prev.right
-    width: 76
+    anchors.left: prev.outsideRight
+    width: 75
 
   ButtonBox
     id: detail
     !text: tr('Detail')
     anchors.top: prev.top
-    anchors.left: prev.right
-    width: 76
+    anchors.left: prev.outsideRight
+    width: 75
 
   // Color Panel
 
   Panel
     id: colorBoxPanel
+    size: 302 119
     anchors.top: head.bottom
     anchors.left: head.left
     margin-top: 3
     margin-right: 20
-    width: 302
-    height: 119
     layout:
       type: grid
       cell-size: 14 14
@@ -166,7 +157,7 @@ MainWindow
     anchors.left: prev.left
     anchors.top: prev.bottom
     margin-right: 16
-    @onClick: modules.game_outfit.randomize()
+    @onClick: GameOutfit.randomize()
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -182,7 +173,7 @@ MainWindow
     anchors.right: next.left
     anchors.bottom: parent.bottom
     margin-right: 16
-    @onClick: modules.game_outfit.accept()
+    @onClick: GameOutfit.accept()
 
   Button
     id: outfitCancelButton
@@ -190,4 +181,4 @@ MainWindow
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    @onClick: modules.game_outfit.destroy()
+    @onClick: GameOutfit.destroy()

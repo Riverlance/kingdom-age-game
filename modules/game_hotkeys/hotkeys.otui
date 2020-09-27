@@ -48,15 +48,8 @@ MainWindow
   !text: tr('Hotkeys')
   size: 350 525
 
-  @onEnter: ok()
-  @onEscape: cancel()
-
-//  Label
-//    id: currentHotkeysLabel
-//    !text: tr('Current hotkeys')
-//    anchors.left: parent.left
-//    anchors.right: parent.right
-//    anchors.top: parent.top
+  @onEnter: GameHotkeys.ok()
+  @onEscape: GameHotkeys.cancel()
 
   VerticalScrollBar
     id: currentHotkeysScrollBar
@@ -75,16 +68,25 @@ MainWindow
     anchors.bottom: prev.bottom
     focusable: false
 
-
-
   Button
-    id: resetButton
-    width: 96
-    !text: tr('Reset All')
+    id: resetHotkeyButton
+    width: 64
+    !text: tr('Reset')
     anchors.top: prev.bottom
     anchors.left: parent.left
     margin-top: 8
-    @onClick: reset()
+    enabled: false
+    @onClick: GameHotkeys.resetHotkey()
+
+  Button
+    id: applyHotkeyButton
+    !text: tr('Apply')
+    width: 64
+    anchors.top: prev.top
+    anchors.left: prev.right
+    margin-left: 5
+    enabled: false
+    @onClick: GameHotkeys.apply()
 
   Button
     id: removeHotkeyButton
@@ -93,7 +95,7 @@ MainWindow
     anchors.top: prev.top
     anchors.right: parent.right
     enabled: false
-    @onClick: removeHotkey()
+    @onClick: GameHotkeys.removeHotkey()
 
   Button
     id: addHotkeyButton
@@ -102,7 +104,7 @@ MainWindow
     anchors.top: prev.top
     anchors.right: prev.left
     margin-right: 5
-    @onClick: addHotkey()
+    @onClick: GameHotkeys.addHotkey()
 
   HorizontalSeparator
     anchors.top: prev.bottom
@@ -110,10 +112,8 @@ MainWindow
     anchors.right: parent.right
     margin-top: 10
 
-
-
   Label
-    id: hotKeyItemLabel
+    id: hotkeyItemLabel
     !text: tr('Item or Power') .. ":"
     anchors.top: prev.bottom
     anchors.left: parent.left
@@ -134,10 +134,8 @@ MainWindow
     anchors.right: parent.right
     margin-top: 10
 
-
-
   Label
-    id: hotKeyTextLabel
+    id: hotkeyTextLabel
     !text: tr('Text') .. ":"
     anchors.top: prev.bottom
     anchors.left: parent.left
@@ -151,83 +149,16 @@ MainWindow
     anchors.right: parent.right
     text-auto-resize: true
     enabled:false
-    @onCheckChange: onSendAutomaticallyChange(self:isChecked())
+    @onCheckChange: GameHotkeys.onSendAutomaticallyChange(self:isChecked())
 
   TextEdit
     id: hotkeyText
     enabled: false
-    anchors.top: hotKeyTextLabel.bottom
+    anchors.top: hotkeyTextLabel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 3
-    @onTextChange: onHotkeyTextChange(self:getText())
-
-
-
-  //Button
-  //  id: selectObjectButton
-  //  !text: tr('Select object')
-  //  width: 128
-  //  enabled: false
-  //  anchors.left: prev.right
-  //  anchors.top: prev.top
-  //  margin-left: 10
-  //  @onClick: startChooseItem()
-
-  //Button
-  //  id: clearObjectButton
-  //  !text: tr('Clear object')
-  //  width: 128
-  //  enabled: false
-  //  anchors.left: prev.left
-  //  anchors.right: prev.right
-  //  anchors.top: prev.bottom
-  //  margin-top: 2
-  //  @onClick: clearObject()
-
-  //ButtonBox
-  //  id: useWith
-  //  !text: tr('With crosshair')
-  //  width: 128
-  //  enabled: false
-  //  anchors.left: selectObjectButton.right
-  //  anchors.right: parent.right
-  //  anchors.top: selectObjectButton.top
-  //  checked: false
-  //  margin-left: 10
-
-  //ButtonBox
-  //  id: useOnSelf
-  //  !text: tr('Use on yourself')
-  //  width: 128
-  //  enabled: false
-  //  anchors.left: selectObjectButton.right
-  //  anchors.right: parent.right
-  //  anchors.top: selectObjectButton.top
-  //  checked: false
-  //  margin-left: 10
-
-  //ButtonBox
-  //  id: useOnTarget
-  //  !text: tr('Use on target')
-  //  width: 128
-  //  enabled: false
-  //  anchors.left: prev.left
-  //  anchors.right: parent.right
-  //  anchors.top: prev.bottom
-  //  checked: false
-  //  margin-top: 2
-
-  //ButtonBox
-  //  id: useWith
-  //  !text: tr('With crosshair')
-  //  width: 128
-  //  enabled: false
-  //  anchors.left: prev.left
-  //  anchors.right: parent.right
-  //  anchors.top: prev.bottom
-  //  checked: false
-  //  margin-top: 2
+    @onTextChange: GameHotkeys.onHotkeyTextChange(self:getText())
 
   HorizontalSeparator
     anchors.left: parent.left
@@ -236,12 +167,29 @@ MainWindow
     margin-bottom: 10
 
   Button
+    id: resetButton
+    width: 72
+    !text: tr('Reset All')
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    @onClick: GameHotkeys.discardChanges()
+
+  Button
+    id: applyAllButton
+    !text: tr('Apply All')
+    width: 72
+    anchors.left: prev.right
+    anchors.bottom: parent.bottom
+    @onClick: GameHotkeys.applyChanges()
+    margin-left: 10
+
+  Button
     id: okButton
     !text: tr('Ok')
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
-    @onClick: ok()
+    @onClick: GameHotkeys.ok()
     margin-right: 10
 
   Button
@@ -250,4 +198,4 @@ MainWindow
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    @onClick: cancel()
+    @onClick: GameHotkeys.cancel()

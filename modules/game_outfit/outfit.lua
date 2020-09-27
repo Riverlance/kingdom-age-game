@@ -1,3 +1,8 @@
+_G.GameOutfit = { }
+GameOutfit.m  = modules.game_outfit -- Alias
+
+
+
 ADDON_SETS = {
   [1] = { 1 },
   [2] = { 2 },
@@ -24,22 +29,26 @@ mounts = nil
 mountCreature = nil
 currentMount = 1
 
-function init()
+
+
+function GameOutfit.init()
   connect(g_game, {
-    onOpenOutfitWindow = create,
-    onGameEnd = destroy
+    onOpenOutfitWindow = GameOutfit.create,
+    onGameEnd          = GameOutfit.destroy
   })
 end
 
-function terminate()
+function GameOutfit.terminate()
   disconnect(g_game, {
-    onOpenOutfitWindow = create,
-    onGameEnd = destroy
+    onOpenOutfitWindow = GameOutfit.create,
+    onGameEnd          = GameOutfit.destroy
   })
-  destroy()
+  GameOutfit.destroy()
+
+  _G.GameOutfit = nil
 end
 
-function updateMount()
+function GameOutfit.updateMount()
   if table.empty(mounts) or not mount then
     return
   end
@@ -50,7 +59,7 @@ function updateMount()
   mountCreature:setOutfit(mount)
 end
 
-function create(creatureOutfit, outfitList, creatureMount, mountList)
+function GameOutfit.create(creatureOutfit, outfitList, creatureMount, mountList)
   if outfitWindow and not outfitWindow:isHidden() then
     return
   end
@@ -59,7 +68,7 @@ function create(creatureOutfit, outfitList, creatureMount, mountList)
   mountCreature = creatureMount
   outfits = outfitList
   mounts = mountList
-  destroy()
+  GameOutfit.destroy()
 
   outfitWindow = g_ui.displayUI('outfitwindow')
   local colorBoxPanel = outfitWindow:getChildById('colorBoxPanel')
@@ -95,7 +104,7 @@ function create(creatureOutfit, outfitList, creatureMount, mountList)
   }
 
   for _, addon in pairs(addons) do
-    addon.widget.onCheckChange = function(self) onAddonCheckChange(self, addon.value) end
+    addon.widget.onCheckChange = function(self) GameOutfit.onAddonCheckChange(self, addon.value) end
   end
 
   if outfit.addons and outfit.addons > 0 then
@@ -106,10 +115,10 @@ function create(creatureOutfit, outfitList, creatureMount, mountList)
 
   -- hook outfit sections
   currentClotheButtonBox = outfitWindow:getChildById('head')
-  outfitWindow:getChildById('head').onCheckChange = onClotheCheckChange
-  outfitWindow:getChildById('primary').onCheckChange = onClotheCheckChange
-  outfitWindow:getChildById('secondary').onCheckChange = onClotheCheckChange
-  outfitWindow:getChildById('detail').onCheckChange = onClotheCheckChange
+  outfitWindow:getChildById('head').onCheckChange = GameOutfit.onClotheCheckChange
+  outfitWindow:getChildById('primary').onCheckChange = GameOutfit.onClotheCheckChange
+  outfitWindow:getChildById('secondary').onCheckChange = GameOutfit.onClotheCheckChange
+  outfitWindow:getChildById('detail').onCheckChange = GameOutfit.onClotheCheckChange
 
   -- populate color panel
   for j=0,6 do
@@ -124,7 +133,7 @@ function create(creatureOutfit, outfitList, creatureMount, mountList)
         currentColorBox = colorBox
         colorBox:setChecked(true)
       end
-      colorBox.onCheckChange = onColorCheckChange
+      colorBox.onCheckChange = GameOutfit.onColorCheckChange
       colorBoxes[#colorBoxes+1] = colorBox
     end
   end
@@ -145,11 +154,11 @@ function create(creatureOutfit, outfitList, creatureMount, mountList)
     end
   end
 
-  updateOutfit()
-  updateMount()
+  GameOutfit.updateOutfit()
+  GameOutfit.updateMount()
 end
 
-function destroy()
+function GameOutfit.destroy()
   if outfitWindow then
     outfitWindow:destroy()
     outfitWindow = nil
@@ -162,7 +171,7 @@ function destroy()
   end
 end
 
-function randomize()
+function GameOutfit.randomize()
   local outfitTemplate = {
     outfitWindow:getChildById('head'),
     outfitWindow:getChildById('primary'),
@@ -178,13 +187,16 @@ function randomize()
   outfitTemplate[1]:setChecked(true)
 end
 
-function accept()
-  if mount then outfit.mount = mount.type end
+function GameOutfit.accept()
+  if mount then
+    outfit.mount = mount.type
+  end
+
   g_game.changeOutfit(outfit)
-  destroy()
+  GameOutfit.destroy()
 end
 
-function nextOutfitType()
+function GameOutfit.nextOutfitType()
   if not outfits then
     return
   end
@@ -192,10 +204,10 @@ function nextOutfitType()
   if currentOutfit > #outfits then
     currentOutfit = 1
   end
-  updateOutfit()
+  GameOutfit.updateOutfit()
 end
 
-function previousOutfitType()
+function GameOutfit.previousOutfitType()
   if not outfits then
     return
   end
@@ -203,10 +215,10 @@ function previousOutfitType()
   if currentOutfit <= 0 then
     currentOutfit = #outfits
   end
-  updateOutfit()
+  GameOutfit.updateOutfit()
 end
 
-function nextMountType()
+function GameOutfit.nextMountType()
   if not mounts then
     return
   end
@@ -214,10 +226,10 @@ function nextMountType()
   if currentMount > #mounts then
     currentMount = 1
   end
-  updateMount()
+  GameOutfit.updateMount()
 end
 
-function previousMountType()
+function GameOutfit.previousMountType()
   if not mounts then
     return
   end
@@ -225,10 +237,10 @@ function previousMountType()
   if currentMount <= 0 then
     currentMount = #mounts
   end
-  updateMount()
+  GameOutfit.updateMount()
 end
 
-function onAddonCheckChange(addon, value)
+function GameOutfit.onAddonCheckChange(addon, value)
   if addon:isChecked() then
     outfit.addons = outfit.addons + value
   else
@@ -237,15 +249,15 @@ function onAddonCheckChange(addon, value)
   outfitCreature:setOutfit(outfit)
 end
 
-function onColorCheckChange(colorBox)
+function GameOutfit.onColorCheckChange(colorBox)
   if colorBox == currentColorBox then
     colorBox.onCheckChange = nil
     colorBox:setChecked(true)
-    colorBox.onCheckChange = onColorCheckChange
+    colorBox.onCheckChange = GameOutfit.onColorCheckChange
   else
     currentColorBox.onCheckChange = nil
     currentColorBox:setChecked(false)
-    currentColorBox.onCheckChange = onColorCheckChange
+    currentColorBox.onCheckChange = GameOutfit.onColorCheckChange
 
     currentColorBox = colorBox
 
@@ -263,15 +275,15 @@ function onColorCheckChange(colorBox)
   end
 end
 
-function onClotheCheckChange(clotheButtonBox)
+function GameOutfit.onClotheCheckChange(clotheButtonBox)
   if clotheButtonBox == currentClotheButtonBox then
     clotheButtonBox.onCheckChange = nil
     clotheButtonBox:setChecked(true)
-    clotheButtonBox.onCheckChange = onClotheCheckChange
+    clotheButtonBox.onCheckChange = GameOutfit.onClotheCheckChange
   else
     currentClotheButtonBox.onCheckChange = nil
     currentClotheButtonBox:setChecked(false)
-    currentClotheButtonBox.onCheckChange = onClotheCheckChange
+    currentClotheButtonBox.onCheckChange = GameOutfit.onClotheCheckChange
 
     currentClotheButtonBox = clotheButtonBox
 
@@ -289,7 +301,7 @@ function onClotheCheckChange(clotheButtonBox)
   end
 end
 
-function updateOutfit()
+function GameOutfit.updateOutfit()
   if table.empty(outfits) or not outfit then
     return
   end
@@ -316,4 +328,3 @@ function updateOutfit()
   outfit.type = outfits[currentOutfit][1]
   outfitCreature:setOutfit(outfit)
 end
-

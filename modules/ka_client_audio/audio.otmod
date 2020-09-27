@@ -6,5 +6,5 @@ Module
   autoload: true
   scripts: [ audio ]
   dependencies: [ client_options ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: ClientAudio.init()
+  @onUnload: ClientAudio.terminate()

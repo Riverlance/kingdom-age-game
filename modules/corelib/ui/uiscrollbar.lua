@@ -52,16 +52,24 @@ local function calcValues(self)
 end
 
 local function updateValueDisplay(widget)
-  if widget == nil then return end
+  if widget == nil then
+    return
+  end
 
   if widget:getShowValue() then
-    widget:setText(widget:getValue() .. (widget:getSymbol() or ''))
+    local value  = widget:getValue()
+    local symbol = widget:getSymbol()
+    local minMax = value >= widget:getMaximum() and string.format(' (%s)', tr('max')) or value <= widget:getMinimum() and string.format(' (%s)', tr('min')) or ''
+
+    widget:setText(string.format('%d%s%s', value, symbol and string.format('%s%s', symbol:find("[%w]") and ' ' or '', symbol) or '', minMax))
   end
 end
 
 local function updateSlider(self)
   local slider = self:getChildById('sliderButton')
-  if slider == nil then return end
+  if slider == nil then
+    return
+  end
 
   local range, pxrange, px, offset, center = calcValues(self)
   if self.orientation == 'vertical' then
@@ -159,20 +167,22 @@ function UIScrollBar:onStyleApply(styleName, styleNode)
 end
 
 function UIScrollBar:onDecrement()
+  local inverted = self.maximum == 0
   if g_keyboard.isCtrlPressed() then
-    self:decrement(self.value)
+    self:decrement(inverted and math.abs(self.minimum) or self.value)
   elseif g_keyboard.isShiftPressed() then
-    self:decrement(10)
+    self:decrement(math.max(math.floor((inverted and math.abs(self.minimum) or self.maximum) * 0.1), self.step))
   else
     self:decrement()
   end
 end
 
 function UIScrollBar:onIncrement()
+  local inverted = self.maximum == 0
   if g_keyboard.isCtrlPressed() then
-    self:increment(self.maximum)
+    self:increment(inverted and math.abs(self.value) or self.maximum)
   elseif g_keyboard.isShiftPressed() then
-    self:increment(10)
+    self:increment(math.max(math.floor((inverted and math.abs(self.minimum) or self.maximum) * 0.1), self.step))
   else
     self:increment()
   end
@@ -189,7 +199,10 @@ function UIScrollBar:increment(count)
 end
 
 function UIScrollBar:setMaximum(maximum)
-  if maximum == self.maximum then return end
+  if maximum == self.maximum then
+    return
+  end
+
   self.maximum = maximum
   if self.minimum > maximum then
     self:setMinimum(maximum)
@@ -202,7 +215,10 @@ function UIScrollBar:setMaximum(maximum)
 end
 
 function UIScrollBar:setMinimum(minimum)
-  if minimum == self.minimum then return end
+  if minimum == self.minimum then
+    return
+  end
+
   self.minimum = minimum
   if self.maximum < minimum then
     self:setMaximum(minimum)
@@ -221,7 +237,10 @@ end
 
 function UIScrollBar:setValue(value)
   value = math.max(math.min(value, self.maximum), self.minimum)
-  if self.value == value then return end
+  if self.value == value then
+    return
+  end
+
   local delta = value - self.value
   self.value = value
   updateSlider(self)
@@ -257,31 +276,67 @@ function UIScrollBar:onMouseWheel(mousePos, mouseWheel)
   if not self.mouseScroll or not self:isOn() then
     return false
   end
+
   if mouseWheel == MouseWheelUp then
     if self.orientation == 'vertical' then
-      if self.value <= self.minimum then  return false end
-      self:decrement()
+      if self.value <= self.minimum then
+        return false
+      end
+
+      self:onDecrement()
     else
-      if self.value >= self.maximum then return false end
-      self:increment()
+      if self.value >= self.maximum then
+        return false
+      end
+
+      self:onIncrement()
     end
   else
     if self.orientation == 'vertical' then
-      if self.value >= self.maximum then return false end
-      self:increment()
+      if self.value >= self.maximum then
+        return false
+      end
+
+      self:onIncrement()
     else
-      if self.value <= self.minimum then  return false end
-      self:decrement()
+      if self.value <= self.minimum then
+        return false
+      end
+
+      self:onDecrement()
     end
   end
   return true
 end
 
-function UIScrollBar:getMaximum() return self.maximum end
-function UIScrollBar:getMinimum() return self.minimum end
-function UIScrollBar:getValue() return math.round(self.value) end
-function UIScrollBar:getStep() return self.step end
-function UIScrollBar:getOrientation() return self.orientation end
-function UIScrollBar:getShowValue() return self.showValue end
-function UIScrollBar:getSymbol() return self.symbol end
-function UIScrollBar:getMouseScroll() return self.mouseScroll end
+function UIScrollBar:getMaximum()
+  return self.maximum
+end
+
+function UIScrollBar:getMinimum()
+  return self.minimum
+end
+
+function UIScrollBar:getValue()
+  return math.round(self.value)
+end
+
+function UIScrollBar:getStep()
+  return self.step
+end
+
+function UIScrollBar:getOrientation()
+  return self.orientation
+end
+
+function UIScrollBar:getShowValue()
+  return self.showValue
+end
+
+function UIScrollBar:getSymbol()
+  return self.symbol
+end
+
+function UIScrollBar:getMouseScroll()
+  return self.mouseScroll
+end

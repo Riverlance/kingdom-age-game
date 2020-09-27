@@ -1,7 +1,10 @@
 -- @docclass table
 
 function table.dump(t, depth)
-  if not depth then depth = 0 end
+  if not depth then
+    depth = 0
+  end
+
   for k,v in pairs(t) do
     str = (' '):rep(depth * 2) .. k .. ': '
     if type(v) ~= "table" then
@@ -43,38 +46,65 @@ function table.selectivecopy(t, keys)
   return res
 end
 
-function table.merge(t, src)
-  for k,v in pairs(src) do
-    t[k] = v
+function table.merge(t, src, overwrite)
+  if overwrite then
+    for k,v in pairs(src) do
+      t[k] = v
+    end
+    return t
   end
+
+  local _t = table.copy(t)
+  for k,v in pairs(src) do
+    table.insert(_t, v)
+  end
+  return _t
 end
 
 function table.find(t, value, lowercase)
   for k,v in pairs(t) do
     if lowercase and type(value) == 'string' and type(v) == 'string' then
-      if v:lower() == value:lower() then return k end
+      if v:lower() == value:lower() then
+        return k
+      end
     end
-    if v == value then return k end
+
+    if v == value then
+      return k
+    end
   end
 end
 
 function table.findbykey(t, key, lowercase)
   for k,v in pairs(t) do
     if lowercase and type(key) == 'string' and type(k) == 'string' then
-      if k:lower() == key:lower() then return v end
+      if k:lower() == key:lower() then
+        return v
+      end
     end
-    if k == key then return v end
+
+    if k == key then
+      return v
+    end
   end
 end
 
-function table.contains(t, value, lowercase)
-  return table.find(t, value, lowercase) ~= nil
+function table.contains(t, value)
+  for _, targetColumn in pairs(t) do
+    if targetColumn == value then
+      return true
+    end
+  end
+
+  return false
 end
 
 function table.findkey(t, key)
   if t and type(t) == 'table' then
     for k,v in pairs(t) do
-      if k == key then return k end
+      if k == key then
+        return k
+      end
     end
   end
 end
@@ -92,7 +122,10 @@ function table.removevalue(t, value, all)
       end
     end
   end
-  if all then return true end
+
+  if all then
+    return true
+  end
   return false
 end
 
@@ -111,9 +144,14 @@ function table.popvalue(value)
 end
 
 function table.compare(t, other)
-  if #t ~= #other then return false end
+  if #t ~= #other then
+    return false
+  end
+
   for k,v in pairs(t) do
-    if v ~= other[k] then return false end
+    if v ~= other[k] then
+      return false
+    end
   end
   return true
 end
@@ -183,7 +221,9 @@ end
 function table.equals(t, comp)
   if type(t) == "table" and type(comp) == "table" then
     for k,v in pairs(t) do
-      if v ~= comp[k] then return false end
+      if v ~= comp[k] then
+        return false
+      end
     end
   end
   return true
@@ -255,7 +295,10 @@ function table.insertChild(t, index, value)
 end
 
 function table.removeChild(t, index, recursive)
-  if not t then return false end
+  if not t then
+    return false
+  end
+
   repeat
     t[index] = nil
     if table.size(t) == 2 then -- only parent and id values

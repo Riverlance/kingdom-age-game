@@ -1,28 +1,40 @@
+_G.ClientModuleManager = { }
+ClientModuleManager.m  = modules.client_modulemanager -- Alias
+
+
+
 local moduleManagerWindow
 local moduleManagerButton
 local moduleList
 
-function init()
+
+
+function ClientModuleManager.init()
   moduleManagerWindow = g_ui.displayUI('modulemanager')
   moduleManagerWindow:hide()
   moduleList = moduleManagerWindow:getChildById('moduleList')
-  connect(moduleList, { onChildFocusChange = function(self, focusedChild)
-                          if focusedChild == nil then return end
-                          updateModuleInfo(focusedChild:getText())
-                        end })
+  connect(moduleList, {
+    onChildFocusChange = function(self, focusedChild)
+      if focusedChild == nil then
+        return
+      end
+
+      ClientModuleManager.updateModuleInfo(focusedChild:getText())
+    end
+  })
 
   g_keyboard.bindKeyPress('Up', function() moduleList:focusPreviousChild(KeyboardFocusReason) end, moduleManagerWindow)
   g_keyboard.bindKeyPress('Down', function() moduleList:focusNextChild(KeyboardFocusReason) end, moduleManagerWindow)
 
-  --moduleManagerButton = modules.client_topmenu.addLeftButton('moduleManagerButton', tr('Module Manager') .. ' (Ctrl+Alt+T)', '/images/topbuttons/modulemanager', toggle)
+  --moduleManagerButton = ClientTopMenu.addLeftButton('moduleManagerButton', tr('Module Manager') .. ' (Ctrl+Alt+T)', '/images/ui/top_menu/modulemanager', ClientModuleManager.toggle)
 
-  g_keyboard.bindKeyDown('Ctrl+Alt+T', toggle)
+  g_keyboard.bindKeyDown('Ctrl+Alt+T', ClientModuleManager.toggle)
 
   -- refresh modules only after all modules are loaded
-  addEvent(listModules)
+  addEvent(ClientModuleManager.listModules)
 end
 
-function terminate()
+function ClientModuleManager.terminate()
   g_keyboard.unbindKeyDown('Ctrl+Alt+T')
 
   moduleManagerWindow:destroy()
@@ -30,23 +42,28 @@ function terminate()
     moduleManagerButton:destroy()
   end
   moduleList = nil
+
+  _G.ClientModuleManager = nil
 end
 
-function disable()
+function ClientModuleManager.disable()
   if moduleManagerButton then
     moduleManagerButton:hide()
   end
 end
 
-function hide()
+function ClientModuleManager.hide()
   moduleManagerWindow:hide()
   if moduleManagerButton then
     moduleManagerButton:setOn(false)
   end
 end
 
-function show()
-  if not g_game.isOnline() or g_game.getAccountType() < ACCOUNT_TYPE_GAMEMASTER then return end
+function ClientModuleManager.show()
+  if not g_game.isOnline() or g_game.getAccountType() < ACCOUNT_TYPE_GAMEMASTER then
+    return
+  end
+
   moduleManagerWindow:show()
   moduleManagerWindow:raise()
   moduleManagerWindow:focus()
@@ -55,21 +72,23 @@ function show()
   end
 end
 
-function toggle()
+function ClientModuleManager.toggle()
   if moduleManagerWindow:isVisible() then
-    hide()
+    ClientModuleManager.hide()
   else
-    show()
+    ClientModuleManager.show()
   end
 end
 
-function refreshModules()
+function ClientModuleManager.refreshModules()
   g_modules.discoverModules()
-  listModules()
+  ClientModuleManager.listModules()
 end
 
-function listModules()
-  if not moduleManagerWindow then return end
+function ClientModuleManager.listModules()
+  if not moduleManagerWindow then
+    return
+  end
 
   moduleList:destroyChildren()
 
@@ -83,8 +102,10 @@ function listModules()
   moduleList:focusChild(moduleList:getFirstChild(), ActiveFocusReason)
 end
 
-function refreshLoadedModules()
-  if not moduleManagerWindow then return end
+function ClientModuleManager.refreshLoadedModules()
+  if not moduleManagerWindow then
+    return
+  end
 
   for i,child in ipairs(moduleList:getChildren()) do
     local module = g_modules.getModule(child:getText())
@@ -92,8 +113,10 @@ function refreshLoadedModules()
   end
 end
 
-function updateModuleInfo(moduleName)
-  if not moduleManagerWindow then return end
+function ClientModuleManager.updateModuleInfo(moduleName)
+  if not moduleManagerWindow then
+    return
+  end
 
   local name = ''
   local description = ''
@@ -117,53 +140,55 @@ function updateModuleInfo(moduleName)
     canUnload = module:canUnload()
   end
 
-  moduleManagerWindow:recursiveGetChildById('moduleName'):setText(name)
-  moduleManagerWindow:recursiveGetChildById('moduleDescription'):setText(description)
-  moduleManagerWindow:recursiveGetChildById('moduleAuthor'):setText(author)
-  moduleManagerWindow:recursiveGetChildById('moduleWebsite'):setText(website)
-  moduleManagerWindow:recursiveGetChildById('moduleVersion'):setText(version)
+  local moduleInfoPanel = moduleManagerWindow:getChildById('moduleInfo')
 
-  local reloadButton = moduleManagerWindow:recursiveGetChildById('moduleReloadButton')
+  moduleInfoPanel:getChildById('moduleName'):setText(name)
+  moduleInfoPanel:getChildById('moduleDescription'):setText(description)
+  moduleInfoPanel:getChildById('moduleAuthor'):setText(author)
+  moduleInfoPanel:getChildById('moduleWebsite'):setText(website)
+  moduleInfoPanel:getChildById('moduleVersion'):setText(version)
+
+  local reloadButton = moduleManagerWindow:getChildById('moduleReloadButton')
   reloadButton:setEnabled(canReload)
   if loaded then reloadButton:setText(tr('Reload'))
   else reloadButton:setText(tr('Load')) end
 
-  local unloadButton = moduleManagerWindow:recursiveGetChildById('moduleUnloadButton')
+  local unloadButton = moduleManagerWindow:getChildById('moduleUnloadButton')
   unloadButton:setEnabled(canUnload)
 end
 
-function reloadCurrentModule()
+function ClientModuleManager.reloadCurrentModule()
   local focusedChild = moduleList:getFocusedChild()
   if focusedChild then
     local module = g_modules.getModule(focusedChild:getText())
     if module then
       module:reload()
       if modules.client_modulemanager then
-        updateModuleInfo(module:getName())
-        refreshLoadedModules()
-        show()
+        ClientModuleManager.updateModuleInfo(module:getName())
+        ClientModuleManager.refreshLoadedModules()
+        ClientModuleManager.show()
       end
     end
   end
 end
 
-function unloadCurrentModule()
+function ClientModuleManager.unloadCurrentModule()
   local focusedChild = moduleList:getFocusedChild()
   if focusedChild then
     local module = g_modules.getModule(focusedChild:getText())
     if module then
       module:unload()
       if modules.client_modulemanager then
-        updateModuleInfo(module:getName())
-        refreshLoadedModules()
+        ClientModuleManager.updateModuleInfo(module:getName())
+        ClientModuleManager.refreshLoadedModules()
       end
     end
   end
 end
 
-function reloadAllModules()
+function ClientModuleManager.reloadAllModules()
   g_modules.reloadModules()
-  refreshLoadedModules()
-  show()
+  ClientModuleManager.refreshLoadedModules()
+  ClientModuleManager.show()
 end
 

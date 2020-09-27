@@ -32,7 +32,7 @@ QuestLogWindow < MainWindow
   !text: tr('Quest Log')
   size: 500 400
   @onEscape: |
-    modules.game_questlog.hide()
+    GameQuestLog.hide()
 
   VerticalScrollBar
     id: questListScrollBar
@@ -62,7 +62,7 @@ QuestLogWindow < MainWindow
 
   Label
     id: rewardExperienceLabel
-    image-source: /images/game/questlog/reward_experience
+    image-source: /images/ui/quest_log/reward_experience
     anchors.bottom: rewardMoneyLabel.top
     anchors.left: parent.left
     margin-bottom: 5
@@ -83,7 +83,7 @@ QuestLogWindow < MainWindow
 
   Label
     id: rewardMoneyLabel
-    image-source: /images/game/questlog/reward_money
+    image-source: /images/ui/quest_log/reward_money
     anchors.bottom: closeButton.top
     anchors.left: parent.left
     margin-bottom: 5
@@ -155,4 +155,4 @@ QuestLogWindow < MainWindow
     anchors.right: parent.right
     width: 80
     @onClick: |
-      modules.game_questlog.hide()
+      GameQuestLog.hide()

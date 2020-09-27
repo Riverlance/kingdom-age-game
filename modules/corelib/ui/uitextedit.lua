@@ -15,16 +15,16 @@ end
 function UITextEdit:onMouseWheel(mousePos, mouseWheel)
   if self.verticalScrollBar and self:isMultiline() then
     if mouseWheel == MouseWheelUp then
-      self.verticalScrollBar:decrement()
+      self.verticalScrollBar:onDecrement()
     else
-      self.verticalScrollBar:increment()
+      self.verticalScrollBar:onIncrement()
     end
     return true
   elseif self.horizontalScrollBar then
     if mouseWheel == MouseWheelUp then
-      self.horizontalScrollBar:increment()
+      self.horizontalScrollBar:onIncrement()
     else
-      self.horizontalScrollBar:decrement()
+      self.horizontalScrollBar:onDecrement()
     end
     return true
   end

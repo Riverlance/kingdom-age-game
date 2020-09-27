@@ -3,14 +3,13 @@ Module
   description: Manages a server list of previously entered servers
   author: BeniS
   website: https://github.com/edubart/otclient
+  scripts: [ serverlist, addserver ]
   dependencies: [ client_entergame ]
 
   @onLoad: |
-    dofile 'serverlist'
-    dofile 'addserver'
-    ServerList.init()
-    AddServer.init()
+    ClientServerList.init()
+    ClientAddServer.init()
 
   @onUnload: |
-    ServerList.terminate()
-    AddServer.terminate()
+    ClientServerList.terminate()
+    ClientAddServer.terminate()

@@ -1,32 +1,48 @@
+_G.GameQuestLog = { }
+GameQuestLog.m  = modules.game_questlog -- Alias
+
+
+
 questLogButton = nil
 questLineWindow = nil
 
--- For avoid multiple teleport confirm windows
 local questLogTeleportLock = false
-function getTeleportLock()     return questLogTeleportLock end
-function setTeleportLock(lock) questLogTeleportLock = lock end
 
-function init()
+function GameQuestLog.init()
   g_ui.importStyle('questlogwindow')
   g_ui.importStyle('questlinewindow')
 
-  questLogButton = modules.client_topmenu.addRightGameToggleButton('questLogButton', tr('Quest Log') .. ' (Ctrl+Q)', '/images/topbuttons/questlog', toggle)
+  questLogButton = ClientTopMenu.addLeftGameButton('questLogButton', tr('Quest Log') .. ' (Ctrl+Q)', '/images/ui/top_menu/questlog', GameQuestLog.toggle)
 
-  connect(g_game, { onGameEnd = destroyWindows })
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerQuestLog, parseQuestLog)
-  g_keyboard.bindKeyDown('Ctrl+Q', toggle)
+  connect(g_game, {
+    onGameEnd = GameQuestLog.destroyWindows
+  })
+  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerQuestLog, GameQuestLog.parseQuestLog)
+  g_keyboard.bindKeyDown('Ctrl+Q', GameQuestLog.toggle)
 end
 
-function terminate()
+function GameQuestLog.terminate()
   g_keyboard.unbindKeyDown('Ctrl+Q')
   ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerQuestLog)
-  disconnect(g_game, { onGameEnd = destroyWindows })
+  disconnect(g_game, {
+    onGameEnd = GameQuestLog.destroyWindows
+  })
 
-  destroyWindows()
+  GameQuestLog.destroyWindows()
   questLogButton:destroy()
+
+  _G.GameQuestLog = nil
 end
 
-function destroyWindows()
+-- For avoid multiple teleport confirm windows
+function GameQuestLog.getTeleportLock()
+  return questLogTeleportLock
+end
+function GameQuestLog.setTeleportLock(lock)
+  questLogTeleportLock = lock
+end
+
+function GameQuestLog.destroyWindows()
   if questLogWindow then
     questLogWindow:destroy()
   end
@@ -36,8 +52,11 @@ function destroyWindows()
   end
 end
 
-function show()
-  if not g_game.canPerformGameAction() then return end
+function GameQuestLog.show()
+  if not g_game.canPerformGameAction() then
+    return
+  end
+
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientQuestLog, '')
@@ -45,16 +64,20 @@ function show()
   end
 end
 
-function hide()
-  destroyWindows()
+function GameQuestLog.hide()
+  GameQuestLog.destroyWindows()
   questLogButton:setOn(false)
 end
 
-function toggle()
-  if not questLogWindow or not questLogWindow:isVisible() then show() else hide() end
+function GameQuestLog.toggle()
+  if not questLogWindow or not questLogWindow:isVisible() then
+    GameQuestLog.show()
+  else
+    GameQuestLog.hide()
+  end
 end
 
-function sendTeleportRequest(questId, missionId)
+function GameQuestLog.sendTeleportRequest(questId, missionId)
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientAction, string.format('%i:%i:%i', ClientActions.QuestTeleports, questId, missionId))
@@ -63,7 +86,7 @@ function sendTeleportRequest(questId, missionId)
   return false
 end
 
-function sendShowItemsRequest(questId, missionId)
+function GameQuestLog.sendShowItemsRequest(questId, missionId)
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientAction, string.format('%i:%i:%i', ClientActions.QuestItems, questId, missionId))
@@ -72,7 +95,7 @@ function sendShowItemsRequest(questId, missionId)
   return false
 end
 
-function onRowUpdate(child)
+function GameQuestLog.onRowUpdate(child)
   if child then
     if not child.isComplete and not child.canDo then
       child:setBackgroundColor('#ff000020')
@@ -81,7 +104,7 @@ function onRowUpdate(child)
   end
 end
 
-function updateLayout(window, questId, missionId, row)
+function GameQuestLog.updateLayout(window, questId, missionId, row)
   if not window then
     return
   end
@@ -100,9 +123,22 @@ function updateLayout(window, questId, missionId, row)
     teleportButton:setVisible(true)
 
     teleportButton.onClick = function()
-      if not getTeleportLock() then
-        displayCustomBox('Quest Teleport', 'Are you sure that you want to teleport?', {{ text = 'Yes', buttonCallback = function() sendTeleportRequest(questId, missionId) if modules.game_questlog then modules.game_questlog.setTeleportLock(false) end end }}, 1, 'No', function() if modules.game_questlog then modules.game_questlog.setTeleportLock(false) end end, nil)
-        setTeleportLock(true)
+      if not GameQuestLog.getTeleportLock() then
+        local buttonCallback = function()
+          GameQuestLog.sendTeleportRequest(questId, missionId)
+          if modules.game_questlog then
+            GameQuestLog.setTeleportLock(false)
+          end
+        end
+
+        local onCancelCallback = function()
+          if modules.game_questlog then
+            GameQuestLog.setTeleportLock(false)
+          end
+        end
+
+        displayCustomBox('Quest Teleport', 'Are you sure that you want to teleport?', {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
+        GameQuestLog.setTeleportLock(true)
       end
     end
   else
@@ -130,7 +166,7 @@ function updateLayout(window, questId, missionId, row)
   if row.showItems then
     itemsButton:setVisible(true)
     itemsButton.onClick = function()
-      sendShowItemsRequest(questId, missionId)
+      GameQuestLog.sendShowItemsRequest(questId, missionId)
     end
   else
     itemsButton:setVisible(false)
@@ -151,16 +187,18 @@ function updateLayout(window, questId, missionId, row)
     local children = rowsList:getChildren()
     if #children >= 1 then
       for i = 1, #children do
-        onRowUpdate(children[i])
+        GameQuestLog.onRowUpdate(children[i])
       end
     end
   end
 end
 
-function parseQuestLog(protocol, opcode, buffer)
+function GameQuestLog.parseQuestLog(protocol, opcode, buffer)
   local params = buffer:split(':::')
   local mode = tonumber(params[1])
-  if not mode then return end
+  if not mode then
+    return
+  end
 
   if mode == 1 then -- Quest Log
     local quests = {}
@@ -169,7 +207,10 @@ function parseQuestLog(protocol, opcode, buffer)
       local quest = {}
       local data = _quest:split("::")
       quest.id = tonumber(data[1])
-      if not quest.id then return end
+      if not quest.id then
+        return
+      end
+
       quest.isComplete   = tonumber(data[2]) == 1 and true or false
       quest.canDo        = tonumber(data[3]) == 1 and true or false
       quest.logName      = data[4]
@@ -183,12 +224,14 @@ function parseQuestLog(protocol, opcode, buffer)
       quest.otherRewards = quest.otherRewards ~= '-' and quest.otherRewards or ''
       table.insert(quests, quest)
     end
-    onGameQuestLog(quests)
+    GameQuestLog.onGameQuestLog(quests)
 
   elseif mode == 2 then -- Quest Line
     local missions = {}
     local questId = tonumber(params[2])
-    if not questId then return end
+    if not questId then
+      return
+    end
 
     for _, _mission in ipairs(params[3] and params[3]:split(';;') or {}) do
       local mission = {}
@@ -209,20 +252,25 @@ function parseQuestLog(protocol, opcode, buffer)
         table.insert(missions, mission)
       end
     end
-    onGameQuestLine(questId, missions)
+    GameQuestLog.onGameQuestLine(questId, missions)
   end
 end
 
-function onGameQuestLog(quests)
-  destroyWindows()
+function GameQuestLog.onGameQuestLog(quests)
+  GameQuestLog.destroyWindows()
 
   questLogWindow = g_ui.createWidget('QuestLogWindow', rootWidget)
   local questList = questLogWindow:getChildById('questList')
 
-  connect(questList, { onChildFocusChange = function(self, focusedChild)
-    if focusedChild == nil then return end
-    updateLayout(questLogWindow, focusedChild.questId, 0, focusedChild)
-  end })
+  connect(questList, {
+    onChildFocusChange = function(self, focusedChild)
+      if focusedChild == nil then
+        return
+      end
+
+      GameQuestLog.updateLayout(questLogWindow, focusedChild.questId, 0, focusedChild)
+    end
+  })
 
   for _, quest in ipairs(quests) do
     local questLabel = g_ui.createWidget('QuestLabel', questList)
@@ -246,10 +294,13 @@ function onGameQuestLog(quests)
     questMainDataLabel:setText('[' .. quest.categoryName .. ']'  .. (quest.minLevel > 1 and ' [Lv ' .. quest.minLevel .. ']' or ''))
     questLabel.mainDataLabel = questMainDataLabel
 
-    onRowUpdate(questLabel)
+    GameQuestLog.onRowUpdate(questLabel)
     questLabel.onDoubleClick =
     function()
-      if not g_game.canPerformGameAction() then return end
+      if not g_game.canPerformGameAction() then
+        return
+      end
+
       local protocolGame = g_game.getProtocolGame()
       if protocolGame then
         questLogWindow:hide()
@@ -266,19 +317,29 @@ function onGameQuestLog(quests)
   --questList:focusChild(questList:getFirstChild())
 end
 
-function onGameQuestLine(questId, missions)
-  if questLogWindow then questLogWindow:hide() end
-  if questLineWindow then questLineWindow:destroy() end
+function GameQuestLog.onGameQuestLine(questId, missions)
+  if questLogWindow then
+    questLogWindow:hide()
+  end
+
+  if questLineWindow then
+    questLineWindow:destroy()
+  end
 
   questLineWindow = g_ui.createWidget('QuestLineWindow', rootWidget)
   local missionList = questLineWindow:getChildById('missionList')
   local missionDescription = questLineWindow:getChildById('missionDescription')
 
-  connect(missionList, { onChildFocusChange = function(self, focusedChild)
-    if focusedChild == nil then return end
-    missionDescription:setText(focusedChild.description)
-    updateLayout(questLineWindow, questId, focusedChild.missionId, focusedChild)
-  end })
+  connect(missionList, {
+    onChildFocusChange = function(self, focusedChild)
+      if focusedChild == nil then
+        return
+      end
+
+      missionDescription:setText(focusedChild.description)
+      GameQuestLog.updateLayout(questLineWindow, questId, focusedChild.missionId, focusedChild)
+    end
+  })
 
   for _, mission in pairs(missions) do
     local missionLabel = g_ui.createWidget('MissionLabel')
@@ -302,20 +363,22 @@ function onGameQuestLine(questId, missions)
     missionMainDataLabel:setText((mission.minLevel > 1 and '[Lv ' .. mission.minLevel .. ']' or ''))
     missionLabel.mainDataLabel = missionMainDataLabel
 
-    onRowUpdate(missionLabel)
+    GameQuestLog.onRowUpdate(missionLabel)
     missionList:addChild(missionLabel)
   end
 
-  questLineWindow.onDestroy =
-  function()
-    if questLogWindow then questLogWindow:show() end
+  questLineWindow.onDestroy = function()
+    if questLogWindow then
+      questLogWindow:show()
+    end
+
     questLineWindow = nil
   end
 
   --missionList:focusChild(missionList:getFirstChild())
 end
 
-function questLogWindowFocus()
+function GameQuestLog.questLogWindowFocus()
   if questLogWindow then
     questLogWindow:focus()
   end

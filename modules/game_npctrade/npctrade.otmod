@@ -5,5 +5,5 @@ Module
   website: https://github.com/edubart/otclient
   sandboxed: true
   scripts: [ npctrade ]
-  @onLoad: init()
-  @onUnload: terminate()
+  @onLoad: GameNpcTrade.init()
+  @onUnload: GameNpcTrade.terminate()

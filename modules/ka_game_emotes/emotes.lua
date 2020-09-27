@@ -1,69 +1,86 @@
+_G.GameEmotes = { }
+GameEmotes.m  = modules.ka_game_emotes -- Alias
+
+
+
 local emoteList = nil
 local emoteListByIndex = nil
 local emoteWindow = nil
 local consoleEmoteButton = nil
-local consolePanel = modules.game_console.getConsolePanel()
 
 local EmoteDisable = 0
 local EmoteEnable  = 1
 
-function init()
-  emoteList = {}
-  emoteListByIndex = {}
 
-  emoteWindow = g_ui.loadUI('emoteWindow', consolePanel)
-  emoteWindow:hide()
-  setupEmotes()
-  onResizeConsole(consolePanel)
 
-  local prevButton = consolePanel:getChildById('channelsButton')
-  local prevButtonIndex = consolePanel:getChildIndex(prevButton)
-  consoleEmoteButton = g_ui.createWidget('EmoteWindowButton', consolePanel)
-  consolePanel:moveChildToIndex(consoleEmoteButton, prevButtonIndex)
-
-  if g_game.isOnline() then
-    online()
+function GameEmotes.init()
+  if not GameConsole then
+    return
   end
 
+  local contentPanel = GameConsole.getContentPanel()
+  if not contentPanel then
+    return
+  end
+
+  emoteList        = {}
+  emoteListByIndex = {}
+
+  emoteWindow = g_ui.loadUI('emoteWindow', contentPanel)
+  GameEmotes.toggleWindow(false)
+  GameEmotes.setupEmotes()
+  GameEmotes.onResizeConsole(contentPanel)
+
+  local headerPanel     = GameConsole.getHeaderPanel()
+  local prevButton      = headerPanel:getChildById('channelsButton')
+  local prevButtonIndex = headerPanel:getChildIndex(prevButton)
+  consoleEmoteButton    = g_ui.createWidget('EmoteWindowButton', headerPanel)
+
+  headerPanel:moveChildToIndex(consoleEmoteButton, prevButtonIndex)
+
   connect(g_game, {
-    onGameStart = online,
-    onGameEnd = offline,
+    onGameStart = GameEmotes.online,
+    onGameEnd   = GameEmotes.offline,
   })
-  connect(consolePanel, {
-    onGeometryChange = onResizeConsole,
+  connect(contentPanel, {
+    onGeometryChange = GameEmotes.onResizeConsole,
   })
   connect(consoleEmoteButton, {
-    onHoverChange = onConsoleEmoteButtonHoverChange,
+    onHoverChange = GameEmotes.onConsoleEmoteButtonHoverChange,
   })
-  ProtocolGame.registerOpcode(GameServerOpcodes.GameServerEmote, parseEmote)
-  g_keyboard.bindKeyDown('Escape', function() emoteWindow:hide() end, rootWidget)
+
+  ProtocolGame.registerOpcode(GameServerOpcodes.GameServerEmote, GameEmotes.parseEmote)
+
+  g_keyboard.bindKeyDown('Escape', function() GameEmotes.toggleWindow(false) end, rootWidget)
+
+  if g_game.isOnline() then
+    GameEmotes.online()
+  end
 end
 
-function online()
-  loadSettings()
-  sortEmoteList()
-  updateConsoleEmoteButtonIcon()
-end
+function GameEmotes.terminate()
+  local contentPanel
+  if GameConsole then
+    contentPanel = GameConsole.getContentPanel()
+  end
 
-function offline()
-  emoteWindow:hide()
-  saveSettings()
-end
+  GameEmotes.toggleWindow(false)
 
-function terminate()
-  saveSettings()
+  GameEmotes.saveSettings()
 
   g_keyboard.unbindKeyDown('Escape')
   ProtocolGame.unregisterOpcode(GameServerOpcodes.GameServerEmote)
   disconnect(consoleEmoteButton, {
-    onHoverChange = onConsoleEmoteButtonHoverChange,
+    onHoverChange = GameEmotes.onConsoleEmoteButtonHoverChange,
   })
-  disconnect(consolePanel, {
-    onGeometryChange = onResizeConsole,
-  })
+  if contentPanel then
+    disconnect(contentPanel, {
+      onGeometryChange = GameEmotes.onResizeConsole,
+    })
+  end
   disconnect(g_game, {
-    onGameStart = online,
-    onGameEnd = offline,
+    onGameStart = GameEmotes.online,
+    onGameEnd   = GameEmotes.offline,
   })
 
   emoteList = {}
@@ -77,23 +94,38 @@ function terminate()
     consoleEmoteButton:destroy()
     consoleEmoteButton = nil
   end
+
+  _G.GameEmotes = nil
 end
 
-function updateConsoleEmoteButtonIcon()
-  consoleEmoteButton:setIcon(string.format('/images/game/emotes/%d', math.random(FirstEmote, LastEmote)))
+function GameEmotes.online()
+  GameEmotes.loadSettings()
+  GameEmotes.sortEmoteList()
+  GameEmotes.updateConsoleEmoteButtonIcon()
+end
+
+function GameEmotes.offline()
+  GameEmotes.saveSettings()
+end
+
+function GameEmotes.updateConsoleEmoteButtonIcon()
+  consoleEmoteButton:setIcon(string.format('/images/game/emote/%d', math.random(FirstEmote, LastEmote)))
   consoleEmoteButton:setIconSize({ width = 16, height = 16 })
   consoleEmoteButton:setIconOffset({ x = 3, y = 4 })
 end
 
-function onConsoleEmoteButtonHoverChange(self, hovered)
+function GameEmotes.onConsoleEmoteButtonHoverChange(self, hovered)
   if not hovered then
     return
   end
-  updateConsoleEmoteButtonIcon()
+  GameEmotes.updateConsoleEmoteButtonIcon()
 end
 
-function onResizeConsole(console)
-  if not emoteWindow then return end
+function GameEmotes.onResizeConsole(console)
+  if not emoteWindow then
+    return
+  end
+
   local realWidth = console:getWidth() - emoteWindow:getMarginRight() - emoteWindow:getMarginLeft()
   local realHeight = console:getHeight() - emoteWindow:getMarginTop() - emoteWindow:getMarginBottom()
   local area =  realWidth * realHeight
@@ -109,20 +141,43 @@ function onResizeConsole(console)
   end
 end
 
-function toggleWindow()
-  if not emoteWindow then return end
-  if emoteWindow:isHidden() then
+function GameEmotes.toggleWindow(force)
+  if not GameConsole then
+    return
+  end
+
+  local contentPanel = GameConsole.getContentPanel()
+  if not contentPanel then
+    return
+  end
+
+  local isForceBool = type(force) == "boolean"
+  local condition   = emoteWindow:isHidden()
+
+  local consoleContentPanel = contentPanel:getChildById('consoleContentPanel')
+  local cloneContentPanel   = contentPanel:getChildById('cloneContentPanel')
+
+  -- Show
+  if force == true or not isForceBool and condition then
     emoteWindow:show()
-  else
+
+    consoleContentPanel:addAnchor(AnchorTop, 'emoteWindow', AnchorOutsideBottom)
+    cloneContentPanel:addAnchor(AnchorTop, 'emoteWindow', AnchorOutsideBottom)
+
+  -- Hide
+  elseif force == false or not isForceBool and not condition then
     emoteWindow:hide()
+
+    consoleContentPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
+    cloneContentPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
   end
 end
 
-function setupEmotes()
+function GameEmotes.setupEmotes()
   for id = FirstEmote, LastEmote do
     local emote = g_ui.createWidget('EmoteButton', emoteWindow)
     emote:setId(string.format('EmoteButton_%d', id))
-    emote:setIcon(string.format('/images/game/emotes/%d', id))
+    emote:setIcon(string.format('/images/game/emote/%d', id))
     emote:setTooltip(emotes[id].name)
     emote.id = id
     emote.timesUsed = 0
@@ -133,92 +188,97 @@ function setupEmotes()
   end
 end
 
-function unlockEmote(id)
+function GameEmotes.unlockEmote(id)
   local emote = emoteList[id]
   local lock = emote:getChildren()[1]
   lock:setIcon(nil)
   emote.locked = false
-  emote.onClick = function() useEmote(id) end
+  emote.onClick = function() GameEmotes.useEmote(id) end
 end
 
-function lockEmote(id)
+function GameEmotes.lockEmote(id)
   local emote = emoteList[id]
   local lock = emote:getChildren()[1]
-  lock:setIcon('/images/game/emotes/locked')
+  lock:setIcon('/images/game/emote/locked')
   emote.timesUsed = 0
   emote.lastUsed = 0
   emote.locked = true
   emote.onClick = nil
 end
 
-function isLocked(id)
+function GameEmotes.isLocked(id)
   local emote = emoteList[id]
   return emote.locked
 end
 
-function getTimesUsed(id)
+function GameEmotes.getTimesUsed(id)
   local emote = emoteList[id]
-  return not isLocked(id) and emote.timesUsed or -1
+  return not GameEmotes.isLocked(id) and emote.timesUsed or -1
 end
 
 -- Settings
-function loadSettings()
-  local settings = modules.game_things.getPlayerSettings()
+function GameEmotes.loadSettings()
+  local settings      = Client.getPlayerSettings()
   local emoteSettings = settings:getNode('emotes') or {}
+
   for id, emote in pairs(emoteSettings) do
     local emoteId = tonumber(id)
     if emoteList[emoteId] then
       emoteList[emoteId].timesUsed = emoteSettings[id].timesUsed
-      emoteList[emoteId].lastUsed = emoteSettings[id].lastUsed
-      emoteList[emoteId].locked = emoteSettings[id].locked
+      emoteList[emoteId].lastUsed  = emoteSettings[id].lastUsed
+      emoteList[emoteId].locked    = emoteSettings[id].locked
     end
   end
 end
 
-function saveSettings()
-  local settings = modules.game_things.getPlayerSettings()
+function GameEmotes.saveSettings()
+  local settings      = Client.getPlayerSettings()
   local emoteSettings = {}
+
   for id, emote in pairs(emoteList) do
     emoteSettings[id] = {}
     emoteSettings[id].timesUsed = emote.timesUsed
     emoteSettings[id].lastUsed  = emote.lastUsed
-    emoteSettings[id].locked  = emote.locked
+    emoteSettings[id].locked    = emote.locked
   end
   settings:setNode('emotes', emoteSettings)
   settings:save()
 end
 
 -- Network
-function useEmote(id)
-  if not g_game.canPerformGameAction() then return end
+function GameEmotes.useEmote(id)
+  if not g_game.canPerformGameAction() then
+    return
+  end
+
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
     protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientEmote, id)
   end
   emoteList[id].timesUsed = emoteList[id].timesUsed + 1
   emoteList[id].lastUsed = os.time()
-  sortEmoteList()
+  GameEmotes.sortEmoteList()
 end
 
-function sortEmoteList()
-  table.sort(emoteListByIndex, (function(a,b) return getTimesUsed(a.id) > getTimesUsed(b.id) or (getTimesUsed(a.id) == getTimesUsed(b.id) and a.lastUsed > b.lastUsed) or (getTimesUsed(a.id) == getTimesUsed(b.id) and a.lastUsed == b.lastUsed and a.id < b.id) end))
+function GameEmotes.sortEmoteList()
+  table.sort(emoteListByIndex, (function(a,b) return GameEmotes.getTimesUsed(a.id) > GameEmotes.getTimesUsed(b.id) or (GameEmotes.getTimesUsed(a.id) == GameEmotes.getTimesUsed(b.id) and a.lastUsed > b.lastUsed) or (GameEmotes.getTimesUsed(a.id) == GameEmotes.getTimesUsed(b.id) and a.lastUsed == b.lastUsed and a.id < b.id) end))
   for i = 1, #emoteListByIndex do
     emoteWindow:moveChildToIndex(emoteListByIndex[i], i)
   end
 end
 
-function parseEmote(protocol, msg)
+function GameEmotes.parseEmote(protocol, msg)
   local total = msg:getU8()
   for i = 1, total do
     local emoteId = msg:getU8()
     local action  = msg:getU8()
     if action == EmoteEnable then
-      unlockEmote(emoteId)
+      GameEmotes.unlockEmote(emoteId)
     elseif action == EmoteDisable then
-      lockEmote(emoteId)
+      GameEmotes.lockEmote(emoteId)
     end
   end
   if total == 1 then
-    sortEmoteList()
+    GameEmotes.sortEmoteList()
   end
 end
