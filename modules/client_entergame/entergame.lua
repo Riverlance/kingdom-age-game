@@ -5,7 +5,7 @@ ClientEnterGame.m  = modules.client_entergame -- Alias
 
 ClientEnterGame.localIp = '127.0.0.1'
 ClientEnterGame.clientIp = 'kingdomageonline.com'
-ClientEnterGame.clientPort = 7171
+ClientEnterGame.clientPort = '7171'
 ClientEnterGame.clientProtocolVersion = 1099
 
 local loadBox
