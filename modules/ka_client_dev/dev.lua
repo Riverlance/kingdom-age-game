@@ -9,40 +9,37 @@ local devCheckBox
 local drawBoxesCheckBox
 local hideMapCheckBox
 
-local tempIp   = ClientEnterGame.clientIp
-local tempPort = 7171
+local tempIp              = ClientEnterGame.clientIp
+local tempPort            = ClientEnterGame.clientPort
+local tempProtocolVersion = ClientEnterGame.clientProtocolVersion
 
 
 
 local function onServerChange(self)
-  if localCheckBox:isChecked() and devCheckBox:isChecked() then
-    if self == localCheckBox then
-      devCheckBox:setChecked(false)
-    else
-      localCheckBox:setChecked(false)
-    end
+  if not localCheckBox:isChecked() or not devCheckBox:isChecked() then
+    return
+  end
+
+  if self == localCheckBox then
+    devCheckBox:setChecked(false)
+  else
+    localCheckBox:setChecked(false)
   end
 end
 
 local function onLocalCheckBoxChange(self, value)
-  if value then
-    tempIp = ClientEnterGame.localIp
-    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
-  else
-    tempIp = ClientEnterGame.clientIp
-    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
-  end
+  tempIp = value and ClientEnterGame.localIp or ClientEnterGame.clientIp
+
+  ClientEnterGame.setUniqueServer(tempIp, tempPort, tempProtocolVersion)
+
   onServerChange(self)
 end
 
 local function onDevCheckBoxChange(self, value)
-  if value then
-    tempPort = 7175
-    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
-  else
-    tempPort = 7171
-    ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
-  end
+  tempPort = value and '7175' or '7171'
+
+  ClientEnterGame.setUniqueServer(tempIp, tempPort, tempProtocolVersion)
+
   onServerChange(self)
 end
 
@@ -61,6 +58,8 @@ end
 
 
 function ClientDev.init()
+  ClientDev.reconnectToDefaultServer()
+
   developmentWindow = g_ui.displayUI('dev')
   localCheckBox     = developmentWindow:getChildById('localCheckBox')
   devCheckBox       = developmentWindow:getChildById('devCheckBox')
@@ -118,15 +117,20 @@ function ClientDev.terminate()
   drawBoxesCheckBox = nil
   hideMapCheckBox   = nil
 
-  -- Set IP to default server
-  tempIp   = ClientEnterGame.clientIp
-  tempPort = 7171
-  ClientEnterGame.setUniqueServer(tempIp, tempPort, 1099)
+  ClientDev.reconnectToDefaultServer()
 
   _G.ClientDev = nil
 end
 
 
+
+function ClientDev.reconnectToDefaultServer()
+  tempIp              = ClientEnterGame.clientIp
+  tempPort            = ClientEnterGame.clientPort
+  tempProtocolVersion = ClientEnterGame.clientProtocolVersion
+
+  ClientEnterGame.setUniqueServer(tempIp, tempPort, tempProtocolVersion)
+end
 
 function ClientDev.toggleWindow()
   if developmentWindow:isHidden() then
