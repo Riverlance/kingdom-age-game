@@ -135,10 +135,10 @@ end
 function ClientDev.toggleWindow()
   if developmentWindow:isHidden() then
     developmentWindow:show()
+
+    -- Connect to local server by default
+    localCheckBox:setChecked(true)
   else
     developmentWindow:hide()
   end
-
-  -- Connect to local server by default
-  localCheckBox:setChecked(true)
 end
