@@ -1,5 +1,4 @@
 _G.GameScreenImage = { }
-GameScreenImage.m  = modules.ka_game_screenimage -- Alias
 
 
 
@@ -45,6 +44,9 @@ end
 
 
 function GameScreenImage.init()
+  -- Alias
+  GameScreenImage.m = modules.ka_game_screenimage
+
   ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerScreenImage, GameScreenImage.parseScreenImage)
 
   g_ui.importStyle('screenimage.otui')

@@ -1,5 +1,4 @@
 _G.GameBugReport = { }
-GameBugReport.m  = modules.game_bugreport -- Alias
 
 
 
@@ -108,6 +107,9 @@ end
 
 
 function GameBugReport.init()
+  -- Alias
+  GameBugReport.m = modules.game_bugreport
+
   g_ui.importStyle('bugreport')
 
   bugReportButton = ClientTopMenu.addLeftGameButton('bugReportButton', tr('Report Bug/Problem/Idea') .. ' (Ctrl+,)', '/images/ui/top_menu/bugreport', GameBugReport.toggle, true)

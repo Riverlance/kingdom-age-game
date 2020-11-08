@@ -1,5 +1,4 @@
 _G.GameHotkeys = { }
-GameHotkeys.m  = modules.game_hotkeys -- Alias
 
 dofiles('ui')
 
@@ -45,6 +44,9 @@ lastHotkeyTime = g_clock.millis()
 
 
 function GameHotkeys.init()
+  -- Alias
+  GameHotkeys.m = modules.game_hotkeys
+
   g_ui.importStyle('hotkeylabel.otui')
 
   hotkeysButton = ClientTopMenu.addLeftGameButton('hotkeysButton', tr('Hotkeys') .. ' (Ctrl+K)', '/images/ui/top_menu/hotkeys', GameHotkeys.toggle)
@@ -171,6 +173,10 @@ function GameHotkeys.apply(hotkey, save)
   save = save and true
   if save then
     GameHotkeys.save()
+  end
+
+  if modules.ka_game_hotkeybars then
+    GameHotkeybars.onUpdateHotkeys()
   end
 end
 
@@ -382,9 +388,6 @@ function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
   end
   hotkeyLabel.keyCombo = keyCombo
   if keySettings then
-    if keySettings.hotkeyBar then
-      keySettings.hotkeyBar:addHotkey(keyCombo, keySettings.mousePos)
-    end
     if keySettings.item then
       hotkeyLabel.autoSend = true
       hotkeyLabel.itemId = keySettings.item:getId()
@@ -397,6 +400,10 @@ function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
         currentHotkeyLabel.useType = HOTKEY_MANAGER_USE
       end
     else
+      if keySettings.powerId then
+        keySettings.value = '/power ' .. keySettings.powerId
+        keySettings.autoSend = true
+      end
       local powerId = GamePowerHotkeys.getIdByString(keySettings.value or '')
       keySettings.autoSend = powerId and true or keySettings.autoSend
       hotkeyLabel.autoSend = toboolean(keySettings.autoSend)
@@ -406,6 +413,10 @@ function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
       if keySettings.value then
         hotkeyLabel.value = tostring(keySettings.value)
       end
+    end
+    if keySettings.hotkeyBar then
+      keySettings.hotkeyBar:addHotkey(keyCombo, keySettings.mousePos)
+      GameHotkeys.apply(hotkeyLabel, true)
     end
   else
     hotkeyLabel.keyCombo = keyCombo
@@ -456,8 +467,11 @@ function GameHotkeys.doKeyCombo(keyCombo, clickedWidget)
     end
 
     if hotkey.autoSend then
-      GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, { hotkey = hotkey, actualTime = actualTime })
-
+    local powerId  = GamePowerHotkeys.getIdByString(hotkey.value)
+      if powerId then
+        GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, { hotkey = hotkey, actualTime = actualTime })
+        return
+      end
       GameConsole.sendMessage(hotkey.value)
     else
       GameConsole.setTextEditText(hotkey.value)

@@ -1,5 +1,4 @@
 _G.GameInterface = { }
-GameInterface.m  = modules.game_interface -- Alias
 
 
 
@@ -45,7 +44,12 @@ local _gamePanels = {}
 local _gamePanelsContainer = {}
 
 function GameInterface.init()
+  -- Alias
+  GameInterface.m = modules.game_interface
+
   g_ui.importStyle('styles/countwindow')
+
+  rootWidget:setImageSource('/images/ui/_background/panel_root')
 
   gameRootPanel = g_ui.displayUI('interface')
   gameRootPanel:hide()
@@ -882,7 +886,7 @@ function GameInterface.onUseWith(clickedWidget, mousePosition)
   elseif clickedWidget:getClassName() == 'UIItem' and not clickedWidget:isVirtual() then
     g_game.useWith(selectedThing, clickedWidget:getItem())
   elseif clickedWidget:getClassName() == 'UICreatureButton' then
-    local creature = clickedWidget:getCreature()
+    local creature = clickedWidget.creature
     if creature and not creature:isPlayer() then
       -- Make possible to use with on UICreatureButton (battle window)
       g_game.useWith(selectedThing, creature)
@@ -897,7 +901,7 @@ function GameInterface.onTradeWith(clickedWidget, mousePosition)
       g_game.requestTrade(selectedThing, tile:getTopCreature())
     end
   elseif clickedWidget:getClassName() == 'UICreatureButton' then
-    local creature = clickedWidget:getCreature()
+    local creature = clickedWidget.creature
     if creature then
       g_game.requestTrade(selectedThing, creature)
     end
@@ -1472,8 +1476,17 @@ function GameInterface.setupViewMode(mode)
   local viewMode = ViewModes[mode]
 
   -- Anchor
-  if viewMode.isFull then
+  gameMapPanel:breakAnchors()
+  -- Full
+  if viewMode.id == 3 then
+    gameMapPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
+    gameMapPanel:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+    gameMapPanel:addAnchor(AnchorLeft, 'gameLeftThirdPanel', AnchorOutsideRight)
+    gameMapPanel:addAnchor(AnchorRight, 'gameRightThirdPanel', AnchorOutsideLeft)
+  -- Crop Full
+  elseif viewMode.id == 2 then
     gameMapPanel:fill('parent')
+  -- Crop (1) or Normal (0)
   else
     gameMapPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
     gameMapPanel:addAnchor(AnchorBottom, 'gameBottomPanel', AnchorOutsideTop)
@@ -1481,27 +1494,22 @@ function GameInterface.setupViewMode(mode)
     gameMapPanel:addAnchor(AnchorRight, 'gameRightThirdPanel', AnchorOutsideLeft)
   end
 
-  gameBottomPanel:setOn(viewMode.isFull)
-
   -- Range
   gameMapPanel:setKeepAspectRatio(not viewMode.isCropped)
   gameMapPanel:setLimitVisibleRange(viewMode.isCropped)
 
-  -- In some dimensions, panels can be above gamescreen, so the panels should be transparent
-  if viewMode.isFull then
-    color = '#ffffff66'
-  else
-    color = 'white'
-  end
+  local panelsColor      = viewMode.id == 2 and '#ffffff66' or 'white'
+  local bottomPanelColor = viewMode.isFull and '#ffffff66' or 'white'
 
-  ClientTopMenu.getTopMenu():setImageColor(color)
-  gameLeftFirstPanel:setImageColor(color)
-  gameLeftSecondPanel:setImageColor(color)
-  gameLeftThirdPanel:setImageColor(color)
-  gameRightFirstPanel:setImageColor(color)
-  gameRightSecondPanel:setImageColor(color)
-  gameRightThirdPanel:setImageColor(color)
-  gameBottomPanel:setImageColor(color)
+  gameLeftFirstPanel:setImageColor(panelsColor)
+  gameLeftSecondPanel:setImageColor(panelsColor)
+  gameLeftThirdPanel:setImageColor(panelsColor)
+  gameRightFirstPanel:setImageColor(panelsColor)
+  gameRightSecondPanel:setImageColor(panelsColor)
+  gameRightThirdPanel:setImageColor(panelsColor)
+  gameBottomPanel:setImageColor(bottomPanelColor)
+
+  gameBottomPanel:setOn(viewMode.isFull)
 
   -- Event
   gameMapPanel:changeViewMode(mode, currentViewMode)

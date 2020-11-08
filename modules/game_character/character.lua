@@ -1,5 +1,4 @@
 _G.GameCharacter = { }
-GameCharacter.m  = modules.game_character -- Alias
 
 
 
@@ -47,6 +46,9 @@ fightModeRadioGroup = nil
 
 
 function GameCharacter.init()
+  -- Alias
+  GameCharacter.m = modules.game_character
+
   connect(LocalPlayer, {
     onChangeOutfit = GameCharacter.onChangeOutfit,
 
@@ -146,6 +148,8 @@ function GameCharacter.init()
   connect(fightModeRadioGroup, {
     onSelectionChange = GameCharacter.onSetFightMode
   })
+
+  GameInterface.setupMiniWindow(inventoryWindow, inventoryTopMenuButton)
 
   GameCharacter.online()
 end

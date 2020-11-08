@@ -1,5 +1,4 @@
 _G.Client = { }
-Client.m  = modules.client -- Alias
 
 local musicFilename = "/audios/startup"
 local musicChannel = g_sounds.getChannel(AudioChannels.Music)
@@ -11,6 +10,9 @@ playerSettingsPath = ""
 
 
 function Client.init()
+  -- Alias
+  Client.m = modules.client
+
   connect(g_app, {
     onRun  = Client.startup,
     onExit = Client.exit

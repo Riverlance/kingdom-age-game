@@ -318,6 +318,10 @@ NetworkMessageTypes = {
   Table = 8,
 }
 
+ScreenRangeX = 12
+ScreenRangeY = 9
+ScreenRangeZ = 16
+
 AudioChannels =
 {
   Music = 1,
@@ -335,14 +339,14 @@ ViewModes = {
   [3] = { id = 3, isCropped = false, isFull = true,  name = 'Full' }, -- Default
 }
 
-local noneStickerDefaultPath = '/images/ui/color_alpha.png'
+local noneStickerDefaultPath = ''
 PanelStickers = {
   [1] = { opt = 'None',      path = noneStickerDefaultPath },
-  [2] = { opt = 'Sticker 1', path = '/images/ui/sticker/sticker_1.png' },
-  [3] = { opt = 'Sticker 2', path = '/images/ui/sticker/sticker_2.png' },
-  [4] = { opt = 'Sticker 3', path = '/images/ui/sticker/sticker_3.png' },
-  [5] = { opt = 'Sticker 4', path = '/images/ui/sticker/sticker_4.png' },
-  [6] = { opt = 'Sticker 5', path = '/images/ui/sticker/sticker_5.png' }
+  [2] = { opt = 'Sticker 1', path = '/images/ui/sticker/sticker_1' },
+  [3] = { opt = 'Sticker 2', path = '/images/ui/sticker/sticker_2' },
+  [4] = { opt = 'Sticker 3', path = '/images/ui/sticker/sticker_3' },
+  [5] = { opt = 'Sticker 4', path = '/images/ui/sticker/sticker_4' },
+  [6] = { opt = 'Sticker 5', path = '/images/ui/sticker/sticker_5' }
 }
 
 setmetatable(PanelStickers, {

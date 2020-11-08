@@ -1,5 +1,4 @@
 _G.GameVipList = { }
-GameVipList.m  = modules.game_viplist -- Alias
 
 
 
@@ -13,6 +12,9 @@ vipInfo = {}
 
 
 function GameVipList.init()
+  -- Alias
+  GameVipList.m = modules.game_viplist
+
   connect(g_game, {
     onGameStart      = GameVipList.online,
     onGameEnd        = GameVipList.offline,
@@ -32,7 +34,12 @@ function GameVipList.init()
   if not g_game.getFeature(GameAdditionalVipInfo) then
     GameVipList.loadVipInfo()
   end
-  GameVipList.online()
+
+  GameInterface.setupMiniWindow(vipWindow, vipTopMenuButton)
+
+  if g_game.isOnline() then
+    GameVipList.online()
+  end
 end
 
 function GameVipList.terminate()
@@ -249,10 +256,15 @@ function GameVipList.sortBy(state)
 end
 
 function GameVipList.onAddVip(id, name, state, description, iconId, notify)
-  local label = g_ui.createWidget('VipListLabel')
-  label.onMousePress = GameVipList.onVipListLabelMousePress
-  label:setId('vip' .. id)
-  label:setText(name)
+  local label = contentsPanel:getChildById('vip' .. id)
+  if not label then
+    label = g_ui.createWidget('VipListLabel')
+    label.onMousePress = GameVipList.onVipListLabelMousePress
+    label:setId('vip' .. id)
+    label:setText(name)
+  else
+    return
+  end
 
   if not g_game.getFeature(GameAdditionalVipInfo) then
     local tmpVipInfo = vipInfo[tostring(id)]

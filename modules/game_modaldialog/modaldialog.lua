@@ -1,11 +1,13 @@
 _G.GameModalDialog = { }
-GameModalDialog.m  = modules.game_modaldialog -- Alias
 
 
 
 modalDialog = nil
 
 function GameModalDialog.init()
+  -- Alias
+  GameModalDialog.m = modules.game_modaldialog
+
   g_ui.importStyle('modaldialog')
 
   connect(g_game, {

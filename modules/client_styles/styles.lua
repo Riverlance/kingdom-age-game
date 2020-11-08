@@ -1,9 +1,11 @@
 _G.ClientStyles = { }
-ClientStyles.m  = modules.client_styles -- Alias
 
 
 
 function ClientStyles.init()
+  -- Alias
+  ClientStyles.m = modules.client_styles
+
   local files
   files = g_resources.listDirectoryFiles('/styles')
   for _,file in pairs(files) do

@@ -1,5 +1,4 @@
 _G.ClientServerList = { }
-ClientServerList.m  = modules.client_serverlist -- Alias
 
 
 
@@ -11,6 +10,9 @@ local servers = {}
 
 
 function ClientServerList.init()
+  -- Alias
+  ClientServerList.m = modules.client_serverlist
+
   serverListWindow = g_ui.displayUI('serverlist')
   serverTextList = serverListWindow:getChildById('serverList')
 

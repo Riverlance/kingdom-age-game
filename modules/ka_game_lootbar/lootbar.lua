@@ -1,5 +1,4 @@
 _G.GameLootbar = { }
-GameLootbar.m  = modules.ka_game_lootbar -- Alias
 
 
 
@@ -18,6 +17,9 @@ local config =
 
 
 function GameLootbar.init()
+  -- Alias
+  GameLootbar.m = modules.ka_game_lootbar
+
   g_ui.importStyle('lootbar')
 
   ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerLootWindow, GameLootbar.onLoot)

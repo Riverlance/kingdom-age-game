@@ -1,5 +1,4 @@
 _G.GameBlinkHit = { }
-GameBlinkHit.m  = modules.ka_game_blinkhit -- Alias
 
 
 
@@ -19,6 +18,9 @@ end
 
 
 function GameBlinkHit.init()
+  -- Alias
+  GameBlinkHit.m = modules.ka_game_blinkhit
+
   GameBlinkHit.removeAll(true)
   ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerBlinkHit, GameBlinkHit.onBlinkHit)
 end

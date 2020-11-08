@@ -1,5 +1,4 @@
 _G.GamePowerHotkeys = { }
-GamePowerHotkeys.m  = modules.game_hotkeys -- Alias
 
 
 
@@ -49,6 +48,9 @@ HotkeyColors.powerColor = '#CD4EFF'
 
 
 function GamePowerHotkeys.init()
+  -- Alias
+  GamePowerHotkeys.m = modules.game_hotkeys
+
   g_keyboard.bindKeyPress('Escape', function() GamePowerHotkeys.cancel(true) end, rootWidget)
 
   GamePowerHotkeys.removeBoostEffect()

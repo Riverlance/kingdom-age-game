@@ -28,6 +28,8 @@ GameServerOpcodes =
     GameServerConditionsList          = 58,
     GameServerCreatureJump            = 59,
     GameServerEmote                   = 60,
+    GameServerPartyList               = 61,
+    GameServerPlayerLevel             = 62,
 
     -- original tibia ONLY
     GameServerFullMap                 = 100,
@@ -151,6 +153,8 @@ ClientOpcodes =
     ClientExtendedOpcode            = 50,
     ClientChangeMapAwareRange       = 51,
     ClientNpcDialogWindows          = 52,
+    --
+    ClientPartyList                 = 61,
 
     -- original tibia ONLY
     ClientAutoWalk                  = 100,

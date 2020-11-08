@@ -1,11 +1,13 @@
 _G.GamePlayerTrade = { }
-GamePlayerTrade.m  = modules.game_playertrade -- Alias
 
 
 
 tradeWindow = nil
 
 function GamePlayerTrade.init()
+  -- Alias
+  GamePlayerTrade.m = modules.game_playertrade
+
   g_ui.importStyle('tradewindow')
 
   connect(g_game, {

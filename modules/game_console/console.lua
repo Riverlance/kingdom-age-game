@@ -1,5 +1,4 @@
 _G.GameConsole = { }
-GameConsole.m  = modules.game_console -- Alias
 
 
 
@@ -125,6 +124,9 @@ local letterWidth = -- New line (10) and Space (32) have width 1 because they ar
 
 
 function GameConsole.init()
+  -- Alias
+  GameConsole.m = modules.game_console
+
   connect(g_game, {
     onTalk                  = GameConsole.onTalk,
     onChannelList           = GameConsole.onChannelList,
@@ -157,7 +159,7 @@ function GameConsole.init()
     if clonedTab then -- cloneTabTipArea is not visible
       return
     end
-    GameConsole.toggleClonedTab(consoleTabBar:getCurrentTab())
+    GameConsole.toggleClonedTab(GameConsole.getCurrentTab())
   end
 
   channels = {}
@@ -167,7 +169,7 @@ function GameConsole.init()
       return false
     end
 
-    local tab = consoleTabBar:getCurrentTab()
+    local tab = GameConsole.getCurrentTab()
     if not tab then
       return false
     end
@@ -405,8 +407,13 @@ function GameConsole.clear()
   end
 end
 
-function GameConsole.clearChannel(consoleTabBar)
-  consoleTabBar:getCurrentTab().tabPanel:getChildById('consoleBuffer'):destroyChildren()
+function GameConsole.clearChannel()
+  local tab = GameConsole.getCurrentTab()
+  if not tab then
+    return
+  end
+
+  tab.tabPanel:getChildById('consoleBuffer'):destroyChildren()
 end
 
 function GameConsole.setTextEditText(text)
@@ -436,6 +443,10 @@ function GameConsole.addTab(name, focus)
 end
 
 function GameConsole.removeTab(tab)
+  if not tab then
+    return
+  end
+
   if type(tab) == 'string' then
     tab = consoleTabBar:getTab(tab)
   end
@@ -464,7 +475,7 @@ function GameConsole.removeTab(tab)
 end
 
 function GameConsole.removeCurrentTab()
-  GameConsole.removeTab(consoleTabBar:getCurrentTab())
+  GameConsole.removeTab(GameConsole.getCurrentTab())
 end
 
 function GameConsole.getTab(name)
@@ -732,6 +743,10 @@ function GameConsole.removeTabLabelByName(tab, name)
 end
 
 function GameConsole.openClonedTab(tab)
+  if not tab then
+    return
+  end
+
   if clonedTab then
     if clonedTab == tab then
       return false
@@ -771,6 +786,10 @@ function GameConsole.closeClonedTab()
 end
 
 function GameConsole.toggleClonedTab(tab)
+  if not tab then
+    return
+  end
+
   if clonedTab == tab then
     GameConsole.closeClonedTab()
   else
@@ -806,8 +825,9 @@ function GameConsole.processChannelTabMenu(tab, mousePos, mouseButton)
     menu:addSeparator()
   end
 
-  if consoleTabBar:getCurrentTab() == tab then
-    menu:addOption(tr('Clear messages'), function() GameConsole.clearChannel(consoleTabBar) end)
+  local _tab = GameConsole.getCurrentTab()
+  if _tab and _tab == tab then
+    menu:addOption(tr('Clear messages'), function() GameConsole.clearChannel() end)
     menu:addOption(tr('Save messages'), function()
       local panel = consoleTabBar:getTabPanel(tab)
       local consoleBuffer = panel:getChildById('consoleBuffer')
@@ -837,7 +857,7 @@ function GameConsole.processChannelTabMenu(tab, mousePos, mouseButton)
     if clonedTab == tab then
       menu:addOption(tr('Close clone'), function() GameConsole.closeClonedTab() end)
     else
-      menu:addOption(tr('Clone tab'), function() GameConsole.openClonedTab(consoleTabBar:getCurrentTab()) end)
+      menu:addOption(tr('Clone tab'), function() GameConsole.openClonedTab(GameConsole.getCurrentTab()) end)
     end
   end
 
@@ -930,12 +950,12 @@ end
 function GameConsole.sendMessage(message, tab)
   local tab = tab or GameConsole.getCurrentTab()
   if not tab then
-    return
+    return false -- No filter results
   end
 
   for k,func in pairs(filters) do
     if func(message) then
-      return true
+      return true -- Filter worked
     end
   end
 
@@ -1009,7 +1029,7 @@ function GameConsole.sendMessage(message, tab)
 
   message = message:gsub("^(%s*)(.*)","%2") -- remove space characters from message init
   if #message == 0 then
-    return
+    return false -- No filter results
   end
 
   -- Add new command to console log
@@ -1034,7 +1054,7 @@ function GameConsole.sendMessage(message, tab)
     end
 
     g_game.talkChannel(SpeakTypesSettings[speaktypedesc].speakType, channel, message)
-    return
+
   else
     local isPrivateCommand = false
     local priv = true
@@ -1056,6 +1076,8 @@ function GameConsole.sendMessage(message, tab)
     message = GameConsole.applyMessagePrefixies(g_game.getCharacterName(), localPlayer:getLevel(), message)
     GameConsole.addPrivateText(message, speaktype, tabname, isPrivateCommand, g_game.getCharacterName())
   end
+
+  return false -- No filter results
 end
 
 function GameConsole.sayModeChange(sayMode)

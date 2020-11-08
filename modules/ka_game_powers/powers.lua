@@ -1,5 +1,4 @@
 _G.GamePowers = { }
-GamePowers.m  = modules.ka_game_powers -- Alias
 
 
 
@@ -7,7 +6,7 @@ powersWindow = nil
 powersTopMenuButton = nil
 powersHeader = nil
 sortMenuButton = nil
-toggleFilterPanelButton = nil
+arrowMenuButton = nil
 
 filterPanel = nil
 filterOffensiveButton = nil
@@ -60,6 +59,9 @@ local power_flag_updateNonConstantPower = -4
 
 
 function GamePowers.init()
+  -- Alias
+  GamePowers.m = modules.ka_game_powers
+
   powersList = {}
   powerListByIndex = {}
 
@@ -80,9 +82,9 @@ function GamePowers.init()
   GamePowers.setSortType(GamePowers.getSortType())
   GamePowers.setSortOrder(GamePowers.getSortOrder())
 
-  toggleFilterPanelButton = powersWindow:getChildById('toggleFilterPanelButton')
-  toggleFilterPanelButton:setOn(not g_settings.getValue('Powers', 'filterPanel', defaultValues.filterPanel))
-  GamePowers.onClickFilterPanelButton(toggleFilterPanelButton)
+  arrowMenuButton = powersWindow:getChildById('arrowMenuButton')
+  arrowMenuButton:setOn(not g_settings.getValue('Powers', 'filterPanel', defaultValues.filterPanel))
+  GamePowers.onClickArrowMenuButton(arrowMenuButton)
 
   filterPanel = powersHeader:getChildById('filterPanel')
 
@@ -107,7 +109,11 @@ function GamePowers.init()
     onPlayerPowersList = GamePowers.onPlayerPowersList
   })
 
-  GamePowers.refreshList()
+  GameInterface.setupMiniWindow(powersWindow, powersTopMenuButton)
+
+  if g_game.isOnline() then
+    GamePowers.online()
+  end
 end
 
 function GamePowers.terminate()
@@ -142,9 +148,9 @@ function GamePowers.toggle()
 end
 
 -- Filtering
-function GamePowers.onClickFilterPanelButton(self)
+function GamePowers.onClickArrowMenuButton(self)
   local newState = not self:isOn()
-  toggleFilterPanelButton:setOn(newState)
+  arrowMenuButton:setOn(newState)
   powersHeader:setOn(not newState)
   g_settings.setValue('Powers', 'filterPanel', newState)
 end

@@ -13,63 +13,24 @@ MiniWindow
   &save: true
   &contentMinimumHeight: 42
 
-  UIButton
-    id: toggleFilterPanelButton
-    size: 14 14
+  ArrowMenuButton
     !tooltip: tr('Show options')
-    image-source: /images/ui/_button/mini_window
-    image-clip: 56 0 14 14
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
-    @onClick: GamePowers.onClickFilterPanelButton(self)
-
-    $hover:
-      image-clip: 56 14 14 14
-
-    $pressed:
-      image-clip: 56 28 14 14
+    @onClick: GamePowers.onClickArrowMenuButton(self)
 
     $on:
-      image-clip: 42 0 14 14
       !tooltip: tr('Hide options')
 
-    $on hover:
-      image-clip: 42 14 14 14
-
-    $on pressed:
-      image-clip: 42 28 14 14
-
-  UIButton
+  BallMenuButton
     id: sortMenuButton
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    anchors.verticalCenter: prev.verticalCenter
-    anchors.right: prev.outsideLeft
     @onClick: GamePowers.createSortMenu()
 
-    $hover:
-      image-clip: 70 14 14 14
-
-    $pressed:
-      image-clip: 70 28 14 14
-
-    $!on:
-      image-clip: 70 0 14 14
-
-    $on:
-      image-clip: 70 28 14 14
-
-  Label
+  EmptyMenuButton
     text: ?
     text-align: center
-    color: #bcbcbc
-    image-source: /images/ui/_button/mini_window
-    image-clip: 112 0 14 14
     phantom: false
     &tooltipAddons: { {{ text = '1. Powers should be used on hotkeys.\n\n2. Power hotkeys can be pressed to boost it\'s power\n- it will increase the mana\'s cost also.\n\n3. Some powers needs the mouse on game screen to target.\n', align = AlignLeft }}, {{ text = 'Note: All powers shows informations according to your\ncharacter\'s status. So, your attributes, equipments and\nothers can change these informations in real time. Also,\ndamages may change according to target\'s defense.', color = '#E6DB74', align = AlignLeft }} }
-    anchors.verticalCenter: prev.verticalCenter
-    anchors.right: prev.outsideLeft
-    size: 14 14
 
   MiniWindowHeader
     height: 20
@@ -94,6 +55,7 @@ MiniWindow
 
         $on:
           !tooltip: tr('Hide offensive powers')
+          icon-clip: 0 20 20 20
 
       PowerTabButton
         id: filterDefensive
@@ -103,6 +65,7 @@ MiniWindow
 
         $on:
           !tooltip: tr('Hide defensive powers')
+          icon-clip: 20 20 20 20
 
       PowerTabButton
         id: filterNonPremium
@@ -112,6 +75,7 @@ MiniWindow
 
         $on:
           !tooltip: tr('Hide non premium powers')
+          icon-clip: 40 20 20 20
 
       PowerTabButton
         id: filterPremium
@@ -121,6 +85,7 @@ MiniWindow
 
         $on:
           !tooltip: tr('Hide premium powers')
+          icon-clip: 60 20 20 20
 
   MiniWindowContents
 

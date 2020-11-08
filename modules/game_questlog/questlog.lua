@@ -1,5 +1,4 @@
 _G.GameQuestLog = { }
-GameQuestLog.m  = modules.game_questlog -- Alias
 
 
 
@@ -9,6 +8,9 @@ questLineWindow = nil
 local questLogTeleportLock = false
 
 function GameQuestLog.init()
+  -- Alias
+  GameQuestLog.m = modules.game_questlog
+
   g_ui.importStyle('questlogwindow')
   g_ui.importStyle('questlinewindow')
 

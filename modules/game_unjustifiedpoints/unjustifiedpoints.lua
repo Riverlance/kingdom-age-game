@@ -1,5 +1,4 @@
 _G.GameUnjustifiedPoints = { }
-GameUnjustifiedPoints.m  = modules.game_unjustifiedpoints -- Alias
 
 
 
@@ -48,6 +47,9 @@ end
 
 
 function GameUnjustifiedPoints.init()
+  -- Alias
+  GameUnjustifiedPoints.m = modules.game_unjustifiedpoints
+
   unjustifiedPointsWindow        = g_ui.loadUI('unjustifiedpoints')
   unjustifiedPointsHeader        = unjustifiedPointsWindow:getChildById('miniWindowHeader')
   unjustifiedPointsFooter        = unjustifiedPointsWindow:getChildById('miniWindowFooter')
@@ -77,6 +79,10 @@ function GameUnjustifiedPoints.init()
   })
 
   g_keyboard.bindKeyDown(shortcut, GameUnjustifiedPoints.toggle)
+
+  if g_game.getFeature(GameUnjustifiedPointsPacket) then
+    GameInterface.setupMiniWindow(unjustifiedPointsWindow, unjustifiedPointsTopMenuButton)
+  end
 
   if g_game.isOnline() then
     GameUnjustifiedPoints.online()

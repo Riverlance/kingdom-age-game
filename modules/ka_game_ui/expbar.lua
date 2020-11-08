@@ -1,9 +1,11 @@
 _G.GameUIExpBar = { }
-GameUIExpBar.m  = modules.ka_game_ui -- Alias
 
 
 
 function GameUIExpBar.init()
+  -- Alias
+  GameUIExpBar.m = modules.ka_game_ui
+
   connect(g_game, {
     onClientOptionChanged = GameUIExpBar.onClientOptionChanged,
   })

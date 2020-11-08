@@ -1,5 +1,4 @@
 _G.ClientTopMenu = { }
-ClientTopMenu.m  = modules.client_topmenu -- Alias
 
 
 
@@ -43,6 +42,9 @@ end
 
 
 function ClientTopMenu.init()
+  -- Alias
+  ClientTopMenu.m = modules.client_topmenu
+
   connect(g_game, {
     onGameStart = ClientTopMenu.online,
     onGameEnd   = ClientTopMenu.offline,
@@ -105,24 +107,32 @@ function ClientTopMenu.updateFps(fps)
   fpsLabel:setText(text)
 end
 
-function ClientTopMenu.updatePing(ping)
+function ClientTopMenu.updatePing(ping) -- See UICreatureButton:updatePing
   local text = 'Ping: '
   local color
+
+  -- Unknown
   if ping < 0 then
-    text = text .. "??"
+    text  = text .. '?'
     color = 'yellow'
+
+  -- Known
   else
     text = text .. ping .. ' ms'
+
     if ping >= 500 then
       color = 'red'
+
     elseif ping >= 250 then
       color = 'yellow'
+
     else
       color = 'green'
     end
   end
-  pingLabel:setColor(color)
+
   pingLabel:setText(text)
+  pingLabel:setColor(color)
 end
 
 function ClientTopMenu.setPingVisible(enable)

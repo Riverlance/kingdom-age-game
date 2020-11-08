@@ -1,5 +1,4 @@
 _G.ClientTerminal = { }
-ClientTerminal.m  = modules.client_terminal -- Alias
 
 
 
@@ -153,6 +152,9 @@ end
 
 
 function ClientTerminal.init()
+  -- Alias
+  ClientTerminal.m = modules.client_terminal
+
   terminalWindow = g_ui.displayUI('terminal')
   clearButton = terminalWindow:getChildById('clearButton')
 

@@ -1,9 +1,11 @@
 _G.GamePlayerMount = { }
-GamePlayerMount.m  = modules.game_playermount -- Alias
 
 
 
 function GamePlayerMount.init()
+  -- Alias
+  GamePlayerMount.m = modules.game_playermount
+
   connect(g_game, {
     onGameStart = GamePlayerMount.online,
     onGameEnd   = GamePlayerMount.offline

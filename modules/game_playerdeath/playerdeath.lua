@@ -1,5 +1,4 @@
 _G.GamePlayerDeath = { }
-GamePlayerDeath.m  = modules.game_npctrade -- Alias
 
 
 
@@ -15,6 +14,9 @@ local deathTexts =
 
 
 function GamePlayerDeath.init()
+  -- Alias
+  GamePlayerDeath.m = modules.game_npctrade
+
   g_ui.importStyle('deathwindow')
 
   connect(g_game, {

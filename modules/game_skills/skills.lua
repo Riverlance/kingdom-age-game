@@ -1,5 +1,4 @@
 _G.GameSkills = { }
-GameSkills.m  = modules.game_skills -- Alias
 
 
 
@@ -9,6 +8,9 @@ skillsTopMenuButton = nil
 contentsPanel = nil
 
 function GameSkills.init()
+  -- Alias
+  GameSkills.m = modules.game_skills
+
   connect(LocalPlayer, {
     onExperienceChange      = GameSkills.onExperienceChange,
     onLevelChange           = GameSkills.onLevelChange,
@@ -30,6 +32,8 @@ function GameSkills.init()
   contentsPanel = skillsWindow:getChildById('contentsPanel')
 
   g_keyboard.bindKeyDown('Ctrl+T', GameSkills.toggle)
+
+  GameInterface.setupMiniWindow(skillsWindow, skillsTopMenuButton)
 
   if g_game.isOnline() then
     GameSkills.online()

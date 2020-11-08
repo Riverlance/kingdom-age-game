@@ -1,5 +1,4 @@
 _G.ClientDev = { }
-ClientDev.m  = modules.ka_client_dev -- Alias
 
 
 
@@ -12,6 +11,8 @@ local hideMapCheckBox
 local tempIp              = ClientEnterGame.clientIp
 local tempPort            = ClientEnterGame.clientPort
 local tempProtocolVersion = ClientEnterGame.clientProtocolVersion
+
+local hasLoggedOnce = false
 
 
 
@@ -55,9 +56,16 @@ local function onHideMapCheckBoxChange(self, value)
   end
 end
 
+local function onGameStart()
+  hasLoggedOnce = true
+end
+
 
 
 function ClientDev.init()
+  -- Alias
+  ClientDev.m = modules.ka_client_dev
+
   ClientDev.reconnectToDefaultServer()
 
   developmentWindow = g_ui.displayUI('dev')
@@ -75,6 +83,9 @@ function ClientDev.init()
   g_keyboard.bindKeyDown('Ctrl+Alt+D', ClientDev.toggleWindow)
 
   -- Connect
+  connect(g_game, {
+    onGameStart = onGameStart,
+  })
   connect(localCheckBox, {
     onCheckChange = onLocalCheckBoxChange
   })
@@ -102,6 +113,9 @@ function ClientDev.terminate()
   })
   disconnect(localCheckBox, {
     onCheckChange = onLocalCheckBoxChange
+  })
+  disconnect(g_game, {
+    onGameStart = onGameStart,
   })
 
   -- Unbind key
@@ -137,7 +151,9 @@ function ClientDev.toggleWindow()
     developmentWindow:show()
 
     -- Connect to local server by default
-    localCheckBox:setChecked(true)
+    if not hasLoggedOnce then
+      localCheckBox:setChecked(true)
+    end
   else
     developmentWindow:hide()
   end

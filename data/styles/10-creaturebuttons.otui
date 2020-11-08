@@ -1,55 +1,63 @@
+CreatureButtonIcon < UIWidget
+  width: 11
+  height: 11
+  anchors.top: parent.top
+  anchors.right: prev.outsideLeft
+  margin-right: 2
+  phantom: true
+  on: false
+
+  $!on:
+    width: 0
+    margin-right: 0
+
+CreatureButtonProgressBar < UIProgressBar
+  height: 5
+  border: 1 black
+  margin-top: 1
+  margin-bottom: 0
+  phantom: true
+
 CreatureButton < UICreatureButton
   height: 20
-  margin-bottom: 5
+  margin-bottom: 4
 
   UICreature
     id: creature
     size: 20 20
-    anchors.left: parent.left
     anchors.top: parent.top
+    anchors.left: parent.left
     phantom: true
-
-  UIWidget
-    id: spacer
-    width: 5
-    anchors.left: creature.right
-    anchors.top: creature.top
-    phantom: true
-
-  UIWidget
-    id: skull
-    height: 11
-    anchors.left: prev.right
-    anchors.top: creature.top
-    phantom: true
-
-  UIWidget
-    id: emblem
-    height: 11
-    anchors.left: prev.right
-    anchors.top: creature.top
-    phantom: true
-
-  UIWidget
-    id: specialIcon
-    height: 11
-    anchors.left: prev.right
-    anchors.top: creature.top
-    phantom: true
-
 
   Label
     id: label
-    anchors.left: specialIcon.right
-    anchors.top: creature.top
+    anchors.top: prev.top
+    anchors.left: prev.outsideRight
+    anchors.right: creatureType.outsideLeft
+    margin-left: 2
+    margin-right: 2
     color: #888888
     phantom: true
 
-  LifeProgressBar
-    id: lifeBar
-    height: 5
-    anchors.left: creature.right
+  CreatureButtonIcon
+    id: specialIcon
     anchors.right: parent.right
-    anchors.top: label.bottom
-    margin-top: 2
-    phantom: true
+
+  CreatureButtonIcon
+    id: emblem
+
+  CreatureButtonIcon
+    id: skull
+
+  CreatureButtonIcon
+    id: shield
+
+  CreatureButtonIcon
+    id: creatureType
+
+  CreatureButtonProgressBar
+    id: healthBar
+    anchors.top: label.outsideBottom
+    anchors.left: creature.outsideRight
+    anchors.right: parent.right
+    background-color: #ff4444

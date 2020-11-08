@@ -1,5 +1,4 @@
 _G.ClientLocales = { }
-ClientLocales.m  = modules.client_locales -- Alias
 
 
 
@@ -90,6 +89,9 @@ function ClientLocales.onExtendedLocales(protocol, opcode, buffer)
 end
 
 function ClientLocales.init()
+  -- Alias
+  ClientLocales.m = modules.client_locales
+
   installedLocales = {}
 
   ClientLocales.installLocales('/locales')

@@ -1,5 +1,4 @@
 _G.ClientAudio = { }
-ClientAudio.m  = modules.ka_client_audio -- Alias
 
 
 
@@ -30,6 +29,9 @@ end
 
 
 function ClientAudio.init()
+  -- Alias
+  ClientAudio.m = modules.ka_client_audio
+
   local isAudioEnabled = ClientOptions.getOption('enableAudio')
 
   channels[AudioChannels.Music].volume   = isAudioEnabled and ClientOptions.getOption('enableMusic') and ClientOptions.getOption('musicVolume') or 0

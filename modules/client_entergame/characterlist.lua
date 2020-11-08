@@ -1,5 +1,4 @@
 _G.ClientCharacterList = { }
-ClientCharacterList.m  = modules.client_entergame -- Alias
 
 
 
@@ -149,6 +148,9 @@ end
 
 
 function ClientCharacterList.init()
+  -- Alias
+  ClientCharacterList.m = modules.client_entergame
+
   connect(g_game, {
     onLoginError = onGameLoginError,
     onLoginToken = onGameLoginToken,

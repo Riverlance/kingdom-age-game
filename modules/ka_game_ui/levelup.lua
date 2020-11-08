@@ -1,5 +1,4 @@
 _G.GameLevelUp = { }
-GameLevelUp.m  = modules.ka_game_ui -- Alias
 
 
 
@@ -31,6 +30,9 @@ local emblems =
 
 
 function GameLevelUp.init()
+  -- Alias
+  GameLevelUp.m = modules.ka_game_ui
+
   g_ui.importStyle('levelup')
 
   connect(LocalPlayer, {
@@ -166,7 +168,7 @@ function GameLevelUp.addWidget(localPlayer, level, levelPercent, oldLevel, oldLe
 end
 
 function GameLevelUp.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
-  if level == oldLevel or oldLevel == 0 then
+  if oldLevel == 0 or oldLevel >= level then
     return
   end
 

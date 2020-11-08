@@ -1,11 +1,13 @@
 _G.GameTextWindow = { }
-GameTextWindow.m  = modules.game_textwindow -- Alias
 
 
 
 local windows = {}
 
 function GameTextWindow.init()
+  -- Alias
+  GameTextWindow.m = modules.game_textwindow
+
   g_ui.importStyle('textwindow')
 
   connect(g_game, {

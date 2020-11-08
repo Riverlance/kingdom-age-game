@@ -1,4 +1,5 @@
 AttributeAddButton < UIButton
+  !tooltip: tr('Add an effective point')
   anchors.top: parent.top
   anchors.horizontalCenter: parent.horizontalCenter
   margin-top: 4
@@ -33,17 +34,13 @@ MiniWindow
   height: 232
   &save: true
 
-  Label
+  EmptyMenuButton
     text: ?
     text-align: center
-    color: #bcbcbc
-    image-source: /images/ui/_button/mini_window
-    image-clip: 112 0 14 14
+    phantom: false
     &tooltipAddons: { {{ text = '1. \'Distribution\' are points that you distributed manually.\n\n2. \'Alignment\' are recommended points that were\ndistributed automatically due to your vocation.\n\n3. \'Buff/Debuff\' are points that were increased or\ndecreased temporarily due to Powers.', align = AlignLeft }} }
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
-    size: 14 14
-    phantom: false
 
 
 
@@ -52,7 +49,7 @@ MiniWindow
 
     Label
       id: labelAttribute
-      !text: 'Attribute'
+      !text: tr('Attribute')
       text-align: left
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
@@ -62,8 +59,8 @@ MiniWindow
     Label
       id: labelAct
       !text: 'Act'
+      !tooltip: tr('Actual effective points of the specific attribute')
       text-align: right
-      !tooltip: 'Actual points of the specific attribute.'
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
       margin-right: 4

@@ -1,5 +1,4 @@
 _G.GameOutfit = { }
-GameOutfit.m  = modules.game_outfit -- Alias
 
 
 
@@ -32,6 +31,9 @@ currentMount = 1
 
 
 function GameOutfit.init()
+  -- Alias
+  GameOutfit.m = modules.game_outfit
+
   connect(g_game, {
     onOpenOutfitWindow = GameOutfit.create,
     onGameEnd          = GameOutfit.destroy

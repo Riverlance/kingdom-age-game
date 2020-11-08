@@ -9,6 +9,12 @@ ACCOUNT_TYPE_GOD = 5
 FloorHigher = 0
 FloorLower = 15
 
+CreatureTypePlayer = 0
+CreatureTypeMonster = 1
+CreatureTypeNpc = 2
+CreatureTypeSummonOwn = 3
+CreatureTypeSummonOther = 4
+
 SkullNone = 0
 SkullYellow = 1
 SkullGreen = 2
@@ -30,6 +36,21 @@ ShieldYellowNoSharedExpBlink = 8
 ShieldBlueNoSharedExp = 9
 ShieldYellowNoSharedExp = 10
 ShieldGray = 11
+ShieldStr =
+{
+  [ShieldNone] = 'None',
+  [ShieldWhiteYellow] = 'Inviter',
+  [ShieldWhiteBlue] = 'Invitee',
+  [ShieldBlue] = 'Partner',
+  [ShieldYellow] = 'Leader',
+  [ShieldGray] = 'Other member',
+}
+ShieldStr[ShieldBlueSharedExp] = ShieldStr[ShieldBlue]
+ShieldStr[ShieldYellowSharedExp] = ShieldStr[ShieldYellow]
+ShieldStr[ShieldBlueNoSharedExpBlink] = ShieldStr[ShieldBlue]
+ShieldStr[ShieldYellowNoSharedExpBlink] = ShieldStr[ShieldYellow]
+ShieldStr[ShieldBlueNoSharedExp] = ShieldStr[ShieldBlue]
+ShieldStr[ShieldYellowNoSharedExp] = ShieldStr[ShieldYellow]
 
 EmblemNone = 0
 EmblemGreen = 1
@@ -37,6 +58,33 @@ EmblemRed = 2
 EmblemBlue = 3
 EmblemMember = 4
 EmblemOther = 5
+
+VocationLearner = 0
+VocationKnight = 1
+VocationPaladin = 2
+VocationArcher = 3
+VocationAssassin = 4
+VocationWizard = 5
+VocationBard = 6
+VocationStr =
+{
+  [VocationLearner] = 'Learner',
+  [VocationKnight] = 'Knight',
+  [VocationPaladin] = 'Paladin',
+  [VocationArcher] = 'Archer',
+  [VocationAssassin] = 'Assassin',
+  [VocationWizard] = 'Wizard',
+  [VocationBard] = 'Bard',
+}
+
+NpcIconNone = 0
+NpcIconChat = 1
+NpcIconTrade = 2
+NpcIconQuest = 3
+NpcIconTradeQuest = 4
+
+SpecialIconNone = 0
+SpecialIconWanted = 1
 
 VipIconFirst = 0
 VipIconLast = 10

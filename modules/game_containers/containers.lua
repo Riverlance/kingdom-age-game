@@ -1,9 +1,11 @@
 _G.GameContainers = { }
-GameContainers.m  = modules.game_containers -- Alias
 
 
 
 function GameContainers.init()
+  -- Alias
+  GameContainers.m = modules.game_containers
+
   g_ui.importStyle('container')
 
   connect(Container, {
@@ -183,12 +185,13 @@ function GameContainers.onContainerOpen(container, previousContainer)
     end
   })
 
-  -- upButton callback
-  local upButton = containerWindow:getChildById('upButton')
-  upButton.onClick = function()
+  -- upArrowMenuButton callback
+  local upArrowMenuButton = containerWindow:getChildById('upArrowMenuButton')
+  upArrowMenuButton.onClick = function()
     g_game.openParent(container)
   end
-  upButton:setVisible(container:hasParent())
+  upArrowMenuButton:setVisible(container:hasParent())
+  upArrowMenuButton:setTooltip(tr('Back'))
 
   -- Set item widget
   local containerItemWidget = containerWindow:getChildById('containerItemWidget')

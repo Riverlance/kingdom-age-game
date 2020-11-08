@@ -1,5 +1,4 @@
 _G.GameRuleViolation = { }
-GameRuleViolation.m  = modules.game_questlog -- Alias
 
 
 
@@ -154,6 +153,9 @@ local reasonId = 0
 
 
 function GameRuleViolation.init()
+  -- Alias
+  GameRuleViolation.m = modules.game_ruleviolation
+
   ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerRuleViolation, GameRuleViolation.parseRuleViolationsReports) -- View List
 end
 

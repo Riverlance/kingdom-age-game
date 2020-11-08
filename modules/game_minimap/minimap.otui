@@ -5,39 +5,15 @@ MiniWindow
   &save: true
   &contentMinimumHeight: 117
 
-  UIButton
-    id: arrowButton
+  InvertedArrowMenuButton
     !tooltip: tr('Show entire game map (%s)', 'Ctrl+Shift+M')
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    image-clip: 42 0 14 14
     @onClick: GameMinimap.toggleFullMap()
 
-    $hover:
-      image-clip: 42 14 14 14
-
-    $pressed:
-      image-clip: 42 28 14 14
-
-    $on:
-      image-clip: 56 0 14 14
-
-    $on hover:
-      image-clip: 56 14 14 14
-
-    $on pressed:
-      image-clip: 56 28 14 14
-
-  UIButton
+  BallMenuButton
     id: ballButton
     !tooltip: tr('Hide controllers')
-    anchors.top: prev.top
-    anchors.right: prev.left
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    image-clip: 70 0 14 14
     @onClick: |
       local widget = GameMinimap.getMinimapBar()
       if widget then
@@ -53,24 +29,11 @@ MiniWindow
         end
       end
 
-    $hover:
-      image-clip: 70 14 14 14
-
-    $pressed:
-      image-clip: 70 28 14 14
-
-  Label
-    id: infoLabel
+  EmptyMenuButton
     text: ?
     text-align: center
-    color: #bcbcbc
-    image-source: /images/ui/_button/mini_window
-    image-clip: 112 0 14 14
-    !tooltip: tr('Hold the left mouse button and drag-and-drop\nor press the \'%s\' holding \'%s\' for navigate.\n\nScroll the mouse wheel for zoom.\nDo the same holding \'%s\' for change the floor level.\n\nPress the right mouse button for create map marks.\n\nPress \'%s\' for view the entire game map.', 'Arrow Keys', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
-    anchors.top: prev.top
-    anchors.right: prev.left
-    size: 14 14
     phantom: false
+    !tooltip: tr('Hold the left mouse button and drag-and-drop\nor press the \'%s\' holding \'%s\' for navigate.\n\nScroll the mouse wheel for zoom.\nDo the same holding \'%s\' for change the floor level.\n\nPress the right mouse button for create map marks.\n\nPress \'%s\' for view the entire game map.', 'Arrow Keys', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
 
   MiniWindowContents
 
@@ -102,6 +65,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveNorth
+          !tooltip: tr('Move to north')
           anchors.top: parent.top
           anchors.horizontalCenter: parent.horizontalCenter
           margin-top: 8
@@ -119,6 +83,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveWest
+          !tooltip: tr('Move to west')
           anchors.verticalCenter: parent.verticalCenter
           anchors.left: parent.left
           margin-left: 8
@@ -136,6 +101,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveCenter
+          !tooltip: tr('Move to centralized position')
           anchors.verticalCenter: parent.verticalCenter
           anchors.horizontalCenter: parent.horizontalCenter
           size: 22 22
@@ -157,6 +123,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveEast
+          !tooltip: tr('Move to east')
           anchors.verticalCenter: parent.verticalCenter
           anchors.right: parent.right
           margin-right: 7
@@ -174,6 +141,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveSouth
+          !tooltip: tr('Move to south')
           anchors.bottom: parent.bottom
           anchors.horizontalCenter: parent.horizontalCenter
           margin-bottom: 7
@@ -191,12 +159,13 @@ MiniWindow
 
       UIWidget
         id: controllersArea
-        anchors.bottom: parent.bottom
+        anchors.top: prev.outsideBottom
         anchors.horizontalCenter: parent.horizontalCenter
         size: 50 50
 
         UIButton
           id: buttonZoomOut
+          !tooltip: tr('Zoom out')
           anchors.bottom: parent.bottom
           anchors.right: parent.right
           size: 24 24
@@ -213,6 +182,7 @@ MiniWindow
 
         UIButton
           id: buttonZoomIn
+          !tooltip: tr('Zoom in')
           anchors.bottom: prev.top
           anchors.right: parent.right
           margin-bottom: 2
@@ -230,6 +200,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveDown
+          !tooltip: tr('Down floor')
           anchors.bottom: parent.bottom
           anchors.right: prev.left
           margin-right: 2
@@ -247,6 +218,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveUp
+          !tooltip: tr('Up floor')
           anchors.bottom: prev.top
           anchors.right: prev.right
           margin-bottom: 2

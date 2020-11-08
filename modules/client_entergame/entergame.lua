@@ -1,5 +1,4 @@
 _G.ClientEnterGame = { }
-ClientEnterGame.m  = modules.client_entergame -- Alias
 
 
 
@@ -123,6 +122,9 @@ end
 
 
 function ClientEnterGame.init()
+  -- Alias
+  ClientEnterGame.m = modules.client_entergame
+
   enterGame = g_ui.displayUI('entergame')
   enterGameButton = ClientTopMenu.addLeftButton('enterGameButton', tr('Login') .. ' (Ctrl+G)', '/images/ui/top_menu/login', ClientEnterGame.openWindow)
   motdButton = ClientTopMenu.addLeftButton('motdButton', tr('Message of the Day'), '/images/ui/top_menu/motd', ClientEnterGame.toggleMotd)
@@ -194,6 +196,7 @@ function ClientEnterGame.terminate()
     protocolLogin:cancelLogin()
     protocolLogin = nil
   end
+
   _G.ClientEnterGame = nil
 end
 

@@ -1,5 +1,4 @@
 _G.ClientModuleManager = { }
-ClientModuleManager.m  = modules.client_modulemanager -- Alias
 
 
 
@@ -10,6 +9,9 @@ local moduleList
 
 
 function ClientModuleManager.init()
+  -- Alias
+  ClientModuleManager.m = modules.client_modulemanager
+
   moduleManagerWindow = g_ui.displayUI('modulemanager')
   moduleManagerWindow:hide()
   moduleList = moduleManagerWindow:getChildById('moduleList')

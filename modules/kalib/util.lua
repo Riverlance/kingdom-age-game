@@ -50,3 +50,12 @@ function print_r(...)
   end
   return true
 end
+
+function print_widget(widget)
+  if not isWidget(widget) then
+    print('Not a widget.')
+    return
+  end
+
+  print(string.format('Id: %s | Class: %s | Style: %s', widget:getId(), widget:getClassName(), widget:getStyleName()))
+end

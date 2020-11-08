@@ -1,5 +1,4 @@
 _G.ClientAddServer = { }
-ClientAddServer.m  = modules.client_serverlist -- Alias
 
 
 
@@ -8,6 +7,9 @@ local addServerWindow = nil
 
 
 function ClientAddServer.init()
+  -- Alias
+  ClientAddServer.m = modules.client_serverlist
+
   addServerWindow = g_ui.displayUI('addserver')
 end
 

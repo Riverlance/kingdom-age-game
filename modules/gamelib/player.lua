@@ -37,36 +37,45 @@ InventorySlotPurse = 11
 InventorySlotFirst = 1
 InventorySlotLast = 10
 
+function isPartyLeader(shield)
+  return shield == ShieldWhiteYellow or
+         shield == ShieldYellow or
+         shield == ShieldYellowSharedExp or
+         shield == ShieldYellowNoSharedExpBlink or
+         shield == ShieldYellowNoSharedExp
+end
+
 function Player:isPartyLeader()
-  local shield = self:getShield()
-  return (shield == ShieldWhiteYellow or
-          shield == ShieldYellow or
-          shield == ShieldYellowSharedExp or
-          shield == ShieldYellowNoSharedExpBlink or
-          shield == ShieldYellowNoSharedExp)
+  return isPartyLeader(self:getShield())
+end
+
+function isPartyMember(shield)
+  return shield == ShieldWhiteYellow or
+         shield == ShieldYellow or
+         shield == ShieldYellowSharedExp or
+         shield == ShieldYellowNoSharedExpBlink or
+         shield == ShieldYellowNoSharedExp or
+         shield == ShieldBlueSharedExp or
+         shield == ShieldBlueNoSharedExpBlink or
+         shield == ShieldBlueNoSharedExp or
+         shield == ShieldBlue
 end
 
 function Player:isPartyMember()
-  local shield = self:getShield()
-  return (shield == ShieldWhiteYellow or
-          shield == ShieldYellow or
-          shield == ShieldYellowSharedExp or
-          shield == ShieldYellowNoSharedExpBlink or
-          shield == ShieldYellowNoSharedExp or
-          shield == ShieldBlueSharedExp or
-          shield == ShieldBlueNoSharedExpBlink or
-          shield == ShieldBlueNoSharedExp or
-          shield == ShieldBlue)
+  return isPartyMember(self:getShield())
+end
+
+function isPartySharedExperienceActive(shield)
+  return shield == ShieldYellowSharedExp or
+         shield == ShieldYellowNoSharedExpBlink or
+         shield == ShieldYellowNoSharedExp or
+         shield == ShieldBlueSharedExp or
+         shield == ShieldBlueNoSharedExpBlink or
+         shield == ShieldBlueNoSharedExp
 end
 
 function Player:isPartySharedExperienceActive()
-  local shield = self:getShield()
-  return (shield == ShieldYellowSharedExp or
-          shield == ShieldYellowNoSharedExpBlink or
-          shield == ShieldYellowNoSharedExp or
-          shield == ShieldBlueSharedExp or
-          shield == ShieldBlueNoSharedExpBlink or
-          shield == ShieldBlueNoSharedExp)
+  return isPartySharedExperienceActive(self:getShield())
 end
 
 function Player:hasVip(creatureName)

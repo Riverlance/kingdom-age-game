@@ -1,9 +1,11 @@
 _G.GameThings = { }
-GameThings.m  = modules.game_things -- Alias
 
 
 
 function GameThings.init()
+  -- Alias
+  GameThings.m = modules.game_things
+
   connect(g_game, {
     onGameStart = GameThings.online,
     onGameEnd   = GameThings.offline

@@ -31,71 +31,15 @@ MiniWindow < UIMiniWindow
     height: 23
     phantom: true
 
-  UIButton
-    id: closeButton
-    !tooltip: 'Close'
+  CloseMenuButton
+    !tooltip: tr('Close')
     anchors.verticalCenter: miniwindowTopBar.verticalCenter
     anchors.right: parent.right
     margin-right: 2
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    image-clip: 28 0 14 14
 
-    $hover:
-      image-clip: 28 14 14 14
+  MinimizeMenuButton
 
-    $pressed:
-      image-clip: 28 28 14 14
-
-  UIButton
-    id: minimizeButton
-    !tooltip: 'Minimize'
-    anchors.verticalCenter: prev.verticalCenter
-    anchors.right: prev.outsideLeft
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    image-clip: 0 0 14 14
-
-    $hover:
-      image-clip: 0 14 14 14
-
-    $pressed:
-      image-clip: 0 28 14 14
-
-    $on:
-      !tooltip: 'Maximize'
-      image-clip: 14 0 14 14
-
-    $on hover:
-      image-clip: 14 14 14 14
-
-    $on pressed:
-      image-clip: 14 28 14 14
-
-  UIButton
-    id: lockButton
-    !tooltip: 'Lock'
-    anchors.verticalCenter: prev.verticalCenter
-    anchors.right: prev.outsideLeft
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    image-clip: 84 0 14 14
-
-    $hover:
-      image-clip: 84 14 14 14
-
-    $pressed:
-      image-clip: 84 28 14 14
-
-    $on:
-      !tooltip: 'Unlock'
-      image-clip: 98 0 14 14
-
-    $on hover:
-      image-clip: 98 14 14 14
-
-    $on pressed:
-      image-clip: 98 28 14 14
+  LockMenuButton
 
   ResizeBorder
     id: bottomResizeBorder

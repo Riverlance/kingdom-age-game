@@ -1,5 +1,4 @@
 _G.GameNpcTrade = { }
-GameNpcTrade.m  = modules.game_npctrade -- Alias
 
 
 
@@ -53,6 +52,9 @@ selectedItem = nil
 cancelNextRelease = nil
 
 function GameNpcTrade.init()
+  -- Alias
+  GameNpcTrade.m = modules.game_npctrade
+
   npcWindow = g_ui.displayUI('npctrade')
   npcWindow:setVisible(false)
 
@@ -152,6 +154,8 @@ function GameNpcTrade.onItemBoxChecked(widget)
 
     if GameNpcTrade.getCurrentTradeType() == SELL then
       quantityScroll:setValue(quantityScroll:getMaximum())
+    else
+      quantityScroll:setValue(quantityScroll:getMinimum())
     end
   end
 end

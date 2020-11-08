@@ -1,9 +1,11 @@
 _G.GameShaders = { }
-GameShaders.m  = modules.game_shaders -- Alias
 
 
 
 function GameShaders.init()
+  -- Alias
+  GameShaders.m = modules.game_shaders
+
   g_ui.importStyle('shaders.otui')
 
   if not g_graphics.canUseShaders() then

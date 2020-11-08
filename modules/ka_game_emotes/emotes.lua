@@ -1,5 +1,4 @@
 _G.GameEmotes = { }
-GameEmotes.m  = modules.ka_game_emotes -- Alias
 
 
 
@@ -22,6 +21,9 @@ function GameEmotes.init()
   if not contentPanel then
     return
   end
+
+  -- Alias
+  GameEmotes.m = modules.ka_game_emotes
 
   emoteList        = {}
   emoteListByIndex = {}

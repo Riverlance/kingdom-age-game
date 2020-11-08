@@ -1,5 +1,4 @@
 _G.GameConditions = { }
-GameConditions.m  = modules.ka_game_conditions -- Alias
 
 
 
@@ -27,7 +26,7 @@ conditionWindow = nil
 conditionHeader = nil
 conditionFooter = nil
 sortMenuButton = nil
-toggleFilterPanelButton = nil
+arrowMenuButton = nil
 
 filterPanel = nil
 filterDefaultButton = nil
@@ -93,6 +92,9 @@ Icons[PlayerStates.Hungry] = { tooltip = tr('You are hungry'), path = '/images/g
 
 
 function GameConditions.init()
+  -- Alias
+  GameConditions.m = modules.ka_game_conditions
+
   conditionList = {}
 
   g_ui.importStyle('conditionbutton')
@@ -117,9 +119,9 @@ function GameConditions.init()
   GameConditions.setSortType(GameConditions.getSortType())
   GameConditions.setSortOrder(GameConditions.getSortOrder())
 
-  toggleFilterPanelButton = conditionWindow:getChildById('toggleFilterPanelButton')
-  toggleFilterPanelButton:setOn(not g_settings.getValue('Conditions', 'filterPanel', defaultValues.filterPanel))
-  GameConditions.onClickFilterPanelButton(toggleFilterPanelButton)
+  arrowMenuButton = conditionWindow:getChildById('arrowMenuButton')
+  arrowMenuButton:setOn(not g_settings.getValue('Conditions', 'filterPanel', defaultValues.filterPanel))
+  GameConditions.onClickArrowMenuButton(arrowMenuButton)
 
   filterPanel           = conditionHeader:getChildById('filterPanel')
   defaultConditionPanel = conditionFooter:getChildById('defaultConditionPanel')
@@ -155,6 +157,8 @@ function GameConditions.init()
   if localPlayer then
     GameConditions.onStatesChange(localPlayer, localPlayer:getStates(), 0)
   end
+
+  GameInterface.setupMiniWindow(conditionWindow, conditionTopMenuButton)
 end
 
 function GameConditions.terminate()
@@ -283,9 +287,9 @@ function GameConditions.toggle()
 end
 
 -- Filtering
-function GameConditions.onClickFilterPanelButton(self)
+function GameConditions.onClickArrowMenuButton(self)
   local newState = not self:isOn()
-  toggleFilterPanelButton:setOn(newState)
+  arrowMenuButton:setOn(newState)
   conditionHeader:setOn(not newState)
   g_settings.setValue('Conditions', 'filterPanel', newState)
 end

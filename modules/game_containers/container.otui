@@ -11,19 +11,9 @@ ContainerWindow < MiniWindow
     margin-top: 4
     margin-left: 6
 
-  UIButton
-    id: upButton
+  UpArrowMenuButton
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    image-clip: 42 0 14 14
-
-    $hover:
-      image-clip: 42 14 14 14
-
-    $pressed:
-      image-clip: 42 28 14 14
 
   MiniWindowHeader
     height: 28

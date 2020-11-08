@@ -58,4 +58,8 @@ function removeEvent(event)
   end
 end
 
+function isWidget(widget)
+  return type(widget) == 'userdata' and type(widget.getStyleName) == 'function'
+end
+
 -- @}

@@ -1,5 +1,4 @@
 _G.GameMinimap = { }
-GameMinimap.m  = modules.game_minimap -- Alias
 
 
 
@@ -11,7 +10,7 @@ minimapBar = nil
 minimapOpacityScrollbar = nil
 positionLabel = nil
 
-arrowButton = nil
+arrowMenuButton = nil
 ballButton = nil
 infoLabel = nil
 
@@ -54,6 +53,9 @@ end
 
 
 function GameMinimap.init()
+  -- Alias
+  GameMinimap.m = modules.game_minimap
+
   minimapWindow        = g_ui.loadUI('minimap')
   local contentsPanel  = minimapWindow:getChildById('contentsPanel')
   minimapTopMenuButton = ClientTopMenu.addRightGameToggleButton('minimapTopMenuButton', tr('Minimap') .. ' (Ctrl+M)', '/images/ui/top_menu/minimap', GameMinimap.toggle)
@@ -67,9 +69,9 @@ function GameMinimap.init()
   minimapOpacityScrollbar:setValue(g_settings.getValue('Minimap', 'opacity', 100))
   positionLabel = contentsPanel:getChildById('positionLabel')
 
-  arrowButton = minimapWindow:getChildById('arrowButton')
+  arrowMenuButton = minimapWindow:getChildById('arrowMenuButton')
   ballButton = minimapWindow:getChildById('ballButton')
-  infoLabel = minimapWindow:getChildById('infoLabel')
+  infoLabel = minimapWindow:getChildById('emptyMenuButton')
 
   for i = 1, lastMinimapMarkId do
     g_textures.preload(string.format('/images/ui/minimap/flag%d', i))
@@ -94,6 +96,8 @@ function GameMinimap.init()
   connect(LocalPlayer, {
     onPositionChange = GameMinimap.updateCameraPosition
   })
+
+  GameInterface.setupMiniWindow(minimapWindow, minimapTopMenuButton)
 
   if g_game.isOnline() then
     GameMinimap.online()
@@ -244,7 +248,7 @@ function GameMinimap.toggleFullMap()
   positionLabel:setParent(parent)
   minimapOpacityScrollbar:setParent(parent)
 
-  arrowButton:setParent(fullmapView and rootPanel or minimapWindow)
+  arrowMenuButton:setParent(fullmapView and rootPanel or minimapWindow)
   ballButton:setParent(fullmapView and rootPanel or minimapWindow)
   infoLabel:setParent(fullmapView and rootPanel or minimapWindow)
 
@@ -267,10 +271,10 @@ function GameMinimap.toggleFullMap()
     minimapBar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
     minimapBar:addAnchor(AnchorRight, 'parent', AnchorRight)
 
-    arrowButton:addAnchor(AnchorTop, 'minimapBar', AnchorTop)
-    arrowButton:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
-    arrowButton:setTooltip(tr('Hide entire game map (%s)', 'Ctrl+Shift+M'))
-    arrowButton:setOn(true)
+    arrowMenuButton:addAnchor(AnchorTop, 'minimapBar', AnchorTop)
+    arrowMenuButton:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
+    arrowMenuButton:setTooltip(tr('Hide entire game map (%s)', 'Ctrl+Shift+M'))
+    arrowMenuButton:setOn(true)
     ballButton:addAnchor(AnchorTop, 'prev', AnchorBottom)
     ballButton:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
     ballButton:setMarginTop(3)
@@ -290,10 +294,10 @@ function GameMinimap.toggleFullMap()
     minimapBar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
     minimapBar:addAnchor(AnchorRight, 'parent', AnchorRight)
 
-    arrowButton:addAnchor(AnchorVerticalCenter, 'lockButton', AnchorVerticalCenter)
-    arrowButton:addAnchor(AnchorRight, 'lockButton', AnchorOutsideLeft)
-    arrowButton:setTooltip(tr('Show entire game map (%s)', 'Ctrl+Shift+M'))
-    arrowButton:setOn(false)
+    arrowMenuButton:addAnchor(AnchorVerticalCenter, 'lockButton', AnchorVerticalCenter)
+    arrowMenuButton:addAnchor(AnchorRight, 'lockButton', AnchorOutsideLeft)
+    arrowMenuButton:setTooltip(tr('Show entire game map (%s)', 'Ctrl+Shift+M'))
+    arrowMenuButton:setOn(false)
     ballButton:addAnchor(AnchorTop, 'prev', AnchorTop)
     ballButton:addAnchor(AnchorRight, 'prev', AnchorLeft)
     ballButton:setMarginTop(0)

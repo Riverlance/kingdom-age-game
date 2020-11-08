@@ -1,5 +1,4 @@
 _G.ClientBackground = { }
-ClientBackground.m  = modules.client_background -- Alias
 
 
 
@@ -7,6 +6,9 @@ local background
 local clientVersionLabel
 
 function ClientBackground.init()
+  -- Alias
+  ClientBackground.m = modules.client_background
+
   background = g_ui.displayUI('background')
   background:lower()
 

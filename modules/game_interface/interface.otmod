@@ -46,6 +46,7 @@ Module
     - ka_game_powers
     - ka_game_conditions
     - game_battlelist
+    - ka_game_partylist
     - game_unjustifiedpoints
     - game_minimap
     - game_viplist

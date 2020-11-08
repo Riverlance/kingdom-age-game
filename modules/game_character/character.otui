@@ -1,28 +1,16 @@
-HealthBar < ProgressBar
-  id: healthBar
+CharacterProgressBar < ProgressBar
+  anchors.left: parent.left
+  anchors.right: parent.right
+
+HealthProgressBar < CharacterProgressBar
   background-color: #ff4444
-  anchors.top: parent.top
-  anchors.left: parent.left
-  anchors.right: parent.right
-  margin: 1
+  margin-top: 1
 
-ManaBar < ProgressBar
-  id: manaBar
+ManaProgressBar < CharacterProgressBar
   background-color: #aa44ff
-  anchors.top: prev.bottom
-  anchors.left: parent.left
-  anchors.right: parent.right
-  margin: 1
-  margin-top: 3
 
-ExperienceBar < ProgressBar
-  id: experienceBar
+ExperienceProgressBar < CharacterProgressBar
   background-color: #B6E866
-  anchors.top: prev.bottom
-  anchors.left: parent.left
-  anchors.right: parent.right
-  margin: 1
-  margin-top: 3
 
 ConditionWidget < UIWidget
   size: 18 18
@@ -163,27 +151,26 @@ MiniWindow
   height: 258
   &save: true
 
-  UIButton
+  BallMenuButton
     id: ballButton
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
-    size: 14 14
-    image-source: /images/ui/_button/mini_window
-    image-clip: 70 0 14 14
     @onClick: GameCharacter.onMiniWindowBallButton()
-
-    $hover:
-      image-clip: 70 14 14 14
-
-    $pressed:
-      image-clip: 70 28 14 14
 
   MiniWindowHeader
     height: 55
 
-    HealthBar
-    ManaBar
-    ExperienceBar
+    HealthProgressBar
+      id: healthBar
+      anchors.top: parent.top
+
+    ManaProgressBar
+      id: manaBar
+      anchors.top: prev.outsideBottom
+
+    ExperienceProgressBar
+      id: experienceBar
+      anchors.top: prev.outsideBottom
 
   MiniWindowContents
     Panel
@@ -281,21 +268,27 @@ MiniWindow
 
       FightOffensiveBox
         id: fightOffensiveBox
+        !tooltip: tr('Offensive combat mode')
 
       FightBalancedBox
         id: fightBalancedBox
+        !tooltip: tr('Balanced combat mode')
 
       FightDefensiveBox
         id: fightDefensiveBox
+        !tooltip: tr('Defensive combat mode')
 
       ChaseModeBox
         id: chaseModeBox
+        !tooltip: tr('Chase mode')
 
       SafeFightBox
         id: safeFightBox
+        !tooltip: tr('Secure mode')
 
       MountButton
         id: mountButton
+        !tooltip: tr('Mounting')
 
   MiniWindowFooter
     height: 14

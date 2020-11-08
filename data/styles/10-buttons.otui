@@ -97,3 +97,194 @@ LightButton < Button
   $pressed:
     color: #dfdfdfff
     icon-source: /images/ui/_button/light
+
+EmptyMenuButton < UIButton
+  id: emptyMenuButton
+  size: 14 14
+  font: verdana-11px-antialised
+  color: #bcbcbc
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 112 0 14 14
+
+  $hover:
+    image-clip: 112 14 14 14
+
+  $pressed:
+    image-clip: 112 28 14 14
+
+  $on:
+    image-clip: 112 28 14 14
+
+LockMenuButton < UIButton
+  id: lockButton
+  size: 14 14
+  !tooltip: tr('Lock')
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 84 0 14 14
+
+  $hover:
+    image-clip: 84 14 14 14
+
+  $pressed:
+    image-clip: 84 28 14 14
+
+  $on:
+    !tooltip: tr('Unlock')
+    image-clip: 98 0 14 14
+
+  $on hover:
+    image-clip: 98 14 14 14
+
+  $on pressed:
+    image-clip: 98 28 14 14
+
+BallMenuButton < UIButton
+  id: ballMenuButton
+  size: 14 14
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 70 0 14 14
+
+  $hover:
+    image-clip: 70 14 14 14
+
+  $pressed:
+    image-clip: 70 28 14 14
+
+  $on:
+    image-clip: 70 28 14 14
+
+ArrowMenuButton < UIButton
+  id: arrowMenuButton
+  size: 14 14
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 56 0 14 14
+
+  $hover:
+    image-clip: 56 14 14 14
+
+  $pressed:
+    image-clip: 56 28 14 14
+
+  $on:
+    image-clip: 42 0 14 14
+
+  $on hover:
+    image-clip: 42 14 14 14
+
+  $on pressed:
+    image-clip: 42 28 14 14
+
+InvertedArrowMenuButton < ArrowMenuButton
+  image-clip: 42 0 14 14
+
+  $hover:
+    image-clip: 42 14 14 14
+
+  $pressed:
+    image-clip: 42 28 14 14
+
+  $on:
+    image-clip: 56 0 14 14
+
+  $on hover:
+    image-clip: 56 14 14 14
+
+  $on pressed:
+    image-clip: 56 28 14 14
+
+DownArrowMenuButton < UIButton
+  id: downArrowMenuButton
+  size: 14 14
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 56 0 14 14
+
+  $hover:
+    image-clip: 56 14 14 14
+
+  $pressed:
+    image-clip: 56 28 14 14
+
+UpArrowMenuButton < UIButton
+  id: upArrowMenuButton
+  size: 14 14
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 42 0 14 14
+
+  $hover:
+    image-clip: 42 14 14 14
+
+  $pressed:
+    image-clip: 42 28 14 14
+
+CloseMenuButton < UIButton
+  id: closeButton
+  size: 14 14
+  image-source: /images/ui/_button/mini_window
+  image-clip: 28 0 14 14
+
+  $hover:
+    image-clip: 28 14 14 14
+
+  $pressed:
+    image-clip: 28 28 14 14
+
+MinimizeMenuButton < UIButton
+  id: minimizeButton
+  size: 14 14
+  !tooltip: tr('Minimize')
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 0 0 14 14
+
+  $hover:
+    image-clip: 0 14 14 14
+
+  $pressed:
+    image-clip: 0 28 14 14
+
+  $on:
+    !tooltip: tr('Maximize')
+    image-clip: 14 0 14 14
+
+  $on hover:
+    image-clip: 14 14 14 14
+
+  $on pressed:
+    image-clip: 14 28 14 14
+
+MoreButton < UIButton
+  id: moreButton
+  size: 14 14
+  image-source: /images/ui/_button/mini_window
+  image-clip: 14 0 14 14
+
+  $hover:
+    image-clip: 14 14 14 14
+
+  $pressed:
+    image-clip: 14 28 14 14
+
+LessButton < UIButton
+  id: lessButton
+  size: 14 14
+  image-source: /images/ui/_button/mini_window
+  image-clip: 0 0 14 14
+
+  $hover:
+    image-clip: 0 14 14 14
+
+  $pressed:
+    image-clip: 0 28 14 14

@@ -1,5 +1,4 @@
 _G.GameAttributes = { }
-GameAttributes.m  = modules.ka_game_attributes -- Alias
 
 
 
@@ -63,6 +62,9 @@ local _availablePoints = 0
 
 
 function GameAttributes.init()
+  -- Alias
+  GameAttributes.m = modules.ka_game_attributes
+
   g_keyboard.bindKeyDown('Ctrl+Shift+U', GameAttributes.toggle)
 
   attributeWindow = g_ui.loadUI('attributes')
@@ -153,14 +155,16 @@ function GameAttributes.init()
   walkingAttributeAddButton.onClick   = GameAttributes.onClickAddButton
   luckAttributeAddButton.onClick      = GameAttributes.onClickAddButton
 
-  if g_game.isOnline() then
-    GameAttributes.online()
-  end
-
   connect(g_game, {
     onGameStart        = GameAttributes.online,
     onPlayerAttributes = GameAttributes.onPlayerAttributes
   })
+
+  GameInterface.setupMiniWindow(attributeWindow, attributeTopMenuButton)
+
+  if g_game.isOnline() then
+    GameAttributes.online()
+  end
 end
 
 function GameAttributes.terminate()

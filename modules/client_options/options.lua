@@ -1,5 +1,4 @@
 _G.ClientOptions = { }
-ClientOptions.m  = modules.client_options -- Alias
 
 
 
@@ -203,6 +202,9 @@ function ClientOptions.setup()
 end
 
 function ClientOptions.init()
+  -- Alias
+  ClientOptions.m = modules.client_options
+
   for k,v in pairs(defaultOptions) do
     g_settings.setDefault(k, v)
     options[k] = v

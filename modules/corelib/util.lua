@@ -33,6 +33,10 @@ function fatal(msg)
   g_logger.log(LogFatal, msg)
 end
 
+function print_traceback(msg)
+  perror(debug.traceback(msg))
+end
+
 function exit()
   g_app.exit()
 end

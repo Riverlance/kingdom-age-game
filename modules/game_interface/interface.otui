@@ -34,9 +34,9 @@ GameBottomPanel < Panel
     image-clip: 0 102 258 102
 
 GameMapPanel < UIGameMap
-  padding: 7
   image-source: /images/ui/_background/panel_map
   image-border: 7
+  padding: 7
   focusable: false
 
   $on:
@@ -58,10 +58,7 @@ UIWidget
 
   GameMapPanel
     id: gameMapPanel
-    anchors.top: gameScreenArea.top
-    anchors.bottom: gameScreenArea.bottom
-    anchors.left: gameScreenArea.left
-    anchors.right: gameScreenArea.right
+    anchors.fill: gameScreenArea
 
   GameSidePanel
     id: gameLeftFirstPanel

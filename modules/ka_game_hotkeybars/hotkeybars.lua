@@ -1,5 +1,4 @@
 _G.GameHotkeybars = { }
-GameHotkeybars.m  = modules.ka_game_hotkeybars -- Alias
 
 
 
@@ -11,6 +10,9 @@ hotkeybars = { }
 
 
 function GameHotkeybars.init()
+  -- Alias
+  GameHotkeybars.m = modules.ka_game_hotkeybars
+
   g_ui.importStyle('hotkeybars.otui')
   GameHotkeybars.initHotkeybars()
 

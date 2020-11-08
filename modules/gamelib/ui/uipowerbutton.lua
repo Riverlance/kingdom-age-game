@@ -23,24 +23,6 @@ local POWER_CLASS_STRING =
   [POWER_CLASS_SPECIAL]   = 'Special'
 }
 
-local VOCATION_LEARNER  = 0
-local VOCATION_KNIGHT   = 1
-local VOCATION_PALADIN  = 2
-local VOCATION_ARCHER   = 3
-local VOCATION_ASSASSIN = 4
-local VOCATION_WIZARD   = 5
-local VOCATION_BARD     = 6
-local VOCATION_STRING =
-{
-  [VOCATION_LEARNER]  = 'Learner',
-  [VOCATION_KNIGHT]   = 'Knight',
-  [VOCATION_PALADIN]  = 'Paladin',
-  [VOCATION_ARCHER]   = 'Archer',
-  [VOCATION_ASSASSIN] = 'Assassin',
-  [VOCATION_WIZARD]   = 'Wizard',
-  [VOCATION_BARD]     = 'Bard',
-}
-
 --[[
   Power Object:
   - (number)  id
@@ -180,14 +162,14 @@ function UIPowerButton:getVocations()
     return 'Unknown'
   end
 
-  if #power.vocations == table.size(VOCATION_STRING) then
+  if #power.vocations == table.size(VocationStr) then
     return 'All'
   end
 
   local vocations = {}
   for _, vocationId in ipairs(power.vocations) do
-    if VOCATION_STRING[vocationId] then
-      table.insert(vocations, VOCATION_STRING[vocationId])
+    if VocationStr[vocationId] then
+      table.insert(vocations, VocationStr[vocationId])
     end
   end
   return table.concat(vocations, ', ')

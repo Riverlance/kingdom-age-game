@@ -1,5 +1,4 @@
 _G.GameTextMessage = { }
-GameTextMessage.m  = modules.game_textmessage -- Alias
 
 
 
@@ -17,7 +16,7 @@ MessageSettings =
   bottomWhite     = { color = TextColors.white,     consoleTab='Server', screenTarget='statusLabel',       consoleOption='showEventMessagesInConsole' },
   status          = { color = TextColors.white,     consoleTab='Server', screenTarget='statusLabel',       consoleOption='showStatusMessagesInConsole' },
   statusSmall     = { color = TextColors.white,                          screenTarget='statusLabel' },
-  loot            = { color = TextColors.white,     consoleTab='Server' },
+  loot            = { color = TextColors.green,     consoleTab='Server' },
   private         = { color = TextColors.lightblue,                      screenTarget='privateLabel' },
   statusBigTop    = { color = '#e1e1e1',            consoleTab='Server', screenTarget='privateLabel',      consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
   statusBigCenter = { color = '#e1e1e1',            consoleTab='Server', screenTarget='middleCenterLabel', consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
@@ -74,6 +73,9 @@ statusLabel = nil
 
 
 function GameTextMessage.init()
+  -- Alias
+  GameTextMessage.m = modules.game_textmessage
+
   for messageMode, _ in pairs(MessageTypes) do
     registerMessageMode(messageMode, GameTextMessage.displayMessage)
   end

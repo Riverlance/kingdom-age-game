@@ -1,7 +1,7 @@
-function getDistanceTo(fromPos, toPos)
+function getDistanceTo(fromPos, toPos, ignoreFloorDif)
   local xDif, yDif = math.abs(fromPos.x - toPos.x), math.abs(fromPos.y - toPos.y)
   local dif = math.max(xDif, yDif)
-  return fromPos.z == toPos.z and dif or dif + 15
+  return (ignoreFloorDif or fromPos.z == toPos.z) and dif or dif + 15
 end
 
 function expForLevel(level)
