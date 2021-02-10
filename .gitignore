@@ -6,6 +6,7 @@
 desktop.ini
 otclient.exp
 otclient.lib
+bin/*
 config/*
 vc12/otclient.sln
 vc12/otclient.vcxproj*
