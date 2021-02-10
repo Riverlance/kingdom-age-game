@@ -7,7 +7,7 @@ MiniWindow < UIMiniWindow
   text-align: topLeft
   image-source: /images/ui/_background/mini_window
   image-clip: 0 0 264 283
-  image-border-top: 23
+  image-border-top: 26
   image-border-bottom: 4
   image-border-left: 42
   image-border-right: 4
@@ -28,7 +28,7 @@ MiniWindow < UIMiniWindow
     padding-bottom: 3
     padding-left: 3
     padding-right: 3
-    height: 23
+    height: 26
     phantom: true
 
   CloseMenuButton

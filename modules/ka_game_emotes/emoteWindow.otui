@@ -11,7 +11,7 @@ EmoteWindow < UIWidget
   layout:
     type: grid
     cell-size: 32 32
-    auto-spacing:true
+    auto-spacing: true
     flow:true
     fit-children:true
     num-columns: 5

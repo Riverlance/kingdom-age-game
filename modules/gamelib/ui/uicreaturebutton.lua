@@ -37,9 +37,14 @@ function UICreatureButton.create()
   button.specialIconId  = SpecialIconNone
   button.vocationId     = VocationLearner -- Player only
 
+  button.masterCid      = 0 -- Summon only (updated manually)
+
   button.isHovered  = false
   button.isTarget   = false
   button.isFollowed = false
+
+  -- Creation time
+  button.lastAppear = os.time()
 
   return button
 end
@@ -87,7 +92,7 @@ end
 
 
 function UICreatureButton:setup(data)
-  -- Creature
+  -- Set creature data
   self:setCreature(data)
 
   -- Id
@@ -146,6 +151,8 @@ function UICreatureButton:updateCreature(data)
   elseif self.outfit then
     creatureWidget:setOutfit(self.outfit)
   end
+
+  self:updateCreatureMinimapWidgetCreature()
 end
 
 function UICreatureButton:updateStaticSquare() -- Update border
@@ -206,6 +213,164 @@ function UICreatureButton:updateStaticSquare() -- Update border
   end
 end
 
+function UICreatureButton:getCreatureMinimapWidget()
+  if not modules.game_minimap then
+    return nil -- Game Minimap module is not set
+  end
+
+  local minimapWidget = GameMinimap.getMinimapWidget()
+  return minimapWidget.alternatives[self.cid]
+end
+
+function UICreatureButton:enableCreatureMinimapWidget()
+  if not modules.game_minimap then
+    return false -- Game Minimap module is not set
+  end
+
+  local creatureMinimapWidget = self:getCreatureMinimapWidget()
+  if creatureMinimapWidget then
+    return false -- Added already
+  end
+
+  local minimapWidget   = GameMinimap.getMinimapWidget()
+  creatureMinimapWidget = g_ui.createWidget('CreatureButtonMinimapWidget')
+
+  creatureMinimapWidget.alternativeId = self.cid
+  self:updateCreatureMinimapWidgetCreature(creatureMinimapWidget)
+  self:updateCreatureMinimapWidgetPosition(creatureMinimapWidget, true)
+  self:updateCreatureMinimapWidgetLabelText(creatureMinimapWidget, true)
+  self:updateCreatureMinimapWidgetTooltip(creatureMinimapWidget)
+
+  connect(self, {
+    onDestroy = function()
+      local creatureMinimapWidget = self:getCreatureMinimapWidget()
+      if creatureMinimapWidget then
+        creatureMinimapWidget:destroy()
+      end
+    end
+  })
+
+  minimapWidget:addAlternativeWidget(creatureMinimapWidget)
+
+  return true -- Added successfully
+end
+
+function UICreatureButton:disableCreatureMinimapWidget()
+  if not modules.game_minimap then
+    return false -- Game Minimap module is not set
+  end
+
+  local creatureMinimapWidget = self:getCreatureMinimapWidget()
+  if not creatureMinimapWidget then
+    return false -- Not found
+  end
+
+  creatureMinimapWidget:destroy()
+
+  return true -- Removed successfully
+end
+
+function UICreatureButton:updateCreatureMinimapWidgetCreature(creatureMinimapWidget)
+  if not modules.game_minimap then
+    return false -- Game Minimap module is not set
+  end
+
+  local creatureMinimapWidget = creatureMinimapWidget or self:getCreatureMinimapWidget()
+  if not creatureMinimapWidget then
+    return false -- Not found
+  end
+
+  local minimapWidgetCreature = creatureMinimapWidget:getChildById('creature')
+  if not minimapWidgetCreature then
+    return false
+  end
+
+  local ret = false
+
+  -- Creature
+  if self.creature then
+    minimapWidgetCreature:setCreature(self.creature)
+    ret = true -- Updated successfully
+
+  -- Outfit
+  elseif self.outfit then
+    minimapWidgetCreature:setOutfit(self.outfit)
+    ret = true -- Updated successfully
+  end
+
+  return ret
+end
+
+function UICreatureButton:updateCreatureMinimapWidgetPosition(creatureMinimapWidget, ignoreTooltipUpdate)
+  if not modules.game_minimap then
+    return false -- Game Minimap module is not set
+  end
+
+  local creatureMinimapWidget = creatureMinimapWidget or self:getCreatureMinimapWidget()
+  if not creatureMinimapWidget then
+    return false -- Not found
+  end
+
+  local minimapWidget = GameMinimap.getMinimapWidget()
+
+  creatureMinimapWidget.pos = self.position -- Position reference
+  minimapWidget:centerInPosition(creatureMinimapWidget, self.position)
+
+  if not ignoreTooltipUpdate then
+    self:updateCreatureMinimapWidgetTooltip(creatureMinimapWidget)
+  end
+
+  return true -- Updated successfully
+end
+
+function UICreatureButton:updateCreatureMinimapWidgetLabelText(creatureMinimapWidget, ignoreTooltipUpdate)
+  if not modules.game_minimap then
+    return false -- Game Minimap module is not set
+  end
+
+  local creatureMinimapWidget = creatureMinimapWidget or self:getCreatureMinimapWidget()
+  if not creatureMinimapWidget then
+    return false -- Not found
+  end
+
+  local minimapWidgetTitleLabel = creatureMinimapWidget:getChildById('titleLabel')
+  local labelWidget             = self:getChildById('label')
+  if not minimapWidgetTitleLabel or not labelWidget then
+    return false
+  end
+
+  minimapWidgetTitleLabel:setText(labelWidget:getText())
+
+  if not ignoreTooltipUpdate then
+    self:updateCreatureMinimapWidgetTooltip(creatureMinimapWidget)
+  end
+
+  return true -- Updated successfully
+end
+
+function UICreatureButton:updateCreatureMinimapWidgetTooltip(creatureMinimapWidget)
+  if not modules.game_minimap then
+    return false -- Game Minimap module is not set
+  end
+
+  local creatureMinimapWidget = creatureMinimapWidget or self:getCreatureMinimapWidget()
+  if not creatureMinimapWidget then
+    return false -- Not found
+  end
+
+  local minimapWidgetCreature   = creatureMinimapWidget:getChildById('creature')
+  local minimapWidgetTitleLabel = creatureMinimapWidget:getChildById('titleLabel')
+  if not minimapWidgetCreature or not minimapWidgetTitleLabel then
+    return false
+  end
+
+  local minimapWidgetTooltip = string.format('%s\n%d, %d, %d', minimapWidgetTitleLabel:getText(), creatureMinimapWidget.pos.x, creatureMinimapWidget.pos.y, creatureMinimapWidget.pos.z)
+  minimapWidgetCreature:setTooltip(minimapWidgetTooltip)
+  minimapWidgetCreature:setPhantom(false)
+
+  return true -- Updated successfully
+end
+
 function UICreatureButton:updateLabelText(nickname)
   local labelWidget = self:getChildById('label')
   if not labelWidget then
@@ -215,6 +380,7 @@ function UICreatureButton:updateLabelText(nickname)
   self.nickname = nickname
 
   labelWidget:setText(self:getCreatureName())
+  self:updateCreatureMinimapWidgetLabelText()
 end
 
 function UICreatureButton:updateHealthPercent(healthPercent)
@@ -299,6 +465,7 @@ function UICreatureButton:updatePosition(position)
   positionLabelWidget:setColor(color)
 
   self:updateInfoIcon()
+  self:updateCreatureMinimapWidgetPosition()
 end
 
 function UICreatureButton:updatePing(ping) -- See ClientTopMenu.updatePing

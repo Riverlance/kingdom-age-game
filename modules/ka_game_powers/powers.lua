@@ -321,7 +321,7 @@ function GamePowers.refreshList()
   GamePowers.clearList()
 
   local ignoreMessage = 1
-  g_game.sendPowerProtocolData(string.format("%d:%d:%d:%d", power_flag_updateList, ignoreMessage, 0, 0))
+  g_game.sendPowerBuffer(string.format("%d:%d:%d:%d", power_flag_updateList, ignoreMessage, 0, 0))
 end
 
 function GamePowers.add(power)
@@ -373,7 +373,7 @@ function GamePowers.requestNonConstantPowerChanges(power)
     return
   end
 
-  g_game.sendPowerProtocolData(string.format("%d:%d:%d:%d", power_flag_updateNonConstantPower, power.id or 0, 0, 0))
+  g_game.sendPowerBuffer(string.format("%d:%d:%d:%d", power_flag_updateNonConstantPower, power.id or 0, 0, 0))
 end
 
 function GamePowers.onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)

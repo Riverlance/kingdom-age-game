@@ -144,7 +144,7 @@ function GameConditions.init()
 
   conditionPanel = conditionWindow:getChildById('contentsPanel'):getChildById('conditionPanel')
 
-  ProtocolGame.registerOpcode(GameServerOpcodes.GameServerConditionsList, GameConditions.parseConditions)
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeConditionsList, GameConditions.parseConditions)
   connect(g_game, {
     onGameStart = GameConditions.online,
     onGameEnd   = GameConditions.offline
@@ -172,7 +172,7 @@ function GameConditions.terminate()
     onGameEnd   = GameConditions.offline
   })
 
-  ProtocolGame.unregisterOpcode(GameServerOpcodes.GameServerConditionsList)
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeConditionsList)
 
   conditionTopMenuButton:destroy()
   conditionWindow:destroy()

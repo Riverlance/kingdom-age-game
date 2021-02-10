@@ -1,5 +1,9 @@
 -- @docclass table
 
+function pack(...)
+  return {...}
+end
+
 function table.dump(t, depth)
   if not depth then
     depth = 0
@@ -113,17 +117,21 @@ function table.haskey(t, key)
   return table.findkey(t, key) ~= nil
 end
 
-function table.removevalue(t, value, all)
+function table.removevalue(t, value, all, force)
   for k,v in pairs(t) do
     if v == value then
-      table.remove(t, k)
-      if not all then
-        return true
+      if force then
+        t[k] = nil
+      else
+        table.remove(t, k)
+        if not all then
+          return true
+        end
       end
     end
   end
 
-  if all then
+  if not force and all then
     return true
   end
   return false
@@ -308,5 +316,26 @@ function table.removeChild(t, index, recursive)
       break
     end
   until not t or not recursive
+  return t
+end
+
+--[[
+  -- Worst way
+  local zip = company and company.director and company.director.address and company.director.address.zipcode
+
+  -- Best way
+  local zip = table.get(company, 'director', 'address', 'zipcode')
+]]
+function table.get(t, ...)
+  local args = {...}
+
+  for i = 1, #args do
+    if type(t) ~= 'table' then
+      return nil
+    end
+
+    t = t[args[i]]
+  end
+
   return t
 end

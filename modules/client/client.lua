@@ -58,6 +58,8 @@ function Client.init()
     g_settings.set('uuid', g_crypt.getMachineUUID())
     g_settings.save()
   end
+
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeOtclientSignal, Client.onRecvOtclientSignal)
 end
 
 function Client.terminate()
@@ -79,8 +81,8 @@ end
 function Client.startup()
   musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
 
-  connect(g_app, {
-    onFps = Client.loadFiles
+  connect(g_updater, {
+    onUpdated = Client.loadFiles
   })
   connect(g_things, {
     onLoadDat = Client.onLoadFiles
@@ -90,10 +92,8 @@ function Client.startup()
   })
 
   connect(g_game, {
-    onGameStart = Client.onGameStart
-  })
-  connect(g_game, {
-    onGameEnd = Client.onGameEnd
+    onGameStart = Client.onGameStart,
+    onGameEnd   = Client.onGameEnd,
   })
 
   -- Check for startup errors
@@ -105,7 +105,26 @@ function Client.startup()
 end
 
 function Client.exit()
+  disconnect(g_game, {
+    onGameStart = Client.onGameStart,
+    onGameEnd   = Client.onGameEnd,
+  })
+
+  disconnect(g_sprites, {
+    onLoadSpr = Client.onLoadFiles
+  })
+  disconnect(g_things, {
+    onLoadDat = Client.onLoadFiles
+  })
+  disconnect(g_updater, {
+    onUpdated = Client.loadFiles
+  })
+
   g_logger.info("Exiting application...")
+end
+
+function Client.onRecvOtclientSignal() -- From Server ProtocolGame::onRecvFirstMessage
+  -- Nothing yet
 end
 
 function Client.onLoadFiles()
@@ -129,8 +148,8 @@ function Client.onGameEnd()
 end
 
 function Client.loadFiles()
-  disconnect(g_app, {
-    onFps = Client.loadFiles
+  disconnect(g_updater, {
+    onUpdated = Client.loadFiles
   })
 
   loadingBox = displaySystemBox(tr('Loading'), tr('Loading files...'))

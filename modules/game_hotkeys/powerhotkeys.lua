@@ -79,12 +79,12 @@ function GamePowerHotkeys.send(flag, keyCombo) -- ([flag], [keyCombo]) -- (flag:
 
   -- If has flag, send flag instead of power id
   if flag then
-    g_game.sendPowerProtocolData(string.format("%d:%d:%d:%d", flag, 0, 0, 0))
+    g_game.sendPowerBuffer(string.format("%d:%d:%d:%d", flag, 0, 0, 0))
     return
   end
 
   -- Send power id and mouse position
-  g_game.sendPowerProtocolData(string.format("%d:%d:%d:%d", powerBoost_lastPower, toPos.x, toPos.y, toPos.z))
+  g_game.sendPowerBuffer(string.format("%d:%d:%d:%d", powerBoost_lastPower, toPos.x, toPos.y, toPos.z))
 
   if keyCombo then
     if modules.ka_game_hotkeybars and lastHotkeyTime > 0 then

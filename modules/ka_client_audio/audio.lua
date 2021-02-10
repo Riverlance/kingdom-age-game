@@ -38,7 +38,7 @@ function ClientAudio.init()
   channels[AudioChannels.Ambient].volume = isAudioEnabled and ClientOptions.getOption('enableSoundAmbient') and ClientOptions.getOption('soundAmbientVolume') or 0
   channels[AudioChannels.Effect].volume  = isAudioEnabled and ClientOptions.getOption('enableSoundEffect') and ClientOptions.getOption('soundEffectVolume') or 0
 
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerAudio, ClientAudio.parseAudioRequest)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeAudio, ClientAudio.parseAudioRequest)
 
   connect(LocalPlayer, {
     onPositionChange = ClientAudio.onPositionChange
@@ -50,7 +50,7 @@ function ClientAudio.terminate()
     onPositionChange = ClientAudio.onPositionChange
   })
 
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerAudio)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeAudio)
 
   ClientAudio.clearAudios()
 
@@ -99,8 +99,10 @@ function ClientAudio.getRootPath()
   return '/audios/'
 end
 
-function ClientAudio.parseAudioRequest(protocol, opcode, buffer)
+function ClientAudio.parseAudioRequest(protocolGame, opcode, msg)
+  local buffer = msg:getString()
   local params = string.split(buffer, ':')
+
   local action = tonumber(params[1])
   if not action then
     return

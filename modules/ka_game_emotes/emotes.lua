@@ -51,7 +51,7 @@ function GameEmotes.init()
     onHoverChange = GameEmotes.onConsoleEmoteButtonHoverChange,
   })
 
-  ProtocolGame.registerOpcode(GameServerOpcodes.GameServerEmote, GameEmotes.parseEmote)
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeEmote, GameEmotes.parseEmote)
 
   g_keyboard.bindKeyDown('Escape', function() GameEmotes.toggleWindow(false) end, rootWidget)
 
@@ -71,7 +71,7 @@ function GameEmotes.terminate()
   GameEmotes.saveSettings()
 
   g_keyboard.unbindKeyDown('Escape')
-  ProtocolGame.unregisterOpcode(GameServerOpcodes.GameServerEmote)
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeEmote)
   disconnect(consoleEmoteButton, {
     onHoverChange = GameEmotes.onConsoleEmoteButtonHoverChange,
   })
@@ -254,9 +254,16 @@ function GameEmotes.useEmote(id)
   end
 
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientEmote, id)
+  if not protocolGame then
+    return
   end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeEmote)
+  msg:addString(tostring(id))
+  protocolGame:send(msg)
+
   emoteList[id].timesUsed = emoteList[id].timesUsed + 1
   emoteList[id].lastUsed = os.time()
   GameEmotes.sortEmoteList()

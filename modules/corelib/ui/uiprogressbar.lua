@@ -8,13 +8,18 @@ function UIProgressBar.create()
   progressbar.min = 0
   progressbar.max = 100
   progressbar.value = 0
+  progressbar.fillerBackgroundWidget = nil
   progressbar.bgBorderLeft = 0
   progressbar.bgBorderRight = 0
   progressbar.bgBorderTop = 0
   progressbar.bgBorderBottom = 0
+  progressbar.bgColor = 'alpha'
+  progressbar.bgAreaColor = 'alpha'
+  progressbar.imageSource = ''
+  progressbar.imageBorder = 0
   progressbar.phases = 0
   progressbar.phasesBorderWidth = 1
-  progressbar.phasesBorderColor = '#ffffff77'
+  progressbar.phasesBorderColor = '#98885e88'
   return progressbar
 end
 
@@ -92,13 +97,26 @@ function UIProgressBar:getPhasesBorderColor()
   return self.phasesBorderColor
 end
 
+function UIProgressBar:updateFillerBackground() -- Should destroy children before at UIProgressBar:updateBackground()
+  self.fillerBackgroundWidget = g_ui.createWidget('UIWidget', self)
+  self.fillerBackgroundWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
+  self.fillerBackgroundWidget:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+  self.fillerBackgroundWidget:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+  self.fillerBackgroundWidget:setMarginLeft(self.bgBorderLeft)
+  self.fillerBackgroundWidget:setMarginRight(self.bgBorderRight)
+  self.fillerBackgroundWidget:setMarginTop(self.bgBorderTop)
+  self.fillerBackgroundWidget:setMarginBottom(self.bgBorderBottom)
+  self.fillerBackgroundWidget:setWidth(math.round(math.max(self:getProgress() * (self:getWidth() - self.bgBorderLeft - self.bgBorderRight), 1)))
+  self.fillerBackgroundWidget:setBackgroundColor(self.bgColor)
+  self.fillerBackgroundWidget:setImageSource(self.imageSource)
+  self.fillerBackgroundWidget:setImageBorder(self.imageBorder)
+  self.fillerBackgroundWidget:setPhantom(true)
+end
+
 function UIProgressBar:updatePhases()
   if self.phases < 2 or self.phasesBorderWidth < 1 then
     return
   end
-
-  -- Remove old phases
-  self:destroyChildren()
 
   local phaseWidth = (self:getWidth() - (self.bgBorderLeft + self.bgBorderRight)) / self.phases
   local phaseHeight = (self:getHeight() - (self.bgBorderTop + self.bgBorderBottom)) / 4
@@ -113,15 +131,24 @@ function UIProgressBar:updatePhases()
 
     widget:setRect(rect)
     widget:setBackgroundColor(self.phasesBorderColor)
+    widget:setPhantom(true)
   end
 end
 
 function UIProgressBar:updateBackground()
   if self:isOn() then
-    local width = math.round(math.max((self:getProgress() * (self:getWidth() - self.bgBorderLeft - self.bgBorderRight)), 1))
-    local height = self:getHeight() - self.bgBorderTop - self.bgBorderBottom
-    local rect = { x = self.bgBorderLeft, y = self.bgBorderTop, width = width, height = height }
-    self:setBackgroundRect(rect)
+    -- Remove old widgets
+    self:destroyChildren()
+
+    -- Background area
+    self:setBackgroundColor(self.bgAreaColor)
+    self:setImageSource('')
+    self:setImageBorder(0)
+
+    -- Filler background
+    self:updateFillerBackground()
+
+    -- Phases
     self:updatePhases()
   end
 end
@@ -132,19 +159,28 @@ end
 
 function UIProgressBar:onStyleApply(name, node)
   for name,value in pairs(node) do
-    if name == 'background-border-left' then
+    if name == 'background-padding-left' then
       self.bgBorderLeft = tonumber(value)
-    elseif name == 'background-border-right' then
+    elseif name == 'background-padding-right' then
       self.bgBorderRight = tonumber(value)
-    elseif name == 'background-border-top' then
+    elseif name == 'background-padding-top' then
       self.bgBorderTop = tonumber(value)
-    elseif name == 'background-border-bottom' then
+    elseif name == 'background-padding-bottom' then
       self.bgBorderBottom = tonumber(value)
-    elseif name == 'background-border' then
+    elseif name == 'background-padding' then
       self.bgBorderLeft = tonumber(value)
       self.bgBorderRight = tonumber(value)
       self.bgBorderTop = tonumber(value)
       self.bgBorderBottom = tonumber(value)
+    elseif name == 'background-area-color' then
+      self.bgAreaColor = tostring(value)
+    elseif name == 'background-color' then
+      self.bgColor = tostring(value)
+
+    elseif name == 'image-source' then
+      self.imageSource = tostring(value)
+    elseif name == 'image-border' then
+      self.imageBorder = tonumber(value)
     end
   end
 end
@@ -154,4 +190,12 @@ function UIProgressBar:onGeometryChange(oldRect, newRect)
     self:setHeight(0)
   end
   self:updateBackground()
+end
+
+function UIProgressBar:setFillerBackgroundColor(color)
+  if not self.fillerBackgroundWidget then
+    return
+  end
+
+  self.fillerBackgroundWidget:setBackgroundColor(color)
 end

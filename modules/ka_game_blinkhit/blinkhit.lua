@@ -22,11 +22,11 @@ function GameBlinkHit.init()
   GameBlinkHit.m = modules.ka_game_blinkhit
 
   GameBlinkHit.removeAll(true)
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerBlinkHit, GameBlinkHit.onBlinkHit)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeBlinkHit, GameBlinkHit.onBlinkHit)
 end
 
 function GameBlinkHit.terminate()
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerBlinkHit)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeBlinkHit)
   GameBlinkHit.removeAll(true)
 end
 
@@ -64,7 +64,9 @@ function GameBlinkHit.add(id)
   GameBlinkHit.remove(id)
 end
 
-function GameBlinkHit.onBlinkHit(protocol, opcode, buffer)
+function GameBlinkHit.onBlinkHit(protocolGame, opcode, msg)
+  local buffer = msg:getString()
+
   local id = tonumber(buffer)
   if not id then
     return

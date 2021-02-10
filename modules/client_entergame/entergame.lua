@@ -212,6 +212,15 @@ function ClientEnterGame.show()
     return
   end
 
+  if not Client.isLoaded() then
+    local callback = function()
+        g_platform.spawnProcess("Kingdom Age Online.exe", { })
+        exit()
+    end
+    displayOkCancelBox(tr("Info"), tr("Your client has been modified. Click OK to restart the client."), callback)
+    return
+  end
+
   enterGame:show()
   enterGame:raise()
   enterGame:focus()

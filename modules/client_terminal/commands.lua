@@ -135,7 +135,7 @@ function ping()
     if not g_game.isOnline() then
       pcolored('Ping command is only allowed when online.', 'red')
       return
-    elseif not (g_game.getFeature(GameClientPing) or g_game.getFeature(GameExtendedClientPing)) then
+    elseif not g_game.getFeature(GameClientPing) then
       pcolored('This server does not support ping.', 'red')
       return
     end

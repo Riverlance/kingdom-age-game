@@ -101,6 +101,7 @@ cloneTabTipArea = nil
 cloneTabBar = nil
 clonedTab = nil
 cloneTab = nil
+clonedSplitter = nil
 
 -- Contains letter width for font "verdana-11px-antialised" as console is based on it
 local letterWidth = -- New line (10) and Space (32) have width 1 because they are printed and not replaced with spacer
@@ -154,6 +155,7 @@ function GameConsole.init()
   cloneTabTipArea = headerPanel:getChildById('cloneTabTipArea')
   cloneTabBar = headerPanel:getChildById('cloneTabBar')
   cloneTabBar:setContentWidget(cloneContentPanel)
+  clonedSplitter = contentPanel:getChildById('clonedSplitter')
 
   cloneTabTipArea.onDoubleClick = function(mousePosition)
     if clonedTab then -- cloneTabTipArea is not visible
@@ -222,6 +224,7 @@ function GameConsole.terminate()
   g_keyboard.unbindKeyDown('Ctrl+W')
 
   GameConsole.saveCommunicationSettings()
+  GameConsole.closeClonedTab()
 
   if channelsWindow then
     channelsWindow:destroy()
@@ -414,6 +417,10 @@ function GameConsole.clearChannel()
   end
 
   tab.tabPanel:getChildById('consoleBuffer'):destroyChildren()
+
+  if tab == clonedTab then
+    cloneTab.tabPanel:getChildById('consoleBuffer'):destroyChildren()
+  end
 end
 
 function GameConsole.setTextEditText(text)
@@ -550,12 +557,14 @@ function GameConsole.getHighlightedText(text)
 end
 
 function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
-  if tab == clonedTab then
-    GameConsole.addTabText(text, speaktype, cloneTab, creatureName, true)
-  end
-
   if not tab or tab.locked or not text or #text == 0 then
     return
+  end
+
+  if tab == clonedTab then
+    GameConsole.addTabText(text, speaktype, cloneTab, creatureName, true)
+  else
+    consoleTabBar:blinkTab(tab)
   end
 
   if ClientOptions.getOption('showTimestampsInConsole') then
@@ -568,7 +577,6 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
   label:setId('consoleLabel' .. consoleBuffer:getChildCount())
   label:setText(text)
   label:setColor(speaktype.color)
-  consoleTabBar:blinkTab(tab)
 
   -- Overlay for consoleBuffer which shows highlighted words only
 
@@ -616,8 +624,21 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
 
           tmpText = tmpText .. string.rep(fillChar, letterWidth[tmpChar])
       end
+      label.highlightWords = {}
+      for i = 1, #highlightData, 3 do
+        label.highlightWords[highlightData[i]] = {last = highlightData[i+1], word = highlightData[i+2]}
+      end
 
       labelHighlight:setText(tmpText)
+
+      label.onClick = function(self, mousePos)
+        local charPos = self:getTextPos(mousePos)
+        for start, highlight in pairs(self.highlightWords) do
+          if charPos >= start and charPos < highlight.last then
+            GameConsole.sendMessage(highlight.word)
+          end
+        end
+      end
     end
   end
 
@@ -769,11 +790,18 @@ function GameConsole.openClonedTab(tab)
   cloneTabBar:setWidth(cloneTab:getWidth()) -- Set tab bar width according to clone tab
   consoleContentPanel:setOn(true)
 
+  clonedSplitter:show()
+  clonedSplitter:setMarginRight(g_settings.getNumber("clonedSplitter", contentPanel:getWidth() / 2))
   GameConsole.cloneMessages(tab, cloneTab)
   return true
 end
 
 function GameConsole.closeClonedTab()
+  if not clonedTab or not cloneTab then
+    return
+  end
+  g_settings.set('clonedSplitter', clonedSplitter.currentMargin)
+
   cloneTabBar:removeTab(cloneTab)
 
   cloneTabSeparator:setOn(false)
@@ -781,6 +809,8 @@ function GameConsole.closeClonedTab()
   cloneTabBar:setWidth(0) -- Hide tab bar
   consoleContentPanel:setOn(false)
 
+  clonedSplitter:setMarginRight(0)
+  clonedSplitter:hide()
   cloneTab = nil
   clonedTab = nil
 end

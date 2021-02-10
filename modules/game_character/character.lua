@@ -9,6 +9,9 @@ outfitCreatureBox = nil
 healthBar = nil
 manaBar = nil
 experienceBar = nil
+healthBarValueLabel = nil
+manaBarValueLabel = nil
+experienceBarValueLabel = nil
 capLabel = nil
 
 
@@ -108,10 +111,13 @@ function GameCharacter.init()
   outfitCreatureBox = contentsPanel:getChildById('outfitCreatureBox')
 
   -- Health info
-  healthBar     = inventoryHeader:getChildById('healthBar')
-  manaBar       = inventoryHeader:getChildById('manaBar')
-  experienceBar = inventoryHeader:getChildById('experienceBar')
-  capLabel      = inventoryFooter:getChildById('capLabel')
+  healthBar               = inventoryHeader:getChildById('healthBar')
+  manaBar                 = inventoryHeader:getChildById('manaBar')
+  experienceBar           = inventoryHeader:getChildById('experienceBar')
+  healthBarValueLabel     = inventoryHeader:getChildById('healthBarValueLabel')
+  manaBarValueLabel       = inventoryHeader:getChildById('manaBarValueLabel')
+  experienceBarValueLabel = inventoryHeader:getChildById('experienceBarValueLabel')
+  capLabel                = inventoryFooter:getChildById('capLabel')
 
   local localPlayer = g_game.getLocalPlayer()
   if localPlayer then
@@ -227,10 +233,16 @@ function GameCharacter.terminate()
   healthBar:destroy()
   manaBar:destroy()
   experienceBar:destroy()
+  healthBarValueLabel:destroy()
+  manaBarValueLabel:destroy()
+  experienceBarValueLabel:destroy()
   capLabel:destroy()
   healthBar = nil
   manaBar = nil
   experienceBar = nil
+  healthBarValueLabel = nil
+  manaBarValueLabel = nil
+  experienceBarValueLabel = nil
   capLabel = nil
 
   inventoryTopMenuButton:destroy()
@@ -383,20 +395,20 @@ end
 
 function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
   healthBar:setValue(health, 0, maxHealth)
-  healthBar:setText(health .. ' / ' .. maxHealth)
-  healthBar:setTooltip(tr('Your character health is %d out of %d', health, maxHealth))
+  healthBarValueLabel:setText(health .. ' / ' .. maxHealth)
+  healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d', health, maxHealth))
 end
 
 function GameCharacter.onManaChange(localPlayer, mana, maxMana)
   manaBar:setValue(mana, 0, maxMana)
-  manaBar:setText(mana .. ' / ' .. maxMana)
-  manaBar:setTooltip(tr('Your character mana is %d out of %d', mana, maxMana))
+  manaBarValueLabel:setText(mana .. ' / ' .. maxMana)
+  manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d', mana, maxMana))
 end
 
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   experienceBar:setPercent(levelPercent)
-  experienceBar:setText(levelPercent .. '%')
-  experienceBar:setTooltip(getExperienceTooltipText(localPlayer, level, levelPercent))
+  experienceBarValueLabel:setText(levelPercent .. '%')
+  experienceBarValueLabel:setTooltip(getExperienceTooltipText(localPlayer, level, levelPercent))
 end
 
 function GameCharacter.onFreeCapacityChange(player, freeCapacity)

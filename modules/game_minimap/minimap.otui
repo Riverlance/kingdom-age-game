@@ -5,15 +5,11 @@ MiniWindow
   &save: true
   &contentMinimumHeight: 117
 
-  InvertedArrowMenuButton
-    !tooltip: tr('Show entire game map (%s)', 'Ctrl+Shift+M')
-    anchors.verticalCenter: lockButton.verticalCenter
-    anchors.right: lockButton.outsideLeft
-    @onClick: GameMinimap.toggleFullMap()
-
   BallMenuButton
     id: ballButton
     !tooltip: tr('Hide controllers')
+    anchors.verticalCenter: lockButton.verticalCenter
+    anchors.right: lockButton.outsideLeft
     @onClick: |
       local widget = GameMinimap.getMinimapBar()
       if widget then
@@ -24,7 +20,7 @@ MiniWindow
           widget:setWidth(0)
           self:setTooltip(tr('Show controllers'))
         else
-          widget:setWidth(71)
+          widget:setWidth(70)
           self:setTooltip(tr('Hide controllers'))
         end
       end
@@ -37,31 +33,102 @@ MiniWindow
 
   MiniWindowContents
 
+    Minimap
+      id: minimap
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      anchors.right: minimapBar.outsideLeft
+      padding: 1
+      border: 1 #353433
+
+    Label
+      id: positionLabel
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      anchors.right: minimapBar.outsideLeft
+      margin: 1
+      background-color: #000000bb
+      color: #ffffff
+      text-align: center
+      text-auto-resize: true
+      font: verdana-8px-antialised
+      text-wrap: true
+      phantom: false
+
+    OptionScrollbar
+      id: minimapOpacity
+      width: 100
+      anchors.bottom: positionLabel.outsideTop
+      anchors.left: parent.left
+      anchors.right: minimapBar.outsideLeft
+      margin-bottom: 1
+      minimum: 10
+      maximum: 100
+      symbol: %
+      visible: false
+      @onValueChange: GameMinimap.getMinimapWidget():setOpacity(self:getValue() / 100)
+
+      $!first:
+        anchors.top: none
+
     UIWidget
       id: minimapBar
       // See ballButton for width
-      // This width includes border-width of minimapBarBackground
-      width: 71
+      width: 70
       anchors.top: parent.top
       anchors.bottom: parent.bottom
       anchors.right: parent.right
       focusable: false
 
+      // Widget instead border because it keeps above minimap icons
+      VerticalSeparatorLeft
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        background-color: #98885e
+
       UIWidget
         id: minimapBarBackground
-        anchors.fill: parent
-        margin-left: 2
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.left: prev.outsideRight
+        anchors.right: parent.right
         image-source: /images/ui/_background/default_stone_grey
         image-repeated: true
-        // Set also the margin-left with same value
-        border-width-left: 2
-        border-color: #98885e
 
       UIWidget
         id: compass
         image-source: /images/ui/minimap/compass
         anchors.top: parent.top
         anchors.right: parent.right
+
+        UIButton
+          id: extraIconsButton
+          size: 15 15
+          !tooltip: tr('Show minimap extra icons\n(e.g., party player icon)')
+          anchors.top: parent.top
+          anchors.left: parent.left
+          margin-left: 4
+          image-source: /images/ui/minimap/controllers_extra
+          image-clip: 30 0 15 15
+          @onClick: ClientOptions.toggleOption('showMinimapExtraIcons')
+
+          $hover:
+            image-clip: 30 15 15 15
+
+          $pressed:
+            image-clip: 30 30 15 15
+
+          $on:
+            !tooltip: tr('Hide minimap extra icons\n(e.g., party player icon)')
+            image-clip: 45 0 15 15
+
+          $on hover:
+            image-clip: 45 15 15 15
+
+          $on pressed:
+            image-clip: 45 30 15 15
 
         UIButton
           id: buttonMoveNorth
@@ -80,6 +147,33 @@ MiniWindow
             image-clip: 21 24 21 12
 
           @onClick: GameMinimap.getMinimapWidget():move(0,1)
+
+        UIButton
+          id: fullMapButton
+          size: 15 15
+          !tooltip: tr('Show entire game map (%s)', 'Ctrl+Shift+M')
+          anchors.top: parent.top
+          anchors.right: parent.right
+          margin-right: 4
+          image-source: /images/ui/minimap/controllers_extra
+          image-clip: 0 0 15 15
+          @onClick: GameMinimap.toggleFullMap()
+
+          $hover:
+            image-clip: 0 15 15 15
+
+          $pressed:
+            image-clip: 0 30 15 15
+
+          $on:
+            !tooltip: tr('Hide entire game map (%s)', 'Ctrl+Shift+M')
+            image-clip: 15 0 15 15
+
+          $on hover:
+            image-clip: 15 15 15 15
+
+          $on pressed:
+            image-clip: 15 30 15 15
 
         UIButton
           id: buttonMoveWest
@@ -233,39 +327,3 @@ MiniWindow
             image-clip: 0 48 24 24
 
           @onClick: GameMinimap.getMinimapWidget():floorUp(1)
-
-    Minimap
-      id: minimap
-      anchors.top: parent.top
-      anchors.bottom: parent.bottom
-      anchors.left: parent.left
-      anchors.right: minimapBar.left
-
-    Label
-      id: positionLabel
-      anchors.bottom: parent.bottom
-      anchors.left: parent.left
-      anchors.right: minimapBar.left
-      background-color: #000000bb
-      color: #ffffff
-      text-align: center
-      text-auto-resize: true
-      font: verdana-8px-antialised
-      text-wrap: true
-      phantom: false
-
-    OptionScrollbar
-      id: minimapOpacity
-      width: 100
-      anchors.bottom: positionLabel.outsideTop
-      anchors.left: parent.left
-      anchors.right: minimapBar.outsideLeft
-      margin-bottom: 1
-      minimum: 10
-      maximum: 100
-      symbol: %
-      visible: false
-      @onValueChange: GameMinimap.getMinimapWidget():setOpacity(self:getValue() / 100)
-
-      $!first:
-        anchors.top: none

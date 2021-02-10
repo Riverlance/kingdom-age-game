@@ -227,8 +227,6 @@ function GameBattleList.add(creature)
     button.onHoverChange  = GameBattleList.onBattleButtonHoverChange
     button.onMouseRelease = GameBattleList.onBattleButtonMouseRelease
 
-    button.lastAppear = os.time()
-
     battleList[cid] = button
     table.insert(battleListByIndex, battleList[cid])
 

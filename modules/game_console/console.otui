@@ -221,22 +221,43 @@ Panel
       focusable: false
 
       $on:
-        anchors.right: parent.horizontalCenter
-        margin-right: 8
+        anchors.right: clonedSplitter.left
 
     Panel
       id: cloneContentPanel
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      anchors.left: prev.right
+      anchors.left: next.right
       anchors.right: parent.right
       margin-top: 1
       margin-bottom: 1
-      margin-left: 8
       border-width: 1
       border-color: #98885e
       padding: 1
       focusable: false
+
+    Splitter
+      id: clonedSplitter
+      width: 4
+      visible: false
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      // Save value as margin-right
+      &defaultMargin: 250
+
+      @canUpdateMargin: |
+        function(self, newMargin)
+          return math.max(math.min(newMargin, self:getParent():getWidth() - self.defaultMargin), self.defaultMargin)
+        end
+
+      @onGeometryChange: |
+        function(self)
+          self:setMarginRight(math.min(math.max(self:getParent():getWidth() - self.defaultMargin, self.defaultMargin), self:getMarginRight()))
+        end
+
+      $hidden:
+        width: 0
 
   Panel
     id: footerPanel

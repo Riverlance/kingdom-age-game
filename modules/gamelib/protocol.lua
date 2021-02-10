@@ -1,258 +1,307 @@
--- Opcodes - Server to Client Source
-GameServerOpcodes =
+-- Server to Client - Opcodes
+ServerOpcodes =
 {
-    GameServerLoginOrPendingState     = 10,
-    GameServerGMActions               = 11,
-    GameServerEnterGame               = 15,
-    GameServerUpdateNeeded            = 17,
-    GameServerLoginError              = 20,
-    GameServerLoginAdvice             = 21,
-    GameServerLoginWait               = 22,
-    GameServerLoginSuccess            = 23,
-    GameServerLoginToken              = 24,
-    GameServerStoreButtonIndicators   = 25, -- 1097
-    GameServerPingBack                = 29,
-    GameServerPing                    = 30,
-    GameServerChallenge               = 31,
-    GameServerDeath                   = 40,
+  -- At login only (this is why it may have same value of other opcodes)
+  ServerOpcodeLoginOrPendingState        = 10,
+  ServerOpcodeLoginErrorNew              = 11, -- 10.76+
+  ServerOpcodeLoginTokenSuccess          = 12,
+  ServerOpcodeLoginTokenError            = 13,
+  ServerOpcodeLoginUpdate                = 17, -- Not in use yet
+  ServerOpcodeLoginMotd                  = 20,
+  ServerOpcodeLoginUpdateNeeded          = 30, -- Not in use yet
+  ServerOpcodeLoginSessionKey            = 40,
+  ServerOpcodeLoginCharacterList         = 100,
+  ServerOpcodeLoginExtendedCharacterList = 101, -- Not in use yet
+  -- -- --
 
-    -- otclient ONLY
-    GameServerExtendedOpcode          = 50,
-    GameServerChangeMapAwareRange     = 51,
-    GameServerCreatureColor           = 52,
-    GameServerCreatureNickname        = 53,
-    GameServerPlayerLoginname         = 54,
-    GameServerCreatureSpecialIcon     = 55,
-    GameServerAttributesList          = 56,
-    GameServerPowersList              = 57,
-    GameServerConditionsList          = 58,
-    GameServerCreatureJump            = 59,
-    GameServerEmote                   = 60,
-    GameServerPartyList               = 61,
-    GameServerPlayerLevel             = 62,
-
-    -- original tibia ONLY
-    GameServerFullMap                 = 100,
-    GameServerMapTopRow               = 101,
-    GameServerMapRightRow             = 102,
-    GameServerMapBottomRow            = 103,
-    GameServerMapLeftRow              = 104,
-    GameServerUpdateTile              = 105,
-    GameServerCreateOnMap             = 106,
-    GameServerChangeOnMap             = 107,
-    GameServerDeleteOnMap             = 108,
-    GameServerMoveCreature            = 109,
-    GameServerOpenContainer           = 110,
-    GameServerCloseContainer          = 111,
-    GameServerCreateContainer         = 112,
-    GameServerChangeInContainer       = 113,
-    GameServerDeleteInContainer       = 114,
-    GameServerSetInventory            = 120,
-    GameServerDeleteInventory         = 121,
-    GameServerOpenNpcTrade            = 122,
-    GameServerPlayerGoods             = 123,
-    GameServerCloseNpcTrade           = 124,
-    GameServerOwnTrade                = 125,
-    GameServerCounterTrade            = 126,
-    GameServerCloseTrade              = 127,
-    GameServerAmbient                 = 130,
-    GameServerGraphicalEffect         = 131,
-    GameServerTextEffect              = 132,
-    GameServerMissileEffect           = 133,
-    GameServerMarkCreature            = 134,
-    GameServerTrappers                = 135,
-    GameServerCreatureHealth          = 139,
-    GameServerCreatureMana            = 140,
-    GameServerCreatureLight           = 141,
-    GameServerCreatureOutfit          = 142,
-    GameServerCreatureSpeed           = 143,
-    GameServerCreatureSkull           = 144,
-    GameServerCreatureParty           = 145,
-    GameServerCreatureUnpass          = 146,
-    GameServerCreatureMarks           = 147,
-    GameServerCreatureType            = 149,
-    GameServerEditText                = 150,
-    GameServerEditList                = 151,
-    GameServerBlessings               = 156,
-    GameServerPreset                  = 157,
-    GameServerPremiumTrigger          = 158, -- 1038
-    GameServerPlayerDataBasic         = 159, -- 950
-    GameServerPlayerData              = 160,
-    GameServerPlayerSkills            = 161,
-    GameServerPlayerState             = 162,
-    GameServerClearTarget             = 163,
-    GameServerSpellDelay              = 164, -- 870
-    GameServerSpellGroupDelay         = 165, -- 870
-    GameServerMultiUseDelay           = 166, -- 870
-    GameServerPlayerModes             = 167,
-    GameServerSetStoreDeepLink        = 168, -- 1097
-    GameServerTalk                    = 170,
-    GameServerChannels                = 171,
-    GameServerOpenChannel             = 172,
-    GameServerOpenPrivateChannel      = 173,
-    GameServerOpenOwnChannel          = 178,
-    GameServerCloseChannel            = 179,
-    GameServerTextMessage             = 180,
-    GameServerCancelWalk              = 181,
-    GameServerWalkWait                = 182,
-    GameServerUnjustifiedStats        = 183,
-    GameServerPvpSituations           = 184,
-    GameServerFloorChangeUp           = 190,
-    GameServerFloorChangeDown         = 191,
-    GameServerChooseOutfit            = 200,
-    GameServerVipAdd                  = 210,
-    GameServerVipState                = 211,
-    GameServerVipLogout               = 212,
-    GameServerTutorialHint            = 220,
-    GameServerAutomapFlag             = 221,
-    GameServerCoinBalance             = 223, -- 1080
-    GameServerStoreError              = 224, -- 1080
-    GameServerRequestPurchaseData     = 225, -- 1080
-    GameServerCoinBalanceUpdating     = 242, -- 1080
-    GameServerChannelEvent            = 243, -- 910
-    GameServerItemInfo                = 244, -- 910
-    GameServerPlayerInventory         = 245, -- 910
-    GameServerMarketEnter             = 246, -- 944
-    GameServerMarketLeave             = 247, -- 944
-    GameServerMarketDetail            = 248, -- 944
-    GameServerMarketBrowse            = 249, -- 944
-    GameServerModalDialog             = 250, -- 960
-    GameServerStore                   = 251, -- 1080
-    GameServerStoreOffers             = 252, -- 1080
-    GameServerStoreTransactionHistory = 253, -- 1080
-    GameServerStoreCompletePurchase   = 254, -- 1080
+  -- Free                               0 to 10
+  ServerOpcodeGMActions               = 11,
+  -- Free                               12 to 14
+  ServerOpcodeEnterGame               = 15,
+  -- Free                               16
+  ServerOpcodeUpdateNeeded            = 17,
+  -- Free                               18 to 19
+  ServerOpcodeLoginError              = 20,
+  ServerOpcodeLoginAdvice             = 21,
+  ServerOpcodeLoginWait               = 22,
+  ServerOpcodeLoginSuccess            = 23,
+  ServerOpcodeLoginToken              = 24,
+  ServerOpcodeStoreButtonIndicators   = 25, -- 1097
+  -- Free                               26 to 28
+  ServerOpcodePingBack                = 29,
+  ServerOpcodePing                    = 30,
+  ServerOpcodeChallenge               = 31,
+  -- Free                               32 to 39
+  ServerOpcodeDeath                   = 40,
+  -- Free                               41 to 49
+  ServerOpcodeExtendedOpcode          = 50,
+  ServerOpcodeChangeMapAwareRange     = 51,
+  ServerOpcodeCreatureColor           = 52,
+  ServerOpcodeCreatureNickname        = 53,
+  ServerOpcodePlayerLoginname         = 54,
+  ServerOpcodeCreatureSpecialIcon     = 55,
+  ServerOpcodeAttributesList          = 56,
+  ServerOpcodePowersList              = 57,
+  ServerOpcodeConditionsList          = 58,
+  ServerOpcodeCreatureJump            = 59,
+  ServerOpcodeEmote                   = 60,
+  ServerOpcodePartyList               = 61,
+  ServerOpcodePlayerLevel             = 62,
+  -- Free                               63 to 95
+  ServerOpcodeStaticText              = 96,
+  ServerOpcodeUnknownCreature         = 97,
+  ServerOpcodeOutdatedCreature        = 98,
+  ServerOpcodeCreature                = 99,
+  ServerOpcodeFullMap                 = 100,
+  ServerOpcodeMapTopRow               = 101,
+  ServerOpcodeMapRightRow             = 102,
+  ServerOpcodeMapBottomRow            = 103,
+  ServerOpcodeMapLeftRow              = 104,
+  ServerOpcodeUpdateTile              = 105,
+  ServerOpcodeCreateOnMap             = 106,
+  ServerOpcodeChangeOnMap             = 107,
+  ServerOpcodeDeleteOnMap             = 108,
+  ServerOpcodeMoveCreature            = 109,
+  ServerOpcodeOpenContainer           = 110,
+  ServerOpcodeCloseContainer          = 111,
+  ServerOpcodeCreateContainer         = 112,
+  ServerOpcodeChangeInContainer       = 113,
+  ServerOpcodeDeleteInContainer       = 114,
+  -- Free                               115 to 119
+  ServerOpcodeSetInventory            = 120,
+  ServerOpcodeDeleteInventory         = 121,
+  ServerOpcodeOpenNpcTrade            = 122,
+  ServerOpcodePlayerGoods             = 123,
+  ServerOpcodeCloseNpcTrade           = 124,
+  ServerOpcodeOwnTrade                = 125,
+  ServerOpcodeCounterTrade            = 126,
+  ServerOpcodeCloseTrade              = 127,
+  -- Free                               128 to 129
+  ServerOpcodeAmbient                 = 130,
+  ServerOpcodeGraphicalEffect         = 131,
+  ServerOpcodeTextEffect              = 132,
+  ServerOpcodeMissileEffect           = 133,
+  ServerOpcodeMarkCreature            = 134,
+  ServerOpcodeTrappers                = 135,
+  -- Free                               136 to 138
+  ServerOpcodeCreatureHealth          = 139,
+  ServerOpcodeCreatureMana            = 140,
+  ServerOpcodeCreatureLight           = 141,
+  ServerOpcodeCreatureOutfit          = 142,
+  ServerOpcodeCreatureSpeed           = 143,
+  ServerOpcodeCreatureSkull           = 144,
+  ServerOpcodeCreatureParty           = 145,
+  ServerOpcodeCreatureUnpass          = 146,
+  ServerOpcodeCreatureMarks           = 147,
+  -- Free                               148
+  ServerOpcodeCreatureType            = 149,
+  ServerOpcodeEditText                = 150,
+  ServerOpcodeEditList                = 151,
+  -- Free                               152 to 155
+  ServerOpcodeBlessings               = 156,
+  ServerOpcodePreset                  = 157,
+  ServerOpcodePremiumTrigger          = 158, -- 1038
+  ServerOpcodePlayerDataBasic         = 159, -- 950
+  ServerOpcodePlayerData              = 160,
+  ServerOpcodePlayerSkills            = 161,
+  ServerOpcodePlayerState             = 162,
+  ServerOpcodeClearTarget             = 163,
+  ServerOpcodeSpellDelay              = 164, -- 870
+  ServerOpcodeSpellGroupDelay         = 165, -- 870
+  ServerOpcodeMultiUseDelay           = 166, -- 870
+  ServerOpcodePlayerModes             = 167,
+  ServerOpcodeSetStoreDeepLink        = 168, -- 1097
+  -- Free                               169
+  ServerOpcodeTalk                    = 170,
+  ServerOpcodeChannels                = 171,
+  ServerOpcodeOpenChannel             = 172,
+  ServerOpcodeOpenPrivateChannel      = 173,
+  -- Free                               174 to 177
+  ServerOpcodeOpenOwnChannel          = 178,
+  ServerOpcodeCloseChannel            = 179,
+  ServerOpcodeTextMessage             = 180,
+  ServerOpcodeCancelWalk              = 181,
+  ServerOpcodeWalkWait                = 182,
+  ServerOpcodeUnjustifiedStats        = 183,
+  ServerOpcodePvpSituations           = 184,
+  -- Free                               185 to 189
+  ServerOpcodeFloorChangeUp           = 190,
+  ServerOpcodeFloorChangeDown         = 191,
+  -- Free                               192 to 199
+  ServerOpcodeChooseOutfit            = 200,
+  -- Free                               201 to 209
+  ServerOpcodeVipAdd                  = 210,
+  ServerOpcodeVipState                = 211,
+  ServerOpcodeVipLogout               = 212,
+  -- Free                               213 to 219
+  ServerOpcodeTutorialHint            = 220,
+  ServerOpcodeAutomapFlag             = 221,
+  -- Free                               222
+  ServerOpcodeCoinBalance             = 223, -- 1080
+  ServerOpcodeStoreError              = 224, -- 1080
+  ServerOpcodeRequestPurchaseData     = 225, -- 1080
+  -- Free                               226 to 241
+  ServerOpcodeCoinBalanceUpdating     = 242, -- 1080
+  ServerOpcodeChannelEvent            = 243, -- 910
+  ServerOpcodeItemInfo                = 244, -- 910
+  ServerOpcodePlayerInventory         = 245, -- 910
+  -- Free                               246 to 249
+  ServerOpcodeModalDialog             = 250, -- 960
+  ServerOpcodeStore                   = 251, -- 1080
+  ServerOpcodeStoreOffers             = 252, -- 1080
+  ServerOpcodeStoreTransactionHistory = 253, -- 1080
+  ServerOpcodeStoreCompletePurchase   = 254, -- 1080
+  -- Free                               255
 }
 
--- Extended Opcodes - Server to Client Lua Modules
-GameServerExtOpcodes =
+-- Server to Client - Extended Opcodes
+ServerExtOpcodes =
 {
-    GameServerOtclientSignal    = 0, -- From Server ProtocolGame::onRecvFirstMessage
-    GameServerLocale            = 1,
-    GameServerInstanceInfo      = 2,
-    GameServerBlinkHit          = 3,
-    GameServerLootWindow        = 4,
-    GameServerScreenImage       = 5,
-    GameServerAudio             = 6,
-    GameServerUnjustifiedPoints = 7,
-    GameServerQuestLog          = 8,
-    GameServerBugReport         = 9,
-    GameServerRuleViolation     = 10,
+  ServerExtOpcodeOtclientSignal    = 0, -- From Server ProtocolGame::onRecvFirstMessage
+  ServerExtOpcodeLocale            = 1,
+  ServerExtOpcodeInstanceInfo      = 2,
+  ServerExtOpcodeBlinkHit          = 3,
+  ServerExtOpcodeLootWindow        = 4,
+  ServerExtOpcodeScreenImage       = 5,
+  ServerExtOpcodeAudio             = 6,
+  ServerExtOpcodeUnjustifiedPoints = 7,
+  ServerExtOpcodeQuestLog          = 8,
+  ServerExtOpcodeBugReport         = 9,
+  ServerExtOpcodeRuleViolation     = 10,
+  -- Free                            11 to 65535
 }
 
--- Opcodes - Client to Server Source
+-- Client to Server - Opcodes
 ClientOpcodes =
 {
-    ClientEnterAccount              = 1,
-    ClientPendingGame               = 10,
-    ClientEnterGame                 = 15,
-    ClientLeaveGame                 = 20,
-    ClientPing                      = 29,
-    ClientPingBack                  = 30,
-
-    -- otclient ONLY
-    ClientExtendedOpcode            = 50,
-    ClientChangeMapAwareRange       = 51,
-    ClientNpcDialogWindows          = 52,
-    --
-    ClientPartyList                 = 61,
-
-    -- original tibia ONLY
-    ClientAutoWalk                  = 100,
-    ClientWalkNorth                 = 101,
-    ClientWalkEast                  = 102,
-    ClientWalkSouth                 = 103,
-    ClientWalkWest                  = 104,
-    ClientStop                      = 105,
-    ClientWalkNorthEast             = 106,
-    ClientWalkSouthEast             = 107,
-    ClientWalkSouthWest             = 108,
-    ClientWalkNorthWest             = 109,
-    ClientTurnNorth                 = 111,
-    ClientTurnEast                  = 112,
-    ClientTurnSouth                 = 113,
-    ClientTurnWest                  = 114,
-    ClientEquipItem                 = 119, -- 910
-    ClientMove                      = 120,
-    ClientInspectNpcTrade           = 121,
-    ClientBuyItem                   = 122,
-    ClientSellItem                  = 123,
-    ClientCloseNpcTrade             = 124,
-    ClientRequestTrade              = 125,
-    ClientInspectTrade              = 126,
-    ClientAcceptTrade               = 127,
-    ClientRejectTrade               = 128,
-    ClientUseItem                   = 130,
-    ClientUseItemWith               = 131,
-    ClientUseOnCreature             = 132,
-    ClientRotateItem                = 133,
-    ClientCloseContainer            = 135,
-    ClientUpContainer               = 136,
-    ClientEditText                  = 137,
-    ClientEditList                  = 138,
-    ClientLook                      = 140,
-    ClientLookCreature              = 141,
-    ClientTalk                      = 150,
-    ClientRequestChannels           = 151,
-    ClientJoinChannel               = 152,
-    ClientLeaveChannel              = 153,
-    ClientOpenPrivateChannel        = 154,
-    ClientCloseNpcChannel           = 158,
-    ClientChangeFightModes          = 160,
-    ClientAttack                    = 161,
-    ClientFollow                    = 162,
-    ClientInviteToParty             = 163,
-    ClientJoinParty                 = 164,
-    ClientRevokeInvitation          = 165,
-    ClientPassLeadership            = 166,
-    ClientLeaveParty                = 167,
-    ClientShareExperience           = 168,
-    ClientOpenOwnChannel            = 170,
-    ClientInviteToOwnChannel        = 171,
-    ClientExcludeFromOwnChannel     = 172,
-    ClientCancelAttackAndFollow     = 190,
-    ClientRefreshContainer          = 202,
-    ClientBrowseField               = 203,
-    ClientSeekInContainer           = 204,
-    ClientRequestOutfit             = 210,
-    ClientChangeOutfit              = 211,
-    ClientMount                     = 212, -- 870
-    ClientAddVip                    = 220,
-    ClientRemoveVip                 = 221,
-    ClientEditVip                   = 222,
-    ClientDebugReport               = 232,
-    ClientTransferCoins             = 239, -- 1080
-    ClientRequestItemInfo           = 243, -- 910
-    ClientMarketLeave               = 244, -- 944
-    ClientMarketBrowse              = 245, -- 944
-    ClientMarketCreate              = 246, -- 944
-    ClientMarketCancel              = 247, -- 944
-    ClientMarketAccept              = 248, -- 944
-    ClientAnswerModalDialog         = 249, -- 960
-    ClientOpenStore                 = 250, -- 1080
-    ClientRequestStoreOffers        = 251, -- 1080
-    ClientBuyStoreOffer             = 252, -- 1080
-    ClientOpenTransactionHistory    = 253, -- 1080
-    ClientRequestTransactionHistory = 254, -- 1080
+  -- Free                                 0
+  ClientOpcodeEnterAccount              = 1,
+  -- Free                                 2 to 9
+  ClientOpcodePendingGame               = 10,
+  -- Free                                 11 to 14
+  ClientOpcodeEnterGame                 = 15,
+  -- Free                                 16 to 19
+  ClientOpcodeLeaveGame                 = 20,
+  -- Free                                 21 to 28
+  ClientOpcodePing                      = 29,
+  ClientOpcodePingBack                  = 30,
+  -- Free                                 31 to 49
+  ClientOpcodeExtendedOpcode            = 50,
+  ClientOpcodeChangeMapAwareRange       = 51,
+  ClientOpcodeNpcDialogWindows          = 52,
+  -- Free                                 53 to 60
+  ClientOpcodePartyList                 = 61, -- Needed?
+  -- Free                                 62 to 99
+  ClientOpcodeAutoWalk                  = 100,
+  ClientOpcodeWalkNorth                 = 101,
+  ClientOpcodeWalkEast                  = 102,
+  ClientOpcodeWalkSouth                 = 103,
+  ClientOpcodeWalkWest                  = 104,
+  ClientOpcodeStop                      = 105,
+  ClientOpcodeWalkNorthEast             = 106,
+  ClientOpcodeWalkSouthEast             = 107,
+  ClientOpcodeWalkSouthWest             = 108,
+  ClientOpcodeWalkNorthWest             = 109,
+  -- Free                                 110
+  ClientOpcodeTurnNorth                 = 111,
+  ClientOpcodeTurnEast                  = 112,
+  ClientOpcodeTurnSouth                 = 113,
+  ClientOpcodeTurnWest                  = 114,
+  -- Free                                 115 to 118
+  ClientOpcodeEquipItem                 = 119, -- 910
+  ClientOpcodeMove                      = 120,
+  ClientOpcodeInspectNpcTrade           = 121,
+  ClientOpcodeBuyItem                   = 122,
+  ClientOpcodeSellItem                  = 123,
+  ClientOpcodeCloseNpcTrade             = 124,
+  ClientOpcodeRequestTrade              = 125,
+  ClientOpcodeInspectTrade              = 126,
+  ClientOpcodeAcceptTrade               = 127,
+  ClientOpcodeRejectTrade               = 128,
+  -- Free                                 129
+  ClientOpcodeUseItem                   = 130,
+  ClientOpcodeUseItemWith               = 131,
+  ClientOpcodeUseOnCreature             = 132,
+  ClientOpcodeRotateItem                = 133,
+  -- Free                                 134
+  ClientOpcodeCloseContainer            = 135,
+  ClientOpcodeUpContainer               = 136,
+  ClientOpcodeEditText                  = 137,
+  ClientOpcodeEditList                  = 138,
+  ClientOpcodeWrapItem                  = 139, -- To do
+  ClientOpcodeLook                      = 140,
+  ClientOpcodeLookCreature              = 141,
+  -- Free                                 142 to 149
+  ClientOpcodeTalk                      = 150,
+  ClientOpcodeRequestChannels           = 151,
+  ClientOpcodeJoinChannel               = 152,
+  ClientOpcodeLeaveChannel              = 153,
+  ClientOpcodeOpenPrivateChannel        = 154,
+  -- Free                                 155 to 157
+  ClientOpcodeCloseNpcChannel           = 158,
+  -- Free                                 159
+  ClientOpcodeChangeFightModes          = 160,
+  ClientOpcodeAttack                    = 161,
+  ClientOpcodeFollow                    = 162,
+  ClientOpcodeInviteToParty             = 163,
+  ClientOpcodeJoinParty                 = 164,
+  ClientOpcodeRevokeInvitation          = 165,
+  ClientOpcodePassLeadership            = 166,
+  ClientOpcodeLeaveParty                = 167,
+  ClientOpcodeShareExperience           = 168,
+  -- Free                                 169
+  ClientOpcodeOpenOwnChannel            = 170,
+  ClientOpcodeInviteToOwnChannel        = 171,
+  ClientOpcodeExcludeFromOwnChannel     = 172,
+  -- Free                                 173 to 189
+  ClientOpcodeCancelAttackAndFollow     = 190,
+  -- Free                                 191 to 201
+  ClientOpcodeRefreshContainer          = 202,
+  ClientOpcodeBrowseField               = 203,
+  ClientOpcodeSeekInContainer           = 204,
+  -- Free                                 205 to 209
+  ClientOpcodeRequestOutfit             = 210,
+  ClientOpcodeChangeOutfit              = 211,
+  ClientOpcodeMount                     = 212, -- 870
+  -- Free                                 213 to 219
+  ClientOpcodeAddVip                    = 220,
+  ClientOpcodeRemoveVip                 = 221,
+  ClientOpcodeEditVip                   = 222,
+  -- Free                                 223 to 231
+  ClientOpcodeDebugReport               = 232,
+  -- Free                                 233 to 238
+  ClientOpcodeTransferCoins             = 239, -- 1080
+  -- Free                                 240 to 242
+  ClientOpcodeRequestItemInfo           = 243, -- 910
+  -- Free                                 244 to 248
+  ClientOpcodeAnswerModalDialog         = 249, -- 960
+  ClientOpcodeOpenStore                 = 250, -- 1080
+  ClientOpcodeRequestStoreOffers        = 251, -- 1080
+  ClientOpcodeBuyStoreOffer             = 252, -- 1080
+  ClientOpcodeOpenTransactionHistory    = 253, -- 1080
+  ClientOpcodeRequestTransactionHistory = 254, -- 1080
+  -- Free                                 255
 }
 
--- Extended Opcodes - Client to Server onExtendedOpcode Player Event
+-- Client to Server - Extended Opcodes (onExtendedOpcode Player Event)
 ClientExtOpcodes =
 {
-    ClientLocale            = 0,
-    ClientGameLanguage      = 1,
-    ClientAction            = 2,
-    ClientAttribute         = 3,
-    ClientPower             = 4,
-    ClientUnjustifiedPoints = 5,
-    ClientQuestLog          = 6,
-    ClientBugReport         = 7,
-    ClientRuleViolation     = 8,
-    ClientConditionsList    = 9,
-    ClientEmote             = 10,
+  ClientExtOpcodeLocale            = 0,
+  ClientExtOpcodeGameLanguage      = 1,
+  ClientExtOpcodeAction            = 2,
+  ClientExtOpcodeAttribute         = 3,
+  ClientExtOpcodePower             = 4,
+  ClientExtOpcodeUnjustifiedPoints = 5,
+  ClientExtOpcodeQuestLog          = 6,
+  ClientExtOpcodeBugReport         = 7,
+  ClientExtOpcodeRuleViolation     = 8,
+  ClientExtOpcodeConditionsList    = 9,
+  ClientExtOpcodeEmote             = 10,
+  -- Free                            11 to 65535
 }
 
 ClientActions =
 {
-    QuestItems     = 1,
-    QuestTeleports = 2
+  QuestItems     = 1,
+  QuestTeleports = 2
 }

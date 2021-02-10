@@ -1,20 +1,6 @@
 -- @docclass
 ProtocolLogin = extends(Protocol, "ProtocolLogin")
 
-LoginServerError = 10
-LoginServerTokenSuccess = 12
-LoginServerTokenError = 13
-LoginServerUpdate = 17
-LoginServerMotd = 20
-LoginServerUpdateNeeded = 30
-LoginServerSessionKey = 40
-LoginServerCharacterList = 100
-LoginServerExtendedCharacterList = 101
-
--- Since 10.76
-LoginServerRetry = 10
-LoginServerErrorNew = 11
-
 function ProtocolLogin:login(host, port, accountName, accountPassword, authenticatorToken, stayLogged)
   if string.len(host) == 0 or port == nil or port == 0 then
     signalcall(self.onLoginError, self, tr("You must enter a valid server address and port."))
@@ -36,7 +22,7 @@ end
 
 function ProtocolLogin:sendLoginPacket()
   local msg = OutputMessage.create()
-  msg:addU8(ClientOpcodes.ClientEnterAccount)
+  msg:addU8(ClientOpcodes.ClientOpcodeEnterAccount)
   msg:addU16(g_game.getOs())
 
   msg:addU16(g_game.getProtocolVersion())
@@ -151,28 +137,28 @@ end
 function ProtocolLogin:onRecv(msg)
   while not msg:eof() do
     local opcode = msg:getU8()
-    if opcode == LoginServerErrorNew then
+    if opcode == ServerOpcodes.ServerOpcodeLoginErrorNew then -- Error for new protocol (10.76+)
       self:parseError(msg)
-    elseif opcode == LoginServerError then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginOrPendingState then -- Error for old protocol (< 10.76)
       self:parseError(msg)
-    elseif opcode == LoginServerMotd then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginMotd then
       self:parseMotd(msg)
-    elseif opcode == LoginServerUpdateNeeded then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginUpdateNeeded then
       signalcall(self.onLoginError, self, tr("Client needs update."))
-    elseif opcode == LoginServerTokenSuccess then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginTokenSuccess then
       local unknown = msg:getU8()
-    elseif opcode == LoginServerTokenError then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginTokenError then
       -- TODO: prompt for token here
       local unknown = msg:getU8()
       signalcall(self.onLoginError, self, tr("Invalid authentication token."))
-    elseif opcode == LoginServerCharacterList then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginCharacterList then
       self:parseCharacterList(msg)
-    elseif opcode == LoginServerExtendedCharacterList then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginExtendedCharacterList then
       self:parseExtendedCharacterList(msg)
-    elseif opcode == LoginServerUpdate then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginUpdate then
       local signature = msg:getString()
       signalcall(self.onUpdateNeeded, self, signature)
-    elseif opcode == LoginServerSessionKey then
+    elseif opcode == ServerOpcodes.ServerOpcodeLoginSessionKey then
       self:parseSessionKey(msg)
     else
       self:parseOpcode(opcode, msg)

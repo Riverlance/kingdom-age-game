@@ -19,13 +19,13 @@ function GameQuestLog.init()
   connect(g_game, {
     onGameEnd = GameQuestLog.destroyWindows
   })
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerQuestLog, GameQuestLog.parseQuestLog)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeQuestLog, GameQuestLog.parseQuestLog)
   g_keyboard.bindKeyDown('Ctrl+Q', GameQuestLog.toggle)
 end
 
 function GameQuestLog.terminate()
   g_keyboard.unbindKeyDown('Ctrl+Q')
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerQuestLog)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeQuestLog)
   disconnect(g_game, {
     onGameEnd = GameQuestLog.destroyWindows
   })
@@ -60,10 +60,17 @@ function GameQuestLog.show()
   end
 
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientQuestLog, '')
-    questLogButton:setOn(true)
+  if not protocolGame then
+    return
   end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeQuestLog)
+  msg:addString('')
+  protocolGame:send(msg)
+
+  questLogButton:setOn(true)
 end
 
 function GameQuestLog.hide()
@@ -82,19 +89,31 @@ end
 function GameQuestLog.sendTeleportRequest(questId, missionId)
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientAction, string.format('%i:%i:%i', ClientActions.QuestTeleports, questId, missionId))
-    return true
+    return false
   end
-  return false
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeAction)
+  msg:addString(string.format('%i:%i:%i', ClientActions.QuestTeleports, questId, missionId))
+  protocolGame:send(msg)
+
+  return true
 end
 
 function GameQuestLog.sendShowItemsRequest(questId, missionId)
   local protocolGame = g_game.getProtocolGame()
   if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientAction, string.format('%i:%i:%i', ClientActions.QuestItems, questId, missionId))
-    return true
+    return false
   end
-  return false
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeAction)
+  msg:addString(string.format('%i:%i:%i', ClientActions.QuestItems, questId, missionId))
+  protocolGame:send(msg)
+
+  return true
 end
 
 function GameQuestLog.onRowUpdate(child)
@@ -195,8 +214,10 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
   end
 end
 
-function GameQuestLog.parseQuestLog(protocol, opcode, buffer)
+function GameQuestLog.parseQuestLog(protocolGame, opcode, msg)
+  local buffer = msg:getString()
   local params = buffer:split(':::')
+
   local mode = tonumber(params[1])
   if not mode then
     return
@@ -304,10 +325,17 @@ function GameQuestLog.onGameQuestLog(quests)
       end
 
       local protocolGame = g_game.getProtocolGame()
-      if protocolGame then
-        questLogWindow:hide()
-        protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientQuestLog, string.format('%d', quest.id))
+      if not protocolGame then
+        return
       end
+
+      questLogWindow:hide()
+
+      local msg = OutputMessage.create()
+      msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+      msg:addU16(ClientExtOpcodes.ClientExtOpcodeQuestLog)
+      msg:addString(tostring(quest.id))
+      protocolGame:send(msg)
     end
 
   end

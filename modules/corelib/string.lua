@@ -162,3 +162,8 @@ end
 function string.exists(value)
   return value and value ~= ''
 end
+
+function string:comma()
+  local left, num, right = string.match(self, '^([^%d]*%d)(%d*)(.-)$')
+  return left .. num:reverse():gsub('(%d%d%d)', '%1,'):reverse() .. right
+end

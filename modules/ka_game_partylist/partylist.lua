@@ -87,7 +87,7 @@ local defaultValues =
   filterWizardPlayers   = true,
   filterBardPlayers     = true,
 
-  sortType  = SortTypeDistance,
+  sortType  = SortTypeHierarchy,
   sortOrder = SortOrderAscending,
 }
 
@@ -209,7 +209,7 @@ function GamePartyList.init()
   GamePartyList.onClickFilterWizardPlayers(filterWizardPlayersButton)
   GamePartyList.onClickFilterBardPlayers(filterBardPlayersButton)
 
-  ProtocolGame.registerOpcode(GameServerOpcodes.GameServerPartyList, GamePartyList.parsePartyList)
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePartyList, GamePartyList.parsePartyList)
 
   connect(Creature, {
     -- onShieldChange = GamePartyList.onShieldChange,
@@ -245,7 +245,7 @@ function GamePartyList.terminate()
     onWalk         = GamePartyList.onWalk,
   })
 
-  ProtocolGame.unregisterOpcode(GameServerOpcodes.GameServerPartyList)
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePartyList)
 
   -- Window
 
@@ -363,25 +363,34 @@ function GamePartyList.add(data, isInvitee)
     end
   end
 
+  local localPlayer = g_game.getLocalPlayer()
+
   local button = g_ui.createWidget('PartyButton')
   button:setup(data)
+
+  if cid ~= localPlayer:getId() and not isInvitee and button.creatureTypeId == CreatureTypePlayer then
+    button:enableCreatureMinimapWidget()
+  end
 
   -- -- Callback
   -- button.onMouseRelease                               = GamePartyList.onButtonMouseRelease
   -- button:getChildById('positionLabel').onMouseRelease = GamePartyList.onButtonMouseRelease -- Because it has tooltip (phantom false)
 
-  -- Register first time creature adding
-  button.lastAppear = os.time()
-
   -- Hide widgets that is not updated as being invitee button
+  local hiddenWidgetIds = { }
+  -- Invitee widgets to hide
   if isInvitee then
-    local hiddenWidgetIds = { 'healthBar', 'manaBar', 'positionLabel', 'pingLabel', 'creatureType', 'skull', 'emblem', 'specialIcon' }
-
-    for _, hiddenWidgetId in ipairs(hiddenWidgetIds) do
-      local widget = button:getChildById(hiddenWidgetId)
-      if widget then
-        widget:setVisible(false)
-      end
+    hiddenWidgetIds = { 'healthBar', 'manaBar', 'positionLabel', 'infoIcon', 'pingLabel', 'creatureType', 'skull', 'emblem', 'specialIcon' }
+  else
+    -- Summon widgets to hide
+    if table.contains({ CreatureTypeSummonOwn, CreatureTypeSummonOther }, button.creatureTypeId) then
+      hiddenWidgetIds = { 'manaBar', 'pingLabel', 'skull', 'emblem', 'specialIcon' }
+    end
+  end
+  for _, hiddenWidgetId in ipairs(hiddenWidgetIds) do
+    local widget = button:getChildById(hiddenWidgetId)
+    if widget then
+      widget:setVisible(false)
     end
   end
 
@@ -435,6 +444,9 @@ function GamePartyList.remove(data)
   -- Member
 
   if memberIndex then
+    local playerTypeId = partyListByIndex[memberIndex].creatureTypeId
+
+    table.remove(partyListByIndex, memberIndex)
     if partyList[cid] then
       if partyList[cid] == lastButtonSwitched then
         lastButtonSwitched = nil
@@ -443,12 +455,35 @@ function GamePartyList.remove(data)
       partyList[cid]:destroy()
       partyList[cid] = nil
     end
-    table.remove(partyListByIndex, memberIndex)
+
+    -- Remove summons of player
+    if playerTypeId == CreatureTypePlayer then
+      -- Find all summons
+      for i = #partyListByIndex, 1, -1 do
+        -- Found a summon
+        if partyListByIndex[i].masterCid == cid then -- masterCid of summon is equals to cid of player
+
+          local summonCid = partyListByIndex[i].cid
+
+          -- Remove summon
+          table.remove(partyListByIndex, i)
+          if partyList[summonCid] then
+            if partyList[summonCid] == lastButtonSwitched then
+              lastButtonSwitched = nil
+            end
+
+            partyList[summonCid]:destroy()
+            partyList[summonCid] = nil
+          end
+        end
+      end
+    end
   end
 
   -- Invitee
 
   if inviteeIndex then
+    table.remove(inviteeListByIndex, inviteeIndex)
     if inviteeList[cid] then
       if inviteeList[cid] == lastButtonSwitched then
         lastButtonSwitched = nil
@@ -457,7 +492,6 @@ function GamePartyList.remove(data)
       inviteeList[cid]:destroy()
       inviteeList[cid] = nil
     end
-    table.remove(inviteeListByIndex, inviteeIndex)
 
     GamePartyList.updateInviteeList() -- Necessary to disable invitee widgets when invitee is empty
   end
@@ -724,7 +758,11 @@ function GamePartyList.sortList()
   if sortOrder == SortOrderAscending then
     -- Ascending - Hierarchy
     if sortType == SortTypeHierarchy then
-      sortFunction = function(a,b) return false end -- todo
+      local localPlayer = g_game.getLocalPlayer()
+      if localPlayer then
+        local localPlayerPos = localPlayer:getPosition()
+        sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] < ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
+      end
 
     -- Ascending - Appear
     elseif sortType == SortTypeAppear then
@@ -735,7 +773,6 @@ function GamePartyList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
-
         sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
       end
 
@@ -759,7 +796,11 @@ function GamePartyList.sortList()
   elseif sortOrder == SortOrderDescending then
     -- Descending - Hierarchy
     if sortType == SortTypeHierarchy then
-      sortFunction = function(a,b) return false end -- todo
+      local localPlayer = g_game.getLocalPlayer()
+      if localPlayer then
+        local localPlayerPos = localPlayer:getPosition()
+        sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] > ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
+      end
 
     -- Descending - Appear
     elseif sortType == SortTypeAppear then
@@ -770,7 +811,6 @@ function GamePartyList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
-
         sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
       end
 
@@ -887,7 +927,7 @@ function GamePartyList.onWalk(creature, oldPosition, newPosition)
 
   memberButton:updatePosition(newPosition)
 
-  if GamePartyList.getSortType() == SortTypeDistance then
+  if table.contains({ SortTypeDistance, SortTypeHierarchy }, GamePartyList.getSortType()) then
     GamePartyList.tryUpdateMemberList(memberButton, newPosition, oldPosition)
   end
 end
@@ -923,6 +963,8 @@ local function getPartyButton(msg, button, isInvitee)
 
   if button.creatureTypeId == CreatureTypePlayer then
     button.shieldId = msg:getU8()
+  elseif button.creatureTypeId == CreatureTypeSummonOwn or button.creatureTypeId == CreatureTypeSummonOther then
+    button.masterCid = msg:getU32()
   end
 
   if not isInvitee then
@@ -939,235 +981,222 @@ local function getPartyButton(msg, button, isInvitee)
   end
 end
 
-local serverSignals =
-{
-  [PARTYLIST_SERVERSIGNAL_CREATE] = function(msg)
-    local button    = { }
-    local isInvitee = false
+local serverSignals = { }
 
-    -- Add leader as button to himself
-    getPartyButton(msg, button, isInvitee)
-    GamePartyList.add(button, isInvitee)
-  end,
+serverSignals[PARTYLIST_SERVERSIGNAL_CREATE] = function(msg)
+  serverSignals[PARTYLIST_SERVERSIGNAL_JOIN](msg)
+end
 
-  [PARTYLIST_SERVERSIGNAL_JOIN] = function(msg)
-    local button    = { }
-    local isInvitee = false
+serverSignals[PARTYLIST_SERVERSIGNAL_JOIN] = function(msg)
+  local button    = { }
+  local isInvitee = false
 
-    -- Add member as button to local player
-    getPartyButton(msg, button, isInvitee)
-    GamePartyList.add(button, isInvitee)
-  end,
+  -- Add member as button to local player
+  getPartyButton(msg, button, isInvitee)
+  GamePartyList.add(button, isInvitee)
+end
 
-  [PARTYLIST_SERVERSIGNAL_LEAVE] = function(msg)
-    local flag = msg:getU32()
+serverSignals[PARTYLIST_SERVERSIGNAL_LEAVE] = function(msg)
+  local cid = msg:getU32()
 
-    -- Remove all buttons from local player
-    if flag == 1 then
-      GamePartyList.clearList()
-      return
-    end
+  -- Remove player button of cid only from local player
+  GamePartyList.remove(cid)
+end
 
-    -- Remove player button of cid only from local player
-    local cid = flag
-    GamePartyList.remove(cid)
-  end,
+serverSignals[PARTYLIST_SERVERSIGNAL_DISBAND] = function(msg)
+  GamePartyList.clearList()
+end
 
-  [PARTYLIST_SERVERSIGNAL_DISBAND] = function(msg)
-    GamePartyList.clearList()
-  end,
+serverSignals[PARTYLIST_SERVERSIGNAL_ADDINVITE] = function(msg)
+  local button    = { }
+  local isInvitee = true
 
-  [PARTYLIST_SERVERSIGNAL_ADDINVITE] = function(msg)
-    local button    = { }
-    local isInvitee = true
+  -- Add invitee as button to leader (only leader can see invitees)
+  getPartyButton(msg, button, isInvitee)
+  GamePartyList.add(button, isInvitee)
+end
 
-    -- Add invitee as button to leader (only leader can see invitees)
-    getPartyButton(msg, button, isInvitee)
-    GamePartyList.add(button, isInvitee)
-  end,
+serverSignals[PARTYLIST_SERVERSIGNAL_REMOVEINVITE] = function(msg)
+  local cid = msg:getU32()
 
-  [PARTYLIST_SERVERSIGNAL_REMOVEINVITE] = function(msg)
-    local cid = msg:getU32()
+  -- Remove invitee from leader (only leader can see invitees)
+  GamePartyList.remove(cid)
+end
 
-    -- Remove invitee from leader (only leader can see invitees)
-    GamePartyList.remove(cid)
-  end,
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATUREOUTFIT] = function(msg)
+  local protocolGame = g_game.getProtocolGame()
 
-  [PARTYLIST_SERVERSIGNAL_SENDCREATUREOUTFIT] = function(msg)
-    local protocolGame = g_game.getProtocolGame()
+  local memberCid    = msg:getU32()
+  local memberOutfit = protocolGame:getOutfit(msg)
 
-    local memberCid    = msg:getU32()
-    local memberOutfit = protocolGame:getOutfit(msg)
+  local memberButton = partyList[memberCid]
 
-    local memberButton = partyList[memberCid]
+  if not memberButton then
+    return
+  end
 
-    if not memberButton then
-      return
-    end
+  memberButton:updateCreature(memberOutfit)
+end
 
-    memberButton:updateCreature(memberOutfit)
-  end,
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATURENICKNAME] = function(msg)
+  local memberCid      = msg:getU32()
+  local memberNickname = msg:getString()
 
-  [PARTYLIST_SERVERSIGNAL_SENDCREATURENICKNAME] = function(msg)
+  local memberButton = partyList[memberCid]
+
+  if not memberButton then
+    return
+  end
+
+  memberButton:updateLabelText(memberNickname)
+
+  if GamePartyList.getSortType() == SortTypeName then
+    GamePartyList.updateMemberList()
+  end
+end
+
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATURESHIELD] = function(msg)
+  local memberCid      = msg:getU32()
+  local memberShieldId = msg:getU8()
+
+  local memberButton = partyList[memberCid]
+
+  if not memberButton then
+    return
+  end
+
+  memberButton:updateShield(memberShieldId)
+
+  if GamePartyList.getSortType() == SortTypeHierarchy then
+    GamePartyList.updateMemberList()
+  end
+end
+
+-- Never happens since skulls are always green on members of party
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATURESKULL] = function(msg)
+  local memberCid     = msg:getU32()
+  local memberSkullId = msg:getU8()
+
+  local memberButton = partyList[memberCid]
+
+  if not memberButton then
+    return
+  end
+
+  memberButton:updateSkull(memberSkullId)
+end
+
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATURESPECIALICON] = function(msg)
+  local memberCid           = msg:getU32()
+  local memberSpecialIconId = msg:getU8()
+
+  local memberButton = partyList[memberCid]
+
+  if not memberButton then
+    return
+  end
+
+  memberButton:updateSpecialIcon(memberSpecialIconId)
+end
+
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATURESPOSITION] = function(msg)
+  local protocolGame = g_game.getProtocolGame()
+  local membersCount = msg:getU8()
+  local sortType     = GamePartyList.getSortType()
+
+  for i = 1, membersCount do
     local memberCid      = msg:getU32()
-    local memberNickname = msg:getString()
+    local memberPosition = protocolGame:getPosition(msg)
 
     local memberButton = partyList[memberCid]
 
-    if not memberButton then
-      return
-    end
+    if memberButton then
+      local oldPosition = memberButton.position
 
-    memberButton:updateLabelText(memberNickname)
+      memberButton:updatePosition(memberPosition)
 
-    if GamePartyList.getSortType() == SortTypeName then
-      GamePartyList.updateMemberList()
-    end
-  end,
-
-  [PARTYLIST_SERVERSIGNAL_SENDCREATURESHIELD] = function(msg)
-    local memberCid      = msg:getU32()
-    local memberShieldId = msg:getU8()
-
-    local memberButton = partyList[memberCid]
-
-    if not memberButton then
-      return
-    end
-
-    memberButton:updateShield(memberShieldId)
-
-    if GamePartyList.getSortType() == SortTypeHierarchy then
-      GamePartyList.updateMemberList()
-    end
-  end,
-
-  -- Never happens since skulls are always green on members of party
-  [PARTYLIST_SERVERSIGNAL_SENDCREATURESKULL] = function(msg)
-    local memberCid     = msg:getU32()
-    local memberSkullId = msg:getU8()
-
-    local memberButton = partyList[memberCid]
-
-    if not memberButton then
-      return
-    end
-
-    memberButton:updateSkull(memberSkullId)
-  end,
-
-  [PARTYLIST_SERVERSIGNAL_SENDCREATURESPECIALICON] = function(msg)
-    local memberCid           = msg:getU32()
-    local memberSpecialIconId = msg:getU8()
-
-    local memberButton = partyList[memberCid]
-
-    if not memberButton then
-      return
-    end
-
-    memberButton:updateSpecialIcon(memberSpecialIconId)
-  end,
-
-  [PARTYLIST_SERVERSIGNAL_SENDCREATURESPOSITION] = function(msg)
-    local protocolGame = g_game.getProtocolGame()
-    local membersCount = msg:getU8()
-    local sortType     = GamePartyList.getSortType()
-
-    for i = 1, membersCount do
-      local memberCid      = msg:getU32()
-      local memberPosition = protocolGame:getPosition(msg)
-
-      local memberButton = partyList[memberCid]
-
-      if memberButton then
-        local oldPosition = memberButton.position
-
-        memberButton:updatePosition(memberPosition)
-
-        if sortType == SortTypeDistance then
-          GamePartyList.tryUpdateMemberList(memberButton, memberPosition, oldPosition)
-        end
+      if table.contains({ SortTypeDistance, SortTypeHierarchy }, sortType) then
+        GamePartyList.tryUpdateMemberList(memberButton, memberPosition, oldPosition)
       end
     end
-  end,
+  end
+end
 
-  [PARTYLIST_SERVERSIGNAL_SENDCREATUREHEALTHPERCENT] = function(msg)
-    local memberCid           = msg:getU32()
-    local memberHealthPercent = msg:getU8()
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATUREHEALTHPERCENT] = function(msg)
+  local memberCid           = msg:getU32()
+  local memberHealthPercent = msg:getU8()
+
+  local memberButton = partyList[memberCid]
+
+  if not memberButton then
+    return
+  end
+
+  memberButton:updateHealthPercent(memberHealthPercent)
+
+  if GamePartyList.getSortType() == SortTypeHealth then
+    GamePartyList.updateMemberList()
+  end
+end
+
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATUREMANAPERCENT] = function(msg)
+  local memberCid         = msg:getU32()
+  local memberManaPercent = msg:getU8()
+
+  local memberButton = partyList[memberCid]
+
+  if not memberButton then
+    return
+  end
+
+  memberButton:updateManaPercent(memberManaPercent)
+
+  if GamePartyList.getSortType() == SortTypeMana then
+    GamePartyList.updateMemberList()
+  end
+end
+
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDPLAYERSPING] = function(msg)
+  local membersCount = msg:getU8()
+
+  for i = 1, membersCount do
+    local memberCid  = msg:getU32()
+    local memberPing = msg:getU64()
+
+    if memberPing == 2^64 - 1 then -- maximum value of uint64_t
+      memberPing = -1 -- any negative value
+    end
 
     local memberButton = partyList[memberCid]
 
-    if not memberButton then
-      return
+    if memberButton then
+      memberButton:updatePing(memberPing)
     end
+  end
 
-    memberButton:updateHealthPercent(memberHealthPercent)
+  if GamePartyList.getSortType() == SortTypePing then
+    GamePartyList.updateMemberList()
+  end
+end
 
-    if GamePartyList.getSortType() == SortTypeHealth then
-      GamePartyList.updateMemberList()
-    end
-  end,
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDVOCATIONID] = function(msg)
+  local memberCid        = msg:getU32()
+  local memberVocationId = msg:getU8()
 
-  [PARTYLIST_SERVERSIGNAL_SENDCREATUREMANAPERCENT] = function(msg)
-    local memberCid         = msg:getU32()
-    local memberManaPercent = msg:getU8()
+  local memberButton = partyList[memberCid]
+  if not memberButton then
+    return
+  end
 
-    local memberButton = partyList[memberCid]
+  memberButton:updateVocation(memberVocationId)
+end
 
-    if not memberButton then
-      return
-    end
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDEXTRAEXPERIENCETOOLTIP] = function(msg)
+  local extraExperienceTooltip = msg:getString()
+  local extraExperienceValue   = msg:getDouble()
 
-    memberButton:updateManaPercent(memberManaPercent)
-
-    if GamePartyList.getSortType() == SortTypeMana then
-      GamePartyList.updateMemberList()
-    end
-  end,
-
-  [PARTYLIST_SERVERSIGNAL_SENDPLAYERSPING] = function(msg)
-    local membersCount = msg:getU8()
-
-    for i = 1, membersCount do
-      local memberCid  = msg:getU32()
-      local memberPing = msg:getU64()
-
-      if memberPing == 2^64 - 1 then -- maximum value of uint64_t
-        memberPing = -1 -- any negative value
-      end
-
-      local memberButton = partyList[memberCid]
-
-      if memberButton then
-        memberButton:updatePing(memberPing)
-      end
-    end
-
-    if GamePartyList.getSortType() == SortTypePing then
-      GamePartyList.updateMemberList()
-    end
-  end,
-
-  [PARTYLIST_SERVERSIGNAL_SENDVOCATIONID] = function(msg)
-    local memberCid        = msg:getU32()
-    local memberVocationId = msg:getU8()
-
-    local memberButton = partyList[memberCid]
-    if not memberButton then
-      return
-    end
-
-    memberButton:updateVocation(memberVocationId)
-  end,
-
-  [PARTYLIST_SERVERSIGNAL_SENDEXTRAEXPERIENCETOOLTIP] = function(msg)
-    local extraExperienceTooltip = msg:getString()
-    local extraExperienceValue   = msg:getDouble()
-
-    emptyMenuButton:setTooltip(extraExperienceValue > 0 and tr(extraExperienceTooltip, extraExperienceValue) or tr('You have no partners in your party yet.'))
-  end,
-}
+  emptyMenuButton:setTooltip(extraExperienceValue > 0 and tr(extraExperienceTooltip, extraExperienceValue) or tr('You have no partners in your party yet.'))
+end
 
 function GamePartyList.parsePartyList(protocol, msg)
   if not g_game.getProtocolGame() then
@@ -1187,19 +1216,21 @@ end
 
 -- Client to server
 
-local clientSignals =
-{
-  -- -- Use GamePartyList.sendPartyList(GamePartyList.m.PARTYLIST_CLIENTSIGNAL_REQUESTPOSITIONS) to send it
-  -- [PARTYLIST_CLIENTSIGNAL_REQUESTPOSITIONS] = function(params) -- Example
-  --   local protocolGame = g_game.getProtocolGame()
+local clientSignals = { }
 
-  --   local msg = OutputMessage.create()
-  --   msg:addU8(ClientOpcodes.ClientPartyList)
-  --   msg:addU8(PARTYLIST_CLIENTSIGNAL_REQUESTPOSITIONS)
-  --   msg:addDouble(107.56789012345, 4) -- 107.5678
-  --   protocolGame:send(msg)
-  -- end,
-}
+-- -- Use GamePartyList.sendPartyList(GamePartyList.m.PARTYLIST_CLIENTSIGNAL_REQUESTPOSITIONS) to send it
+-- clientSignals[PARTYLIST_CLIENTSIGNAL_REQUESTPOSITIONS] = function(params) -- Example
+--   local protocolGame = g_game.getProtocolGame()
+--   if not protocolGame then
+--     return
+--   end
+
+--   local msg = OutputMessage.create()
+--   msg:addU8(ClientOpcodes.ClientOpcodePartyList)
+--   msg:addU8(PARTYLIST_CLIENTSIGNAL_REQUESTPOSITIONS) -- U8 for opcode, U16 for extended opcode
+--   msg:addDouble(107.56789012345, 4) -- 107.5678
+--   protocolGame:send(msg)
+-- end
 
 function GamePartyList.sendPartyList(clientSignalId, params)
   if not g_game.getProtocolGame() then

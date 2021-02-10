@@ -10,45 +10,20 @@ minimapBar = nil
 minimapOpacityScrollbar = nil
 positionLabel = nil
 
-arrowMenuButton = nil
 ballButton = nil
 infoLabel = nil
+
+extraIconsButton = nil
+fullMapButton = nil
 
 otmm = true
 preloaded = false
 fullmapView = false
 oldZoom = nil
 oldPos = nil
-instanceId = 0
-instanceName = ""
 
 
 local lastMinimapMarkId = 19
-
-local function updatePositionLabel()
-  local text
-
-  -- Default map
-  if instanceId < 1 then
-    local player = g_game.getLocalPlayer()
-    if not player then
-      return
-    end
-    local pos = player:getPosition()
-    if not pos then
-      return
-    end
-
-    text = tr('%d, %d, %d', pos.x, pos.y, pos.z)
-
-  -- Instance map
-  else
-    text = instanceName
-  end
-
-  positionLabel:setText(text)
-  positionLabel:setTooltip(text)
-end
 
 
 
@@ -69,9 +44,12 @@ function GameMinimap.init()
   minimapOpacityScrollbar:setValue(g_settings.getValue('Minimap', 'opacity', 100))
   positionLabel = contentsPanel:getChildById('positionLabel')
 
-  arrowMenuButton = minimapWindow:getChildById('arrowMenuButton')
   ballButton = minimapWindow:getChildById('ballButton')
   infoLabel = minimapWindow:getChildById('emptyMenuButton')
+
+  local compassWidget = minimapBar:getChildById('compass')
+  extraIconsButton = compassWidget:getChildById('extraIconsButton')
+  fullMapButton = compassWidget:getChildById('fullMapButton')
 
   for i = 1, lastMinimapMarkId do
     g_textures.preload(string.format('/images/ui/minimap/flag%d', i))
@@ -86,7 +64,7 @@ function GameMinimap.init()
   g_keyboard.bindKeyDown('Ctrl+Shift+M', GameMinimap.toggleFullMap)
   g_keyboard.bindKeyDown('Escape', function() if fullmapView then GameMinimap.toggleFullMap() end end)
 
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerInstanceInfo, GameMinimap.onInstanceInfo)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo, GameMinimap.onInstanceInfo)
 
   connect(g_game, {
     onGameStart = GameMinimap.online,
@@ -124,7 +102,7 @@ function GameMinimap.terminate()
     onPositionChange = GameMinimap.updateCameraPosition
   })
 
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerInstanceInfo)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo)
 
   local gameRootPanel = GameInterface.getRootPanel()
   g_keyboard.unbindKeyPress('Alt+Left', gameRootPanel)
@@ -157,9 +135,6 @@ function GameMinimap.online()
   GameInterface.setupMiniWindow(minimapWindow, minimapTopMenuButton)
 
   GameMinimap.loadMap(not preloaded)
-
-  instanceId   = 0
-  instanceName = ""
   GameMinimap.updateCameraPosition()
 
   minimapWidget:setOpacity(1.0)
@@ -206,17 +181,18 @@ function GameMinimap.saveMap()
 end
 
 function GameMinimap.updateCameraPosition()
-  local player = g_game.getLocalPlayer()
-  if not player then
+  local localPlayer = g_game.getLocalPlayer()
+  if not localPlayer then
     return
   end
-  local pos = player:getPosition()
+
+  local pos = localPlayer:getPosition()
   if not pos then
     return
   end
 
-  if instanceId < 1 then
-    local text = tr('%d, %d, %d', pos.x, pos.y, pos.z)
+  if localPlayer:getInstanceId() < 1 then
+    local text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
 
     positionLabel:setText(text)
     positionLabel:setTooltip(text)
@@ -224,9 +200,9 @@ function GameMinimap.updateCameraPosition()
 
   if not minimapWidget:isDragging() then
     if not fullmapView then
-      minimapWidget:setCameraPosition(player:getPosition())
+      minimapWidget:setCameraPosition(localPlayer:getPosition())
     end
-    minimapWidget:setCrossPosition(player:getPosition())
+    minimapWidget:setCrossPosition(localPlayer:getPosition())
   end
 end
 
@@ -248,15 +224,17 @@ function GameMinimap.toggleFullMap()
   positionLabel:setParent(parent)
   minimapOpacityScrollbar:setParent(parent)
 
-  arrowMenuButton:setParent(fullmapView and rootPanel or minimapWindow)
   ballButton:setParent(fullmapView and rootPanel or minimapWindow)
   infoLabel:setParent(fullmapView and rootPanel or minimapWindow)
 
   -- Update anchors and others
 
+  minimapBar:addAnchor(AnchorTop, 'parent', AnchorTop)
+  minimapBar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+  minimapBar:addAnchor(AnchorRight, 'parent', AnchorRight)
   positionLabel:addAnchor(AnchorBottom, 'parent', AnchorBottom)
   positionLabel:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-  positionLabel:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
+  positionLabel:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
   minimapOpacityScrollbar:addAnchor(AnchorBottom, 'positionLabel', AnchorOutsideTop)
   minimapOpacityScrollbar:addAnchor(AnchorLeft, 'parent', AnchorLeft)
   minimapOpacityScrollbar:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
@@ -265,44 +243,27 @@ function GameMinimap.toggleFullMap()
   if fullmapView then
     minimapWindow:hide()
     minimapWidget:fill('parent')
-    minimapWidget:setAlternativeWidgetsVisible(true)
     minimapWidget:setOpacity(minimapOpacityScrollbar:getValue() / 100)
 
-    minimapBar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-    minimapBar:addAnchor(AnchorRight, 'parent', AnchorRight)
-
-    arrowMenuButton:addAnchor(AnchorTop, 'minimapBar', AnchorTop)
-    arrowMenuButton:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
-    arrowMenuButton:setTooltip(tr('Hide entire game map (%s)', 'Ctrl+Shift+M'))
-    arrowMenuButton:setOn(true)
-    ballButton:addAnchor(AnchorTop, 'prev', AnchorBottom)
-    ballButton:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
-    ballButton:setMarginTop(3)
+    fullMapButton:setOn(true)
+    ballButton:addAnchor(AnchorTop, 'minimapBar', AnchorTop)
+    ballButton:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
     infoLabel:addAnchor(AnchorTop, 'prev', AnchorBottom)
-    infoLabel:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
+    infoLabel:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
     infoLabel:setMarginTop(3)
   else
     minimapWindow:show()
     minimapWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
     minimapWidget:addAnchor(AnchorBottom, 'parent', AnchorBottom)
     minimapWidget:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-    minimapWidget:addAnchor(AnchorRight, 'minimapBar', AnchorLeft)
-    minimapWidget:setAlternativeWidgetsVisible(false)
+    minimapWidget:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
     minimapWidget:setOpacity(1.0)
 
-    minimapBar:addAnchor(AnchorTop, 'parent', AnchorTop)
-    minimapBar:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-    minimapBar:addAnchor(AnchorRight, 'parent', AnchorRight)
-
-    arrowMenuButton:addAnchor(AnchorVerticalCenter, 'lockButton', AnchorVerticalCenter)
-    arrowMenuButton:addAnchor(AnchorRight, 'lockButton', AnchorOutsideLeft)
-    arrowMenuButton:setTooltip(tr('Show entire game map (%s)', 'Ctrl+Shift+M'))
-    arrowMenuButton:setOn(false)
-    ballButton:addAnchor(AnchorTop, 'prev', AnchorTop)
-    ballButton:addAnchor(AnchorRight, 'prev', AnchorLeft)
-    ballButton:setMarginTop(0)
-    infoLabel:addAnchor(AnchorTop, 'prev', AnchorTop)
-    infoLabel:addAnchor(AnchorRight, 'prev', AnchorLeft)
+    fullMapButton:setOn(false)
+    ballButton:addAnchor(AnchorVerticalCenter, 'lockButton', AnchorVerticalCenter)
+    ballButton:addAnchor(AnchorRight, 'lockButton', AnchorOutsideLeft)
+    infoLabel:addAnchor(AnchorVerticalCenter, 'prev', AnchorVerticalCenter)
+    infoLabel:addAnchor(AnchorRight, 'prev', AnchorOutsideLeft)
     infoLabel:setMarginTop(0)
   end
 
@@ -325,24 +286,40 @@ function GameMinimap.getMinimapBar()
   return minimapBar
 end
 
-function GameMinimap.onInstanceInfo(protocol, opcode, buffer)
-  local params = string.split(buffer, ':')
+function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
+  local creatureId   = msg:getU32()
+  local instanceId   = msg:getU32()
+  local instanceName = msg:getString()
 
-  local id, name
-  if #params == 2 then
-    id   = tonumber(params[1])
-    name = params[2]
-  else
-    id   = 0
-    name = ""
+  local creature    = g_map.getCreatureById(creatureId)
+  local localPlayer = g_game.getLocalPlayer()
+
+  if not creature or not localPlayer then
+    return
   end
 
-  if id < 1 or not name then
-    name = ""
+  creature:setInstanceId(instanceId)
+  creature:setInstanceName(instanceName)
+
+  -- Creature is local player
+  if creature == localPlayer then
+    local text
+
+    -- Instance map
+    if instanceId > 0 then
+      text = instanceName
+
+    -- Default map
+    else
+      local pos = localPlayer:getPosition()
+      if not pos then
+        return
+      end
+
+      text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
+    end
+
+    positionLabel:setText(text)
+    positionLabel:setTooltip(text)
   end
-
-  instanceId   = id
-  instanceName = name
-
-  updatePositionLabel()
 end

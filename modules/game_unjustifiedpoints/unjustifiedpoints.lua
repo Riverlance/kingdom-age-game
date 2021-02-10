@@ -71,7 +71,7 @@ function GameUnjustifiedPoints.init()
 
   GameUnjustifiedPoints.onUnjustifiedPoints()
 
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerUnjustifiedPoints, GameUnjustifiedPoints.parseUnjustifiedPoints)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeUnjustifiedPoints, GameUnjustifiedPoints.parseUnjustifiedPoints)
 
   connect(g_game, {
     onGameStart = GameUnjustifiedPoints.online,
@@ -100,7 +100,7 @@ function GameUnjustifiedPoints.terminate()
 
   g_keyboard.unbindKeyDown(shortcut)
 
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerUnjustifiedPoints)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeUnjustifiedPoints)
 
   unjustifiedPointsWindow:destroy()
   unjustifiedPointsTopMenuButton:destroy()
@@ -114,7 +114,7 @@ function GameUnjustifiedPoints.onMiniWindowOpen()
   end
 
   updateMainLabelEvent = cycleEvent(updateMainLabelEventFunction, updateTime * 1000)
-  g_game.sendUnjustifiedPointsProtocolData()
+  g_game.sendUnjustifiedPointsBuffer()
 end
 
 function GameUnjustifiedPoints.onMiniWindowClose()
@@ -130,7 +130,7 @@ function GameUnjustifiedPoints.online()
   if g_game.getFeature(GameUnjustifiedPointsPacket) then
     GameInterface.setupMiniWindow(unjustifiedPointsWindow, unjustifiedPointsTopMenuButton)
     unjustifiedPointsTopMenuButton:show()
-    g_game.sendUnjustifiedPointsProtocolData()
+    g_game.sendUnjustifiedPointsBuffer()
 
     if unjustifiedPointsWindow:isVisible() then
       updateMainLabelEvent = cycleEvent(updateMainLabelEventFunction, updateTime * 1000)
@@ -191,7 +191,7 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
 
   if fragsToRedSkull ~= 0 then
     redSkullProgressBar:setValue(fragsCount, 0, fragsToRedSkull)
-    redSkullProgressBar:setBackgroundColor(getColorByKills(fragsCount, fragsToRedSkull))
+    redSkullProgressBar:setFillerBackgroundColor(getColorByKills(fragsCount, fragsToRedSkull))
   else
     redSkullProgressBar:setValue(0, 0, 1)
   end
@@ -199,15 +199,17 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
 
   if fragsToBlackSkull ~= 0 then
     blackSkullProgressBar:setValue(fragsCount, 0, fragsToBlackSkull)
-    blackSkullProgressBar:setBackgroundColor(getColorByKills(fragsCount, fragsToBlackSkull))
+    blackSkullProgressBar:setFillerBackgroundColor(getColorByKills(fragsCount, fragsToBlackSkull))
   else
     blackSkullProgressBar:setValue(0, 0, 1)
   end
   blackSkullProgressBar:setTooltip('Frags until black skull: ' .. math.max(0, fragsToBlackSkull - fragsCount))
 end
 
-function GameUnjustifiedPoints.parseUnjustifiedPoints(protocol, opcode, buffer)
+function GameUnjustifiedPoints.parseUnjustifiedPoints(protocolGame, opcode, msg)
+  local buffer = msg:getString()
   local params = buffer:split(':')
+
   local remainingTime     = tonumber(params[1])
   local fragsToRedSkull   = tonumber(params[2])
   local fragsToBlackSkull = tonumber(params[3])

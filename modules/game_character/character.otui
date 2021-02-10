@@ -2,15 +2,20 @@ CharacterProgressBar < ProgressBar
   anchors.left: parent.left
   anchors.right: parent.right
 
-HealthProgressBar < CharacterProgressBar
-  background-color: #ff4444
-  margin-top: 1
+  $first:
+    anchors.top: parent.top
+    margin-top: 0
 
-ManaProgressBar < CharacterProgressBar
-  background-color: #aa44ff
+  $!first:
+    anchors.top: prev.outsideBottom
+    margin-top: 1
 
-ExperienceProgressBar < CharacterProgressBar
-  background-color: #B6E866
+CharacterProgressBarValue < Label
+  anchors.fill: prev
+  font: verdana-11px-rounded
+  text-offset: 0 1
+  text-align: center
+  phantom: false
 
 ConditionWidget < UIWidget
   size: 18 18
@@ -158,19 +163,34 @@ MiniWindow
     @onClick: GameCharacter.onMiniWindowBallButton()
 
   MiniWindowHeader
-    height: 55
+    height: 52
 
-    HealthProgressBar
+    CharacterProgressBar
       id: healthBar
-      anchors.top: parent.top
+      background-color: #ff4444
 
-    ManaProgressBar
+    CharacterProgressBarValue
+      id: healthBarValueLabel
+
+    CharacterProgressBar
       id: manaBar
-      anchors.top: prev.outsideBottom
+      background-color: #aa44ff
 
-    ExperienceProgressBar
+      $!first:
+        anchors.top: healthBar.outsideBottom
+
+    CharacterProgressBarValue
+      id: manaBarValueLabel
+
+    CharacterProgressBar
       id: experienceBar
-      anchors.top: prev.outsideBottom
+      background-color: #B6E866
+
+      $!first:
+        anchors.top: manaBar.outsideBottom
+
+    CharacterProgressBarValue
+      id: experienceBarValueLabel
 
   MiniWindowContents
     Panel

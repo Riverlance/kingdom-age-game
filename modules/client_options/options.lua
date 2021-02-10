@@ -71,6 +71,7 @@ local defaultOptions = {
   bouncingKeysDelayScrollBar = 1000,
   turnDelay = 50,
   hotkeyDelay = 50,
+  showMinimapExtraIcons = true,
 }
 
 local optionsWindow
@@ -522,17 +523,19 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.getMapPanel():setDrawManaBar(value)
 
   elseif key == 'showExpBar' then
-    if modules.ka_game_ui then
-      GameUIExpBar.setExpBar(value)
+    if not modules.ka_game_ui then
+      return
     end
+    GameUIExpBar.setExpBar(value)
 
   elseif modules.game_interface and key == 'showText' then
     GameInterface.getMapPanel():setDrawTexts(value)
 
   elseif key == 'showHotkeybars' then
-    if modules.ka_game_hotkeybars then
-      GameHotkeybars.onDisplay(value)
+    if not modules.ka_game_hotkeybars then
+      return
     end
+    GameHotkeybars.onDisplay(value)
 
   elseif key == 'showNpcDialogWindows' then
     g_game.setNpcDialogWindows(value)
@@ -542,19 +545,23 @@ function ClientOptions.setOption(key, value, force)
 
   elseif modules.game_interface and key == 'leftStickerOpacityScrollbar' then
     local leftStickerWidget = GameInterface.getLeftFirstPanel():getChildById('gameLeftPanelSticker')
-    if leftStickerWidget then
-      local _value = math.ceil(value * 2.55)
-      local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
-      leftStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
+    if not leftStickerWidget then
+      return
     end
+
+    local _value = math.ceil(value * 2.55)
+    local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
+    leftStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
 
   elseif modules.game_interface and key == 'rightStickerOpacityScrollbar' then
     local rightStickerWidget = GameInterface.getRightFirstPanel():getChildById('gameRightPanelSticker')
-    if rightStickerWidget then
-      local _value = math.ceil(value * 2.55)
-      local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
-      rightStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
+    if not rightStickerWidget then
+      return
     end
+
+    local _value = math.ceil(value * 2.55)
+    local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
+    rightStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
 
   elseif key == "shaderFilterComboBox" then
     shaderFilterComboBox:setOption(value)
@@ -577,6 +584,16 @@ function ClientOptions.setOption(key, value, force)
 
   elseif key == 'bouncingKeys' then
     controlPanel:getChildById('bouncingKeysDelayScrollBar'):setEnabled(value)
+
+  elseif key == 'showMinimapExtraIcons' then
+    if not modules.game_minimap then
+      return
+    end
+
+    local minimapWidget = GameMinimap.getMinimapWidget()
+    minimapWidget:setAlternativeWidgetsVisible(value)
+
+    GameMinimap.m.extraIconsButton:setOn(value)
   end
 
   -- change value for keybind updates

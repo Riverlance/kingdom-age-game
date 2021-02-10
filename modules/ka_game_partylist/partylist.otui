@@ -7,7 +7,8 @@ MiniWindow
   !text: tr('Party List')
   icon: /images/ui/top_menu/party_list
   &save: true
-  &contentMinimumHeight: 31
+  // Cool size when the panel has 4 slots
+  &contentMinimumHeight: 45
 
   ArrowMenuButton
     !tooltip: tr('Show options')
@@ -28,39 +29,49 @@ MiniWindow
     phantom: false
 
   MiniWindowHeader
-    height: 20
+    height: 41
 
     $on:
       height: 0
 
+    @onGeometryChange: |
+      function(self)
+        local filterPanel = self:getChildById('filterPanel')
+        if not filterPanel then
+          return
+        end
+        local layout = filterPanel:getLayout()
+
+        local minWidth = 125 -- Same width of filterPanel
+        local maxWidth = 167 -- Width of all TabButton in line
+        local width = math.max(minWidth, math.min(self:getWidth(), maxWidth))
+        filterPanel:setWidth(width)
+
+        local lineHeight  = 20 -- Same height of filterPanel
+        local lines       = layout:getNumLines()
+        local cellSpacing = 1 -- Same cell-spacing of filterPanel
+        local height      = math.max(20, lineHeight * lines + cellSpacing * (lines - 1))
+        filterPanel:setHeight(height)
+        self:setHeight(height)
+      end
+
+    HorizontalSeparator
+      anchors.top: next.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 19
+
     Panel
       id: filterPanel
-      size: 172 20
+      // See parent's onGeometryChange for the width
+      size: 125 20
       anchors.verticalCenter: parent.verticalCenter
       anchors.horizontalCenter: parent.horizontalCenter
       layout:
-        type: horizontalBox
-        spacing: 2
-
-      PartyTabButton
-        id: filterPlayers
-        !tooltip: tr('Show players')
-        icon-clip: 0 0 20 20
-        @onClick: GamePartyList.onClickFilterPlayers(self)
-
-        $on:
-          !tooltip: tr('Hide players')
-          icon-clip: 0 20 20 20
-
-      PartyTabButton
-        id: filterSummons
-        !tooltip: tr('Show summons')
-        icon-clip: 20 0 20 20
-        @onClick: GamePartyList.onClickFilterSummons(self)
-
-        $on:
-          !tooltip: tr('Hide summons')
-          icon-clip: 20 20 20 20
+        type: grid
+        cell-size: 20 20
+        cell-spacing: 1
+        flow: true
 
       PartyTabButton
         id: filterKnightPlayers
@@ -121,6 +132,26 @@ MiniWindow
         $on:
           !tooltip: tr('Hide bard players')
           icon-clip: 140 20 20 20
+
+      PartyTabButton
+        id: filterPlayers
+        !tooltip: tr('Show players')
+        icon-clip: 0 0 20 20
+        @onClick: GamePartyList.onClickFilterPlayers(self)
+
+        $on:
+          !tooltip: tr('Hide players')
+          icon-clip: 0 20 20 20
+
+      PartyTabButton
+        id: filterSummons
+        !tooltip: tr('Show summons')
+        icon-clip: 20 0 20 20
+        @onClick: GamePartyList.onClickFilterSummons(self)
+
+        $on:
+          !tooltip: tr('Hide summons')
+          icon-clip: 20 20 20 20
 
   MiniWindowContents
 

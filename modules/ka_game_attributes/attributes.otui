@@ -28,10 +28,10 @@ AttributeActLabel < Label
   phantom: false
 
 MiniWindow
-  icon: attributes
+  icon: /images/ui/top_menu/attributes
   id: attributeWindow
   !text: 'Attributes'
-  height: 232
+  height: 235
   &save: true
 
   EmptyMenuButton

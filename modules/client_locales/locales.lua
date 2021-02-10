@@ -32,12 +32,23 @@ local language =
 
 function ClientLocales.sendLocale(localeName)
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientLocale, localeName)
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientGameLanguage, language[localeName] or GAMELANGUAGE_EN)
-    return true
+  if not protocolGame then
+    return false
   end
-  return false
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeLocale)
+  msg:addString(localeName)
+  protocolGame:send(msg)
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeGameLanguage)
+  msg:addString(tostring(language[localeName] or GAMELANGUAGE_EN))
+  protocolGame:send(msg)
+
+  return true
 end
 
 function ClientLocales.createWindow()
@@ -81,7 +92,9 @@ function ClientLocales.onGameStart()
   ClientLocales.sendLocale(currentLocale.name)
 end
 
-function ClientLocales.onExtendedLocales(protocol, opcode, buffer)
+function ClientLocales.onExtendedLocales(protocolGame, opcode, msg)
+  local buffer = msg:getString()
+
   local locale = installedLocales[buffer]
   if locale and ClientLocales.setLocale(locale.name) then
     g_modules.reloadModules()
@@ -106,7 +119,7 @@ function ClientLocales.init()
     })
   end
 
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerLocale, ClientLocales.onExtendedLocales)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeLocale, ClientLocales.onExtendedLocales)
   connect(g_game, {
     onGameStart = ClientLocales.onGameStart
   })
@@ -116,7 +129,7 @@ function ClientLocales.terminate()
   installedLocales = nil
   currentLocale = nil
 
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerLocale)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeLocale)
 
   disconnect(g_app, {
     onRun = ClientLocales.createWindow

@@ -47,7 +47,7 @@ function GameScreenImage.init()
   -- Alias
   GameScreenImage.m = modules.ka_game_screenimage
 
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerScreenImage, GameScreenImage.parseScreenImage)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeScreenImage, GameScreenImage.parseScreenImage)
 
   g_ui.importStyle('screenimage.otui')
 
@@ -63,7 +63,7 @@ function GameScreenImage.init()
 end
 
 function GameScreenImage.terminate()
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerScreenImage)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeScreenImage)
 
   GameScreenImage.clearImages()
 
@@ -267,8 +267,10 @@ function GameScreenImage.removeImage(path, fadeOut, mode)
   end
 end
 
-function GameScreenImage.parseScreenImage(protocol, opcode, buffer)
+function GameScreenImage.parseScreenImage(protocolGame, opcode, msg)
+  local buffer = msg:getString()
   local params = string.split(buffer, ':')
+
   local state = tonumber(params[1])
   if not state then
     return

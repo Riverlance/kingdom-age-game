@@ -89,7 +89,7 @@ function ClientTopMenu.online()
   ClientTopMenu.showGameButtons()
 
   addEvent(function()
-    if ClientOptions.getOption('showPing') and (g_game.getFeature(GameClientPing) or g_game.getFeature(GameExtendedClientPing)) then
+    if ClientOptions.getOption('showPing') and g_game.getFeature(GameClientPing) then
       pingLabel:show()
     else
       pingLabel:hide()

@@ -69,7 +69,7 @@ function GameAttributes.init()
 
   attributeWindow = g_ui.loadUI('attributes')
   attributeFooter = attributeWindow:getChildById('miniWindowFooter')
-  attributeTopMenuButton = ClientTopMenu.addRightGameToggleButton('attributeTopMenuButton', tr('Attributes') .. ' (Ctrl+Shift+U)', 'attributes', GameAttributes.toggle)
+  attributeTopMenuButton = ClientTopMenu.addRightGameToggleButton('attributeTopMenuButton', tr('Attributes') .. ' (Ctrl+Shift+U)', '/images/ui/top_menu/attributes', GameAttributes.toggle)
 
   attributeWindow.topMenuButton = attributeTopMenuButton
   attributeWindow:disableResize()
@@ -227,7 +227,7 @@ function GameAttributes.online()
 
   GameAttributes.clearWindow()
 
-  g_game.sendAttributeProtocolData(string.format("%d", attribute_flag_updateList))
+  g_game.sendAttributeBuffer(string.format("%d", attribute_flag_updateList))
 end
 
 function GameAttributes.clearWindow()
@@ -309,7 +309,7 @@ function GameAttributes.onPlayerAttributes(tooltips, attributes, availablePoints
 end
 
 function GameAttributes.sendAdd(attributeId)
-  g_game.sendAttributeProtocolData(string.format("%d", attributeId))
+  g_game.sendAttributeBuffer(string.format("%d", attributeId))
 end
 
 function GameAttributes.onClickAddButton(widget)

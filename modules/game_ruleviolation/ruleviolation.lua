@@ -20,6 +20,11 @@ local REPORT_TYPE_VIOLATION = 2
 local REPORT_TYPE_NOTATIONS = 3
 
 local function sendNewReport(_type, targetName, reasonId, comment, statement, translation)
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
   if not statement or statement == '' then
     statement = '-'
   end
@@ -29,42 +34,67 @@ local function sendNewReport(_type, targetName, reasonId, comment, statement, tr
     translation = '-'
   end
 
-  local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientRuleViolation, string.format("%d:%d:%s:%d:%s:%s:%s", REPORT_MODE_NEWREPORT, _type, targetName, reasonId, comment:trim(), statement:trim(), translation:trim()))
-  end
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
+  msg:addString(string.format("%d:%d:%s:%d:%s:%s:%s", REPORT_MODE_NEWREPORT, _type, targetName, reasonId, comment:trim(), statement:trim(), translation:trim()))
+  protocolGame:send(msg)
 end
 
 local function sendUpdateSearch(_type, reasonId, page, rowsPerPage, state)
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientRuleViolation, string.format("%d:%d:%d:%d:%d:%d", REPORT_MODE_UPDATESEARCH, _type, reasonId, page, rowsPerPage, state))
+  if not protocolGame then
+    return
   end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
+  msg:addString(string.format("%d:%d:%d:%d:%d:%d", REPORT_MODE_UPDATESEARCH, _type, reasonId, page, rowsPerPage, state))
+  protocolGame:send(msg)
 end
 
 local function sendUpdateState(row, state) -- (row[, state])
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientRuleViolation, string.format("%d:%d:%d", REPORT_MODE_UPDATESTATE, state or row.state, row.id))
+  if not protocolGame then
+    return
   end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
+  msg:addString(string.format("%d:%d:%d", REPORT_MODE_UPDATESTATE, state or row.state, row.id))
+  protocolGame:send(msg)
 end
 
 local function sendRemoveRow(row)
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientRuleViolation, string.format("%d:%d", REPORT_MODE_REMOVEROW, row.id))
+  if not protocolGame then
+    return
   end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
+  msg:addString(string.format("%d:%d", REPORT_MODE_REMOVEROW, row.id))
+  protocolGame:send(msg)
 end
 
 local function sendAddAction(_type, targetName, reasonId, comment, actionId, days, row)
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
   if comment == '' then
     comment = '-'
   end
 
-  local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
-    protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientRuleViolation, string.format("%d:%d:%s:%d:%s:%d:%d:%d", REPORT_MODE_ACTION, _type, targetName, reasonId, comment:trim(), actionId, days, row and row.id or 0))
-  end
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
+  msg:addString(string.format("%d:%d:%s:%d:%s:%d:%d:%d", REPORT_MODE_ACTION, _type, targetName, reasonId, comment:trim(), actionId, days, row and row.id or 0))
+  protocolGame:send(msg)
 end
 
 
@@ -156,11 +186,11 @@ function GameRuleViolation.init()
   -- Alias
   GameRuleViolation.m = modules.game_ruleviolation
 
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerRuleViolation, GameRuleViolation.parseRuleViolationsReports) -- View List
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeRuleViolation, GameRuleViolation.parseRuleViolationsReports) -- View List
 end
 
 function GameRuleViolation.terminate()
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerRuleViolation) -- View List
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeRuleViolation) -- View List
 
   GameRuleViolation.destroyRuleViolationReportWindow()
   GameRuleViolation.destroyRVViewWindow()
@@ -785,7 +815,9 @@ local function updateReportRowTitle(row)
   row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. types[row.type] .. '] ' .. row.comment:sub(0, 35) .. (#row.comment > 35 and "..." or ""))
 end
 
-function GameRuleViolation.parseRuleViolationsReports(protocol, opcode, buffer)
+function GameRuleViolation.parseRuleViolationsReports(protocolGame, opcode, msg)
+  local buffer = msg:getString()
+
   if not getWindowState() then
     return
   end

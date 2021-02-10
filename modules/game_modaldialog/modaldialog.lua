@@ -11,8 +11,9 @@ function GameModalDialog.init()
   g_ui.importStyle('modaldialog')
 
   connect(g_game, {
-    onModalDialog = GameModalDialog.onModalDialog,
-    onGameEnd     = GameModalDialog.destroyDialog
+    onModalDialog       = GameModalDialog.onModalDialog,
+    onModalDialogCancel = GameModalDialog.onModalDialogCancel,
+    onGameEnd           = GameModalDialog.destroyDialog
   })
 
   local dialog = rootWidget:recursiveGetChildById('modalDialog')
@@ -23,8 +24,9 @@ end
 
 function GameModalDialog.terminate()
   disconnect(g_game, {
-    onModalDialog = GameModalDialog.onModalDialog,
-    onGameEnd     = GameModalDialog.destroyDialog
+    onModalDialog       = GameModalDialog.onModalDialog,
+    onModalDialogCancel = GameModalDialog.onModalDialogCancel,
+    onGameEnd           = GameModalDialog.destroyDialog
   })
 
   _G.GameModalDialog = nil
@@ -152,4 +154,8 @@ function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons,
 
   modalDialog.onEnter = enterFunc
   modalDialog.onEscape = escapeFunc
+end
+
+function GameModalDialog.onModalDialogCancel()
+  GameModalDialog.destroyDialog()
 end

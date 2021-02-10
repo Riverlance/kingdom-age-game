@@ -6,7 +6,7 @@ SkullWidget < UIWidget
 MiniWindow
   id: unjustifiedPointsWindow
   !text: tr('Frags')
-  height: 88
+  height: 91
   icon: /images/ui/top_menu/unjustifiedpoints
   @onOpen: GameUnjustifiedPoints.onMiniWindowOpen()
   @onClose: GameUnjustifiedPoints.onMiniWindowClose()
@@ -47,7 +47,6 @@ MiniWindow
       anchors.verticalCenter: redSkullSkullWidget.verticalCenter
       anchors.left: parent.left
       anchors.right: redSkullSkullWidget.left
-      margin-left: 4
       margin-right: 4
 
     ProgressBar
@@ -56,7 +55,6 @@ MiniWindow
       anchors.verticalCenter: blackSkullSkullWidget.verticalCenter
       anchors.left: parent.left
       anchors.right: blackSkullSkullWidget.left
-      margin-left: 4
       margin-right: 4
 
   MiniWindowFooter

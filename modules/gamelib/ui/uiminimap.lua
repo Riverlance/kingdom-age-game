@@ -10,11 +10,26 @@ function UIMinimap:onSetup()
   self.zoomOutWidget = self:getChildById('zoomOut')
   self.flags = {}
   self.alternatives = {}
-  self.onAddAutomapFlag = function(pos, icon, description) self:addFlag(pos, icon, description) end
-  self.onRemoveAutomapFlag = function(pos, icon, description) self:removeFlag(pos, icon, description) end
+  self.alternativesVisible = true
+  self.onAddAutomapFlag = function(pos, icon, description)
+    self:addFlag(pos, icon, description)
+  end
+  self.onRemoveAutomapFlag = function(pos, icon, description)
+    self:removeFlag(pos, icon, description)
+  end
+  self.onGameEnd = function()
+    for k, widget in pairs(self.alternatives) do
+      if widget.temporary then
+        widget:destroy()
+        -- self.alternatives[k] = nil -- Not needed because of the widget.onDestroy
+      end
+    end
+  end
+
   connect(g_game, {
     onAddAutomapFlag    = self.onAddAutomapFlag,
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
+    onGameEnd           = self.onGameEnd,
   })
 end
 
@@ -26,6 +41,7 @@ function UIMinimap:onDestroy()
   disconnect(g_game, {
     onAddAutomapFlag    = self.onAddAutomapFlag,
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
+    onGameEnd           = self.onGameEnd,
   })
   self:destroyFlagWindow()
   self.flags = {}
@@ -142,31 +158,60 @@ function UIMinimap:addFlag(pos, icon, description, temporary)
   self:centerInPosition(flag, pos)
 end
 
-function UIMinimap:addAlternativeWidget(widget, pos, maxZoom, minZoom)
-  widget.pos = pos
-  widget.maxZoom = maxZoom or 0
-  widget.minZoom = minZoom
-  table.insert(self.alternatives, widget)
+-- Attach data in widget before use this function: pos, alternativeId, temporary, description, minZoom, maxZoom
+function UIMinimap:addAlternativeWidget(widget)
+  local hasAlternativeWidget = table.contains(self.alternatives, widget)
+  local hasChild             = self:hasChild(widget)
+  if hasAlternativeWidget and hasChild then
+    return
+  else
+    -- Ensure it is removed from both lists
+    if hasAlternativeWidget then
+      table.removevalue(self.alternatives, widget)
+    end
+    if hasChild then
+      self:removeChild(widget)
+    end
+  end
+
+  if self.alternativesVisible then
+    self:insertChild(1, widget)
+  end
+  if widget.description then
+    if widget:getStyleName() ~= 'CreatureButtonMinimapWidget' then -- CreatureButtonMinimapWidget updates its tooltip within UICreatureButton
+      widget:setTooltip(widget.description)
+    end
+  end
+  connect(widget, {
+    onDestroy = function() table.removevalue(self.alternatives, widget, nil, true) end
+  })
+  self.alternatives[widget.alternativeId or tostring(widget:getId())] = widget
+  self:centerInPosition(widget, widget.pos)
 end
 
 function UIMinimap:setAlternativeWidgetsVisible(show)
   local layout = self:getLayout()
   layout:disableUpdates()
+  self.alternativesVisible = show
   for _,widget in pairs(self.alternatives) do
     if show then
-      self:insertChild(1, widget)
-      self:centerInPosition(widget, widget.pos)
+      if not self:hasChild(widget) then
+        self:insertChild(1, widget)
+        self:centerInPosition(widget, widget.pos)
+      end
     else
-      self:removeChild(widget)
+      if self:hasChild(widget) then
+        self:removeChild(widget)
+      end
     end
   end
   layout:enableUpdates()
   layout:update()
 end
 
-function UIMinimap:onZoomChange(zoom)
+function UIMinimap:onZoomChange(zoom) -- zoom is from maxZoom -5 (far) to minZoom 5 (near)
   for _,widget in pairs(self.alternatives) do
-    if (not widget.minZoom or widget.minZoom >= zoom) and widget.maxZoom <= zoom then
+    if (not widget.minZoom or widget.minZoom >= zoom) and (widget.maxZoom or 0) <= zoom then
       widget:show()
     else
       widget:hide()

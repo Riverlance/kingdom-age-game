@@ -41,13 +41,18 @@ local categories =
 local bugCategory = REPORT_CATEGORY_MAP
 
 local function sendNewReport(category, comment, position)
-  position = position or { x = 0, y = 0, z = 0 }
   local protocolGame = g_game.getProtocolGame()
   if not protocolGame then
     return
   end
 
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%s;%d;%d;%d", REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
+  position = position or { x = 0, y = 0, z = 0 }
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
+  msg:addString(string.format("%d;%d;%s;%d;%d;%d", REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
+  protocolGame:send(msg)
 end
 
 local function sendUpdateSearch(category, page, rowsPerPage, state)
@@ -56,7 +61,11 @@ local function sendUpdateSearch(category, page, rowsPerPage, state)
     return
   end
 
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%d;%d;%d", REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
+  msg:addString(string.format("%d;%d;%d;%d;%d", REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
+  protocolGame:send(msg)
 end
 
 local function sendUpdateState(row)
@@ -65,7 +74,11 @@ local function sendUpdateState(row)
     return
   end
 
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d;%d", REPORT_MODE_UPDATESTATE, row.state, row.id))
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
+  msg:addString(string.format("%d;%d;%d", REPORT_MODE_UPDATESTATE, row.state, row.id))
+  protocolGame:send(msg)
 end
 
 local function sendRemoveRow(row)
@@ -74,7 +87,11 @@ local function sendRemoveRow(row)
     return
   end
 
-  protocolGame:sendExtendedOpcode(ClientExtOpcodes.ClientBugReport, string.format("%d;%d", REPORT_MODE_REMOVEROW, row.id))
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
+  msg:addString(string.format("%d;%d", REPORT_MODE_REMOVEROW, row.id))
+  protocolGame:send(msg)
 end
 
 local function clearBugReportWindow()
@@ -132,11 +149,11 @@ function GameBugReport.init()
   bugCommentMultilineTextEdit = bugReportWindow:getChildById('bugCommentMultilineTextEdit')
 
   g_keyboard.bindKeyDown('Ctrl+,', GameBugReport.toggle)
-  ProtocolGame.registerExtendedOpcode(GameServerExtOpcodes.GameServerBugReport, GameBugReport.parseBugReports) -- View List
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeBugReport, GameBugReport.parseBugReports) -- View List
 end
 
 function GameBugReport.terminate()
-  ProtocolGame.unregisterExtendedOpcode(GameServerExtOpcodes.GameServerBugReport) -- View List
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeBugReport) -- View List
   g_keyboard.unbindKeyDown('Ctrl+,')
 
   GameBugReport.destroyBugReportWindow()
@@ -536,7 +553,9 @@ end
 
 
 
-function GameBugReport.parseBugReports(protocol, opcode, buffer)
+function GameBugReport.parseBugReports(protocolGame, opcode, msg)
+  local buffer = msg:getString()
+
   if not getWindowState() then
     return
   end

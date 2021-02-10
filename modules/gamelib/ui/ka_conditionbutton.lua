@@ -84,7 +84,7 @@ function UIConditionButton:updateConditionClock()
 
   for _, v in pairs(barColors) do
     if percent > v.percentAbove then
-      conditionBarWidget:setBackgroundColor(v.color)
+      conditionBarWidget:setFillerBackgroundColor(v.color)
       return
     end
   end
