@@ -6,8 +6,10 @@
 desktop.ini
 otclient.exp
 otclient.lib
-bin/*
-config/*
+.project/
+bin/
+config/
+config.otml
 vc12/otclient.sln
 vc12/otclient.vcxproj*
 vc14_dx9/otclient.VC.db
@@ -60,7 +62,6 @@ CMakeLists.txt.user*
 *.pic
 .lvimrc
 .clang_complete
-config.otml
 /modules/otclientrc.lua
 /doc
 !.gitignore
@@ -71,7 +72,6 @@ tags
 Thumbs.db
 .directory
 src/framework/graphics/dx/
-modules/.project/modules.sublime-workspace
 
 #################
 ## Visual Studio
@@ -87,6 +87,7 @@ modules/.project/modules.sublime-workspace
 
 # Build results
 
+.vs/
 [Dd]ebug/
 [Rr]elease/
 x64/
