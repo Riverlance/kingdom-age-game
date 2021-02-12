@@ -163,6 +163,14 @@ function GameInterface.bindTurnKey(key, dir)
   g_keyboard.bindKeyPress(key, callback, gameRootPanel)
 end
 
+function GameInterface.bindActionKeyUp(key)
+  g_keyboard.bindKeyUp(key, function() g_game.sendActionKey(key, true) end)
+end
+
+function GameInterface.bindActionKeyDown(key)
+  g_keyboard.bindKeyDown(key, function() g_game.sendActionKey(key, false) end)
+end
+
 function GameInterface.bindKeys()
   gameRootPanel:setAutoRepeatDelay(200)
 
@@ -199,6 +207,19 @@ function GameInterface.bindKeys()
   g_keyboard.bindKeyDown('Ctrl+Shift+W', function() ClientOptions.setOption('showChat', not ClientOptions.getOption('showChat')) end)
   g_keyboard.bindKeyDown('Ctrl+Shift+A', function() ClientOptions.setOption('showLeftPanel', not ClientOptions.getOption('showLeftPanel')) end)
   g_keyboard.bindKeyDown('Ctrl+Shift+S', function() ClientOptions.setOption('showRightPanel', not ClientOptions.getOption('showRightPanel')) end)
+
+  GameInterface.bindActionKeyUp('Insert')
+  GameInterface.bindActionKeyUp('Delete')
+  GameInterface.bindActionKeyUp('Home')
+  GameInterface.bindActionKeyUp('End')
+  GameInterface.bindActionKeyUp('PageUp')
+  GameInterface.bindActionKeyUp('PageDown')
+  GameInterface.bindActionKeyDown('Insert')
+  GameInterface.bindActionKeyDown('Delete')
+  GameInterface.bindActionKeyDown('Home')
+  GameInterface.bindActionKeyDown('End')
+  GameInterface.bindActionKeyDown('PageUp')
+  GameInterface.bindActionKeyDown('PageDown')
 end
 
 function GameInterface.terminate()

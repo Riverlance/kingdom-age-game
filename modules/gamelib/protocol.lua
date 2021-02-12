@@ -189,7 +189,8 @@ ClientOpcodes =
   ClientOpcodeExtendedOpcode            = 50,
   ClientOpcodeChangeMapAwareRange       = 51,
   ClientOpcodeNpcDialogWindows          = 52,
-  -- Free                                 53 to 60
+  ClientOpcodeActionKey                 = 53,
+  -- Free                                 54 to 60
   ClientOpcodePartyList                 = 61, -- Needed?
   -- Free                                 62 to 99
   ClientOpcodeAutoWalk                  = 100,
