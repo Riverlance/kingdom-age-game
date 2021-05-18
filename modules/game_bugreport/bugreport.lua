@@ -5,7 +5,7 @@ _G.GameBugReport = { }
 local maximumXYValue     = 9999
 local maximumZValue      = 15
 local minimumCommentSize = 50
-local textPattern     = "[^%w%s!?%+-*/=@%(%)%[%]%{%}.,]+" -- Find symbols that are NOT letters, numbers, spaces and !?+-*/=@()[]{}.,
+local textPattern     = '[^%w%s!?%+-*/=@%(%)%[%]%{%}.,]+' -- Find symbols that are NOT letters, numbers, spaces and !?+-*/=@()[]{}.,
 
 local REPORT_MODE_NEWREPORT    = 0
 local REPORT_MODE_UPDATESEARCH = 1
@@ -51,7 +51,7 @@ local function sendNewReport(category, comment, position)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format("%d;%d;%s;%d;%d;%d", REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
+  msg:addString(string.format('%d;%d;%s;%d;%d;%d', REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
   protocolGame:send(msg)
 end
 
@@ -64,7 +64,7 @@ local function sendUpdateSearch(category, page, rowsPerPage, state)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format("%d;%d;%d;%d;%d", REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
+  msg:addString(string.format('%d;%d;%d;%d;%d', REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
   protocolGame:send(msg)
 end
 
@@ -77,7 +77,7 @@ local function sendUpdateState(row)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format("%d;%d;%d", REPORT_MODE_UPDATESTATE, row.state, row.id))
+  msg:addString(string.format('%d;%d;%d', REPORT_MODE_UPDATESTATE, row.state, row.id))
   protocolGame:send(msg)
 end
 
@@ -90,7 +90,7 @@ local function sendRemoveRow(row)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format("%d;%d", REPORT_MODE_REMOVEROW, row.id))
+  msg:addString(string.format('%d;%d', REPORT_MODE_REMOVEROW, row.id))
   protocolGame:send(msg)
 end
 
@@ -116,7 +116,7 @@ end
 
 local function onPositionTextChange(self, maxValue)
   local text = self:getText()
-  if text:match("[^0-9]+") or (tonumber(text) or 0) > maxValue then
+  if text:match('[^0-9]+') or (tonumber(text) or 0) > maxValue then
     self:setText(maxValue)
   end
 end
@@ -348,7 +348,7 @@ local function clearBugReportViewWindow(row)
 end
 
 local function updateReportRowTitle(row)
-  row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. categories[row.category] .. '] ' .. row.comment:sub(0, 35) .. (#row.comment > 35 and "..." or ""))
+  row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. categories[row.category] .. '] ' .. row.comment:sub(0, 35) .. (#row.comment > 35 and '...' or ''))
 end
 
 
@@ -362,7 +362,7 @@ function GameBugReport.listOnChildFocusChange(textList, focusedChild)
   local children = bugViewList:getChildren()
   for i = 1, #children do
     if children[i].state == REPORT_STATE_WORKING then
-      children[i]:setColor("#3264c8")
+      children[i]:setColor('#3264c8')
     elseif children[i].state == REPORT_STATE_DONE then
       children[i]:setOn(true)
     end
@@ -613,7 +613,7 @@ function GameBugReport.removeRow(bugViewList, row) -- After confirm button
 
   -- Ignored fields
   local _bugCategory = 255
-  local _position    = {}
+  local _position    = { }
   local _comment     = ''
   local _page        = 65535
   local _rowsPerPage = 65535
@@ -674,7 +674,7 @@ function GameBugReport.bugViewSetReportState()
 
   -- Ignored fields
   local _bugCategory = 255
-  local _position    = {}
+  local _position    = { }
   local _comment     = ''
   local _page        = 65535
   local _rowsPerPage = 65535

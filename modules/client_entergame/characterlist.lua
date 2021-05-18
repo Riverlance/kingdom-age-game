@@ -51,7 +51,7 @@ local function updateWait(timeStart, timeEnd)
     local time = g_clock.seconds()
     if time <= timeEnd then
       local percent = ((time - timeStart) / (timeEnd - timeStart)) * 100
-      local timeStr = string.format("%.0f", timeEnd - time)
+      local timeStr = string.format('%.0f', timeEnd - time)
 
       local progressBar = waitingWindow:getChildById('progressBar')
       progressBar:setPercent(percent)
@@ -109,7 +109,7 @@ end
 
 function onGameLoginError(message)
   ClientCharacterList.destroyLoadBox()
-  errorBox = displayErrorBox(tr("Login Error"), message)
+  errorBox = displayErrorBox(tr('Login Error'), message)
   errorBox.onOk = function()
     errorBox = nil
     ClientCharacterList.showAgain()
@@ -119,7 +119,7 @@ end
 function onGameLoginToken(unknown)
   ClientCharacterList.destroyLoadBox()
   -- TODO: make it possible to enter a new token here / prompt token
-  errorBox = displayErrorBox(tr("Two-Factor Authentication"), tr('A new authentication token is required.\nLogin again.'))
+  errorBox = displayErrorBox(tr('Two-Factor Authentication'), tr('A new authentication token is required.\nLogin again.'))
   errorBox.onOk = function()
     errorBox = nil
     ClientEnterGame.show()
@@ -129,7 +129,7 @@ end
 function onGameConnectionError(message, code)
   ClientCharacterList.destroyLoadBox()
   local text = translateNetworkError(code, g_game.getProtocolGame() and g_game.getProtocolGame():isConnecting(), message)
-  errorBox = displayErrorBox(tr("Connection Error"), text)
+  errorBox = displayErrorBox(tr('Connection Error'), text)
   errorBox.onOk = function()
     errorBox = nil
     ClientCharacterList.showAgain()
@@ -138,7 +138,7 @@ end
 
 function onGameUpdateNeeded(signature)
   ClientCharacterList.destroyLoadBox()
-  errorBox = displayErrorBox(tr("Update needed"), tr('Enter with your account again to update your client.'))
+  errorBox = displayErrorBox(tr('Update needed'), tr('Enter with your account again to update your client.'))
   errorBox.onOk = function()
     errorBox = nil
     ClientCharacterList.showAgain()
@@ -284,9 +284,9 @@ function ClientCharacterList.create(characters, account, otui)
 
   -- account
   if account.premDays >= 1 and account.premDays < 65535 then
-    accountStatusLabel:setText(tr("Premium Account - Days left") .. ": " .. account.premDays)
+    accountStatusLabel:setText(tr('Premium Account - Days left') .. ': ' .. account.premDays)
   elseif account.premDays >= 65535 then
-    accountStatusLabel:setText(tr("Lifetime Premium Account"))
+    accountStatusLabel:setText(tr('Lifetime Premium Account'))
   else
     accountStatusLabel:setText(tr('Free Account'))
   end
@@ -400,7 +400,7 @@ function ClientCharacterList.updateLoginname(name, currentLoginname, newLoginnam
     for i = 1, #children do
       if children[i].name:lower() == name:lower() and children[i].loginname:lower() == currentLoginname:lower() then
         children[i].loginname = newLoginname
-        if newLoginname == "" then
+        if newLoginname == '' then
           children[i]:getChildById('name'):setText(children[i].name)
         else
           children[i]:getChildById('name'):setText(newLoginname)

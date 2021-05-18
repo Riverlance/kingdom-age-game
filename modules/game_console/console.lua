@@ -4,7 +4,7 @@ _G.GameConsole = { }
 
 SpeakTypesSettings =
 {
-  none = {},
+  none = { },
   say = { speakType = MessageModes.Say, color = '#FFFF00' },
   whisper = { speakType = MessageModes.Whisper, color = '#FFFF00' },
   yell = { speakType = MessageModes.Yell, color = '#FFFF00' },
@@ -78,7 +78,7 @@ currentMessageIndex = 0
 ignoreNpcMessages = false
 defaultTab = nil
 serverTab = nil
-filters = {}
+filters = { }
 
 local communicationSettings =
 {
@@ -87,11 +87,11 @@ local communicationSettings =
   privateMessages = false,
   yelling = false,
   allowVIPs = false,
-  ignoredPlayers = {},
-  whitelistedPlayers = {}
+  ignoredPlayers = { },
+  whitelistedPlayers = { }
 }
 
-local consoleLog = {}
+local consoleLog = { }
 local MAX_LOGLINES = 500
 local MAX_LINES = 100
 
@@ -103,7 +103,7 @@ clonedTab = nil
 cloneTab = nil
 clonedSplitter = nil
 
--- Contains letter width for font "verdana-11px-antialised" as console is based on it
+-- Contains letter width for font 'verdana-11px-antialised' as console is based on it
 local letterWidth = -- New line (10) and Space (32) have width 1 because they are printed and not replaced with spacer
 {
   [10] = 1, [32] = 1, [33] = 3, [34] = 6, [35] = 8, [36] = 7, [37] = 13, [38] = 9, [39] = 3, [40] = 5, [41] = 5, [42] = 6, [43] = 8, [44] = 4, [45] = 5, [46] = 3, [47] = 8,
@@ -164,7 +164,7 @@ function GameConsole.init()
     GameConsole.toggleClonedTab(GameConsole.getCurrentTab())
   end
 
-  channels = {}
+  channels = { }
 
   consolePanel.onKeyPress = function(self, keyCode, keyboardModifiers)
     if not (keyboardModifiers == KeyboardCtrlModifier and keyCode == KeyC) then
@@ -264,7 +264,7 @@ end
 function GameConsole.selectAll(consoleBuffer)
   GameConsole.clearSelection(consoleBuffer)
   if consoleBuffer:getChildCount() > 0 then
-    local text = {}
+    local text = { }
     for _,label in pairs(consoleBuffer:getChildren()) do
       label:selectAll()
       table.insert(text, label:getSelection())
@@ -343,7 +343,7 @@ function GameConsole.load()
   local settings = Client.getPlayerSettings('log.console')
 
   -- Load kept console log after login
-  consoleLog = settings:getList('consoleLog') or {}
+  consoleLog = settings:getList('consoleLog') or { }
 
   GameConsole.loadCommunicationSettings()
 end
@@ -367,8 +367,8 @@ end
 function GameConsole.clear()
   -- Save last open channels
   local settings = Client.getPlayerSettings()
-  local lastChannelsOpen = settings:getNode('lastChannelsOpen') or {}
-  local savedChannels = {}
+  local lastChannelsOpen = settings:getNode('lastChannelsOpen') or { }
+  local savedChannels = { }
   local set = false
   for channelId, channelName in pairs(channels) do
     if type(channelId) == 'number' then
@@ -379,7 +379,7 @@ function GameConsole.clear()
   if set then
     lastChannelsOpen = savedChannels
   else
-    lastChannelsOpen = {}
+    lastChannelsOpen = { }
   end
   settings:setNode('lastChannelsOpen', lastChannelsOpen)
   settings:save()
@@ -389,7 +389,7 @@ function GameConsole.clear()
     local tab = consoleTabBar:getTab(channelName)
     consoleTabBar:removeTab(tab)
   end
-  channels = {}
+  channels = { }
 
   consoleTabBar:removeTab(defaultTab)
   defaultTab = nil
@@ -474,7 +474,7 @@ function GameConsole.removeTab(tab)
       end
     end
     g_game.leaveChannel(tab.channelId)
-  elseif tab:getText() == "NPCs" then
+  elseif tab:getText() == 'NPCs' then
     g_game.closeNpcChannel()
   end
 
@@ -544,14 +544,14 @@ end
 
 -- Return information about start, end in the string and the highlighted words
 function GameConsole.getHighlightedText(text)
-  local tmpData = {}
+  local tmpData = { }
 
   repeat
-    local tmp = {string.find(text, "{([^}]+)}", tmpData[#tmpData-1])}
+    local tmp = {string.find(text, '{([^}]+)}', tmpData[#tmpData-1])}
     for _, v in pairs(tmp) do
       table.insert(tmpData, v)
     end
-  until not(string.find(text, "{([^}]+)}", tmpData[#tmpData-1]))
+  until not(string.find(text, '{([^}]+)}', tmpData[#tmpData-1]))
 
   return tmpData
 end
@@ -587,12 +587,12 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
       labelHighlight:fill('parent')
 
       labelHighlight:setId('consoleLabelHighlight' .. consoleBuffer:getChildCount())
-      labelHighlight:setColor("#1f9ffe")
+      labelHighlight:setColor('#1f9ffe')
 
       -- Remove the curly braces
       for i = 1, #highlightData / 3 do
         local dataBlock = { _start = highlightData[(i-1)*3+1], _end = highlightData[(i-1)*3+2], words = highlightData[(i-1)*3+3] }
-        text = text:gsub("%{(.-)%}", dataBlock.words, 1)
+        text = text:gsub('%{(.-)%}', dataBlock.words, 1)
 
         -- Recalculate positions as braces are removed
         highlightData[(i-1)*3+1] = dataBlock._start - ((i-1) * 2)
@@ -602,7 +602,7 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
 
       -- Calculate the positions of the highlighted text and fill with string.char(127) [Width: 1]
       local drawText = label:getDrawText()
-      local tmpText = ""
+      local tmpText = ''
       for i = 1, #highlightData / 3 do
         local dataBlock = { _start = highlightData[(i-1)*3+1], _end = highlightData[(i-1)*3+2], words = highlightData[(i-1)*3+3] }
         local lastBlockEnd = (highlightData[(i-2)*3+2] or 1)
@@ -624,7 +624,7 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
 
           tmpText = tmpText .. string.rep(fillChar, letterWidth[tmpChar])
       end
-      label.highlightWords = {}
+      label.highlightWords = { }
       for i = 1, #highlightData, 3 do
         label.highlightWords[highlightData[i]] = {last = highlightData[i+1], word = highlightData[i+2]}
       end
@@ -663,7 +663,7 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
   end
 
   label.onDragLeave = function(self, droppedWidget, mousePos)
-    local text = {}
+    local text = { }
     if consoleBuffer.selection then
       for selectionChild = consoleBuffer.selection.first, consoleBuffer.selection.last do
         local label = self:getParent():getChildByIndex(selectionChild)
@@ -791,7 +791,7 @@ function GameConsole.openClonedTab(tab)
   consoleContentPanel:setOn(true)
 
   clonedSplitter:show()
-  clonedSplitter:setMarginRight(g_settings.getNumber("clonedSplitter", contentPanel:getWidth() / 2))
+  clonedSplitter:setMarginRight(g_settings.getNumber('clonedSplitter', contentPanel:getWidth() / 2))
   GameConsole.cloneMessages(tab, cloneTab)
   return true
 end
@@ -861,7 +861,7 @@ function GameConsole.processChannelTabMenu(tab, mousePos, mouseButton)
     menu:addOption(tr('Save messages'), function()
       local panel = consoleTabBar:getTabPanel(tab)
       local consoleBuffer = panel:getChildById('consoleBuffer')
-      local lines = {}
+      local lines = { }
       for _,label in pairs(consoleBuffer:getChildren()) do
         table.insert(lines, label:getText())
       end
@@ -1045,11 +1045,11 @@ function GameConsole.sendMessage(message, tab)
     channel = 0
   end
 
-  local findIni, findEnd, chatCommandInitial, chatCommandPrivate, chatCommandEnd, chatCommandMessage = message:find("([%*%@])(.+)([%*%@])(.*)")
+  local findIni, findEnd, chatCommandInitial, chatCommandPrivate, chatCommandEnd, chatCommandMessage = message:find('([%*%@])(.+)([%*%@])(.*)')
   if findIni ~= nil and findIni == 1 then -- player used private chat command
     if chatCommandInitial == chatCommandEnd then
       chatCommandPrivateRepeat = false
-      if chatCommandInitial == "*" then
+      if chatCommandInitial == '*' then
         GameConsole.setTextEditText('*'.. chatCommandPrivate .. '* ')
       end
       message = chatCommandMessage:trim()
@@ -1057,7 +1057,7 @@ function GameConsole.sendMessage(message, tab)
     end
   end
 
-  message = message:gsub("^(%s*)(.*)","%2") -- remove space characters from message init
+  message = message:gsub('^(%s*)(.*)', '%2') -- remove space characters from message init
   if #message == 0 then
     return false -- No filter results
   end
@@ -1211,7 +1211,7 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
       if #highlightData > 0 then
         for i = 1, #highlightData / 3 do
           local dataBlock = { _start = highlightData[(i-1)*3+1], _end = highlightData[(i-1)*3+2], words = highlightData[(i-1)*3+3] }
-          staticMessage = staticMessage:gsub("{"..dataBlock.words.."}", dataBlock.words)
+          staticMessage = staticMessage:gsub('{'..dataBlock.words..'}', dataBlock.words)
         end
       end
       staticText:setColor(speaktype.color)
@@ -1340,8 +1340,8 @@ function GameConsole.onChannelList(channelList)
 end
 
 function GameConsole.loadCommunicationSettings()
-  communicationSettings.whitelistedPlayers = {}
-  communicationSettings.ignoredPlayers = {}
+  communicationSettings.whitelistedPlayers = { }
+  communicationSettings.ignoredPlayers = { }
 
   local ignoreNode = g_settings.getNode('IgnorePlayers')
   if ignoreNode then
@@ -1365,13 +1365,13 @@ function GameConsole.loadCommunicationSettings()
 end
 
 function GameConsole.saveCommunicationSettings()
-  local tmpIgnoreList = {}
+  local tmpIgnoreList = { }
   local ignoredPlayers = GameConsole.getIgnoredPlayers()
   for i = 1, #ignoredPlayers do
     table.insert(tmpIgnoreList, ignoredPlayers[i])
   end
 
-  local tmpWhiteList = {}
+  local tmpWhiteList = { }
   local whitelistedPlayers = GameConsole.getWhitelistedPlayers()
   for i = 1, #whitelistedPlayers do
     table.insert(tmpWhiteList, whitelistedPlayers[i])
@@ -1484,7 +1484,7 @@ function GameConsole.onClickIgnoreButton()
     removeWhitelistButton:disable()
   end
 
-  local newlyIgnoredPlayers = {}
+  local newlyIgnoredPlayers = { }
   local addIgnoreName = communicationWindow:getChildById('ignoreNameEdit')
   local addIgnoreButton = communicationWindow:getChildById('buttonIgnoreAdd')
   local addIgnoreFunction = function()
@@ -1508,7 +1508,7 @@ function GameConsole.onClickIgnoreButton()
     end
   addIgnoreButton.onClick = addIgnoreFunction
 
-  local newlyWhitelistedPlayers = {}
+  local newlyWhitelistedPlayers = { }
   local addWhitelistName = communicationWindow:getChildById('whitelistNameEdit')
   local addWhitelistButton = communicationWindow:getChildById('buttonWhitelistAdd')
   local addWhitelistFunction = function()
@@ -1549,12 +1549,12 @@ function GameConsole.onClickIgnoreButton()
 
   local saveButton = communicationWindow:recursiveGetChildById('buttonSave')
   saveButton.onClick = function()
-      communicationSettings.ignoredPlayers = {}
+      communicationSettings.ignoredPlayers = { }
       for i = 1, ignoreListPanel:getChildCount() do
         GameConsole.addIgnoredPlayer(ignoreListPanel:getChildByIndex(i):getText())
       end
 
-      communicationSettings.whitelistedPlayers = {}
+      communicationSettings.whitelistedPlayers = { }
       for i = 1, whiteListPanel:getChildCount() do
         GameConsole.addWhitelistedPlayer(whiteListPanel:getChildByIndex(i):getText())
       end
@@ -1593,7 +1593,7 @@ function GameConsole.online()
 
   -- Open last channels
   local settings = Client.getPlayerSettings()
-  for channelName, channelId in pairs(settings:getNode('lastChannelsOpen') or {}) do
+  for channelName, channelId in pairs(settings:getNode('lastChannelsOpen') or { }) do
     channelId = tonumber(channelId)
     if channelId ~= -1 and not table.find(channels, channelId) then
       g_game.joinChannel(channelId)

@@ -108,13 +108,13 @@ function UIItem:onMouseRelease(mousePosition, mouseButton)
      ((g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton) or
       (g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton)) then
     self.cancelNextRelease = true
-    if GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil) then
+    if GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil, item) then
       return true
     end
     return false
-  elseif GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil) then
+  elseif GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil, item) then
     return true
-  elseif g_ui.isMouseGrabbed() then -- For double click of item "use with" work
+  elseif g_ui.isMouseGrabbed() then -- For double click of item 'use with' work
     return true
   end
   return false

@@ -47,7 +47,7 @@ function live_module_reload(name)
     return
   end
 
-  local files = {}
+  local files = { }
   local hasFile = false
   for _,file in pairs(g_resources.listDirectoryFiles('/' .. name)) do
     local filepath = '/' .. name .. '/' .. file
@@ -82,7 +82,7 @@ function live_module_reload(name)
 end
 
 function live_sprites_reload()
-  local files = {}
+  local files = { }
   for _,file in pairs(g_resources.listDirectoryFiles('/things')) do
     local filepath = '/things/' .. file
     local time = g_resources.getFileTime(filepath)

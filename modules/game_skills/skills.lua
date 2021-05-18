@@ -227,7 +227,7 @@ function GameSkills.checkExpSpeed()
     player.expSpeed = (currentExp - player.lastExps[1][1])/(currentTime - player.lastExps[1][2])
     GameSkills.onLevelChange(player, player:getLevel(), player:getLevelPercent())
   else
-    player.lastExps = {}
+    player.lastExps = { }
   end
   table.insert(player.lastExps, {currentExp, currentTime})
   if #player.lastExps > 30 then
@@ -263,14 +263,14 @@ function GameSkills.onStaminaChange(localPlayer, stamina)
     minutes = '0' .. minutes
   end
 
-  GameSkills.setSkillValue('stamina', hours .. ":" .. minutes)
+  GameSkills.setSkillValue('stamina', hours .. ':' .. minutes)
 
   local percent = math.floor(100 * stamina / (42 * 60)) -- max is 42 hours
   local text    = tr('Remaining %s%% (%s hours and %s minutes)', percent, hours, minutes)
   if stamina <= 840 and stamina > 0 then -- red phase
-    text = string.format("%s\n%s", text, tr("You are receiving only 50%% of experience\nand you may not receive loot from monsters"))
+    text = string.format('%s\n%s', text, tr('You are receiving only 50%% of experience\nand you may not receive loot from monsters'))
   elseif stamina == 0 then
-    text = string.format("%s\n%s", text, tr("You may not receive experience and loot from monsters"))
+    text = string.format('%s\n%s', text, tr('You may not receive experience and loot from monsters'))
   end
   GameSkills.setSkillPercent('stamina', percent, text)
 end
@@ -294,7 +294,7 @@ function GameSkills.setupRegeneration(time)
     seconds = '0' .. seconds
   end
 
-  GameSkills.setSkillValue('regenerationTime', minutes .. ":" .. seconds)
+  GameSkills.setSkillValue('regenerationTime', minutes .. ':' .. seconds)
   GameSkills.checkAlert('regenerationTime', time, false, 300)
 end
 function GameSkills.onRegenerationChange(localPlayer, time)

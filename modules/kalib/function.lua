@@ -13,8 +13,8 @@ function expToAdvance(currentLevel, currentExp)
 end
 
 function getExperienceTooltipText(localPlayer, value, percent)
-  local ret = tr('Remaining %d%% (about %d XP) to advance to level %d', string.format("%.2f", 100 - percent), expToAdvance(localPlayer:getLevel(), localPlayer:getExperience()), value + 1)
-  if type(localPlayer.expSpeed) == "number" then
+  local ret = tr('Remaining %d%% (about %d XP) to advance to level %d', string.format('%.2f', 100 - percent), expToAdvance(localPlayer:getLevel(), localPlayer:getExperience()), value + 1)
+  if type(localPlayer.expSpeed) == 'number' then
     local xpPerHour = math.floor(localPlayer.expSpeed * 3600)
     if xpPerHour > 0 then
       local xpNextLevel = expForLevel(localPlayer:getLevel() + 1)

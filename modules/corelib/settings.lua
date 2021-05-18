@@ -1,7 +1,7 @@
 g_settings = makesingleton(g_configs.getSettings())
 
 function g_settings.getValue(nodeKey, key, defaultValue) -- (nodeKey, key[, defaultValue])
-  local nodeSettings = g_settings.getNode(nodeKey) or {}
+  local nodeSettings = g_settings.getNode(nodeKey) or { }
   local value
   if defaultValue ~= nil then
     value = defaultValue
@@ -13,7 +13,7 @@ function g_settings.getValue(nodeKey, key, defaultValue) -- (nodeKey, key[, defa
 end
 
 function g_settings.setValue(nodeKey, key, value) -- (nodeKey, key, value)
-  local nodeSettings = {}
+  local nodeSettings = { }
   nodeSettings[key] = value
   g_settings.mergeNode(nodeKey, nodeSettings)
 end

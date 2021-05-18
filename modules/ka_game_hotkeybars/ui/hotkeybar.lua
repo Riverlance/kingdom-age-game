@@ -5,8 +5,8 @@ local containersLimit = 10
 function UIHotkeybar.create()
   local obj = UIHotkeybar.internalCreate()
   obj:setId('hotkeybar_none')
-  obj.hotkeys = {}
-  obj.arrows = {}
+  obj.hotkeys = { }
+  obj.arrows = { }
   obj.alignment = 'none'
   obj.mapMargin = 4
   obj.hotkeySize = 36
@@ -149,7 +149,7 @@ function UIHotkeybar:unload()
     end
   end
 
-  self.hotkeys = {}
+  self.hotkeys = { }
   self:updateSize()
 end
 
@@ -164,7 +164,7 @@ end
 
 function UIHotkeybar:load()
   local settings = Client.getPlayerSettings()
-  local hotkeyBars = settings:getNode('hotkeybars') or {}
+  local hotkeyBars = settings:getNode('hotkeybars') or { }
 
   if table.empty(hotkeyBars) then
     return
@@ -175,7 +175,7 @@ function UIHotkeybar:load()
     return
   end
 
-  local tmp = {}
+  local tmp = { }
   for k, keyCombo in pairs(hotkeyBars) do
     table.insert(tmp, {k, tostring(keyCombo)})
   end
@@ -188,13 +188,13 @@ end
 
 function UIHotkeybar:save()
   local settings = Client.getPlayerSettings()
-  local hotkeyBars = settings:getNode('hotkeybars') or {}
+  local hotkeyBars = settings:getNode('hotkeybars') or { }
 
   for k, v in pairs(hotkeyBars) do
     hotkeyBars[k] = v
   end
 
-  hotkeyBars['Hotkeybar' .. self.id] = {}
+  hotkeyBars['Hotkeybar' .. self.id] = { }
 
   for k, v in ipairs(self.hotkeys) do
     table.insert(hotkeyBars['Hotkeybar' .. self.id], v)

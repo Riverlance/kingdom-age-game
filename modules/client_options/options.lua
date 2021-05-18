@@ -77,7 +77,7 @@ local defaultOptions = {
 local optionsWindow
 local optionsButton
 local optionsTabBar
-local options = {}
+local options = { }
 
 local generalPanel
 local controlPanel
@@ -194,7 +194,7 @@ function ClientOptions.setup()
       ClientOptions.setOption(k, g_settings.getNumber(k), true)
     elseif type(v) == 'string' then
       ClientOptions.setOption(k, g_settings.getString(k), true)
-    elseif k == "rightStickerComboBox" or k == "leftStickerComboBox" then
+    elseif k == 'rightStickerComboBox' or k == 'leftStickerComboBox' then
       ClientOptions.setOption(k, g_settings.get(k), true)
     end
   end
@@ -563,16 +563,16 @@ function ClientOptions.setOption(key, value, force)
     local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
     rightStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
 
-  elseif key == "shaderFilterComboBox" then
+  elseif key == 'shaderFilterComboBox' then
     shaderFilterComboBox:setOption(value)
 
-  elseif key == "viewModeComboBox" then
+  elseif key == 'viewModeComboBox' then
     viewModeComboBox:setOption(value)
 
-  elseif key == "leftStickerComboBox" then
+  elseif key == 'leftStickerComboBox' then
     leftStickerComboBox:setOption(value)
 
-  elseif key == "rightStickerComboBox" then
+  elseif key == 'rightStickerComboBox' then
     rightStickerComboBox:setOption(value)
 
   elseif modules.game_interface and key == 'walkingRepeatDelayScrollBar' then
@@ -581,6 +581,9 @@ function ClientOptions.setOption(key, value, force)
   elseif key == 'smoothWalk' then
     controlPanel:getChildById('walkingSensitivityScrollBar'):setEnabled(value)
     controlPanel:getChildById('walkingRepeatDelayScrollBar'):setEnabled(value)
+    if not value then
+      ClientOptions.setOption('walkingRepeatDelayScrollBar', 200)
+    end
 
   elseif key == 'bouncingKeys' then
     controlPanel:getChildById('bouncingKeysDelayScrollBar'):setEnabled(value)
@@ -636,7 +639,7 @@ function ClientOptions.updateStickers()
   local leftStickerWidget = GameInterface.getLeftFirstPanel():getChildById('gameLeftPanelSticker')
   if leftStickerWidget then
     local value = g_settings.get(leftStickerComboBox:getId())
-    value = type(value) == "string" and value ~= "" and value or defaultOptions.leftSticker
+    value = type(value) == 'string' and value ~= '' and value or defaultOptions.leftSticker
 
     leftStickerComboBox:setOption(value) -- Make sure combobox has same as value at g_settings
     leftStickerComboBox.tooltipAddons = value ~= defaultOptions.leftSticker and { {{ image = PanelStickers[value], align = AlignCenter }} } or nil
@@ -647,7 +650,7 @@ function ClientOptions.updateStickers()
   local rightStickerWidget = GameInterface.getRightFirstPanel():getChildById('gameRightPanelSticker')
   if rightStickerWidget then
     local value = g_settings.get(rightStickerComboBox:getId())
-    value = type(value) == "string" and value ~= "" and value or defaultOptions.rightSticker
+    value = type(value) == 'string' and value ~= '' and value or defaultOptions.rightSticker
 
     rightStickerComboBox:setOption(value) -- Make sure combobox has same as value at g_settings
     rightStickerComboBox.tooltipAddons = value ~= defaultOptions.rightSticker and { {{ image = PanelStickers[value], align = AlignCenter }} } or nil

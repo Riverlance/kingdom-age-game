@@ -1,5 +1,5 @@
 -- @docclass
-UITabBar = extends(UIWidget, "UITabBar")
+UITabBar = extends(UIWidget, 'UITabBar')
 
 -- private functions
 local function onTabClick(tab)
@@ -16,7 +16,7 @@ end
 function UITabBar.create()
   local tabbar = UITabBar.internalCreate()
   tabbar:setFocusable(false)
-  tabbar.tabs = {}
+  tabbar.tabs = { }
   return tabbar
 end
 
@@ -54,7 +54,7 @@ function UITabBar:addTab(text, panel, icon)
     self:selectTab(tab)
   end
 
-  local tabStyle = {}
+  local tabStyle = { }
   tabStyle['icon-source'] = icon
   tab:mergeStyle(tabStyle)
 
@@ -65,7 +65,7 @@ function UITabBar:addButton(text, func, icon)
   local button = g_ui.createWidget(self:getStyleName() .. 'Button', self.buttonsPanel)
   button:setText(text)
 
-  local style = {}
+  local style = { }
   style['icon-source'] = icon
   button:mergeStyle(style)
 

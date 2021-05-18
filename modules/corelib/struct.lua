@@ -1,7 +1,7 @@
-Struct = {}
+Struct = { }
 
 function Struct.pack(format, ...)
-  local stream = {}
+  local stream = { }
   local vars = {...}
   local endianness = true
 
@@ -18,7 +18,7 @@ function Struct.pack(format, ...)
         val = val + 2 ^ (n * 8 - 1)
       end
 
-      local bytes = {}
+      local bytes = { }
       for j = 1, n do
         table.insert(bytes, string.char(val % (2 ^ 8)))
         val = math.floor(val / (2 ^ 8))
@@ -34,8 +34,8 @@ function Struct.pack(format, ...)
       local sign = 0
 
       if val < 0 then
-        sign = 1 
-        val = -val 
+        sign = 1
+        val = -val
       end
 
       local mantissa, exponent = math.frexp(val)
@@ -47,7 +47,7 @@ function Struct.pack(format, ...)
         exponent = exponent + ((opt == 'd') and 1022 or 126)
       end
 
-      local bytes = {}
+      local bytes = { }
       if opt == 'd' then
         val = mantissa
         for i = 1, 6 do
@@ -93,7 +93,7 @@ function Struct.pack(format, ...)
 end
 
 function Struct.unpack(format, stream)
-  local vars = {}
+  local vars = { }
   local iterator = 1
   local endianness = true
 
@@ -149,7 +149,7 @@ function Struct.unpack(format, stream)
         table.insert(vars, math.ldexp(mantissa, exponent - ((opt == 'd') and 1023 or 127)))
       end
     elseif opt == 's' then
-      local bytes = {}
+      local bytes = { }
       for j = iterator, stream:len() do
         if stream:sub(j, j) == string.char(0) then
           break

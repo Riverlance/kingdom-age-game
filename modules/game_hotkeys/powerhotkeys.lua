@@ -79,12 +79,12 @@ function GamePowerHotkeys.send(flag, keyCombo) -- ([flag], [keyCombo]) -- (flag:
 
   -- If has flag, send flag instead of power id
   if flag then
-    g_game.sendPowerBuffer(string.format("%d:%d:%d:%d", flag, 0, 0, 0))
+    g_game.sendPowerBuffer(string.format('%d:%d:%d:%d', flag, 0, 0, 0))
     return
   end
 
   -- Send power id and mouse position
-  g_game.sendPowerBuffer(string.format("%d:%d:%d:%d", powerBoost_lastPower, toPos.x, toPos.y, toPos.z))
+  g_game.sendPowerBuffer(string.format('%d:%d:%d:%d', powerBoost_lastPower, toPos.x, toPos.y, toPos.z))
 
   if keyCombo then
     if modules.ka_game_hotkeybars and lastHotkeyTime > 0 then
@@ -151,8 +151,8 @@ function GamePowerHotkeys.removeBoostImage()
   powerBoost_state_image = false
   if modules.ka_game_screenimage then
     for boostLevel = powerBoost_first, powerBoost_last do
-      GameScreenImage.removeImage(string.format("system/power_boost/normal_%d.png", boostLevel), powerBoost_fadeout, 0)
-      GameScreenImage.removeImage(string.format("system/power_boost/extra_%d.png", boostLevel), powerBoost_fadeout, 0)
+      GameScreenImage.removeImage(string.format('system/power_boost/normal_%d.png', boostLevel), powerBoost_fadeout, 0)
+      GameScreenImage.removeImage(string.format('system/power_boost/extra_%d.png', boostLevel), powerBoost_fadeout, 0)
     end
   end
 
@@ -199,16 +199,16 @@ function GamePowerHotkeys.setBoostImage(boostTime) -- ([boostTime])
     powerBoost_state_image = true
   else
     if modules.ka_game_screenimage then
-      GameScreenImage.removeImage(string.format("system/power_boost/normal_%d.png", boostLevel - 1), powerBoost_fadeout, 0)
-      GameScreenImage.removeImage(string.format("system/power_boost/extra_%d.png", boostLevel - 1), powerBoost_fadeout, 0)
+      GameScreenImage.removeImage(string.format('system/power_boost/normal_%d.png', boostLevel - 1), powerBoost_fadeout, 0)
+      GameScreenImage.removeImage(string.format('system/power_boost/extra_%d.png', boostLevel - 1), powerBoost_fadeout, 0)
     end
   end
 
   local ret = false
   if powerBoost_state_image then
     if modules.ka_game_screenimage and boostTime ~= 0 then
-      GameScreenImage.addImage(string.format("system/power_boost/normal_%d.png", boostLevel), powerBoost_fadein, 1, powerBoost_resizex, powerBoost_resizey, 0)
-      GameScreenImage.addImage(string.format("system/power_boost/extra_%d.png", boostLevel), powerBoost_fadein, 1, powerBoost_resizex, powerBoost_resizey, 0)
+      GameScreenImage.addImage(string.format('system/power_boost/normal_%d.png', boostLevel), powerBoost_fadein, 1, powerBoost_resizex, powerBoost_resizey, 0)
+      GameScreenImage.addImage(string.format('system/power_boost/extra_%d.png', boostLevel), powerBoost_fadein, 1, powerBoost_resizex, powerBoost_resizey, 0)
     end
 
     powerBoost_event_image = scheduleEvent(function() GamePowerHotkeys.setBoostImage(boostTime) end, boostTime ~= 0 and powerBoost_time or 0)
@@ -354,7 +354,7 @@ function GamePowerHotkeys.updateHotkeyLabel(hotkeyLabel, params)
     level = power.level
   end
 
-  hotkeyLabel:setText(string.format("%s[Power] %s", params.text, name and string.format('%s%s', name, level and string.format(' (level %d)', level) or '') or 'You are not able to use this power.'))
+  hotkeyLabel:setText(string.format('%s[Power] %s', params.text, name and string.format('%s%s', name, level and string.format(' (level %d)', level) or '') or 'You are not able to use this power.'))
 
   if powerId then
     hotkeyLabel:setColor(HotkeyColors.powerColor)

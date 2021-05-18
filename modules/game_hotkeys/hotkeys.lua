@@ -37,8 +37,8 @@ hotkeyText = nil
 sendAutomatically = nil
 defaultComboKeys = nil
 currentHotkeys = nil
-boundCombosCallback = {}
-hotkeyList = {}
+boundCombosCallback = { }
+hotkeyList = { }
 lastHotkeyTime = g_clock.millis()
 
 
@@ -248,7 +248,7 @@ end
 
 function GameHotkeys.load(forceDefaults)
   hotkeysManagerLoaded = false
-  local hotkeySettings = Client.getPlayerSettings():getNode('hotkeys') or {}
+  local hotkeySettings = Client.getPlayerSettings():getNode('hotkeys') or { }
   if table.empty(hotkeySettings) then
     GameHotkeys.loadDefaultComboKeys()
   end
@@ -271,11 +271,11 @@ function GameHotkeys.unload()
     g_keyboard.unbindKeyPress(keyCombo, callback)
   end
 
-  boundCombosCallback = {}
+  boundCombosCallback = { }
   currentHotkeys:destroyChildren()
   currentHotkeyLabel = nil
   GameHotkeys.updateHotkeyForm(true)
-  hotkeyList = {}
+  hotkeyList = { }
 end
 
 function GameHotkeys.reset()
@@ -290,7 +290,7 @@ end
 
 function GameHotkeys.save()
   local settings = Client.getPlayerSettings()
-  local hotkeys = {}
+  local hotkeys = { }
 
   GameHotkeys.sort()
   for index, hotkey in ipairs(currentHotkeys:getChildren()) do
@@ -370,7 +370,7 @@ function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
   if not string.exists(keyCombo) then
     return
   end
-  hotkeyList[keyCombo] = keySettings or {}
+  hotkeyList[keyCombo] = keySettings or { }
 
   local hotkeyLabel = currentHotkeys:getChildById(keyCombo)
   currentHotkeyLabel = hotkeyLabel
@@ -424,11 +424,11 @@ function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
     hotkeyLabel.itemId = nil
     hotkeyLabel.subType = nil
     hotkeyLabel.useType = nil
-    hotkeyLabel.value = ""
+    hotkeyLabel.value = ''
   end
   boundCombosCallback[keyCombo] = function()
     local textEdit = GameConsole.getFooterPanel():getChildById('consoleTextEdit')
-    if textEdit and textEdit:isEnabled() and string.match(keyCombo, "^%C$") then
+    if textEdit and textEdit:isEnabled() and string.match(keyCombo, '^%C$') then
       return
     end
 

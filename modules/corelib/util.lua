@@ -1,7 +1,7 @@
 -- @docfuncs @{
 
 function print(...)
-  local msg = ""
+  local msg = ''
   local args = {...}
   local appendSpace = #args > 1
   for i,v in ipairs(args) do
@@ -126,9 +126,9 @@ function newclass(name)
     perror(debug.traceback('new class has no name.'))
   end
 
-  local class = {}
+  local class = { }
   function class.internalCreate()
-    local instance = {}
+    local instance = { }
     for k,v in pairs(class) do
       instance[k] = v
     end
@@ -145,7 +145,7 @@ function extends(base, name)
     perror(debug.traceback('extended class has no name.'))
   end
 
-  local derived = {}
+  local derived = { }
   function derived.internalCreate()
     local instance = base.create()
     for k,v in pairs(derived) do
@@ -229,10 +229,10 @@ end
 
 function getfsrcpath(depth)
   depth = depth or 2
-  local info = debug.getinfo(1+depth, "Sn")
+  local info = debug.getinfo(1+depth, 'Sn')
   local path
   if info.short_src then
-    path = info.short_src:match("(.*)/.*")
+    path = info.short_src:match('(.*)/.*')
   end
   if not path then
     path = '/'
@@ -366,7 +366,7 @@ function getOppositeAnchor(anchor)
 end
 
 function makesingleton(obj)
-  local singleton = {}
+  local singleton = { }
   if obj.getClassName then
     for key,value in pairs(_G[obj:getClassName()]) do
       if type(value) == 'function' then

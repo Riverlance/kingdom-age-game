@@ -18,16 +18,16 @@ capLabel = nil
 
 InventorySlotStyles =
 {
-  [InventorySlotHead] = "HeadSlot",
-  [InventorySlotNeck] = "NeckSlot",
-  [InventorySlotBack] = "BackSlot",
-  [InventorySlotBody] = "BodySlot",
-  [InventorySlotRight] = "RightSlot",
-  [InventorySlotLeft] = "LeftSlot",
-  [InventorySlotLeg] = "LegSlot",
-  [InventorySlotFeet] = "FeetSlot",
-  [InventorySlotFinger] = "FingerSlot",
-  [InventorySlotAmmo] = "AmmoSlot"
+  [InventorySlotHead] = 'HeadSlot',
+  [InventorySlotNeck] = 'NeckSlot',
+  [InventorySlotBack] = 'BackSlot',
+  [InventorySlotBody] = 'BodySlot',
+  [InventorySlotRight] = 'RightSlot',
+  [InventorySlotLeft] = 'LeftSlot',
+  [InventorySlotLeg] = 'LegSlot',
+  [InventorySlotFeet] = 'FeetSlot',
+  [InventorySlotFinger] = 'FingerSlot',
+  [InventorySlotAmmo] = 'AmmoSlot'
 }
 
 inventoryTopMenuButton = nil
@@ -447,7 +447,7 @@ function GameCharacter.online()
 
   if player then
     local settings = Client.getPlayerSettings()
-    local lastCombatControls = settings:getNode('lastCombatControls') or {}
+    local lastCombatControls = settings:getNode('lastCombatControls') or { }
 
     g_game.setChaseMode(true, lastCombatControls.chaseMode)
     g_game.setSafeFight(true, lastCombatControls.safeFight)
@@ -472,7 +472,7 @@ function GameCharacter.offline()
   -- Combat controls
 
   local settings = Client.getPlayerSettings()
-  local lastCombatControls = settings:getNode('lastCombatControls') or {}
+  local lastCombatControls = settings:getNode('lastCombatControls') or { }
 
   local player = g_game.getLocalPlayer()
   if player then

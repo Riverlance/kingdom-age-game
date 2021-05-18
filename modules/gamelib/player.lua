@@ -117,7 +117,7 @@ end
 function Player:getItems(itemId, subType)
   local subType = subType or -1
 
-  local items = {}
+  local items = { }
   for i=InventorySlotFirst,InventorySlotLast do
     local item = self:getInventoryItem(i)
     if item and item:getId() == itemId and (subType == -1 or item:getSubType() == subType) then

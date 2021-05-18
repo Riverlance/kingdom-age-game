@@ -3,7 +3,7 @@ if not UIWindow then
 end
 
 -- @docclass
-UIMessageBox = extends(UIWindow, "UIMessageBox")
+UIMessageBox = extends(UIWindow, 'UIMessageBox')
 
 -- messagebox cannot be created from otui files
 UIMessageBox.create = nil

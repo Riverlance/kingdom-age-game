@@ -1,9 +1,9 @@
 -- @docclass
-ProtocolLogin = extends(Protocol, "ProtocolLogin")
+ProtocolLogin = extends(Protocol, 'ProtocolLogin')
 
 function ProtocolLogin:login(host, port, accountName, accountPassword, authenticatorToken, stayLogged)
   if string.len(host) == 0 or port == nil or port == 0 then
-    signalcall(self.onLoginError, self, tr("You must enter a valid server address and port."))
+    signalcall(self.onLoginError, self, tr('You must enter a valid server address and port.'))
     return
   end
 
@@ -144,13 +144,13 @@ function ProtocolLogin:onRecv(msg)
     elseif opcode == ServerOpcodes.ServerOpcodeLoginMotd then
       self:parseMotd(msg)
     elseif opcode == ServerOpcodes.ServerOpcodeLoginUpdateNeeded then
-      signalcall(self.onLoginError, self, tr("Client needs update."))
+      signalcall(self.onLoginError, self, tr('Client needs update.'))
     elseif opcode == ServerOpcodes.ServerOpcodeLoginTokenSuccess then
       local unknown = msg:getU8()
     elseif opcode == ServerOpcodes.ServerOpcodeLoginTokenError then
       -- TODO: prompt for token here
       local unknown = msg:getU8()
-      signalcall(self.onLoginError, self, tr("Invalid authentication token."))
+      signalcall(self.onLoginError, self, tr('Invalid authentication token.'))
     elseif opcode == ServerOpcodes.ServerOpcodeLoginCharacterList then
       self:parseCharacterList(msg)
     elseif opcode == ServerOpcodes.ServerOpcodeLoginExtendedCharacterList then
@@ -183,14 +183,14 @@ function ProtocolLogin:parseSessionKey(msg)
 end
 
 function ProtocolLogin:parseCharacterList(msg)
-  local characters = {}
+  local characters = { }
 
   if g_game.getClientVersion() > 1010 then
-    local worlds = {}
+    local worlds = { }
 
     local worldsCount = msg:getU8()
     for i=1, worldsCount do
-      local world = {}
+      local world = { }
       local worldId = msg:getU8()
       world.worldName = msg:getString()
       world.worldIp = msg:getString()
@@ -201,7 +201,7 @@ function ProtocolLogin:parseCharacterList(msg)
 
     local charactersCount = msg:getU8()
     for i=1, charactersCount do
-      local character = {}
+      local character = { }
       local worldId = msg:getU8()
       character.name = msg:getString()
       character.loginname = msg:getString()
@@ -215,7 +215,7 @@ function ProtocolLogin:parseCharacterList(msg)
   else
     local charactersCount = msg:getU8()
     for i=1,charactersCount do
-      local character = {}
+      local character = { }
       character.name = msg:getString()
       character.loginname = msg:getString()
       character.worldName = msg:getString()
@@ -230,7 +230,7 @@ function ProtocolLogin:parseCharacterList(msg)
     end
   end
 
-  local account = {}
+  local account = { }
   account.premDays = msg:getU16()
   signalcall(self.onCharacterList, self, characters, account)
 end

@@ -35,8 +35,8 @@ local function onError(protocol, message, errorCode)
 end
 
 local function onMotd(protocol, motd)
-  G.motdNumber = tonumber(motd:sub(0, motd:find("\n")))
-  G.motdMessage = motd:sub(motd:find("\n") + 1, #motd)
+  G.motdNumber = tonumber(motd:sub(0, motd:find('\n')))
+  G.motdMessage = motd:sub(motd:find('\n') + 1, #motd)
   if motdEnabled then
     motdButton:show()
   end
@@ -86,9 +86,9 @@ local function onCharacterList(protocol, characters, account, otui)
   ClientCharacterList.show()
 
   if motdEnabled then
-    local lastMotdNumber = g_settings.getNumber("motd")
+    local lastMotdNumber = g_settings.getNumber('motd')
     if G.motdNumber and G.motdNumber ~= lastMotdNumber then
-      g_settings.set("motd", G.motdNumber)
+      g_settings.set('motd', G.motdNumber)
       motdWindow = displayInfoBox(tr('Message of the Day'), G.motdMessage)
       motdButton:setOn(true)
       connect(motdWindow, {
@@ -214,10 +214,10 @@ function ClientEnterGame.show()
 
   if not Client.isLoaded() then
     local callback = function()
-        g_platform.spawnProcess("Kingdom Age Online.exe", { })
+        g_platform.spawnProcess('Kingdom Age Online.exe', { })
         exit()
     end
-    displayOkCancelBox(tr("Info"), tr("Your client has been modified. Click OK to restart the client."), callback)
+    displayOkCancelBox(tr('Info'), tr('Your client has been modified. Click OK to restart the client.'), callback)
     return
   end
 

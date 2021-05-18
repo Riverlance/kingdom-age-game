@@ -1,6 +1,6 @@
 locale = {
-  name = "pl",
-  languageName = "Polski",
+  name = 'pl',
+  languageName = 'Polski',
 
   formatNumbers = true,
   decimalSeperator = '.',

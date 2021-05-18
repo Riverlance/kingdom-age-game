@@ -5,7 +5,7 @@ _G.ClientServerList = { }
 local serverListWindow = nil
 local serverTextList = nil
 local removeWindow = nil
-local servers = {}
+local servers = { }
 
 
 
@@ -16,7 +16,7 @@ function ClientServerList.init()
   serverListWindow = g_ui.displayUI('serverlist')
   serverTextList = serverListWindow:getChildById('serverList')
 
-  servers = g_settings.getNode('ServerList') or {}
+  servers = g_settings.getNode('ServerList') or { }
   if servers then
     ClientServerList.load()
   end

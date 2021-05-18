@@ -9,8 +9,8 @@ local fadeInTime = 100
 local fadeOutTime = 100
 local toolTipLabel
 local currentHoveredWidget
-local toolTipAddonLabels = {}
-local toolTipAddonGroupLabels = {} -- Rows background
+local toolTipAddonLabels = { }
+local toolTipAddonGroupLabels = { } -- Rows background
 local toolTipAddonsBackgroundLabel
 local alignToAnchor =
 {
@@ -27,8 +27,8 @@ local function removeToolTipAddonLabels()
     end
     toolTipAddonGroupLabels[i]:destroy()
   end
-  toolTipAddonLabels = {}
-  toolTipAddonGroupLabels = {}
+  toolTipAddonLabels = { }
+  toolTipAddonGroupLabels = { }
 end
 
 local function removeTooltip()
@@ -246,7 +246,7 @@ function g_tooltip.display(widget)
       ]]
       local addonsWidthSum = 0
       local higherHeight   = 0
-      toolTipAddonLabels[i] = {}
+      toolTipAddonLabels[i] = { }
       for j = 1, #widget.tooltipAddons[i] do
         toolTipAddonLabels[i][j] = g_ui.createWidget('UILabel', rootWidget)
         local addon = toolTipAddonLabels[i][j]
@@ -424,9 +424,9 @@ end
 
 function UIWidget:setTooltip(tooltip, toolTipAddonsBackground)
   self:removeTooltip()
-  if type(tooltip) == "string" then
+  if type(tooltip) == 'string' then
     self.tooltip = tooltip
-  elseif type(tooltip) == "table" then
+  elseif type(tooltip) == 'table' then
     self.tooltipAddons = tooltip
     self.toolTipAddonsBackground = toolTipAddonsBackground
   end

@@ -60,9 +60,9 @@ function UIHotkeybarContainer:updateLook()
         powerWidget:setVisible(true)
         self.powerId = view.id
         if view.name and view.level then
-          tooltipText = string.format("%s %s (level %d)", tooltipText, view.name, view.level)
+          tooltipText = string.format('%s %s (level %d)', tooltipText, view.name, view.level)
         else
-          tooltipText = string.format("%s You are not able to use this power.", tooltipText)
+          tooltipText = string.format('%s You are not able to use this power.', tooltipText)
         end
       elseif view.type == 'item' and itemWidget then
         itemWidget:setVisible(true)

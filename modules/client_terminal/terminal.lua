@@ -27,12 +27,12 @@ local oldPos
 local oldSize
 local firstShown = false
 local flushEvent
-local cachedLines = {}
+local cachedLines = { }
 local disabled = false
-local allLines = {}
+local allLines = { }
 
 local terminalLogFile = nil
-local terminalLog = {}
+local terminalLog = { }
 local MAX_LOGLINES = 500
 local MAX_LINES = 128
 
@@ -63,7 +63,7 @@ local function completeCommand()
   end
 
   local commandBegin = commandTextEdit:getText():sub(1, cursorPos)
-  local possibleCommands = {}
+  local possibleCommands = { }
 
   -- create a list containing all globals
   local allVars = table.copy(_G)
@@ -204,7 +204,7 @@ function ClientTerminal.init()
   terminalLogFile = g_configs.create('/log.terminal.otml')
 
   -- Load kept terminal log after login
-  terminalLog = terminalLogFile:getList('terminalLog') or {}
+  terminalLog = terminalLogFile:getList('terminalLog') or { }
 end
 
 function ClientTerminal.terminate()
@@ -242,7 +242,7 @@ function ClientTerminal.terminate()
 end
 
 function ClientTerminal.popWindow(force)
-  local isForceBool = type(force) == "boolean"
+  local isForceBool = type(force) == 'boolean'
 
   if force == true or not isForceBool and poped then
     oldPos = terminalWindow:getPosition()
@@ -360,7 +360,7 @@ function ClientTerminal.flushLines()
 
   terminalSelectText:setText(fulltext)
 
-  cachedLines = {}
+  cachedLines = { }
   removeEvent(flushEvent)
   flushEvent = nil
 end
@@ -380,7 +380,7 @@ function ClientTerminal.executeCommand(command)
   end
 
   -- add command line
-  ClientTerminal.addLine("> " .. command, "#ffffff")
+  ClientTerminal.addLine('> ' .. command, '#ffffff')
 
   -- Add new command to console log
   currentMessageIndex = 0
@@ -399,7 +399,7 @@ function ClientTerminal.executeCommand(command)
     realCommand = command
   end
 
-  local func, err = loadstring(realCommand, "@")
+  local func, err = loadstring(realCommand, '@')
 
   -- detect terminal commands
   if not func then
@@ -440,6 +440,6 @@ end
 function ClientTerminal.clear()
   terminalBuffer:destroyChildren()
   terminalSelectText:setText('')
-  cachedLines = {}
-  allLines = {}
+  cachedLines = { }
+  allLines = { }
 end

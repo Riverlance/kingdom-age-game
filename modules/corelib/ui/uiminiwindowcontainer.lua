@@ -1,9 +1,9 @@
 -- @docclass
-UIMiniWindowContainer = extends(UIWidget, "UIMiniWindowContainer")
+UIMiniWindowContainer = extends(UIWidget, 'UIMiniWindowContainer')
 
 function UIMiniWindowContainer.create()
   local container = UIMiniWindowContainer.internalCreate()
-  container.scheduledWidgets = {}
+  container.scheduledWidgets = { }
   container:setFocusable(false)
   container:setPhantom(true)
   return container

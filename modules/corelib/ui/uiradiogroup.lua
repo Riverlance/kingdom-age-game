@@ -1,9 +1,9 @@
 -- @docclass
-UIRadioGroup = newclass("UIRadioGroup")
+UIRadioGroup = newclass('UIRadioGroup')
 
 function UIRadioGroup.create()
   local radiogroup = UIRadioGroup.internalCreate()
-  radiogroup.widgets = {}
+  radiogroup.widgets = { }
   radiogroup.selectedWidget = nil
   return radiogroup
 end
@@ -12,7 +12,7 @@ function UIRadioGroup:destroy()
   for k,widget in pairs(self.widgets) do
     widget.onClick = nil
   end
-  self.widgets = {}
+  self.widgets = { }
 end
 
 function UIRadioGroup:addWidget(widget)

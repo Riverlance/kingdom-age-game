@@ -35,7 +35,7 @@ MainWindow
     width: 230
 
   Label
-    !text: tr('Ignored players') .. ":"
+    !text: tr('Ignored players') .. ':'
     anchors.left: parent.left
     anchors.top: prev.bottom
     margin-top: 10
@@ -104,7 +104,7 @@ MainWindow
     width: 230
 
   Label
-    !text: tr('Allowed players') .. ":"
+    !text: tr('Allowed players') .. ':'
     anchors.top: prev.bottom
     anchors.left: prev.left
     margin-top: 10

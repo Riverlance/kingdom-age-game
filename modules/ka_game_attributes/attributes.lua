@@ -227,7 +227,7 @@ function GameAttributes.online()
 
   GameAttributes.clearWindow()
 
-  g_game.sendAttributeBuffer(string.format("%d", attribute_flag_updateList))
+  g_game.sendAttributeBuffer(string.format('%d', attribute_flag_updateList))
 end
 
 function GameAttributes.clearWindow()
@@ -309,7 +309,7 @@ function GameAttributes.onPlayerAttributes(tooltips, attributes, availablePoints
 end
 
 function GameAttributes.sendAdd(attributeId)
-  g_game.sendAttributeBuffer(string.format("%d", attributeId))
+  g_game.sendAttributeBuffer(string.format('%d', attributeId))
 end
 
 function GameAttributes.onClickAddButton(widget)

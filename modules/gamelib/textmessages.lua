@@ -1,4 +1,4 @@
-local messageModeCallbacks = {}
+local messageModeCallbacks = { }
 
 function g_game.onTextMessage(messageMode, message)
   local callbacks = messageModeCallbacks[messageMode]
@@ -14,7 +14,7 @@ end
 
 function registerMessageMode(messageMode, callback)
   if not messageModeCallbacks[messageMode] then
-    messageModeCallbacks[messageMode] = {}
+    messageModeCallbacks[messageMode] = { }
   end
 
   table.insert(messageModeCallbacks[messageMode], callback)

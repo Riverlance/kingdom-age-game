@@ -114,7 +114,7 @@ MainWindow
 
   Label
     id: hotkeyItemLabel
-    !text: tr('Item or Power') .. ":"
+    !text: tr('Item or Power') .. ':'
     anchors.top: prev.bottom
     anchors.left: parent.left
     margin-top: 10
@@ -136,7 +136,7 @@ MainWindow
 
   Label
     id: hotkeyTextLabel
-    !text: tr('Text') .. ":"
+    !text: tr('Text') .. ':'
     anchors.top: prev.bottom
     anchors.left: parent.left
     margin-top: 10

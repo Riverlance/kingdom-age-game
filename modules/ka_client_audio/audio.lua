@@ -9,9 +9,9 @@ local ACTION_CHANNEL_SETGAIN              = 3
 local ACTION_CHANNEL_STOPAUDIOS           = 4
 local ACTION_CHANNEL_AUDIOSSETGAIN        = 5
 
-local channels = {}
+local channels = { }
 for channelId = AudioChannels.First, AudioChannels.Last do
-  channels[channelId] = {}
+  channels[channelId] = { }
   channels[channelId].id      = channelId -- Same as its key
   channels[channelId].volume  = 0
   channels[channelId].channel = g_sounds.getChannel(channelId)

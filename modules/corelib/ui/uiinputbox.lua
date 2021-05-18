@@ -3,15 +3,15 @@ if not UIWindow then
 end
 
 -- @docclass
-UIInputBox = extends(UIWindow, "UIInputBox")
+UIInputBox = extends(UIWindow, 'UIInputBox')
 
 function UIInputBox.create(title, okCallback, cancelCallback)
   local inputBox = UIInputBox.internalCreate()
 
   inputBox:setText(title)
-  inputBox.inputs = {}
+  inputBox.inputs = { }
   inputBox.onEnter = function()
-    local results = {}
+    local results = { }
     for _,func in pairs(inputBox.inputs) do
       table.insert(results, func())
     end

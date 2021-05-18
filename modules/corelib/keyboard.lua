@@ -1,5 +1,5 @@
 -- @docclass
-g_keyboard = {}
+g_keyboard = { }
 
 -- private functions
 function translateKeyCombo(keyCombo)
@@ -37,7 +37,7 @@ local function retranslateKeyComboDesc(keyComboDesc)
     keyComboDesc = tostring(keyComboDesc)
   end
 
-  local keyCombo = {}
+  local keyCombo = { }
   for i,currentKeyDesc in ipairs(keyComboDesc:split('+')) do
     for keyCode, keyDesc in pairs(KeyCodeDescs) do
       if keyDesc:lower() == currentKeyDesc:trim():lower() then
@@ -49,7 +49,7 @@ local function retranslateKeyComboDesc(keyComboDesc)
 end
 
 function determineKeyComboDesc(keyCode, keyboardModifiers)
-  local keyCombo = {}
+  local keyCombo = { }
   if keyCode == KeyCtrl or keyCode == KeyShift or keyCode == KeyAlt then
     table.insert(keyCombo, keyCode)
   elseif KeyCodeDescs[keyCode] ~= nil then
@@ -117,8 +117,8 @@ local function connectKeyDownEvent(widget)
   connect(widget, {
     onKeyDown = onWidgetKeyDown
   })
-  widget.boundKeyDownCombos = {}
-  widget.boundAloneKeyDownCombos = {}
+  widget.boundKeyDownCombos = { }
+  widget.boundAloneKeyDownCombos = { }
 end
 
 local function connectKeyUpEvent(widget)
@@ -129,8 +129,8 @@ local function connectKeyUpEvent(widget)
   connect(widget, {
     onKeyUp = onWidgetKeyUp
   })
-  widget.boundKeyUpCombos = {}
-  widget.boundAloneKeyUpCombos = {}
+  widget.boundKeyUpCombos = { }
+  widget.boundAloneKeyUpCombos = { }
 end
 
 local function connectKeyPressEvent(widget)
@@ -141,7 +141,7 @@ local function connectKeyPressEvent(widget)
   connect(widget, {
     onKeyPress = onWidgetKeyPress
   })
-  widget.boundKeyPressCombos = {}
+  widget.boundKeyPressCombos = { }
 end
 
 -- public functions
@@ -236,7 +236,7 @@ end
 
 function g_keyboard.isKeySetPressed(keys, all)
   all = all or false
-  local result = {}
+  local result = { }
   for k,v in pairs(keys) do
     if type(v) == 'string' then
       v = getKeyCode(v)

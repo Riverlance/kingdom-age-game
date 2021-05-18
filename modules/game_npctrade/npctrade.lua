@@ -45,8 +45,8 @@ playerFreeCapacity = 0
 playerIsPremium = false
 playerMoneyFromBank = true
 playerMoney = 0
-tradeItems = {}
-playerItems = {}
+tradeItems = { }
+playerItems = { }
 selectedItem = nil
 
 cancelNextRelease = nil
@@ -414,8 +414,8 @@ function GameNpcTrade.refreshPlayerGoods()
 end
 
 function GameNpcTrade.onOpenNpcTrade(items, isVip)
-  tradeItems[BUY] = {}
-  tradeItems[SELL] = {}
+  tradeItems[BUY] = { }
+  tradeItems[SELL] = { }
 
   for _,item in pairs(items) do
     if item[5] > 0 then
@@ -469,7 +469,7 @@ function GameNpcTrade.onPlayerGoods(isPremium, bankPaymentMode, money, bankMoney
     playerMoney         = bankMoney
   end
 
-  playerItems = {}
+  playerItems = { }
   for _,item in pairs(items) do
     local id = item[1]:getId()
     if not playerItems[id] then
@@ -530,7 +530,7 @@ function GameNpcTrade.checkSellAllTooltip()
     if item then
       local items, price = GameNpcTrade.getSellAmount(item)
       if items > 0 then
-        info = string.format("%s%s%d %s (%d %s)", info, (not first and "\n" or ""), items, item.name, price, tr(CURRENCY))
+        info = string.format('%s%s%d %s (%d %s)', info, (not first and '\n' or ''), items, item.name, price, tr(CURRENCY))
         total = total + price
 
         if first then
@@ -540,7 +540,7 @@ function GameNpcTrade.checkSellAllTooltip()
     end
   end
   if info ~= '' then
-    info = string.format("%s\nTotal: %d %s", info, total, tr(CURRENCY))
+    info = string.format('%s\nTotal: %d %s', info, total, tr(CURRENCY))
     sellAllButton:setTooltip(info)
   else
     sellAllButton:setEnabled(false)
@@ -549,7 +549,7 @@ end
 
 function GameNpcTrade.formatCurrency(amount)
   if CURRENCY_DECIMAL then
-    return string.format("%.02f", amount/100.0) .. ' ' .. (CURRENCY_ISVIP and CURRENCY_VIP or CURRENCY)
+    return string.format('%.02f', amount/100.0) .. ' ' .. (CURRENCY_ISVIP and CURRENCY_VIP or CURRENCY)
   else
     return amount .. ' ' .. (CURRENCY_ISVIP and CURRENCY_VIP or CURRENCY)
   end

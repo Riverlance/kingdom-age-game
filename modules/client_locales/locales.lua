@@ -42,12 +42,6 @@ function ClientLocales.sendLocale(localeName)
   msg:addString(localeName)
   protocolGame:send(msg)
 
-  local msg = OutputMessage.create()
-  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
-  msg:addU16(ClientExtOpcodes.ClientExtOpcodeGameLanguage)
-  msg:addString(tostring(language[localeName] or GAMELANGUAGE_EN))
-  protocolGame:send(msg)
-
   return true
 end
 
@@ -105,7 +99,7 @@ function ClientLocales.init()
   -- Alias
   ClientLocales.m = modules.client_locales
 
-  installedLocales = {}
+  installedLocales = { }
 
   ClientLocales.installLocales('/locales')
 
@@ -172,7 +166,7 @@ function ClientLocales.installLocale(locale)
   end
 
   if locale.name ~= defaultLocaleName then
-    local updatesNamesMissing = {}
+    local updatesNamesMissing = { }
     for _,k in pairs(neededTranslations) do
       if locale.translation[k] == nil then
         updatesNamesMissing[#updatesNamesMissing + 1] = k
@@ -208,7 +202,7 @@ function ClientLocales.setLocale(name)
     return
   end
   if not locale then
-    pwarning("Locale " .. name .. ' does not exist.')
+    pwarning('Locale ' .. name .. ' does not exist.')
     return false
   end
   if currentLocale then

@@ -1,10 +1,10 @@
 -- @docclass
-UIComboBox = extends(UIWidget, "UIComboBox")
+UIComboBox = extends(UIWidget, 'UIComboBox')
 
 function UIComboBox.create()
   local combobox = UIComboBox.internalCreate()
   combobox:setFocusable(false)
-  combobox.options = {}
+  combobox.options = { }
   combobox.currentIndex = -1
   combobox.mouseScroll = true
   combobox.menuScroll = false
@@ -14,7 +14,7 @@ function UIComboBox.create()
 end
 
 function UIComboBox:clearOptions()
-  self.options = {}
+  self.options = { }
   self.currentIndex = -1
   self:clearText()
 end

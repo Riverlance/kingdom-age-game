@@ -229,7 +229,7 @@ ClientOpcodes =
   ClientOpcodeUpContainer               = 136,
   ClientOpcodeEditText                  = 137,
   ClientOpcodeEditList                  = 138,
-  ClientOpcodeWrapItem                  = 139, -- To do
+  ClientOpcodeWrapItem                  = 139,
   ClientOpcodeLook                      = 140,
   ClientOpcodeLookCreature              = 141,
   -- Free                                 142 to 149
@@ -288,7 +288,7 @@ ClientOpcodes =
 ClientExtOpcodes =
 {
   ClientExtOpcodeLocale            = 0,
-  ClientExtOpcodeGameLanguage      = 1,
+  -- Free                            1
   ClientExtOpcodeAction            = 2,
   ClientExtOpcodeAttribute         = 3,
   ClientExtOpcodePower             = 4,

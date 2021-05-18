@@ -69,8 +69,8 @@ function GameBattleList.init()
   -- Alias
   GameBattleList.m = modules.game_battlelist
 
-  battleList        = {}
-  battleListByIndex = {}
+  battleList        = { }
+  battleListByIndex = { }
 
   g_ui.importStyle('battlelistbutton')
   g_keyboard.bindKeyDown('Ctrl+B', GameBattleList.toggle)
@@ -84,7 +84,7 @@ function GameBattleList.init()
 
   -- This disables scrollbar auto hiding
   local scrollbar = battleWindow:getChildById('miniwindowScrollBar')
-  scrollbar:mergeStyle({ ['$!on'] = {} })
+  scrollbar:mergeStyle({ ['$!on'] = { } })
 
   sortMenuButton = battleWindow:getChildById('sortMenuButton')
   GameBattleList.setSortType(GameBattleList.getSortType())
@@ -148,8 +148,8 @@ function GameBattleList.init()
 end
 
 function GameBattleList.terminate()
-  battleList        = {}
-  battleListByIndex = {}
+  battleList        = { }
+  battleListByIndex = { }
 
   disconnect(g_game, {
     onAttackingCreatureChange = GameBattleList.onAttackingCreatureChange,
@@ -255,7 +255,7 @@ function GameBattleList.remove(creature)
     end
     table.remove(battleListByIndex, index)
   -- else
-  --   print("Trying to remove invalid battleButton")
+  --   print('Trying to remove invalid battleButton')
   end
 end
 

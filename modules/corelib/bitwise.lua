@@ -1,4 +1,4 @@
-Bit = {}
+Bit = { }
 
 function Bit.bit(p)
   return 2 ^ p

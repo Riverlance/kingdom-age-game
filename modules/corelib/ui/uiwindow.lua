@@ -1,5 +1,5 @@
 -- @docclass
-UIWindow = extends(UIWidget, "UIWindow")
+UIWindow = extends(UIWidget, 'UIWindow')
 
 function UIWindow.create()
   local window = UIWindow.internalCreate()

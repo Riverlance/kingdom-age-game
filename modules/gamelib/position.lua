@@ -1,4 +1,4 @@
-Position = {}
+Position = { }
 
 function Position.equals(pos1, pos2)
   return pos1.x == pos2.x and pos1.y == pos2.y and pos1.z == pos2.z

@@ -49,15 +49,15 @@ function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
     local receivedMB = receivedBytes / 1024 / 1024
 
     updaterWindow:getChildById('topText'):setText(string.format('Downloading: %s of %s files', tostring(receivedObj):comma(), tostring(totalObj):comma()))
-    updaterWindow:getChildById('bottomText'):setText(string.format('Received: %.2f MB (%.2f %s/s)', receivedMB, avgSpeed < 1024 and avgSpeed or avgSpeed / 1024, avgSpeed < 1024 and "kB" or "MB"))
+    updaterWindow:getChildById('bottomText'):setText(string.format('Received: %.2f MB (%.2f %s/s)', receivedMB, avgSpeed < 1024 and avgSpeed or avgSpeed / 1024, avgSpeed < 1024 and 'kB' or 'MB'))
     updaterWindow:getChildById('rightText'):setText(string.format('%.2f%%', percent))
     updaterWindow:getChildById('bar'):setPercent(percent)
 end
 
 function ClientUpdater.onUpdateEnd()
     local callback = function()
-        g_platform.spawnProcess("Kingdom Age Online.exe", { })
+        g_platform.spawnProcess('Kingdom Age Online.exe', { })
         exit()
     end
-    displayOkCancelBox(tr("Info"), tr("Your client has been updated. Click OK to restart the client."), callback)
+    displayOkCancelBox(tr('Info'), tr('Your client has been updated. Click OK to restart the client.'), callback)
 end

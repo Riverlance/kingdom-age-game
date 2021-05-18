@@ -1,4 +1,4 @@
-UIGameMap = extends(UIMap, "UIGameMap")
+UIGameMap = extends(UIMap, 'UIGameMap')
 
 function UIGameMap.create()
   local gameMap = UIGameMap.internalCreate()
@@ -102,6 +102,7 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
   local useThing
   local creatureThing
   local multiUseThing
+  local wrapThing
   local attackCreature
 
   local tile = self:getTile(mousePosition)
@@ -109,6 +110,7 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
     lookThing = tile:getTopLookThing()
     useThing = tile:getTopUseThing()
     creatureThing = tile:getTopCreature()
+    wrapThing = tile:getTopWrapThing()
   end
 
   local autoWalkTile = g_map.getTile(autoWalkPos)
@@ -116,7 +118,7 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
     attackCreature = autoWalkTile:getTopCreature()
   end
 
-  local ret = GameInterface.processMouseAction(mousePosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature)
+  local ret = GameInterface.processMouseAction(mousePosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, wrapThing)
   if ret then
     self.allowNextRelease = false
   end

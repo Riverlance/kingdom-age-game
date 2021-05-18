@@ -1,5 +1,5 @@
 -- @docclass
-g_effects = {}
+g_effects = { }
 
 function g_effects.fadeIn(widget, time, elapsed)
   if not elapsed then

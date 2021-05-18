@@ -7,7 +7,7 @@ vipTopMenuButton = nil
 addVipWindow = nil
 editVipWindow = nil
 contentsPanel = nil
-vipInfo = {}
+vipInfo = { }
 
 
 
@@ -72,14 +72,14 @@ end
 function GameVipList.loadVipInfo()
   local settings = g_settings.getNode('VipList')
   if not settings then
-    vipInfo = {}
+    vipInfo = { }
     return
   end
-  vipInfo = settings['VipInfo'] or {}
+  vipInfo = settings['VipInfo'] or { }
 end
 
 function GameVipList.saveVipInfo()
-  settings = {}
+  settings = { }
   settings['VipInfo'] = vipInfo
   g_settings.mergeNode('VipList', settings)
 end
@@ -224,7 +224,7 @@ function GameVipList.removeVip(widgetOrName)
 end
 
 function GameVipList.hideOffline(state)
-  settings = {}
+  settings = { }
   settings['hideOffline'] = state
   g_settings.mergeNode('VipList', settings)
 
@@ -248,7 +248,7 @@ function GameVipList.getSortedBy()
 end
 
 function GameVipList.sortBy(state)
-  settings = {}
+  settings = { }
   settings['sortedBy'] = state
   g_settings.mergeNode('VipList', settings)
 

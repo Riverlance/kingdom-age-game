@@ -1,5 +1,5 @@
 -- @docclass
-UIImageView = extends(UIWidget, "UIImageView")
+UIImageView = extends(UIWidget, 'UIImageView')
 
 function UIImageView.create()
   local imageView = UIImageView.internalCreate()

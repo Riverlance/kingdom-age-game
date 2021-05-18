@@ -156,9 +156,9 @@ function getMarketDescriptionId(name)
 end
 
 MarketSlotFilters = {
-  [InventorySlotOther] = "Two-Handed",
-  [InventorySlotLeft] = "One-Handed",
-  [255] = "Any"
+  [InventorySlotOther] = 'Two-Handed',
+  [InventorySlotLeft] = 'One-Handed',
+  [255] = 'Any'
 }
 
 MarketFilters = {

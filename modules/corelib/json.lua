@@ -57,8 +57,8 @@ end
 
 
 local function encode_table(val, stack)
-  local res = {}
-  stack = stack or {}
+  local res = { }
+  stack = stack or { }
 
   -- Circular reference?
   if stack[val] then
@@ -145,7 +145,7 @@ end
 local parse
 
 local function create_set(...)
-  local res = {}
+  local res = { }
   for i = 1, select("#", ...) do
     res[ select(i, ...) ] = true
   end
@@ -292,7 +292,7 @@ end
 
 
 local function parse_array(str, i)
-  local res = {}
+  local res = { }
   local n = 1
   i = i + 1
   while 1 do
@@ -326,7 +326,7 @@ end
 
 
 local function parse_object(str, i)
-  local res = {}
+  local res = { }
   i = i + 1
   while 1 do
     local key, val

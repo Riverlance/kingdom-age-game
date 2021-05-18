@@ -5,7 +5,7 @@ Timer = { --minute:second countdown timer
 }
 
 function Timer:new(duration)
-    local timer = {}
+    local timer = { }
     timer.duration = math.min(duration / 1000)
     timer.minutes = math.min(timer.duration / 60)
     timer.seconds = timer.duration % 60
@@ -13,7 +13,7 @@ function Timer:new(duration)
 end
 
 function Timer:getString()
-    return string.format("%.2d:%.2d", self.minutes, self.seconds)
+    return string.format('%.2d:%.2d', self.minutes, self.seconds)
 end
 
 function Timer:getPercent()

@@ -1,5 +1,5 @@
 -- @docclass
-UIResizeBorder = extends(UIWidget, "UIResizeBorder")
+UIResizeBorder = extends(UIWidget, 'UIResizeBorder')
 
 function UIResizeBorder.create()
   local resizeborder = UIResizeBorder.internalCreate()

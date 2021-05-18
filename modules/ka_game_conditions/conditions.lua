@@ -17,7 +17,7 @@ local CONDITION_ACTION_REMOVE = 2
 local CONDITION_CODE_NONAGGRESSIVE = 0
 local CONDITION_CODE_AGGRESSIVE = 1
 
-conditionList = {}
+conditionList = { }
 
 
 
@@ -70,7 +70,7 @@ local defaultValues = {
   sortOrder = CONDITION_ORDER_DESCENDING
 }
 
-Icons = {}
+Icons = { }
 Icons[PlayerStates.Poison] = { tooltip = tr('You are poisoned'), path = '/images/game/creature/condition/default_poisoned', id = 'condition_poisoned' }
 Icons[PlayerStates.Burn] = { tooltip = tr('You are burning'), path = '/images/game/creature/condition/default_burning', id = 'condition_burning' }
 Icons[PlayerStates.Energy] = { tooltip = tr('You are electrified'), path = '/images/game/creature/condition/default_electrified', id = 'condition_electrified' }
@@ -95,7 +95,7 @@ function GameConditions.init()
   -- Alias
   GameConditions.m = modules.ka_game_conditions
 
-  conditionList = {}
+  conditionList = { }
 
   g_ui.importStyle('conditionbutton')
   g_keyboard.bindKeyDown('Ctrl+Shift+C', GameConditions.toggle)
@@ -113,7 +113,7 @@ function GameConditions.init()
 
   -- This disables scrollbar auto hiding
   local scrollbar = conditionWindow:getChildById('miniwindowScrollBar')
-  scrollbar:mergeStyle({ ['$!on'] = {} })
+  scrollbar:mergeStyle({ ['$!on'] = { } })
 
   sortMenuButton = conditionWindow:getChildById('sortMenuButton')
   GameConditions.setSortType(GameConditions.getSortType())
@@ -162,7 +162,7 @@ function GameConditions.init()
 end
 
 function GameConditions.terminate()
-  conditionList = {}
+  conditionList = { }
 
   disconnect(LocalPlayer, {
     onStatesChange = GameConditions.onStatesChange
@@ -211,7 +211,7 @@ function GameConditions.removeCondition(condition)
     table.remove(conditionList, index)
     GameConditions.updateConditionList()
   -- else
-  --   print("Trying to remove invalid condition")
+  --   print('Trying to remove invalid condition')
   end
 end
 
@@ -230,7 +230,7 @@ end
 function GameConditions.parseConditions(protocol, msg)
   local action = msg:getU8()
 
-  local condition = {}
+  local condition = { }
   condition.id    = msg:getU8()
   condition.subId = msg:getU8()
 
@@ -260,7 +260,7 @@ function GameConditions.parseConditions(protocol, msg)
         condition.offset = msg:getString()
         condition.factor = msg:getString()
       else
-        print("Unknown byte: " .. nextByte)
+        print('Unknown byte: ' .. nextByte)
       end
       nextByte = msg:getU8()
     end
@@ -462,7 +462,7 @@ function GameConditions.updateConditionList()
 end
 
 function GameConditions.clearListConditionPanel()
-  conditionList = {}
+  conditionList = { }
   conditionPanel:destroyChildren()
 end
 

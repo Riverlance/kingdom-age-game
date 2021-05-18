@@ -11,7 +11,7 @@ function table.dump(t, depth)
 
   for k,v in pairs(t) do
     str = (' '):rep(depth * 2) .. k .. ': '
-    if type(v) ~= "table" then
+    if type(v) ~= 'table' then
       print(str .. tostring(v))
     else
       print(str)
@@ -27,9 +27,9 @@ function table.clear(t)
 end
 
 function table.copy(t)
-  local ret = {}
+  local ret = { }
   for k,v in pairs(t) do
-    if type(v) ~= "table" then
+    if type(v) ~= 'table' then
       ret[k] = v
     else
       ret[k] = table.copy(v)
@@ -199,22 +199,22 @@ end
 
 function table.tostring(t)
   local maxn = #t
-  local str = ""
+  local str = ''
   for k,v in pairs(t) do
     v = tostring(v)
     if k == maxn and k ~= 1 then
-      str = str .. " and " .. v
+      str = str .. ' and ' .. v
     elseif maxn > 1 and k ~= 1 then
-      str = str .. ", " .. v
+      str = str .. ', ' .. v
     else
-      str = str .. " " .. v
+      str = str .. ' ' .. v
     end
   end
   return str
 end
 
 function table.collect(t, func)
-  local res = {}
+  local res = { }
   for k,v in pairs(t) do
     local a,b = func(k,v)
     if a and b then
@@ -227,7 +227,7 @@ function table.collect(t, func)
 end
 
 function table.equals(t, comp)
-  if type(t) == "table" and type(comp) == "table" then
+  if type(t) == 'table' and type(comp) == 'table' then
     for k,v in pairs(t) do
       if v ~= comp[k] then
         return false
@@ -260,31 +260,31 @@ end
 
 function table.serialize(_table, recursive) -- (table) -- Do not use the recursive param
   local _type = type(_table)
-  recursive = recursive or {}
+  recursive = recursive or { }
 
-  if _type == "nil" or _type == "number" or _type == "boolean" then
+  if _type == 'nil' or _type == 'number' or _type == 'boolean' then
     return tostring(_table)
-  elseif _type == "string" then
-    return string.format("%q", _table)
+  elseif _type == 'string' then
+    return string.format('%q', _table)
   elseif getmetatable(_table) then
-    error("Was not possible to serialize a table that has a metatable associated with it.")
-  elseif _type == "table" then
+    error('Was not possible to serialize a table that has a metatable associated with it.')
+  elseif _type == 'table' then
     if table.find(recursive, _table) then
-      error("Was not possible to serialize recursive tables.")
+      error('Was not possible to serialize recursive tables.')
     end
     table.insert(recursive, _table)
 
-    local s = "{"
+    local s = '{'
     for k, v in pairs(_table) do
-      s = string.format("%s[%s]=%s, ", s, table.serialize(k, recursive), table.serialize(v, recursive))
+      s = string.format('%s[%s]=%s, ', s, table.serialize(k, recursive), table.serialize(v, recursive))
     end
-    return string.format("%s}", s:sub(0, s:len() - 2))
+    return string.format('%s}', s:sub(0, s:len() - 2))
   end
   error(string.format("Was not possible to serialize the value of type '%s'", _type))
 end
 
 function table.unserialize(str)
-  return loadstring("return " .. str)()
+  return loadstring('return ' .. str)()
 end
 
 function table.insertChild(t, index, value)
@@ -295,7 +295,7 @@ function table.insertChild(t, index, value)
     index = #t
   end
 
-  if type(value) == "table" then
+  if type(value) == 'table' then
     value._parent = t
     value._id = index
   end

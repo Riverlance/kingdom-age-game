@@ -193,7 +193,7 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
     itemsButton:setVisible(false)
   end
 
-  if row.otherRewards and row.otherRewards ~= "" then
+  if row.otherRewards and row.otherRewards ~= '' then
     otherRewards:setVisible(true)
     otherRewards:setText(row.otherRewards)
     otherRewardsScrollBar:setVisible(true)
@@ -224,11 +224,11 @@ function GameQuestLog.parseQuestLog(protocolGame, opcode, msg)
   end
 
   if mode == 1 then -- Quest Log
-    local quests = {}
+    local quests = { }
 
-    for _, _quest in ipairs(params[2] and params[2]:split(';;') or {}) do
-      local quest = {}
-      local data = _quest:split("::")
+    for _, _quest in ipairs(params[2] and params[2]:split(';;') or { }) do
+      local quest = { }
+      local data = _quest:split('::')
       quest.id = tonumber(data[1])
       if not quest.id then
         return
@@ -250,14 +250,14 @@ function GameQuestLog.parseQuestLog(protocolGame, opcode, msg)
     GameQuestLog.onGameQuestLog(quests)
 
   elseif mode == 2 then -- Quest Line
-    local missions = {}
+    local missions = { }
     local questId = tonumber(params[2])
     if not questId then
       return
     end
 
-    for _, _mission in ipairs(params[3] and params[3]:split(';;') or {}) do
-      local mission = {}
+    for _, _mission in ipairs(params[3] and params[3]:split(';;') or { }) do
+      local mission = { }
       local data = _mission:split('::')
       mission.id = tonumber(data[1])
       if mission.id then

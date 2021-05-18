@@ -1,5 +1,5 @@
 -- @docclass
-UIMiniWindow = extends(UIWindow, "UIMiniWindow")
+UIMiniWindow = extends(UIWindow, 'UIMiniWindow')
 
 function UIMiniWindow.create()
   local miniwindow = UIMiniWindow.internalCreate()
@@ -369,12 +369,12 @@ function UIMiniWindow:setSettings(data)
 
   local settings = g_settings.getNode('MiniWindows')
   if not settings then
-    settings = {}
+    settings = { }
   end
 
   local id = self:getId()
   if not settings[id] then
-    settings[id] = {}
+    settings[id] = { }
   end
 
   for key,value in pairs(data) do
@@ -391,12 +391,12 @@ function UIMiniWindow:eraseSettings(data)
 
   local settings = g_settings.getNode('MiniWindows')
   if not settings then
-    settings = {}
+    settings = { }
   end
 
   local id = self:getId()
   if not settings[id] then
-    settings[id] = {}
+    settings[id] = { }
   end
 
   for key,value in pairs(data) do
@@ -418,14 +418,14 @@ function UIMiniWindow:saveParent(parent)
 end
 
 function UIMiniWindow:saveParentPosition(parentId, position)
-  local selfSettings = {}
+  local selfSettings = { }
   selfSettings.parentId = parentId
   selfSettings.position = pointtostring(position)
   self:setSettings(selfSettings)
 end
 
 function UIMiniWindow:saveParentIndex(parentId, index)
-  local selfSettings = {}
+  local selfSettings = { }
   selfSettings.parentId = parentId
   selfSettings.index = index
   self:setSettings(selfSettings)

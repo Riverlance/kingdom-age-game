@@ -25,8 +25,8 @@ function GameEmotes.init()
   -- Alias
   GameEmotes.m = modules.ka_game_emotes
 
-  emoteList        = {}
-  emoteListByIndex = {}
+  emoteList        = { }
+  emoteListByIndex = { }
 
   emoteWindow = g_ui.loadUI('emoteWindow', contentPanel)
   GameEmotes.toggleWindow(false)
@@ -85,8 +85,8 @@ function GameEmotes.terminate()
     onGameEnd   = GameEmotes.offline,
   })
 
-  emoteList = {}
-  emoteListByIndex = {}
+  emoteList = { }
+  emoteListByIndex = { }
 
   if emoteWindow then
     emoteWindow:destroy()
@@ -153,7 +153,7 @@ function GameEmotes.toggleWindow(force)
     return
   end
 
-  local isForceBool = type(force) == "boolean"
+  local isForceBool = type(force) == 'boolean'
   local condition   = emoteWindow:isHidden()
 
   local consoleContentPanel = contentPanel:getChildById('consoleContentPanel')
@@ -221,7 +221,7 @@ end
 -- Settings
 function GameEmotes.loadSettings()
   local settings      = Client.getPlayerSettings()
-  local emoteSettings = settings:getNode('emotes') or {}
+  local emoteSettings = settings:getNode('emotes') or { }
 
   for id, emote in pairs(emoteSettings) do
     local emoteId = tonumber(id)
@@ -235,10 +235,10 @@ end
 
 function GameEmotes.saveSettings()
   local settings      = Client.getPlayerSettings()
-  local emoteSettings = {}
+  local emoteSettings = { }
 
   for id, emote in pairs(emoteList) do
-    emoteSettings[id] = {}
+    emoteSettings[id] = { }
     emoteSettings[id].timesUsed = emote.timesUsed
     emoteSettings[id].lastUsed  = emote.lastUsed
     emoteSettings[id].locked    = emote.locked

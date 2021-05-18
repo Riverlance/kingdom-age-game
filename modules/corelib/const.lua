@@ -216,7 +216,7 @@ KeyCodeDescs = {
   [KeyMenu] = 'Menu',
   [KeySpace] = 'Space',
   [KeyExclamation] = '!',
-  [KeyQuote] = '\"',
+  [KeyQuote] = '"',
   [KeyNumberSign] = '#',
   [KeyDollar] = '$',
   [KeyPercent] = '%',
@@ -352,7 +352,7 @@ PanelStickers = {
 setmetatable(PanelStickers, {
   __index =
   function (self, index)
-    if type(index) == "string" then
+    if type(index) == 'string' then
       for i, v in ipairs(self) do
         if index == v.opt then
           return v.path

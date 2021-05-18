@@ -1,9 +1,9 @@
 -- thanks cometangel, who made these translations
 
 locale = {
-  name = "sv",
-  charset = "cp1252",
-  languageName = "Svenska", -- Swedish
+  name = 'sv',
+  charset = 'cp1252',
+  languageName = 'Svenska', -- Swedish
 
   formatNumbers = true,
   decimalSeperator = ',',

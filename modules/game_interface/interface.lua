@@ -31,17 +31,17 @@ rightPanelButton = nil
 topMenuButton = nil
 chatButton = nil
 currentViewMode = 0
-smartWalkDirs = {}
+smartWalkDirs = { }
 smartWalkDir = nil
 walkFunction = nil
-hookedMenuOptions = {}
+hookedMenuOptions = { }
 lastDirTime = g_clock.millis()
-gamePanels = {}
-gamePanelsContainer = {}
+gamePanels = { }
+gamePanelsContainer = { }
 
 -- List of panels, even if panelsPriority is not set
-local _gamePanels = {}
-local _gamePanelsContainer = {}
+local _gamePanels = { }
+local _gamePanelsContainer = { }
 
 function GameInterface.init()
   -- Alias
@@ -164,11 +164,11 @@ function GameInterface.bindTurnKey(key, dir)
 end
 
 function GameInterface.bindActionKeyUp(key)
-  g_keyboard.bindKeyUp(key, function() g_game.sendActionKey(key, true) end)
+  g_keyboard.bindKeyUp(key, function() if g_game.isOnline() then g_game.sendActionKey(key, true) end end)
 end
 
 function GameInterface.bindActionKeyDown(key)
-  g_keyboard.bindKeyDown(key, function() g_game.sendActionKey(key, false) end)
+  g_keyboard.bindKeyDown(key, function() if g_game.isOnline() then g_game.sendActionKey(key, false) end end)
 end
 
 function GameInterface.bindKeys()
@@ -225,7 +225,7 @@ end
 function GameInterface.terminate()
   GameInterface.hide()
 
-  hookedMenuOptions = {}
+  hookedMenuOptions = { }
   GameInterface.stopSmartWalk()
 
   disconnect(bottomSplitter, {
@@ -258,10 +258,10 @@ function GameInterface.terminate()
     onExit = GameInterface.save,
   })
 
-  _gamePanelsContainer = {}
-  _gamePanels = {}
-  gamePanelsContainer = {}
-  gamePanels = {}
+  _gamePanelsContainer = { }
+  _gamePanels = { }
+  gamePanelsContainer = { }
+  gamePanels = { }
 
   logoutButton:destroy()
   gameRootPanel:destroy()
@@ -271,7 +271,7 @@ end
 
 function GameInterface.onGameStart()
   local localPlayer = g_game.getLocalPlayer()
-  g_window.setTitle(g_app.getName() .. (localPlayer and " - " .. localPlayer:getName() or ""))
+  g_window.setTitle(g_app.getName() .. (localPlayer and ' - ' .. localPlayer:getName() or ''))
   GameInterface.show()
 
   -- Panels width
@@ -329,7 +329,7 @@ function GameInterface.hide()
 end
 
 function GameInterface.save()
-  local settings = {}
+  local settings = { }
   settings.splitterMarginBottom = bottomSplitter.currentMargin
   g_settings.setNode('game_interface', settings)
 end
@@ -342,7 +342,7 @@ function GameInterface.load()
 end
 
 function GameInterface.onLoginAdvice(message)
-  displayInfoBox(tr("For Your Information"), message)
+  displayInfoBox(tr('For Your Information'), message)
 end
 
 function GameInterface.forceExit()
@@ -370,7 +370,7 @@ function GameInterface.tryExit()
 end
 
 function GameInterface.tryLogout(prompt)
-  if type(prompt) ~= "boolean" then
+  if type(prompt) ~= 'boolean' then
     prompt = true
   end
   if not g_game.isOnline() then
@@ -425,7 +425,7 @@ function GameInterface.tryLogout(prompt)
 end
 
 function GameInterface.stopSmartWalk()
-  smartWalkDirs = {}
+  smartWalkDirs = { }
   smartWalkDir = nil
 end
 
@@ -499,7 +499,7 @@ end
 local function tryChangeChild(selfHeight, childrenHeight, _childList, changeValidateCondition, changeConditionValidated, changeCondition)
   local oldChildrenHeight = childrenHeight
 
-  local childList = {}
+  local childList = { }
 
   for i = #_childList, 1, -1 do
     local child = _childList[i]
@@ -700,8 +700,8 @@ function GameInterface.setupPanels()
 
   -- None
   else
-    gamePanels          = {}
-    gamePanelsContainer = {}
+    gamePanels          = { }
+    gamePanelsContainer = { }
   end
 end
 
@@ -978,7 +978,7 @@ end
 
 function GameInterface.addMenuHook(category, name, callback, condition, shortcut)
   if not hookedMenuOptions[category] then
-    hookedMenuOptions[category] = {}
+    hookedMenuOptions[category] = { }
   end
   hookedMenuOptions[category][name] = {
     callback = callback,
@@ -989,13 +989,13 @@ end
 
 function GameInterface.removeMenuHook(category, name)
   if not name then
-    hookedMenuOptions[category] = {}
+    hookedMenuOptions[category] = { }
   else
     hookedMenuOptions[category][name] = nil
   end
 end
 
-function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
   if not g_game.isOnline() then
     return
   end
@@ -1020,6 +1020,16 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
     shortcut = '(Ctrl)'
   else
     shortcut = nil
+  end
+
+  if wrapThing then
+    if wrapThing:isUnwrappable() then
+      menu:addOption(tr('Unwrap'), function() g_game.wrap(wrapThing) end)
+    end
+
+    if wrapThing:isWrappable() then
+      menu:addOption(tr('Wrap'), function() g_game.wrap(wrapThing) end)
+    end
   end
 
   if useThing then
@@ -1203,14 +1213,13 @@ local function getDistanceBetween(p1, p2)
   return math.max(math.abs(p1.x - p2.x), math.abs(p1.y - p2.y))
 end
 
-function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature)
+function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, wrapThing)
   local player = g_game.getLocalPlayer()
   local keyboardModifiers = g_keyboard.getModifiers()
   local isMouseBothPressed = g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton or g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton
-
   if not ClientOptions.getOption('classicControl') then
     if keyboardModifiers == KeyboardNoModifier and mouseButton == MouseRightButton and not g_mouse.isPressed(MouseLeftButton) then
-      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
       return true
     elseif creatureThing and getDistanceBetween(creatureThing:getPosition(), player:getPosition()) >= 1 and (creatureThing:getPosition().z == autoWalkPos.z and g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) or not creatureThing:isMonster() and isMouseBothPressed) then
       g_game.follow(creatureThing)
@@ -1265,7 +1274,7 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
       g_game.look(lookThing)
       return true
     elseif useThing and keyboardModifiers == KeyboardCtrlModifier and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
-      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
       return true
     elseif attackCreature and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
       g_game.attack(attackCreature)
@@ -1330,16 +1339,16 @@ function GameInterface.moveStackableItem(item, toPos)
       spinbox.firstEdit = false
     end
   end
-  g_keyboard.bindKeyPress("Up", function() check() spinbox:up() end, spinbox)
-  g_keyboard.bindKeyPress("Right", function() check() spinbox:up() end, spinbox)
-  g_keyboard.bindKeyPress("Down", function() check() spinbox:down() end, spinbox)
-  g_keyboard.bindKeyPress("Left", function() check() spinbox:down() end, spinbox)
-  g_keyboard.bindKeyPress("PageUp", function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
-  g_keyboard.bindKeyPress("Shift+Up", function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
-  g_keyboard.bindKeyPress("Shift+Right", function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
-  g_keyboard.bindKeyPress("PageDown", function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
-  g_keyboard.bindKeyPress("Shift+Down", function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
-  g_keyboard.bindKeyPress("Shift+Left", function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
+  g_keyboard.bindKeyPress('Up', function() check() spinbox:up() end, spinbox)
+  g_keyboard.bindKeyPress('Right', function() check() spinbox:up() end, spinbox)
+  g_keyboard.bindKeyPress('Down', function() check() spinbox:down() end, spinbox)
+  g_keyboard.bindKeyPress('Left', function() check() spinbox:down() end, spinbox)
+  g_keyboard.bindKeyPress('PageUp', function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Up', function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Right', function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
+  g_keyboard.bindKeyPress('PageDown', function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Down', function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Left', function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
 
   scrollbar.onValueChange = function(self, value)
     itembox:setItemCount(value)

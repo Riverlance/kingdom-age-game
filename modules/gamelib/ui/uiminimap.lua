@@ -8,8 +8,8 @@ function UIMinimap:onSetup()
   self.floorDownWidget = self:getChildById('floorDown')
   self.zoomInWidget = self:getChildById('zoomIn')
   self.zoomOutWidget = self:getChildById('zoomOut')
-  self.flags = {}
-  self.alternatives = {}
+  self.flags = { }
+  self.alternatives = { }
   self.alternativesVisible = true
   self.onAddAutomapFlag = function(pos, icon, description)
     self:addFlag(pos, icon, description)
@@ -37,14 +37,14 @@ function UIMinimap:onDestroy()
   for _,widget in pairs(self.alternatives) do
     widget:destroy()
   end
-  self.alternatives = {}
+  self.alternatives = { }
   disconnect(g_game, {
     onAddAutomapFlag    = self.onAddAutomapFlag,
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
     onGameEnd           = self.onGameEnd,
   })
   self:destroyFlagWindow()
-  self.flags = {}
+  self.flags = { }
 end
 
 function UIMinimap:onVisibilityChange()
@@ -86,7 +86,7 @@ function UIMinimap:load()
 end
 
 function UIMinimap:save()
-  local settings = { flags={} }
+  local settings = { flags={ } }
   for _,flag in pairs(self.flags) do
     if not flag.temporary then
       table.insert(settings.flags, {

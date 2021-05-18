@@ -6,7 +6,7 @@ DefaultFont = 'verdana-11px-rounded'
 
 MessageSettings =
 {
-  none            = {},
+  none            = { },
   consoleRed      = { color = TextColors.red,       consoleTab='Default' },
   consoleOrange   = { color = TextColors.orange,    consoleTab='Default' },
   consoleBlue     = { color = TextColors.blue,      consoleTab='Default' },

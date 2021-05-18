@@ -3,7 +3,7 @@ UIPowerButton = extends(UIWidget, 'UIPowerButton')
 
 -- See uicreaturebutton.lua
 
-local extraLabelColors = {}
+local extraLabelColors = { }
 extraLabelColors[0] = '#888888' -- No boost
 extraLabelColors[1] = '#FF7549'
 extraLabelColors[2] = '#B770FF'
@@ -106,7 +106,7 @@ function UIPowerButton:setTooltipText(text)
   end
 
   local power  = self.power
-  local blocks = {}
+  local blocks = { }
 
   local exhaustTime = power.exhaustTime / 1000
 
@@ -166,7 +166,7 @@ function UIPowerButton:getVocations()
     return 'All'
   end
 
-  local vocations = {}
+  local vocations = { }
   for _, vocationId in ipairs(power.vocations) do
     if VocationStr[vocationId] then
       table.insert(vocations, VocationStr[vocationId])

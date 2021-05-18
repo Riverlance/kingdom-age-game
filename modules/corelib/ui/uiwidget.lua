@@ -3,8 +3,8 @@
 function UIWidget:onSetup()
   local id = self:getId()
 
-  local isMiniWindowHeader = id == "miniWindowHeader"
-  local isMiniWindowFooter = id == "miniWindowFooter"
+  local isMiniWindowHeader = id == 'miniWindowHeader'
+  local isMiniWindowFooter = id == 'miniWindowFooter'
 
   if isMiniWindowHeader or isMiniWindowFooter then
     local miniWindow          = self:getParent()

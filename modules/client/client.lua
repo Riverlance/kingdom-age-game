@@ -1,11 +1,11 @@
 _G.Client = { }
 
-local musicFilename = "/audios/startup"
+local musicFilename = '/audios/startup'
 local musicChannel = g_sounds.getChannel(AudioChannels.Music)
 local loadingBox = nil
 local isLoaded = false
 
-playerSettingsPath = ""
+playerSettingsPath = ''
 
 
 
@@ -22,7 +22,7 @@ function Client.init()
   -- g_sounds.preload(musicFilename)
 
   -- initialize in fullscreen mode on mobile devices
-  if g_window.getPlatformType() == "X11-EGL" then
+  if g_window.getPlatformType() == 'X11-EGL' then
     g_window.setFullscreen(true)
   else
     -- window size
@@ -120,7 +120,7 @@ function Client.exit()
     onUpdated = Client.loadFiles
   })
 
-  g_logger.info("Exiting application...")
+  g_logger.info('Exiting application...')
 end
 
 function Client.onRecvOtclientSignal() -- From Server ProtocolGame::onRecvFirstMessage
@@ -208,7 +208,7 @@ end
 
 function Client.getPlayerSettings(fileName) -- ([fileName])
   if g_game.isOnline() then
-    playerSettingsPath = string.format('/%s/%s', G.host:gsub("[%W]", "_"):lower(), g_game.getCharacterName():gsub("[%W]", "_"))
+    playerSettingsPath = string.format('/%s/%s', G.host:gsub('[%W]', '_'):lower(), g_game.getCharacterName():gsub('[%W]', '_'))
   end
   if not g_resources.makeDir(playerSettingsPath) then
     g_logger.error(string.format('Failed to load path \'%s\'', playerSettingsPath))

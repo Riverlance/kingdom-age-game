@@ -1,5 +1,5 @@
 -- @docclass
-UIScrollBar = extends(UIWidget, "UIScrollBar")
+UIScrollBar = extends(UIWidget, 'UIScrollBar')
 
 -- private functions
 local function calcValues(self)
@@ -61,7 +61,7 @@ local function updateValueDisplay(widget)
     local symbol = widget:getSymbol()
     local minMax = value >= widget:getMaximum() and string.format(' (%s)', tr('max')) or value <= widget:getMinimum() and string.format(' (%s)', tr('min')) or ''
 
-    widget:setText(string.format('%d%s%s', value, symbol and string.format('%s%s', symbol:find("[%w]") and ' ' or '', symbol) or '', minMax))
+    widget:setText(string.format('%d%s%s', value, symbol and string.format('%s%s', symbol:find('[%w]') and ' ' or '', symbol) or '', minMax))
   end
 end
 

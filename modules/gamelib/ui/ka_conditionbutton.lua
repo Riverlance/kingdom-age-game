@@ -1,7 +1,7 @@
 -- @docclass
-UIConditionButton = extends(UIWidget, "UIConditionButton")
+UIConditionButton = extends(UIWidget, 'UIConditionButton')
 
-local barColors = {} -- Must be sorted by percentAbove
+local barColors = { } -- Must be sorted by percentAbove
 table.insert(barColors, { percentAbove = 92, color = '#00BC00' } )
 table.insert(barColors, { percentAbove = 60, color = '#50A150' } )
 table.insert(barColors, { percentAbove = 30, color = '#A1A100' } )
@@ -9,7 +9,7 @@ table.insert(barColors, { percentAbove =  8, color = '#BF0A0A' } )
 table.insert(barColors, { percentAbove =  3, color = '#910F0F' } )
 table.insert(barColors, { percentAbove = -1, color = '#850C0C' } )
 
-local boostColors = {}
+local boostColors = { }
 boostColors[0] = '#88888877' -- No boost
 boostColors[1] = '#FF754977'
 boostColors[2] = '#B770FF77'
@@ -29,8 +29,8 @@ function UIConditionButton:setup(condition)
   conditionBarWidget:setPhasesBorderWidth(1)
   conditionBarWidget:setPhasesBorderColor('#00000077')
 
-  if type(condition.remainingTime) == "number" and condition.remainingTime > 0 then
-    local timer = {}
+  if type(condition.remainingTime) == 'number' and condition.remainingTime > 0 then
+    local timer = { }
     self.clock = Timer.new(timer, condition.remainingTime)
     self.clock.updateTicks = 0.1
     self.clock.onUpdate = function() self:updateConditionClock() end
@@ -96,15 +96,15 @@ end
 
 function UIConditionButton:setTooltipText()
   local c = self.condition
-  local blocks = {}
+  local blocks = { }
 
   local nameBlock = { { text = c.name }, backgroundImage = '/images/ui/_background/default_stone_blue' }
   local infoBlock = {
-    { text = "Combat: ", align = AlignLeft },
+    { text = 'Combat: ', align = AlignLeft },
     { icon = string.format('/images/game/creature/condition/type_%s', c.aggressive and 'aggressive' or 'non_aggressive'), size = { width = 11, height = 11 }, align = AlignLeft },
-    { text = string.format(' %s', c.aggressive and "Aggressive" or "Non-Aggressive"), align = AlignLeft },
+    { text = string.format(' %s', c.aggressive and 'Aggressive' or 'Non-Aggressive'), align = AlignLeft },
   }
-  local attributeStr = ""
+  local attributeStr = ''
   if c.attribute then
     if tonumber(c.offset) > 0 then
       attributeStr = string.format('%s +%s', attributeStr, c.offset)
@@ -114,8 +114,8 @@ function UIConditionButton:setTooltipText()
     end
   end
 
-  local attributeBlock = { { text = string.format("Attribute: %s%s", ATTRIBUTE_NAMES[c.attribute], attributeStr), align = AlignLeft } }
-  local durationBlock = { {  text = "Duration: " .. (self.clock and self.clock:getString()), align = AlignLeft } }
+  local attributeBlock = { { text = string.format('Attribute: %s%s', ATTRIBUTE_NAMES[c.attribute], attributeStr), align = AlignLeft } }
+  local durationBlock = { {  text = 'Duration: ' .. (self.clock and self.clock:getString()), align = AlignLeft } }
   local powerBlock = {
     { icon = c.powerId and string.format('/images/ui/power/%d_off', c.powerId), size = { width = 20, height = 20 } },
     { text = c.powerId and c.powerName or 'Unknown' },

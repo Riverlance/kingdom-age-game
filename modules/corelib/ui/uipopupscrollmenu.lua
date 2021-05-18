@@ -1,5 +1,5 @@
 -- @docclass
-UIPopupScrollMenu = extends(UIWidget, "UIPopupScrollMenu")
+UIPopupScrollMenu = extends(UIWidget, 'UIPopupScrollMenu')
 
 local currentMenu
 

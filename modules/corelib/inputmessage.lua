@@ -23,7 +23,7 @@ function InputMessage:getData()
 end
 
 function InputMessage:getTable()
-  local ret = {}
+  local ret = { }
   local size = self:getU16()
   for i=1,size do
     local index = self:getData()
@@ -34,7 +34,7 @@ function InputMessage:getTable()
 end
 
 function InputMessage:getColor()
-  local color = {}
+  local color = { }
   color.r = self:getU8()
   color.g = self:getU8()
   color.b = self:getU8()
@@ -43,7 +43,7 @@ function InputMessage:getColor()
 end
 
 function InputMessage:getPosition()
-  local position = {}
+  local position = { }
   position.x = self:getU16()
   position.y = self:getU16()
   position.z = self:getU8()

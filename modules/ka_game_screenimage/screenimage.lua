@@ -2,7 +2,7 @@ _G.GameScreenImage = { }
 
 
 
-screenImages = {}
+screenImages = { }
 
 local SCREENPOS_CENTER = 1
 local SCREENPOS_TOP = 2
@@ -154,7 +154,7 @@ function GameScreenImage.clearImages()
       tmpImage:destroy()
     end
   end
-  screenImages = {}
+  screenImages = { }
 end
 
 function GameScreenImage.getRootPath()

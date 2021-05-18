@@ -1,5 +1,5 @@
 -- @docclass
-UICreatureButton = extends(UIWidget, "UICreatureButton")
+UICreatureButton = extends(UIWidget, 'UICreatureButton')
 
 local alpha = 'AA' -- Alpha
 
@@ -50,7 +50,7 @@ function UICreatureButton.create()
 end
 
 function UICreatureButton:setCreature(data)
-  if type(data) == "userdata" then
+  if type(data) == 'userdata' then
     local position = data:getPosition()
 
     self.creature = data

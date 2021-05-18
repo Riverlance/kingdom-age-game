@@ -3,7 +3,7 @@ _G.GameBlinkHit = { }
 
 
 local blinkTime = 250
-local events    = {}
+local events    = { }
 
 local function removeBlink(id)
   local creature = g_map.getCreatureById(id)
@@ -45,7 +45,7 @@ function GameBlinkHit.removeAll(instantly)
     GameBlinkHit.remove(id, instantly)
   end
   if instantly then
-    events = {}
+    events = { }
   end
 end
 

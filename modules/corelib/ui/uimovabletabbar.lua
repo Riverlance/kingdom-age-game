@@ -1,5 +1,5 @@
 -- @docclass
-UIMoveableTabBar = extends(UIWidget, "UIMoveableTabBar")
+UIMoveableTabBar = extends(UIWidget, 'UIMoveableTabBar')
 
 -- private functions
 local function onTabClick(tab)
@@ -210,12 +210,12 @@ end
 function UIMoveableTabBar.create()
   local tabbar = UIMoveableTabBar.internalCreate()
   tabbar:setFocusable(false)
-  tabbar.tabs = {}
+  tabbar.tabs = { }
   tabbar.selected = nil  -- dragged tab
   tabbar.tabSpacing = 0
   tabbar.tabsMoveable = false
-  tabbar.preTabs = {}
-  tabbar.postTabs = {}
+  tabbar.preTabs = { }
+  tabbar.postTabs = { }
   tabbar.prevNavigation = nil
   tabbar.nextNavigation = nil
   tabbar.onGeometryChange = function()

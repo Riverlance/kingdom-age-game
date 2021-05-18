@@ -8,18 +8,18 @@
 TABLE_SORTING_ASC = 0
 TABLE_SORTING_DESC = 1
 
-UITable = extends(UIWidget, "UITable")
+UITable = extends(UIWidget, 'UITable')
 
 -- Initialize default values
 function UITable.create()
   local table = UITable.internalCreate()
   table.headerRow = nil
-  table.headerColumns = {}
+  table.headerColumns = { }
   table.dataSpace = nil
-  table.rows = {}
+  table.rows = { }
   table.rowBaseStyle = nil
-  table.columns = {}
-  table.columnWidth = {}
+  table.columns = { }
+  table.columnWidth = { }
   table.columBaseStyle = nil
   table.headerRowBaseStyle = nil
   table.headerColumnBaseStyle = nil
@@ -37,11 +37,11 @@ function UITable:onDestroy()
   for _,row in pairs(self.rows) do
     row.onClick = nil
   end
-  self.rows = {}
-  self.columns = {}
+  self.rows = { }
+  self.columns = { }
   self.headerRow = nil
-  self.headerColumns = {}
-  self.columnWidth = {}
+  self.headerColumns = { }
+  self.columnWidth = { }
   self.selectedRow = nil
 
   if self.dataSpace then
@@ -111,8 +111,8 @@ function UITable:clearData()
   end
   self.dataSpace:destroyChildren()
   self.selectedRow = nil
-  self.columns = {}
-  self.rows = {}
+  self.columns = { }
+  self.rows = { }
 end
 
 -- Set existing child as header
@@ -124,8 +124,8 @@ function UITable:setHeader(headerWidget)
     self.dataSpace:applyStyle({ height = newHeight })
   end
 
-  self.headerColumns = {}
-  self.columnWidth = {}
+  self.headerColumns = { }
+  self.columnWidth = { }
   for colId, column in pairs(headerWidget:getChildren()) do
     column.colId = colId
     column.table = self
@@ -146,7 +146,7 @@ function UITable:addHeader(data)
   self:removeHeader()
 
   -- build header columns
-  local columns = {}
+  local columns = { }
   for colId, column in pairs(data) do
     local col = g_ui.createWidget(self.headerColumnBaseStyle)
     col.colId = colId
@@ -171,8 +171,8 @@ function UITable:addHeader(data)
   self.dataSpace:applyStyle({ height = newHeight })
 
   headerRow:setId('header')
-  self.headerColumns = {}
-  self.columnWidth = {}
+  self.headerColumns = { }
+  self.columnWidth = { }
   for _, column in pairs(columns) do
     headerRow:addChild(column)
     table.insert(self.columnWidth, column:getWidth())
@@ -190,8 +190,8 @@ function UITable:removeHeader()
       local newHeight = self.dataSpace:getHeight()+self.headerRow:getHeight()+self.dataSpace:getMarginTop()
       self.dataSpace:applyStyle({ height = newHeight })
     end
-    self.headerColumns = {}
-    self.columnWidth = {}
+    self.headerColumns = { }
+    self.columnWidth = { }
     self.headerRow:destroy()
     self.headerRow = nil
   end
@@ -218,7 +218,7 @@ function UITable:addRow(data, height)
   row:setId('row'..rowId)
   row:updateBackgroundColor()
 
-  self.columns[rowId] = {}
+  self.columns[rowId] = { }
   for colId, column in pairs(data) do
     local col = g_ui.createWidget(self.columBaseStyle, row)
     if column.width then
@@ -316,13 +316,13 @@ function UITable:sort()
   end
 
   self:updateRows()
-  self.columns = {}
+  self.columns = { }
   for _, row in pairs(self.rows) do
     if self.dataSpace then
       self.dataSpace:addChild(row)
     end
 
-    self.columns[row.rowId] = {}
+    self.columns[row.rowId] = { }
     for _, column in pairs(row:getChildren()) do
       table.insert(self.columns[row.rowId], column)
     end
@@ -395,7 +395,7 @@ function UITable:setHeaderColumnStyle(style)
 end
 
 
-UITableRow = extends(UIWidget, "UITableRow")
+UITableRow = extends(UIWidget, 'UITableRow')
 
 function UITableRow:onFocusChange(focused)
   if focused then
@@ -431,7 +431,7 @@ function UITableRow:updateBackgroundColor()
 end
 
 
-UITableHeaderColumn = extends(UIButton, "UITableHeaderColumn")
+UITableHeaderColumn = extends(UIButton, 'UITableHeaderColumn')
 
 function UITableHeaderColumn:onClick()
   if self.table then

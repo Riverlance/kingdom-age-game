@@ -1,5 +1,5 @@
 function postostring(pos)
-  return pos.x .. " " .. pos.y .. " " .. pos.z
+  return pos.x .. ' ' .. pos.y .. ' ' .. pos.z
 end
 
 function dirtostring(dir)

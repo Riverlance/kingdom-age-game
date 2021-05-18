@@ -1277,7 +1277,7 @@ function GamePartyList.onLevelTextEditChange(self)
   local number = tonumber(text)
 
   -- If not integer
-  if text ~= '' and (text:match("[^0-9]+") or not number) then
+  if text ~= '' and (text:match('[^0-9]+') or not number) then
     self:setText('')
   end
 

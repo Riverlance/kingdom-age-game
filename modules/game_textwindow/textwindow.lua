@@ -2,7 +2,7 @@ _G.GameTextWindow = { }
 
 
 
-local windows = {}
+local windows = { }
 
 function GameTextWindow.init()
   -- Alias
@@ -33,7 +33,7 @@ function GameTextWindow.destroyWindows()
   for _,window in pairs(windows) do
     window:destroy()
   end
-  windows = {}
+  windows = { }
 end
 
 function GameTextWindow.onGameEditText(id, itemId, maxLength, text, writer, time)
@@ -69,7 +69,7 @@ function GameTextWindow.onGameEditText(id, itemId, maxLength, text, writer, time
   end
 
   if #text == 0 and not writeable then
-    desc = tr("It is empty.")
+    desc = tr('It is empty.')
   elseif writeable then
     desc = desc .. tr('You can enter new text.')
   end

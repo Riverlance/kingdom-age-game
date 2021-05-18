@@ -21,7 +21,7 @@ currentOutfit = 1
 addons = nil
 currentColorBox = nil
 currentClotheButtonBox = nil
-colorBoxes = {}
+colorBoxes = { }
 
 mount = nil
 mounts = nil
@@ -168,8 +168,8 @@ function GameOutfit.destroy()
     mountCreature = nil
     currentColorBox = nil
     currentClotheButtonBox = nil
-    colorBoxes = {}
-    addons = {}
+    colorBoxes = { }
+    addons = { }
   end
 end
 
@@ -312,7 +312,7 @@ function GameOutfit.updateOutfit()
 
   local availableAddons = outfits[currentOutfit][3]
 
-  local prevAddons = {}
+  local prevAddons = { }
   for k, addon in pairs(addons) do
     prevAddons[k] = addon.widget:isChecked()
     addon.widget:setChecked(false)

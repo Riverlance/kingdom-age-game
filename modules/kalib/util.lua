@@ -1,5 +1,5 @@
 function dumpvar(data)
-  local tablecache = {}
+  local tablecache = { }
   local buffer = ''
   local padder = '    '
 
@@ -42,7 +42,7 @@ function print_r(...)
   end
 
   local args = {...}
-  if type(args) ~= "table" or table.empty(args) then
+  if type(args) ~= 'table' or table.empty(args) then
     return false
   end
   for _,arg in pairs(args) do
