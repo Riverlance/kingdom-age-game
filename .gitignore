@@ -71,6 +71,7 @@ Thumbs.db
 .directory
 src/framework/graphics/dx/
 modules/.project/modules.sublime-workspace
+modules/.project/modules.sublime-project
 
 #################
 ## Visual Studio
