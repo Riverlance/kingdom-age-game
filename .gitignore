@@ -72,6 +72,8 @@ tags
 Thumbs.db
 .directory
 src/framework/graphics/dx/
+*.sublime-workspace
+*.sublime-project
 
 #################
 ## Visual Studio
