@@ -48,6 +48,31 @@ local function retranslateKeyComboDesc(keyComboDesc)
   return translateKeyCombo(keyCombo)
 end
 
+function backtranslateKeyComboDesc(keyComboDesc)
+  local keyCombo = { }
+  for _, keyCodeDesc in ipairs(keyComboDesc:split('+')) do
+    for keyCode, keyDesc in pairs(KeyCodeDescs) do
+      if keyDesc:lower() == keyCodeDesc:trim():lower() then
+        table.insert(keyCombo, keyCode)
+      end
+    end
+  end
+  local mainKeyCode = KeyUnknown
+  local keyModifiers = KeyboardNoModifier
+  for _, keyCode in ipairs(keyCombo) do
+    if keyCode == KeyCtrl then
+      keyModifiers = bit32.bor(keyModifiers, KeyboardCtrlModifier)
+    elseif keyCode == KeyShift then
+      keyModifiers = bit32.bor(keyModifiers, KeyboardShiftModifier)
+    elseif keyCode == KeyAlt then
+      keyModifiers = bit32.bor(keyModifiers, KeyboardAltModifier)
+    else
+      mainKeyCode = keyCode
+    end
+  end
+  return {keyCode = mainKeyCode, keyModifiers = keyModifiers}
+end
+
 function determineKeyComboDesc(keyCode, keyboardModifiers)
   local keyCombo = { }
   if keyCode == KeyCtrl or keyCode == KeyShift or keyCode == KeyAlt then
@@ -199,6 +224,8 @@ function g_keyboard.unbindKeyDown(keyComboDesc, arg1, arg2)
     return
   end
 
+  local keyAlone = translateKeyCombo({ backtranslateKeyComboDesc(keyComboDesc).keyCode })
+  disconnect(widget.boundAloneKeyDownCombos, keyAlone, callback)
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
   disconnect(widget.boundKeyDownCombos, keyComboDesc, callback)
 end
@@ -209,6 +236,8 @@ function g_keyboard.unbindKeyUp(keyComboDesc, arg1, arg2)
     return
   end
 
+  local keyAlone = translateKeyCombo({ backtranslateKeyComboDesc(keyComboDesc).keyCode })
+  disconnect(widget.boundAloneKeyUpCombos, keyAlone, callback)
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
   disconnect(widget.boundKeyUpCombos, keyComboDesc, callback)
 end

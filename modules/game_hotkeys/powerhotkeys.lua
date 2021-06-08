@@ -289,6 +289,7 @@ function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
 
     -- By keyboard press
     else
+      keyCombo = translateKeyCombo({ backtranslateKeyComboDesc(keyCombo).keyCode })
       g_keyboard.bindKeyUp(keyCombo, function ()
         g_keyboard.unbindKeyUp(keyCombo)
 
@@ -302,7 +303,7 @@ function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
           powerBoost_lastPower = 0
           powerBoost_keyCombo = nil
         end, 500)
-      end)
+      end, nil, true)
     end
 
   -- Has previous power
