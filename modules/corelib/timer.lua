@@ -6,8 +6,8 @@ Timer = { --minute:second countdown timer
 
 function Timer:new(duration)
     local timer = { }
-    timer.duration = math.min(duration / 1000)
-    timer.minutes = math.min(timer.duration / 60)
+    timer.duration = math.floor(duration / 1000)
+    timer.minutes = math.floor(timer.duration / 60)
     timer.seconds = timer.duration % 60
     return setmetatable(timer, { __index = Timer })
 end
