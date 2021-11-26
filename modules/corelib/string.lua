@@ -60,11 +60,6 @@ function string:contains(...)
   return false
 end
 
--- :+ to : and ;+ to ;
-function string:asOpcodeString()
-  return self:gsub(':+', ':'):gsub(';+', ';')
-end
-
 local function getFatorial(n)
   return n == 0 and 1 or n * getFatorial(n - 1)
 end
@@ -159,8 +154,8 @@ function string:getCompactPath() -- path/file.ext to path/file
   return self:match('(.+)%..-$')
 end
 
-function string.exists(value)
-  return value and value ~= ''
+function string.exists(self)
+  return self and self ~= ''
 end
 
 function string:comma()

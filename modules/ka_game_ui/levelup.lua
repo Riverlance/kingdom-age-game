@@ -82,9 +82,9 @@ function GameLevelUp.updatePosition()
   local margin = GameInterface.m.topMenuButton:getHeight() + config.baseMargin
 
   -- Hotkey bar
-  local firstHotkeybar = modules.ka_game_hotkeybars and GameHotkeybars.getHotkeyBars()[1] or nil
-  if firstHotkeybar and firstHotkeybar:isVisible() then
-    margin = margin + firstHotkeybar.height + firstHotkeybar.mapMargin
+  local topHotkeyBar = modules.ka_game_hotkeybars and GameHotkeyBars.getHotkeyBars()[AnchorTop] or nil
+  if topHotkeyBar and topHotkeyBar:isVisible() then
+    margin = margin + topHotkeyBar:getHeight()
   end
 
   -- Loot bar

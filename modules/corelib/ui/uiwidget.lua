@@ -75,23 +75,6 @@ function UIWidget:onDrop(widget, mousePos)
 
     signalcall(widget.lastPanel.onFitAll, widget.lastPanel, self)
   end
-
-  if widget:getClassName() == 'UIHotkeybarContainer' then
-    local parent = widget:getParentBar()
-    if not parent or not modules.game_hotkeys or not GameHotkeys.isOpen() then
-      return false
-    end
-
-    local dropParent = self:getParent()
-    if dropParent and dropParent:getClassName() == 'UIHotkeybar' then
-      dropParent:onDrop(widget, mousePos)
-      return true
-    end
-
-    parent:removeHotkey(widget)
-    return true
-  end
-
   return false
 end
 

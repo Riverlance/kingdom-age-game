@@ -1,6 +1,10 @@
 Panel
 
   OptionCheckBox
+    id: autoDisableChatOnSendMessage
+    !text: tr('Auto disable chat on send message')
+
+  OptionCheckBox
     id: showTimestampsInConsole
     !text: tr('Show timestamps in console')
 
@@ -8,13 +12,9 @@ Panel
     id: showLevelsInConsole
     !text: tr('Show levels in console')
 
-  OptionHorizontalSeparator
-
   OptionCheckBox
     id: showInfoMessagesInConsole
     !text: tr('Show info messages in console')
-    $!first:
-      margin-top: 10
 
   OptionCheckBox
     id: showEventMessagesInConsole

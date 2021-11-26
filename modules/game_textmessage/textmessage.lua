@@ -119,9 +119,9 @@ local function updateStatusLabelPosition(label)
   local margin = GameInterface.m.chatButton:getHeight() + 4
 
   -- Hotkey bar
-  local firstHotkeybar = modules.ka_game_hotkeybars and GameHotkeybars.getHotkeyBars()[1] or nil
-  if firstHotkeybar and firstHotkeybar:isVisible() then
-    margin = margin + firstHotkeybar.height + firstHotkeybar.mapMargin
+  local bottomHotkeyBar = modules.ka_game_hotkeybars and GameHotkeyBars.getHotkeyBars()[AnchorBottom] or nil
+  if bottomHotkeyBar and bottomHotkeyBar:isVisible() then
+    margin = margin + bottomHotkeyBar:getHeight()
   end
 
   -- Experience bar

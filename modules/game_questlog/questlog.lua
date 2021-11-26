@@ -7,6 +7,25 @@ questLineWindow = nil
 
 local questLogTeleportLock = false
 
+QUEST_CATEGORY_MAIN      = 1
+QUEST_CATEGORY_SIDEQUEST = 2
+QUEST_CATEGORY_DAILY     = 3
+QUEST_CATEGORY_WEEKLY    = 4
+QUEST_CATEGORY_MONTHLY   = 5
+QUEST_CATEGORY_GUILD     = 6
+
+QUESTS_CATEGORIESNAMES =
+{
+  [QUEST_CATEGORY_MAIN]      = 'Main',
+  [QUEST_CATEGORY_SIDEQUEST] = 'Side Quest',
+  [QUEST_CATEGORY_DAILY]     = 'Daily',
+  [QUEST_CATEGORY_WEEKLY]    = 'Weekly',
+  [QUEST_CATEGORY_MONTHLY]   = 'Monthly',
+  [QUEST_CATEGORY_GUILD]     = 'Guild',
+}
+
+
+
 function GameQuestLog.init()
   -- Alias
   GameQuestLog.m = modules.game_questlog
@@ -64,11 +83,7 @@ function GameQuestLog.show()
     return
   end
 
-  local msg = OutputMessage.create()
-  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
-  msg:addU16(ClientExtOpcodes.ClientExtOpcodeQuestLog)
-  msg:addString('')
-  protocolGame:send(msg)
+  GameQuestLog.sendLogWindowRequest()
 
   questLogButton:setOn(true)
 end
@@ -88,14 +103,18 @@ end
 
 function GameQuestLog.sendTeleportRequest(questId, missionId)
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
+  if not protocolGame then
     return false
   end
 
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeAction)
-  msg:addString(string.format('%i:%i:%i', ClientActions.QuestTeleports, questId, missionId))
+
+  msg:addU16(ClientActions.QuestTeleports)
+  msg:addU16(questId)
+  msg:addU16(missionId)
+
   protocolGame:send(msg)
 
   return true
@@ -103,14 +122,44 @@ end
 
 function GameQuestLog.sendShowItemsRequest(questId, missionId)
   local protocolGame = g_game.getProtocolGame()
-  if protocolGame then
+  if not protocolGame then
     return false
   end
 
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeAction)
-  msg:addString(string.format('%i:%i:%i', ClientActions.QuestItems, questId, missionId))
+
+  msg:addU16(ClientActions.QuestItems)
+  msg:addU16(questId)
+  msg:addU16(missionId)
+
+  protocolGame:send(msg)
+
+  return true
+end
+
+function GameQuestLog.sendLogWindowRequest(questId)
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return false
+  end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeQuestLog)
+
+  -- Quest log
+  if not questId then
+    msg:addU8(1)
+
+  -- Mission log
+  else
+    msg:addU8(2)
+
+    msg:addU16(questId) -- Quest id
+  end
+
   protocolGame:send(msg)
 
   return true
@@ -215,66 +264,62 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
 end
 
 function GameQuestLog.parseQuestLog(protocolGame, opcode, msg)
-  local buffer = msg:getString()
-  local params = buffer:split(':::')
+  local windowId = msg:getU8()
 
-  local mode = tonumber(params[1])
-  if not mode then
-    return
-  end
-
-  if mode == 1 then -- Quest Log
+  -- Quest log window
+  if windowId == 1 then
     local quests = { }
 
-    for _, _quest in ipairs(params[2] and params[2]:split(';;') or { }) do
+    local questListSize = msg:getU16()
+    for i = 1, questListSize do
       local quest = { }
-      local data = _quest:split('::')
-      quest.id = tonumber(data[1])
-      if not quest.id then
-        return
-      end
 
-      quest.isComplete   = tonumber(data[2]) == 1 and true or false
-      quest.canDo        = tonumber(data[3]) == 1 and true or false
-      quest.logName      = data[4]
-      quest.categoryName = data[5]
-      quest.minLevel     = tonumber(data[6]) or 1
-      quest.hasTeleport  = tonumber(data[7]) == 1 and true or false
-      quest.experience   = tonumber(data[8]) or 0
-      quest.money        = tonumber(data[9]) or 0
-      quest.showItems    = tonumber(data[10]) == 1 and true or false
-      quest.otherRewards = data[11]
-      quest.otherRewards = quest.otherRewards ~= '-' and quest.otherRewards or ''
+      quest.id           = msg:getU16()
+      quest.isComplete   = msg:getU8() == 1
+      quest.canDo        = msg:getU8() == 1
+      quest.logName      = msg:getString()
+      quest.categoryName = QUESTS_CATEGORIESNAMES[msg:getU8()] or ''
+      quest.minLevel     = msg:getU32()
+      quest.hasTeleport  = msg:getU8() == 1
+
+      local hasRewards   = msg:getU8() == 1
+      quest.experience   = hasRewards and msg:getU64() or 0
+      quest.money        = hasRewards and msg:getU64() or 0
+      quest.showItems    = hasRewards and msg:getU8() == 1 or false
+      quest.otherRewards = hasRewards and msg:getString() or ''
+
       table.insert(quests, quest)
     end
+
     GameQuestLog.onGameQuestLog(quests)
 
-  elseif mode == 2 then -- Quest Line
+  -- Mission log window
+  elseif windowId == 2 then
     local missions = { }
-    local questId = tonumber(params[2])
-    if not questId then
-      return
+
+    local questId = msg:getU16()
+
+    local missionListSize = msg:getU16()
+    for i = 1, missionListSize do
+      local mission = { }
+
+      mission.id           = msg:getU16()
+      mission.isComplete   = msg:getU8() == 1
+      mission.canDo        = msg:getU8() == 1
+      mission.logName      = msg:getString()
+      mission.minLevel     = msg:getU32()
+      mission.description  = msg:getString()
+      mission.hasTeleport  = msg:getU8() == 1
+
+      local hasRewards     = msg:getU8() == 1
+      mission.experience   = hasRewards and msg:getU64() or 0
+      mission.money        = hasRewards and msg:getU64() or 0
+      mission.showItems    = hasRewards and msg:getU8() == 1 or false
+      mission.otherRewards = hasRewards and msg:getString() or ''
+
+      table.insert(missions, mission)
     end
 
-    for _, _mission in ipairs(params[3] and params[3]:split(';;') or { }) do
-      local mission = { }
-      local data = _mission:split('::')
-      mission.id = tonumber(data[1])
-      if mission.id then
-        mission.isComplete   = tonumber(data[2]) == 1 and true or false
-        mission.canDo        = tonumber(data[3]) == 1 and true or false
-        mission.logName      = data[4]
-        mission.minLevel     = tonumber(data[5]) or 1
-        mission.description  = data[6]
-        mission.hasTeleport  = tonumber(data[7]) == 1 and true or false
-        mission.experience   = tonumber(data[8]) or 0
-        mission.money        = tonumber(data[9]) or 0
-        mission.showItems    = tonumber(data[10]) == 1 and true or false
-        mission.otherRewards = data[11]
-        mission.otherRewards = mission.otherRewards ~= '-' and mission.otherRewards or ''
-        table.insert(missions, mission)
-      end
-    end
     GameQuestLog.onGameQuestLine(questId, missions)
   end
 end
@@ -331,11 +376,7 @@ function GameQuestLog.onGameQuestLog(quests)
 
       questLogWindow:hide()
 
-      local msg = OutputMessage.create()
-      msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
-      msg:addU16(ClientExtOpcodes.ClientExtOpcodeQuestLog)
-      msg:addString(tostring(quest.id))
-      protocolGame:send(msg)
+      GameQuestLog.sendLogWindowRequest(quest.id)
     end
 
   end

@@ -407,4 +407,19 @@ ChannelEvent = {
   Exclude = 3,
 }
 
+HotkeyStatus =
+{
+  Applied = {color = 'alpha',     focusColor = '#CCCCCC22'},
+  Added   = {color = '#00FF0022', focusColor = '#00CC0022'},
+  Edited  = {color = '#FFFF0022', focusColor = '#CCCC0022'},
+  Deleted = {color = '#FF000022', focusColor = '#CC000022'},
+}
+
+HotkeyItemUseType = {
+  Default = nil,
+  Crosshair = 1,
+  Target    = 2,
+  Self      = 3
+}
+
 -- @}

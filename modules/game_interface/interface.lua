@@ -6,6 +6,7 @@ WALK_STEPS_RETRY = 10
 
 gameRootPanel = nil
 gameMapPanel = nil
+gameScreenArea = nil
 gameRightFirstPanel = nil
 gameRightSecondPanel = nil
 gameRightThirdPanel = nil
@@ -64,6 +65,7 @@ function GameInterface.init()
   topMenuButton = gameRootPanel:getChildById('topMenuButton')
   chatButton = gameRootPanel:getChildById('chatButton')
   gameMapPanel = gameRootPanel:getChildById('gameMapPanel')
+  gameScreenArea = gameRootPanel:getChildById('gameScreenArea')
   gameRightFirstPanel = gameRootPanel:getChildById('gameRightFirstPanel')
   gameRightSecondPanel = gameRootPanel:getChildById('gameRightSecondPanel')
   gameRightThirdPanel = gameRootPanel:getChildById('gameRightThirdPanel')
@@ -107,14 +109,25 @@ function GameInterface.init()
   })
 
   connect(g_game, {
-    onGameStart   = GameInterface.onGameStart,
-    onGameEnd     = GameInterface.onGameEnd,
-    onLoginAdvice = GameInterface.onLoginAdvice,
+    onGameStart      = GameInterface.onGameStart,
+    onGameEnd        = GameInterface.onGameEnd,
+    onLoginAdvice    = GameInterface.onLoginAdvice,
+    onTrackCreature  = GameInterface.onTrackCreature
   }, true)
 
   connect(gameRootPanel, {
     onGeometryChange = GameInterface.updateStretchShrink,
     onFocusChange    = GameInterface.stopSmartWalk,
+  })
+
+  connect(gameMapPanel, {
+    onGeometryChange = updateTrackArrows,
+    onViewModeChange = updateTrackArrows,
+    onZoomChange     = updateTrackArrows,
+  })
+
+  connect(gameScreenArea, {
+    onGeometryChange = updateTrackArrows,
   })
 
   connect(mouseGrabberWidget, {
@@ -242,15 +255,26 @@ function GameInterface.terminate()
     onMouseRelease = GameInterface.onMouseGrabberRelease,
   })
 
+  disconnect(gameScreenArea, {
+    onGeometryChange = updateTrackArrows,
+  })
+
+  disconnect(gameMapPanel, {
+    onGeometryChange = updateTrackArrows,
+    onViewModeChange = updateTrackArrows,
+    onZoomChange     = updateTrackArrows,
+  })
+
   disconnect(gameRootPanel, {
     onGeometryChange = GameInterface.updateStretchShrink,
     onFocusChange    = GameInterface.stopSmartWalk,
   })
 
   disconnect(g_game, {
-    onGameStart   = GameInterface.onGameStart,
-    onGameEnd     = GameInterface.onGameEnd,
-    onLoginAdvice = GameInterface.onLoginAdvice
+    onGameStart      = GameInterface.onGameStart,
+    onGameEnd        = GameInterface.onGameEnd,
+    onLoginAdvice    = GameInterface.onLoginAdvice,
+    onTrackCreature  = GameInterface.onTrackCreature
   })
 
   disconnect(g_app, {
@@ -1131,6 +1155,20 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
         end
       end
 
+      if modules.ka_game_tracker then
+        if not classic then
+          shortcut = '(Alt+Shift)'
+        else
+          shortcut = nil
+        end
+
+        if not GameTracker.isTracked(creatureThing) then
+          menu:addOption(tr('Track'), function() GameTracker.startTracking(creatureThing) end, shortcut)
+        else
+          menu:addOption(tr('Stop track'), function() GameTracker.stopTracking(creatureThing) end, shortcut)
+        end
+      end
+
       if creatureThing:isPlayer() then
         menu:addSeparator()
 
@@ -1221,6 +1259,8 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
     if keyboardModifiers == KeyboardNoModifier and mouseButton == MouseRightButton and not g_mouse.isPressed(MouseLeftButton) then
       GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
       return true
+    elseif modules.ka_game_tracker and attackCreature and g_keyboard.isShiftPressed() and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton or isMouseBothPressed) then
+      GameTracker.toggleTracking(attackCreature)
     elseif creatureThing and getDistanceBetween(creatureThing:getPosition(), player:getPosition()) >= 1 and (creatureThing:getPosition().z == autoWalkPos.z and g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) or not creatureThing:isMonster() and isMouseBothPressed) then
       g_game.follow(creatureThing)
       return true
@@ -1275,6 +1315,9 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
       return true
     elseif useThing and keyboardModifiers == KeyboardCtrlModifier and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
       GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
+      return true
+    elseif modules.ka_game_tracker and attackCreature and g_keyboard.isShiftPressed() and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton or isMouseBothPressed) then
+      GameTracker.toggleTracking(attackCreature)
       return true
     elseif attackCreature and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
       g_game.attack(attackCreature)
@@ -1546,4 +1589,79 @@ function GameInterface.setupViewMode(mode)
   currentViewMode = mode
 
   ClientOptions.setOption('viewModeComboBox', viewMode.name, false)
+end
+
+function GameInterface.onTrackCreature(creature)
+  local TrackingInfo = GameTracker.m.TrackingInfo
+
+  if not creature.widget then
+    creature.widget = g_ui.createWidget('TrackerWidget', gameScreenArea)
+    creature.widget:setId('tracked_creature_' .. creature.id)
+  end
+
+  if creature.status == TrackingInfo.Stop then
+    creature.widget:destroy()
+    creature.widget = nil
+    return
+  end
+
+  if creature.status == TrackingInfo.Paused then
+    creature.widget:hide()
+  else
+    creature.widget:show()
+  end
+
+  updateTrackArrow(creature)
+end
+
+function updateTrackArrow(creature)
+  local playerPos = g_game.getLocalPlayer():getPosition()
+  local targetPos = creature.position
+
+  local distance = Position.distance(playerPos, targetPos)
+  creature.widget:setVisible(distance ~= 0)
+  local trackerLabel = creature.widget:getChildById('distance')
+  trackerLabel:setText(string.format('%d m', math.floor(distance)))
+
+  local orientation = math.atan2(targetPos.y - playerPos.y, targetPos.x - playerPos.x)
+  local trackerArrow = creature.widget:getChildById('arrow')
+  trackerArrow:setRotation(math.deg(orientation))
+
+  trackerLabel:breakAnchors()
+  local xDiff = playerPos.x - targetPos.x
+  local yDiff = playerPos.y - targetPos.y
+  if yDiff < 0 then
+    trackerLabel:addAnchor(AnchorBottom, 'arrow', AnchorOutsideTop)
+  elseif yDiff > 0 then
+    trackerLabel:addAnchor(AnchorTop, 'arrow', AnchorOutsideBottom)
+  else
+    trackerLabel:addAnchor(AnchorVerticalCenter, 'arrow', AnchorVerticalCenter)
+  end
+  if xDiff < 0 then
+    trackerLabel:addAnchor(AnchorRight, 'arrow', AnchorOutsideLeft)
+  elseif xDiff > 0 then
+    trackerLabel:addAnchor(AnchorLeft, 'arrow', AnchorOutsideRight)
+  else
+    trackerLabel:addAnchor(AnchorHorizontalCenter, 'arrow', AnchorHorizontalCenter)
+  end
+
+  local mapSize = gameMapPanel:getVisibleDimension()
+  local tileX = gameMapPanel:getMapWidth() / mapSize.width
+  local tileY = gameMapPanel:getMapHeight() / mapSize.height
+
+  local px = gameMapPanel:getX() + (gameMapPanel:getWidth() - gameMapPanel:getMapWidth()) / 2 + (tileX * (mapSize.width - 1) / 2)
+  local py = gameMapPanel:getY() + (gameMapPanel:getHeight() - gameMapPanel:getMapHeight()) / 2 + (tileY * (mapSize.height - 1) / 2)
+
+  local rx = ( (distance - 1) * tileX - creature.widget:getWidth()  ) * math.cos(orientation)
+  local ry = ( (distance - 1) * tileY - creature.widget:getHeight() ) * math.sin(orientation)
+
+  creature.widget:setX(px + rx)
+  creature.widget:setY(py + ry)
+  creature.widget:bindRectToParent()
+end
+
+function updateTrackArrows()
+  for _, trackedCreature in pairs(GameTracker.getTrackedCreaturesList()) do
+    updateTrackArrow(trackedCreature)
+  end
 end

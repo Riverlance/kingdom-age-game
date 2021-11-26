@@ -17,6 +17,7 @@ local defaultOptions = {
   showStatusMessagesInConsole = true,
   showEventMessagesInConsole = true,
   showInfoMessagesInConsole = true,
+  autoDisableChatOnSendMessage = true,
   showTimestampsInConsole = true,
   showLevelsInConsole = true,
   showPrivateMessagesInConsole = true,
@@ -535,7 +536,7 @@ function ClientOptions.setOption(key, value, force)
     if not modules.ka_game_hotkeybars then
       return
     end
-    GameHotkeybars.onDisplay(value)
+    GameHotkeyBars.onDisplay(value)
 
   elseif key == 'showNpcDialogWindows' then
     g_game.setNpcDialogWindows(value)

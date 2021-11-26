@@ -119,12 +119,12 @@ if not G.currentRsa then
   g_game.setRsa(OTSERV_RSA)
 end
 
-function g_game.getWidgetByPos(wantsPhantom, parentWidget)
+function g_game.getWidgetByPos(mousePos, wantsPhantom, parentWidget)
   if wantsPhantom == nil then
     wantsPhantom = false
   end
   parentWidget = parentWidget or rootWidget
 
-  local mousePosition = g_window.getMousePosition()
+  local mousePosition = mousePos or g_window.getMousePosition()
   return parentWidget:recursiveGetChildByPos(mousePosition, wantsPhantom), mousePosition
 end

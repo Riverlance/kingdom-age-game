@@ -1,24 +1,12 @@
 _G.GameHotkeys = { }
 
-dofiles('ui')
-
-HOTKEY_MANAGER_USE     = nil
-HOTKEY_MANAGER_USEWITH = 1
-
 HotkeyColors =
 {
-  text = '#333B43',
-  textAutoSend = '#FFFFFF',
-  itemUse = '#AEF2FF',
-  itemUseWith = '#F8E127',
-}
-
-HotkeyStatus =
-{
-  Applied = {color = 'alpha',     focusColor = '#CCCCCC22'},
-  Added   = {color = '#00FF0022', focusColor = '#00CC0022'},
-  Edited  = {color = '#FFFF0022', focusColor = '#CCCC0022'},
-  Deleted = {color = '#FF000022', focusColor = '#CC000022'},
+  Text = '#333B43',
+  TextAutoSend = '#FFFFFF',
+  ItemUse = '#AEF2FF',
+  ItemUseWith = '#F8E127',
+  Power = '#CD4EFF'
 }
 
 hotkeysManagerLoaded = false
@@ -27,9 +15,10 @@ hotkeysButton = nil
 currentHotkeyLabel = nil
 hotkeyItemLabel = nil
 currentItemPreview = nil
-itemWidget = nil
-applyHotkeyLabel = nil
-resetHotketLabel = nil
+useOnSelf = nil
+useOnTarget = nil
+useWith = nil
+useRadioGroup = nil
 addHotkeyButton = nil
 removeHotkeyButton = nil
 hotkeyTextLabel = nil
@@ -70,6 +59,16 @@ function GameHotkeys.init()
   currentItemPreview.onDragLeave = GameHotkeys.dragLeaveItemPreview
   currentItemPreview.onDrop = GameHotkeys.dropOnItemPreview
 
+  useOnSelf = hotkeysWindow:recursiveGetChildById('useOnSelf')
+  useOnTarget = hotkeysWindow:recursiveGetChildById('useOnTarget')
+  useWith = hotkeysWindow:recursiveGetChildById('useWith')
+  useRadioGroupWidget = hotkeysWindow:getChildById('useGroup')
+  useRadioGroup = UIRadioGroup.create()
+  useRadioGroup:addWidget(useOnSelf)
+  useRadioGroup:addWidget(useOnTarget)
+  useRadioGroup:addWidget(useWith)
+  useRadioGroup.onSelectionChange = function(self, selected) GameHotkeys.onChangeUseType(self, selected) end
+
   hotkeyTextLabel = hotkeysWindow:getChildById('hotkeyTextLabel')
   hotkeyText = hotkeysWindow:getChildById('hotkeyText')
   sendAutomatically = hotkeysWindow:getChildById('sendAutomatically')
@@ -82,13 +81,25 @@ function GameHotkeys.init()
     onGameStart = GameHotkeys.online,
     onGameEnd   = GameHotkeys.offline
   })
+
+  connect(GamePowers, {
+    onUpdatePowerList = GameHotkeys.updateHotkeyList
+  })
 end
 
 function GameHotkeys.terminate()
+  disconnect(GamePowers, {
+    onUpdatePowerList = GameHotkeys.updateHotkeyList
+  })
+
   disconnect(g_game, {
     onGameStart = GameHotkeys.online,
     onGameEnd   = GameHotkeys.offline
   })
+
+  if g_game.isOnline() then
+    GameHotkeys.offline()
+  end
 
   g_keyboard.unbindKeyDown('Ctrl+K')
 
@@ -116,20 +127,18 @@ function GameHotkeys.show()
   if not g_game.isOnline() then
     return
   end
-  if modules.ka_game_hotkeybars then
-    GameHotkeybars.updateDraggable(true)
-  end
   hotkeysWindow:show()
   hotkeysWindow:raise()
   hotkeysWindow:focus()
+  local firstChild = currentHotkeys:getChildren()[1]
+  if firstChild then
+    firstChild:focus()
+  end
   hotkeysButton:setOn(true)
 end
 
 function GameHotkeys.hide()
   hotkeysWindow:hide()
-  if modules.ka_game_hotkeybars then
-    GameHotkeybars.updateDraggable(false)
-  end
   hotkeysButton:setOn(false)
 end
 
@@ -147,66 +156,63 @@ function GameHotkeys.setStatus(hotkeyLabel, status)
   GameHotkeys.updateHotkeyForm()
 end
 
-function GameHotkeys.apply(hotkey, save)
-  if not hotkey then
-    if currentHotkeyLabel then
-      hotkey = currentHotkeyLabel
+function GameHotkeys.apply(hotkeyLabel, save, sort)
+  hotkeyLabel = hotkeyLabel or currentHotkeyLabel
+  if not hotkeyLabel then
+    return
+  end
+  local keySettings = hotkeyLabel.settings
+  local keyCombo = keySettings.keyCombo
+  if hotkeyLabel.status == HotkeyStatus.Deleted then
+    if keySettings.powerId then
+      g_keyboard.unbindKeyPress(keyCombo, boundCombosCallback[keyCombo])
     else
-      return
+      g_keyboard.unbindKeyDown(keyCombo, boundCombosCallback[keyCombo])
     end
-  end
-  if hotkey.status == HotkeyStatus.Deleted then
-    hotkey:destroy()
-    hotkey = nil
+    hotkeyList[keyCombo] = nil
+    boundCombosCallback[keyCombo] = nil
+    currentHotkeyLabel = nil
+    currentHotkeys:focusNextChild(OtherFocusReason)
+    hotkeyLabel:destroy()
+    signalcall(GameHotkeys.onRemoveHotkey, keyCombo)
   else
-    hotkeyList[hotkey.keyCombo] = {
-      keyCombo = hotkey.keyCombo,
-      autoSend = hotkey.autoSend,
-      itemId   = hotkey.itemId,
-      subType  = hotkey.subType,
-      useType  = hotkey.useType,
-      value    = hotkey.value
-    }
-    GameHotkeys.setStatus(hotkey, HotkeyStatus.Applied)
+    hotkeyList[keyCombo] = table.copy(keySettings)
+    GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Applied)
+    signalcall(GameHotkeys.onApplyHotkey, hotkeyLabel)
   end
-
-  save = save and true
+  sort = (sort == nil) and true
+  if sort then
+    GameHotkeys.sort()
+  end
   if save then
     GameHotkeys.save()
-  end
-
-  if modules.ka_game_hotkeybars then
-    GameHotkeybars.onUpdateHotkeys()
   end
 end
 
 function GameHotkeys.applyChanges()
-  for index, hotkey in ipairs(currentHotkeys:getChildren()) do
-    if hotkey.status ~= HotkeyStatus.Applied then
-      GameHotkeys.apply(hotkey, false)
+  for index, hotkeyLabel in ipairs(currentHotkeys:getChildren()) do
+    if hotkeyLabel.status ~= HotkeyStatus.Applied then
+      GameHotkeys.apply(hotkeyLabel, false, false)
     end
+    GameHotkeys.sort()
   end
 end
 
-function GameHotkeys.resetHotkey(hotkey)
-  if not hotkey then
-    if currentHotkeyLabel then
-      hotkey = currentHotkeyLabel
-    else
-      return
-    end
+function GameHotkeys.resetHotkey(hotkeyLabel)
+  hotkeyLabel = hotkeyLabel or currentHotkeyLabel
+  if not hotkeyLabel then
+    return
   end
-  if hotkey.status == HotkeyStatus.Added then
-      hotkey:destroy()
-      hotkey = nil
-  elseif hotkey.status ~= HotkeyStatus.Applied then
-    local key = hotkeyList[hotkey.keyCombo]
-    hotkey.autoSend = key.autoSend
-    hotkey.itemId   = key.itemId
-    hotkey.subType  = key.subType
-    hotkey.useType  = key.useType
-    hotkey.value    = key.value
-    GameHotkeys.setStatus(hotkey, HotkeyStatus.Applied)
+  local keyCombo = hotkeyLabel.settings.keyCombo
+  if hotkeyLabel.status == HotkeyStatus.Added then
+    GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Deleted)
+    hotkeyLabel:destroy()
+    hotkeyLabel = nil
+    signalcall(GameHotkeys.onRemoveHotkey, keyCombo)
+  elseif hotkeyLabel.status ~= HotkeyStatus.Applied then
+    hotkeyLabel.settings = table.copy(hotkeyList[keyCombo])
+    GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Applied)
+    signalcall(GameHotkeys.onApplyHotkey, hotkeyLabel)
   end
 end
 
@@ -235,9 +241,6 @@ end
 function GameHotkeys.ok()
   GameHotkeys.applyChanges()
   GameHotkeys.save()
-  if modules.ka_game_hotkeybars then
-    GameHotkeybars.onUpdateHotkeys()
-  end
   GameHotkeys.hide()
 end
 
@@ -248,34 +251,56 @@ end
 
 function GameHotkeys.load(forceDefaults)
   hotkeysManagerLoaded = false
-  local hotkeySettings = Client.getPlayerSettings():getNode('hotkeys') or { }
-  if table.empty(hotkeySettings) then
-    GameHotkeys.loadDefaultComboKeys()
-  end
-  for index, keySettings in pairs(hotkeySettings) do
-    if tonumber(index) then
-      GameHotkeys.addKeyCombo(keySettings.keyCombo, keySettings)
-    else --retrocompatibility
-      keySettings.keyCombo = index
-      GameHotkeys.addKeyCombo(index, keySettings)
+  local hotkeySettings = Client.getPlayerSettings():getNode('Hotkeys') or { }
+  if not table.empty(hotkeySettings) then
+    for _, settings in pairs(hotkeySettings) do
+      local keySettings = { }
+      keySettings.keyCombo = string.exists(settings.keyCombo) and tostring(settings.keyCombo) or nil
+      keySettings.text = string.exists(settings.text) and tostring(settings.text) or nil
+      keySettings.autoSend = string.exists(settings.text) and toboolean(settings.autoSend) or nil
+      keySettings.itemId = tonumber(settings.itemId) or nil
+      keySettings.subType = tonumber(settings.subType) or nil
+      keySettings.useType = tonumber(settings.useType) or nil
+      keySettings.powerId = tonumber(settings.powerId) or nil
+      GameHotkeys.addKeyCombo(keySettings)
     end
+  else --retrocompatibility
+    local hotkeySettings = Client.getPlayerSettings():getNode('hotkeys') or { }
+    if table.empty(hotkeySettings) then
+      GameHotkeys.loadDefaultComboKeys()
+    end
+    for index, keySettings in pairs(hotkeySettings) do
+      if string.exists(keySettings.value) then
+        keySettings.powerId = tonumber(keySettings.value:match('/power (%d+)')) or nil
+        keySettings.text = not keySettings.powerId and tostring(keySettings.value) or nil -- parse numeric text
+      end
+      if tonumber(index) then
+        GameHotkeys.addKeyCombo(keySettings)
+      else --retrocompatibility
+        keySettings.keyCombo = tostring(index)
+        GameHotkeys.addKeyCombo(keySettings)
+      end
+    end
+    Client.getPlayerSettings():remove('hotkeys') --remove old config
   end
   GameHotkeys.sort()
   hotkeysManagerLoaded = true
 end
 
 function GameHotkeys.unload()
-  GamePowerHotkeys.unload()
-
-  for keyCombo,callback in pairs(boundCombosCallback) do
-    g_keyboard.unbindKeyPress(keyCombo, callback)
+  for _, hotkeyLabel in ipairs(currentHotkeys:getChildren()) do
+    local keySettings = hotkeyLabel.settings
+    if keySettings.powerId then
+      g_keyboard.unbindKeyPress(keySettings.keyCombo, boundCombosCallback[keySettings.keyCombo])
+    else
+      g_keyboard.unbindKeyDown(keySettings.keyCombo, boundCombosCallback[keySettings.keyCombo])
+    end
   end
-
   boundCombosCallback = { }
   currentHotkeys:destroyChildren()
   currentHotkeyLabel = nil
-  GameHotkeys.updateHotkeyForm(true)
   hotkeyList = { }
+  GameHotkeys.updateHotkeyForm(true)
 end
 
 function GameHotkeys.reset()
@@ -293,37 +318,27 @@ function GameHotkeys.save()
   local hotkeys = { }
 
   GameHotkeys.sort()
-  for index, hotkey in ipairs(currentHotkeys:getChildren()) do
-    local powerId  = GamePowerHotkeys.getIdByString(hotkey.value)
-    hotkey.autoSend = powerId and true or hotkey.autoSend
-
-    hotkeys[index] = {
-      keyCombo = hotkey.keyCombo,
-      autoSend = hotkey.autoSend or nil,
-      itemId = hotkey.itemId or nil,
-      subType = hotkey.subType or nil,
-      useType = hotkey.useType or nil,
-      value = string.exists(hotkey.value) and hotkey.value or nil
-    }
+  for index, hotkeyLabel in ipairs(currentHotkeys:getChildren()) do
+    hotkeys[index] = hotkeyLabel.settings
   end
-  settings:setNode('hotkeys', hotkeys)
+  settings:setNode('Hotkeys', hotkeys)
   settings:save()
 end
 
 function GameHotkeys.loadDefaultComboKeys()
   if not defaultComboKeys then
     for i=1,12 do
-      GameHotkeys.addKeyCombo('F' .. i)
+      GameHotkeys.addKeyCombo({keyCombo = 'F' .. i})
     end
     for i=1,12 do
-      GameHotkeys.addKeyCombo('Shift+F' .. i)
+      GameHotkeys.addKeyCombo({keyCombo = 'Shift+F' .. i})
     end
     for i=1,12 do
-      GameHotkeys.addKeyCombo('Ctrl+F' .. i)
+      GameHotkeys.addKeyCombo({keyCombo = 'Ctrl+F' .. i})
     end
   else
     for keyCombo, keySettings in pairs(defaultComboKeys) do
-      GameHotkeys.addKeyCombo(keyCombo, keySettings)
+      GameHotkeys.addKeyCombo(keySettings)
     end
   end
 end
@@ -332,51 +347,44 @@ function GameHotkeys.setDefaultComboKeys(combo)
   defaultComboKeys = combo
 end
 
-function GameHotkeys.clearObject()
-  currentHotkeyLabel.itemId = nil
-  currentHotkeyLabel.subType = nil
-  currentHotkeyLabel.useType = nil
-  currentHotkeyLabel.autoSend = nil
-  currentHotkeyLabel.value = nil
-  GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
-  GameHotkeys.updateHotkeyForm(true)
-  if modules.ka_game_hotkeybars then
-    GameHotkeybars.onUpdateHotkeys()
-  end
-end
-
-function GameHotkeys.addHotkey(keySettings)
+function GameHotkeys.assignHotkey(keySettings)
   local assignWindow = g_ui.createWidget('HotkeyAssignWindow', rootWidget)
   assignWindow:grabKeyboard()
+
+  local keySettings = keySettings or { }
 
   local comboLabel = assignWindow:getChildById('comboPreview')
   comboLabel.keyCombo = ''
   assignWindow.onKeyDown = GameHotkeys.hotkeyCapture
 
   local addButtonWidget = assignWindow:getChildById('addButton')
-  addButtonWidget.onClick = function(widget)
+  addButtonWidget.onClick = function(widget, mousePos)
     local keyCombo = assignWindow:getChildById('comboPreview').keyCombo
-    GameHotkeys.addKeyCombo(keyCombo, keySettings, true)
+    keySettings.keyCombo = keyCombo
+    local applied =  GameHotkeys.addKeyCombo(keySettings, true)
+    signalcall(GameHotkeys.onAssignHotkey, keySettings, applied)
     assignWindow:destroy()
   end
 
   local cancelButton = assignWindow:getChildById('cancelButton')
-  cancelButton.onClick = function (widget)
+  cancelButton.onClick = function (widget, mousePos)
+    signalcall(GameHotkeys.onAssignHotkey, keySettings, false)
     assignWindow:destroy()
   end
 end
 
-function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
+function GameHotkeys.addKeyCombo(keySettings, focus)
+  local keyCombo = keySettings.keyCombo
   if not string.exists(keyCombo) then
     return
   end
-  hotkeyList[keyCombo] = keySettings or { }
+  hotkeyList[keyCombo] = table.copy(keySettings) or { }
 
   local hotkeyLabel = currentHotkeys:getChildById(keyCombo)
-  currentHotkeyLabel = hotkeyLabel
   if not hotkeyLabel then
     hotkeyLabel = g_ui.createWidget('HotkeyListLabel')
     hotkeyLabel:setId(keyCombo)
+    hotkeyLabel.settings = keySettings
     if hotkeysManagerLoaded then --adding new hotkey
       GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Added)
       currentHotkeys:insertChild(1, hotkeyLabel)
@@ -384,58 +392,29 @@ function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
       GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Applied)
       currentHotkeys:addChild(hotkeyLabel)
     end
-    GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
+    GameHotkeys.updateHotkeyLabel(hotkeyLabel)
   end
-  hotkeyLabel.keyCombo = keyCombo
-  if keySettings then
-    if keySettings.item then
-      hotkeyLabel.autoSend = true
-      hotkeyLabel.itemId = keySettings.item:getId()
-      if keySettings.item:isFluidContainer() then
-          currentHotkeyLabel.subType = keySettings.item:getSubType()
-      end
-      if keySettings.item:isMultiUse() then
-        currentHotkeyLabel.useType = HOTKEY_MANAGER_USEWITH
-      else
-        currentHotkeyLabel.useType = HOTKEY_MANAGER_USE
-      end
-    else
-      if keySettings.powerId then
-        keySettings.value = '/power ' .. keySettings.powerId
-        keySettings.autoSend = true
-      end
-      local powerId = GamePowerHotkeys.getIdByString(keySettings.value or '')
-      keySettings.autoSend = powerId and true or keySettings.autoSend
-      hotkeyLabel.autoSend = toboolean(keySettings.autoSend)
-      hotkeyLabel.itemId = tonumber(keySettings.itemId)
-      hotkeyLabel.subType = tonumber(keySettings.subType)
-      hotkeyLabel.useType = tonumber(keySettings.useType)
-      if keySettings.value then
-        hotkeyLabel.value = tostring(keySettings.value)
-      end
-    end
-    if keySettings.hotkeyBar then
-      keySettings.hotkeyBar:addHotkey(keyCombo, keySettings.mousePos)
-      GameHotkeys.apply(hotkeyLabel, true)
-    end
-  else
-    hotkeyLabel.keyCombo = keyCombo
-    hotkeyLabel.autoSend = false
-    hotkeyLabel.itemId = nil
-    hotkeyLabel.subType = nil
-    hotkeyLabel.useType = nil
-    hotkeyLabel.value = ''
+  hotkeyLabel.settings = keySettings
+  currentHotkeyLabel = hotkeyLabel
+  if keySettings.hotkeyBarId then
+    GameHotkeys.apply(hotkeyLabel, true, true)
   end
+
   boundCombosCallback[keyCombo] = function()
-    local textEdit = GameConsole.getFooterPanel():getChildById('consoleTextEdit')
-    if textEdit and textEdit:isEnabled() and string.match(keyCombo, '^%C$') then
-      return
+      local chat = GameConsole.getFooterPanel():getChildById('consoleTextEdit')
+      local keyAlone = translateKeyCombo({ backtranslateKeyComboDesc(keyCombo).keyCode })
+      if chat and chat:isEnabled() and (string.match(keyAlone, '^%C$') or keyAlone == "Space" or keyAlone == "Backspace") then
+        return
+      end
+      GameHotkeys.doKeyCombo(keyCombo)
     end
 
-    GameHotkeys.doKeyCombo(keyCombo)
+  if tonumber(keySettings.powerId) then
+    g_keyboard.bindKeyPress(keyCombo, boundCombosCallback[keyCombo])
+  else
+    g_keyboard.bindKeyDown(keyCombo, boundCombosCallback[keyCombo])
   end
 
-  g_keyboard.bindKeyPress(keyCombo, boundCombosCallback[keyCombo])
   GameHotkeys.onEdit(hotkeyLabel)
   GameHotkeys.updateHotkeyLabel(hotkeyLabel)
   if focus then
@@ -443,6 +422,7 @@ function GameHotkeys.addKeyCombo(keyCombo, keySettings, focus)
     currentHotkeys:ensureChildVisible(hotkeyLabel)
     GameHotkeys.updateHotkeyForm(true)
   end
+  return true
 end
 
 function GameHotkeys.doKeyCombo(keyCombo, clickedWidget)
@@ -461,41 +441,32 @@ function GameHotkeys.doKeyCombo(keyCombo, clickedWidget)
   end
   lastHotkeyTime = actualTime
 
-  if hotkey.itemId == nil then
-    if not hotkey.value or #hotkey.value == 0 then
-      return
-    end
+  if hotkey.powerId then
+    GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, { hotkey = hotkey, actualTime = actualTime })
+    return
+  end
 
+  if hotkey.text then
     if hotkey.autoSend then
-    local powerId  = GamePowerHotkeys.getIdByString(hotkey.value)
-      if powerId then
-        GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, { hotkey = hotkey, actualTime = actualTime })
-        return
-      end
-      GameConsole.sendMessage(hotkey.value)
+      GameConsole.sendMessage(hotkey.text)
     else
-      GameConsole.setTextEditText(hotkey.value)
+      GameConsole.setTextEditText(hotkey.text)
     end
-  elseif hotkey.useType == HOTKEY_MANAGER_USE then
-    if g_game.getClientVersion() < 780 or hotkey.subType then
-      local item = g_game.findPlayerItem(hotkey.itemId, hotkey.subType or -1)
-      if item then
-        g_game.use(item)
-      end
-    else
-      g_game.useInventoryItem(hotkey.itemId)
-    end
-  elseif hotkey.useType == HOTKEY_MANAGER_USEWITH then
-    local item = Item.create(hotkey.itemId)
-    if g_game.getClientVersion() < 780 or hotkey.subType then
-      local tmpItem = g_game.findPlayerItem(hotkey.itemId, hotkey.subType or -1)
-      if not tmpItem then
-        return
-      end
+  end
 
-      item = tmpItem
+  if hotkey.itemId then
+    if hotkey.useType == HotkeyItemUseType.Default then
+      g_game.useInventoryItem(hotkey.itemId)
+    elseif hotkey.useType == HotkeyItemUseType.Crosshair then
+      local item = Item.create(hotkey.itemId)
+      GameInterface.startUseWith(item)
+    elseif hotkey.useType == HotkeyItemUseType.Target then
+      local attackingCreature = g_game.getAttackingCreature()
+      if not attackingCreature then GameInterface.startUseWith(item) end
+      if attackingCreature:getTile() then g_game.useInventoryItemWith(hotkey.itemId, attackingCreature) end
+    elseif hotkey.useType == HotkeyItemUseType.Self then
+      g_game.useInventoryItemWith(hotkey.itemId, g_game.getLocalPlayer())
     end
-    GameInterface.startUseWith(item)
   end
 end
 
@@ -503,26 +474,7 @@ function GameHotkeys.getHotkey(keyCombo)
   if not g_game.isOnline() then
     return nil
   end
-
-  local hotkey = hotkeyList[keyCombo]
-  if not hotkey then
-    return nil
-  end
-
-  if hotkey.itemId == nil then
-    if not hotkey.value or #hotkey.value == 0 then
-      return nil
-    end
-
-    local powerHotkey = GamePowerHotkeys.getHotkey(keyCombo, { hotkey = hotkey })
-    if powerHotkey then
-      return powerHotkey
-    end
-    return { type = 'text', autoSend = hotkey.autoSend, value = hotkey.value }
-
-  else
-    return { type = 'item', id = hotkey.itemId, useType = hotkey.useType }
-  end
+  return hotkeyList[keyCombo] or nil
 end
 
 function GameHotkeys.updateHotkeyLabel(hotkeyLabel)
@@ -530,83 +482,118 @@ function GameHotkeys.updateHotkeyLabel(hotkeyLabel)
     return
   end
   hotkeyLabel:setBackgroundColor(hotkeyLabel:isFocused() and hotkeyLabel.status.focusColor or hotkeyLabel.status.color)
-  local text = string.format('%s: ', hotkeyLabel.keyCombo)
 
-  if hotkeyLabel.useType == HOTKEY_MANAGER_USEWITH then
-    hotkeyLabel:setText(tr('%s: [Item] Use object with crosshair.', hotkeyLabel.keyCombo))
-    hotkeyLabel:setColor(HotkeyColors.itemUseWith)
-
-  elseif hotkeyLabel.itemId ~= nil then
-    hotkeyLabel:setText(tr('%s: [Item] Use object.', hotkeyLabel.keyCombo))
-    hotkeyLabel:setColor(HotkeyColors.itemUse)
-
-  elseif not GamePowerHotkeys.updateHotkeyLabel(hotkeyLabel, { text = text }) then
-    if hotkeyLabel.value then
-      if hotkeyLabel.value ~= '' then
-        text = text .. '[Text] ' .. hotkeyLabel.value
-      end
-    end
-
-    hotkeyLabel:setText(text)
-
-    if hotkeyLabel.autoSend then
-      hotkeyLabel:setColor(HotkeyColors.autoSend)
+  local keySettings = hotkeyLabel.settings
+  if string.exists(keySettings.text) then
+    hotkeyLabel:setText(tr('%s: [Text] %s', keySettings.keyCombo, keySettings.text))
+    if keySettings.autoSend then
+      hotkeyLabel:setColor(HotkeyColors.TextAutoSend)
     else
-      hotkeyLabel:setColor(HotkeyColors.text)
+      hotkeyLabel:setColor(HotkeyColors.Text)
     end
+  elseif tonumber(keySettings.itemId) then
+    if keySettings.useType == HotkeyItemUseType.Crosshair then
+      hotkeyLabel:setText(tr('%s: [Item] Use this object with crosshair.', keySettings.keyCombo))
+      hotkeyLabel:setColor(HotkeyColors.ItemUseWith)
+    elseif keySettings.useType == HotkeyItemUseType.Target then
+      hotkeyLabel:setText(tr('%s: [Item] Use this object on target.', keySettings.keyCombo))
+      hotkeyLabel:setColor(HotkeyColors.ItemUseWith)
+    elseif keySettings.useType == HotkeyItemUseType.Self then
+      hotkeyLabel:setText(tr('%s: [Item] Use this object on yourself.', keySettings.keyCombo))
+      hotkeyLabel:setColor(HotkeyColors.ItemUse)
+    else
+      hotkeyLabel:setText(tr('%s: [Item] Use this object.', keySettings.keyCombo))
+      hotkeyLabel:setColor(HotkeyColors.ItemUse)
+    end
+  elseif tonumber(keySettings.powerId) then
+    local info = modules.ka_game_powers and GamePowers.getPowerInfo(keySettings.powerId) or nil
+    if info then
+      hotkeyLabel:setText(tr('%s: [Power] %s (level %s)', keySettings.keyCombo, info.name, info.level))
+    else
+      hotkeyLabel:setText(tr('%s: [Power] N/A', keySettings.keyCombo))
+    end
+    hotkeyLabel:setColor(HotkeyColors.Power)
+  else
+    hotkeyLabel:setText(tr('%s:', keySettings.keyCombo))
+    hotkeyLabel:setColor(HotkeyColors.Text)
   end
 end
 
 function GameHotkeys.updateHotkeyList()
-  local hotkeys = currentHotkeys:getChildren()
-  for _, hotkey in ipairs(hotkeys) do
+  for _, hotkey in ipairs(currentHotkeys:getChildren()) do
     GameHotkeys.updateHotkeyLabel(hotkey)
   end
 end
 
 function GameHotkeys.updateHotkeyForm(reset)
+  local enableText = function()
+    hotkeyTextLabel:enable()
+    hotkeyText:enable()
+    hotkeyText:focus()
+    sendAutomatically:enable()
+  end
+
+  local disableText = function()
+    hotkeyTextLabel:disable()
+    hotkeyText:clearText()
+    hotkeyText:disable()
+    sendAutomatically:setChecked(false)
+    sendAutomatically:disable()
+  end
+
+  local switchItemPreview = function(on, useType)
+    hotkeyItemLabel:setEnabled(on)
+    currentItemPreview:setVisible(on)
+    currentItemPreview:setIcon('')
+    currentItemPreview:clearItem()
+    useRadioGroupWidget:setVisible(on and useType)
+  end
+
   if currentHotkeyLabel then
     resetHotkeyButton:setEnabled(currentHotkeyLabel.status ~= HotkeyStatus.Applied)
     applyHotkeyButton:setEnabled(currentHotkeyLabel.status ~= HotkeyStatus.Applied)
     removeHotkeyButton:setEnabled(currentHotkeyLabel.status ~= HotkeyStatus.Deleted)
-    hotkeyItemLabel:enable()
-    currentItemPreview:setVisible(true)
-    if currentHotkeyLabel.itemId ~= nil then
-      hotkeyTextLabel:disable()
-      hotkeyText:clearText()
-      hotkeyText:disable()
-      sendAutomatically:setChecked(false)
-      sendAutomatically:disable()
-      currentItemPreview:setIcon('')
-      currentItemPreview:setItemId(currentHotkeyLabel.itemId)
-      if currentHotkeyLabel.subType then
-        currentItemPreview:setItemSubType(currentHotkeyLabel.subType)
-      end
 
-    elseif not GamePowerHotkeys.updateHotkeyForm(reset) then
-      hotkeyTextLabel:enable()
-      hotkeyText:enable()
-      hotkeyText:focus()
-      if reset then
-        hotkeyText:setCursorPos(-1)
+    local keySettings = currentHotkeyLabel.settings
+    if string.exists(keySettings.text) then
+      enableText()
+      hotkeyText:setText(keySettings.text)
+      sendAutomatically:setChecked(keySettings.autoSend)
+      switchItemPreview(false)
+    elseif keySettings.itemId then --TODO: isValidItem
+      disableText()
+      switchItemPreview(true, keySettings.useType)
+      currentItemPreview:setItemId(keySettings.itemId)
+      if keySettings.subType then
+        currentItemPreview:setItemSubType(keySettings.subType)
       end
-      hotkeyText:setText(currentHotkeyLabel.value)
-      sendAutomatically:setChecked(currentHotkeyLabel.autoSend)
-      sendAutomatically:setEnabled(currentHotkeyLabel.value and #currentHotkeyLabel.value > 0)
-      currentItemPreview:setIcon('')
-      currentItemPreview:clearItem()
+      if keySettings.useType then
+        if keySettings.useType == HotkeyItemUseType.Crosshair then
+          selectedWidget = useWith
+        elseif keySettings.useType == HotkeyItemUseType.Target then
+          selectedWidget = useOnTarget
+        elseif keySettings.useType == HotkeyItemUseType.Self then
+          selectedWidget = useOnSelf
+        else
+          selectedWidget = nil
+        end
+        useRadioGroup:selectWidget(selectedWidget)
+      end
+    elseif keySettings.powerId then --TODO: isValidPower
+      disableText()
+      switchItemPreview(true)
+      currentItemPreview:setIcon('/images/ui/power/' .. keySettings.powerId .. '_off')
+    else
+      enableText()
+      switchItemPreview(true)
     end
   else
-    removeHotkeyButton:disable()
-    hotkeyTextLabel:disable()
-    hotkeyText:disable()
-    hotkeyText:clearText()
-    sendAutomatically:disable()
-    sendAutomatically:setChecked(false)
-    hotkeyItemLabel:disable()
-    currentItemPreview:setIcon('')
-    currentItemPreview:clearItem()
-    currentItemPreview:setVisible(false)
+    disableText()
+    switchItemPreview(false)
+  end
+
+  if reset then
+    hotkeyText:setCursorPos(-1)
   end
 end
 
@@ -615,48 +602,39 @@ function GameHotkeys.removeHotkey()
     return
   end
   GameHotkeys.setStatus(currentHotkeyLabel, HotkeyStatus.Deleted)
-  g_keyboard.unbindKeyPress(currentHotkeyLabel.keyCombo, boundCombosCallback[currentHotkeyLabel.keyCombo])
-  boundCombosCallback[currentHotkeyLabel.keyCombo] = nil
+end
+
+function GameHotkeys.clearObject()
+  if not currentHotkeyLabel then
+    return
+  end
+  local keyCombo = currentHotkeyLabel.settings.keyCombo
+  currentHotkeyLabel.settings = { keyCombo = keyCombo }
+  GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
+  GameHotkeys.updateHotkeyForm(true)
 end
 
 function GameHotkeys.onHotkeyTextChange(value)
-  if not hotkeysManagerLoaded then
+  if not hotkeysManagerLoaded or not currentHotkeyLabel then
     return
   end
-
-  if not currentHotkeyLabel then
-    return
-  end
-
-  currentHotkeyLabel.value = value
-  local powerId = GamePowerHotkeys.getIdByString(currentHotkeyLabel.value)
-  if value == '' then
-    currentHotkeyLabel.autoSend = false
-  elseif powerId then
-    currentHotkeyLabel.autoSend = true
-  end
+  local keySettings = currentHotkeyLabel.settings
+  keySettings.text = string.exists(value) and value or nil
+  keySettings.autoSend = string.exists(value) and keySettings.autoSend or nil
+  GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
   GameHotkeys.updateHotkeyForm()
-  GameHotkeys.onEdit(currentHotkeyLabel)
 end
 
 function GameHotkeys.onSendAutomaticallyChange(autoSend)
-  if not hotkeysManagerLoaded then
+  if not hotkeysManagerLoaded or not currentHotkeyLabel then
     return
   end
-
-  if not currentHotkeyLabel then
-    return
-  end
-
-  if not string.exists(currentHotkeyLabel.value) then
-    return
-  end
-
-  currentHotkeyLabel.autoSend = autoSend
+  local keySettings = currentHotkeyLabel.settings
+  keySettings.autoSend = string.exists(keySettings.text) and autoSend or nil
+  GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
   GameHotkeys.updateHotkeyForm()
-  GameHotkeys.onEdit(currentHotkeyLabel)
 end
 
 function GameHotkeys.onSelectHotkeyLabel(hotkeyLabel, unfocused)
@@ -684,28 +662,43 @@ function GameHotkeys.onEdit(hotkeyLabel)
   if not hotkeysManagerLoaded or hotkeyLabel.status == HotkeyStatus.Added or hotkeyLabel.status == HotkeyStatus.Deleted then
     return
   end
-  local hotkey = hotkeyList[hotkeyLabel.keyCombo]
-  if (not hotkeyLabel.autoSend ~= not hotkey.autoSend) or hotkeyLabel.itemId ~= hotkey.itemId or hotkeyLabel.subType ~= hotkey.subType or hotkeyLabel.useType ~= hotkey.useType then
+  local keySettings = hotkeyLabel.settings        --current values
+  local hotkey = hotkeyList[keySettings.keyCombo] --applied
+  if (not keySettings.autoSend ~= not hotkey.autoSend) or keySettings.itemId ~= hotkey.itemId or keySettings.subType ~= hotkey.subType or keySettings.useType ~= hotkey.useType or keySettings.powerId ~= hotkey.powerId then
     GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Edited)
-  elseif (hotkey.value and hotkeyLabel.value ~= hotkey.value) or (not hotkey.value and string.exists(hotkeyLabel.value)) then
+  elseif (hotkey.text and keySettings.text ~= hotkey.text) or (not hotkey.text and string.exists(keySettings.text)) then
     GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Edited)
   else
     GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Applied)
   end
 end
 
+function GameHotkeys.onChangeUseType(self, selectedWidget)
+  local keySettings = currentHotkeyLabel.settings
+  if selectedWidget == useWith then
+    keySettings.useType = HotkeyItemUseType.Crosshair
+  elseif selectedWidget == useOnTarget then
+    keySettings.useType = HotkeyItemUseType.Target
+  elseif selectedWidget == useOnSelf then
+    keySettings.useType = HotkeyItemUseType.Self
+  else
+    keySettings.useType = HotkeyItemUseType.Default
+  end
+  GameHotkeys.onEdit(currentHotkeyLabel)
+  GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
+  GameHotkeys.updateHotkeyForm(true)
+end
+
 function GameHotkeys.dragEnterItemPreview(self, mousePos)
   self:setBorderWidth(1)
   g_mouse.pushCursor('target')
-
-  local powerId = GamePowerHotkeys.getIdByString(currentHotkeyLabel.value)
-  local item    = self:getItem()
-  if powerId then
-    g_mouseicon.display(string.format('/images/ui/power/%d_off', powerId))
-  elseif item and item:isPickupable() then
+  local keySettings = currentHotkeyLabel.settings
+  local item = self:getItem()
+  if item then
     g_mouseicon.displayItem(item)
+  elseif tonumber(keySettings.powerId) then
+    g_mouseicon.display(string.format('/images/ui/power/%d_off', keySettings.powerId))
   end
-
   return true
 end
 
@@ -714,8 +707,10 @@ function GameHotkeys.dragLeaveItemPreview(self, droppedWidget, mousePos)
   g_mouse.popCursor('target')
   self:setBorderWidth(0)
   GameHotkeys.clearObject()
+  if not currentHotkeyLabel then return end
   GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
+  GameHotkeys.updateHotkeyForm(true)
   return true
 end
 
@@ -723,37 +718,29 @@ function GameHotkeys.dropOnItemPreview(self, widget, mousePos)
   if not currentHotkeyLabel then
     return false
   end
-
+  local keySettings = { }
   local item = nil
-
-  if not GamePowerHotkeys.dropOnItemPreview(self, widget, mousePos) then
-    local widgetClass = widget:getClassName()
-    if widgetClass == 'UIItem' then
-      item = widget:getItem()
-    elseif widgetClass == 'UIGameMap' then
-      item = widget.currentDragThing
-    end
+  local widgetClass = widget:getClassName()
+  if widgetClass == 'UIItem' then
+    item = widget:getItem()
+  elseif widgetClass == 'UIGameMap' then
+    item = widget.currentDragThing
+  elseif widgetClass == 'UIPowerButton' then
+    keySettings.powerId = widget.power.id
   end
-
   if item then
-    currentHotkeyLabel.itemId = item:getId()
-    if item:isFluidContainer() then
-        currentHotkeyLabel.subType = item:getSubType()
-    end
+    keySettings.itemId = item:getId()
+    keySettings.subType = item:getSubType() or 0
     if item:isMultiUse() then
-      currentHotkeyLabel.useType = HOTKEY_MANAGER_USEWITH
+      keySettings.useType = HotkeyItemUseType.Crosshair
     else
-      currentHotkeyLabel.useType = HOTKEY_MANAGER_USE
+      keySettings.useType = HotkeyItemUseType.Default
     end
-    currentHotkeyLabel.value = nil
-    currentHotkeyLabel.autoSend = false
   end
+  keySettings.keyCombo = currentHotkeyLabel.settings.keyCombo --only keep keyCombo
+  currentHotkeyLabel.settings = keySettings
+  GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
   GameHotkeys.updateHotkeyForm(true)
-  GameHotkeys.onEdit(currentHotkeyLabel)
-
-  if modules.ka_game_hotkeybars then
-    GameHotkeybars.onUpdateHotkeys()
-  end
   return true
 end

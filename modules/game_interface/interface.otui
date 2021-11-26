@@ -42,10 +42,28 @@ GameMapPanel < UIGameMap
   $on:
     padding: 0
 
+TrackerWidget < UIWidget
+  size: 48 48
+
+  UIWidget
+    id: arrow
+    image-source: /images/ui/minimap/track_arrow
+    anchors.centerIn: parent
+
+  UILabel
+    id: distance
+    font: verdana-11px-antialised
+    color: #ffc659
+    text-auto-resize: true
+
 UIWidget
   id: gameRootPanel
   anchors.fill: parent
   anchors.top: topMenu.outsideBottom
+
+  GameMapPanel
+    id: gameMapPanel
+    anchors.fill: gameScreenArea
 
   // Used for anchoring purposes
   UIWidget
@@ -55,10 +73,7 @@ UIWidget
     anchors.left: gameLeftThirdPanel.outsideRight
     anchors.right: gameRightThirdPanel.outsideLeft
     focusable: false
-
-  GameMapPanel
-    id: gameMapPanel
-    anchors.fill: gameScreenArea
+    phantom: true
 
   GameSidePanel
     id: gameLeftFirstPanel

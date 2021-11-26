@@ -15,10 +15,15 @@ PlayerStates = {
   Dazzled = 1024,
   Cursed = 2048,
   PartyBuff = 4096,
-  PzBlock = 8192,
-  Pz = 16384,
+  PZBlock = 8192,
+  Secure = 16384,
   Bleeding = 32768,
-  Hungry = 65536
+  Hungry = 65536,
+  SecureBlock = 131072,
+  PZ = 262144,
+  WZ = 524288,
+  RZ = 1048576,
+  BZ = 2097152
 }
 
 InventorySlotOther = 0

@@ -47,7 +47,8 @@ ServerOpcodes =
   ServerOpcodeEmote                   = 60,
   ServerOpcodePartyList               = 61,
   ServerOpcodePlayerLevel             = 62,
-  -- Free                               63 to 95
+  ServerOpcodeTracking                = 63,
+  -- Free                               64 to 95
   ServerOpcodeStaticText              = 96,
   ServerOpcodeUnknownCreature         = 97,
   ServerOpcodeOutdatedCreature        = 98,
@@ -192,7 +193,9 @@ ClientOpcodes =
   ClientOpcodeActionKey                 = 53,
   -- Free                                 54 to 60
   ClientOpcodePartyList                 = 61, -- Needed?
-  -- Free                                 62 to 99
+  -- Free                                 62
+  ClientOpcodeTracking                  = 63,
+  -- Free                                 64 to 99
   ClientOpcodeAutoWalk                  = 100,
   ClientOpcodeWalkNorth                 = 101,
   ClientOpcodeWalkEast                  = 102,

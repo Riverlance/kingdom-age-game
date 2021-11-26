@@ -339,7 +339,7 @@ function GameBattleList.buttonFilter(button)
   local filterParty    = not filterPartyButton:isOn()
 
   local creature = button.creature
-  return filterPlayers and creature:isPlayer() or filterNPCs and creature:isNpc() or filterMonsters and creature:isMonster() or filterSkulls and (creature:getSkull() == SkullNone or creature:getSkull() == SkullProtected) or filterParty and creature:getShield() > ShieldWhiteBlue or false
+  return filterPlayers and creature:isPlayer() or filterNPCs and creature:isNpc() or filterMonsters and creature:isMonster() or filterSkulls and (creature:isPlayer() and (creature:getSkull() == SkullNone or creature:getSkull() == SkullProtected)) or filterParty and creature:getShield() > ShieldWhiteBlue or false
 end
 
 function GameBattleList.filterButtons()

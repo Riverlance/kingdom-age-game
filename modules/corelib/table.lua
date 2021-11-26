@@ -197,20 +197,16 @@ function table.size(t)
   return size
 end
 
-function table.tostring(t)
-  local maxn = #t
-  local str = ''
-  for k,v in pairs(t) do
-    v = tostring(v)
-    if k == maxn and k ~= 1 then
-      str = str .. ' and ' .. v
-    elseif maxn > 1 and k ~= 1 then
-      str = str .. ', ' .. v
-    else
-      str = str .. ' ' .. v
-    end
+function table.apply(t, func, copy) -- (t, func [, copy = false])
+  local ret = copy and { } or t
+  for k, v in pairs(t) do
+    ret[k] = func(v)
   end
-  return str
+  return ret
+end
+
+function table.list(t)
+  return table.concat(t, ', '):gsub(', ([^,]+)$', ' and %1') -- Returns like '1, 2 and 3'
 end
 
 function table.collect(t, func)
@@ -319,6 +315,7 @@ function table.removeChild(t, index, recursive)
   return t
 end
 
+function table.get(t, ...)
 --[[
   -- Worst way
   local zip = company and company.director and company.director.address and company.director.address.zipcode
@@ -326,7 +323,6 @@ end
   -- Best way
   local zip = table.get(company, 'director', 'address', 'zipcode')
 ]]
-function table.get(t, ...)
   local args = {...}
 
   for i = 1, #args do

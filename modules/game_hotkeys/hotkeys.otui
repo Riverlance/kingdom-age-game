@@ -46,7 +46,7 @@ HotkeyAssignWindow < MainWindow
 MainWindow
   id: hotkeysWindow
   !text: tr('Hotkeys')
-  size: 350 525
+  size: 350 540
 
   @onEnter: GameHotkeys.ok()
   @onEscape: GameHotkeys.cancel()
@@ -104,7 +104,7 @@ MainWindow
     anchors.top: prev.top
     anchors.right: prev.left
     margin-right: 5
-    @onClick: GameHotkeys.addHotkey()
+    @onClick: GameHotkeys.assignHotkey()
 
   HorizontalSeparator
     anchors.top: prev.bottom
@@ -127,6 +127,29 @@ MainWindow
     margin-top: 3
     virtual: true
     draggable: true
+
+  UIWidget
+    id: useGroup
+    width: 120
+    layout:
+      type: verticalBox
+      fit-children: true
+    anchors.top: hotkeyItemLabel.top
+    anchors.right: parent.right
+
+    ButtonBox
+      id: useOnSelf
+      !text: tr('Use on yourself')
+
+    ButtonBox
+      id: useOnTarget
+      !text: tr('Use on target')
+      margin-top: 2
+
+    ButtonBox
+      id: useWith
+      !text: tr('With crosshair')
+      margin-top: 2
 
   HorizontalSeparator
     anchors.top: prev.bottom

@@ -13,82 +13,113 @@ PowerSendingParticlesBoost3 < UIParticles
   focusable: false
   phantom: true
 
-HotkeybarArrowTop < UIWidget
-  id: arrowtop
-  anchors.top: parent.top
-  anchors.left: parent.left
-  margin-left: 9
-  size: 21 12
-  image-source: /images/ui/_button/arrow_vertical
-  image-rect: 0 0 21 12
-  image-clip: 21 0 21 12
-  phantom: true
+VisibilityButton < UIWidget
+  id: visibilityButton
+  size: 11 11
+  image-source: /images/ui/_button/visibility
+  image-clip: 0 0 11 11
+  fixed-size: true
+  opacity: 0
 
   $on:
-    image-source: /images/ui/_button/arrow_vertical_red
+    image-clip: 0 11 11 11
 
-HotkeybarArrowBottom < UIWidget
-  id: arrowbottom
-  anchors.bottom: parent.bottom
-  anchors.left: parent.left
-  margin-left: 9
-  size: 21 12
-  image-source: /images/ui/_button/arrow_vertical
-  image-rect: 0 0 21 12
-  image-clip: 0 0 21 12
-  phantom: true
+//vertical bar
 
-  $on:
-    image-source: /images/ui/_button/arrow_vertical_red
-
-HotkeybarArrowLeft < UIWidget
-  id: arrowbottom
-  anchors.top: parent.top
-  anchors.left: parent.left
-  margin-top: 9
-  size: 12 21
-  image-source: /images/ui/_button/arrow_horizontal
-  image-rect: 0 0 12 21
-  image-clip: 0 0 12 21
-  phantom: true
+HotkeyBarVertical < UIHotkeyBar
+  anchors.verticalCenter: gameScreenArea.verticalCenter
+  width: 40
+  margin-left: 8
+  margin-right: 8
+  padding: 1
+  border-color: #ffffff
+  border-width: 0
+  focusable: false
+  layout:
+    type: verticalBox
+    fit-children: true
 
   $on:
-    image-source: /images/ui/_button/arrow_horizontal_red
+    border-width: 1
 
-HotkeybarArrowRight < UIWidget
-  id: arrowbottom
-  anchors.top: parent.top
-  anchors.right: parent.right
-  margin-top: 9
-  size: 12 21
-  image-source: /images/ui/_button/arrow_horizontal
-  image-rect: 0 0 12 21
-  image-clip: 12 0 12 21
-  phantom: true
+  UIWidget
+    id: hotkeyList
+    phantom: true
+    layout:
+      type: verticalBox
+      fit-children: true
+
+  VisibilityButton
+    margin-top: 4
+    margin-bottom: 4
+
+    $!on:
+      margin-top: 60
+      margin-bottom: 60
+
+
+//horizontal bar
+
+HotkeyBarHorizontal < UIHotkeyBar
+  anchors.horizontalCenter: gameScreenArea.horizontalCenter
+  height: 40
+  margin-top: 8
+  margin-bottom: 16
+  padding: 1
+  border-color: #ffffff
+  border-width: 0
+  focusable: false
+  layout:
+    type: horizontalBox
+    fit-children: true
 
   $on:
-    image-source: /images/ui/_button/arrow_horizontal_red
+    border-width: 1
 
-HotkeybarContainer < UIHotkeybarContainer
+  UIWidget
+    id: hotkeyList
+    phantom: true
+    layout:
+      type: horizontalBox
+      fit-children: true
+
+  VisibilityButton
+    margin-left: 4
+    margin-right: 4
+
+    $!on:
+      margin-left: 60
+      margin-right: 60
+
+//bar container
+
+HotkeyBarContainer < UIHotkeyBarContainer
   text-align: center
   image-source: /images/ui/slot/item
+  width: 36
+  height: 36
+  fixed-size: true
+  focusable: false
+  phantom: true
 
   UIItem
     id: item
     phantom: true
     virtual: true
     anchors.fill: parent
-    margin: 2
 
   UIWidget
     id: power
     phantom: true
     anchors.fill: parent
-    margin: 2
 
-Hotkeybar < UIHotkeybar
-  background: alpha
-  focusable: false
+  UIWidget
+    id: deleteButton
+    image-source: /images/ui/_button/mini_window
+    image-clip: 28 0 14 14
+    size: 8 8
+    visible: false
+    anchors.top: parent.top
+    anchors.right: parent.right
 
-  $on:
-    background: #ffffff22
+    @onClick: self:getParent():getParentBar():removeHotkey(self:getParent().settings.keyCombo)

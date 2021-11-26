@@ -299,12 +299,7 @@ function GamePowers.updatePowersList()
     powerListByIndex[i].index = i
   end
   GamePowers.filterPowersButtons()
-  if modules.game_hotkeys then
-    GameHotkeys.updateHotkeyList()
-  end
-  if modules.ka_game_hotkeybars then
-    GameHotkeybars.onUpdateHotkeys()
-  end
+  signalcall(GamePowers.onUpdatePowerList)
 end
 
 function GamePowers.clearList()
@@ -379,6 +374,11 @@ end
 function GamePowers.onPlayerPowersList(powers, updateNonConstantPower, ignoreMessage)
   local hasAdded   = false
   local hasRemoved = false
+
+  -- Remove old buttons, if will update all powers
+  if not updateNonConstantPower then
+    GamePowers.clearList()
+  end
 
   -- For add and update
   for _, powerData in ipairs(powers) do
@@ -472,4 +472,14 @@ end
 function GamePowers.getPower(id)
   local ret = GamePowers.getPowerButton(id)
   return ret and ret.power or nil
+end
+
+function GamePowers.getPowerInfo(powerId)
+  local power = GamePowers.getPower(powerId)
+  local ret = { }
+  if power then
+    ret.name = power.name or "Unknown Power"
+    ret.level = power.level or "?"
+  end
+  return ret
 end

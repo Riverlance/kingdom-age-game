@@ -16,7 +16,6 @@ Module
     - game_textmessage
     - game_modaldialog
     - ka_game_screenimage
-    - ka_game_hotkeybars
     - ka_game_lootbar
     - ka_game_blinkhit
     - ka_game_ui
@@ -34,11 +33,6 @@ Module
     - game_console
     - game_ruleviolation
 
-    // Top menu left buttons
-    - game_bugreport
-    - game_hotkeys
-    - game_questlog
-
     // Top menu right buttons (mini windows)
     - game_character
     - game_skills
@@ -50,3 +44,9 @@ Module
     - game_unjustifiedpoints
     - game_minimap
     - game_viplist
+
+    // Top menu left buttons
+    - game_bugreport
+    - game_hotkeys
+    - ka_game_hotkeybars
+    - game_questlog

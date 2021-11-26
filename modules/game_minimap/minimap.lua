@@ -287,39 +287,33 @@ function GameMinimap.getMinimapBar()
 end
 
 function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
-  local creatureId   = msg:getU32()
   local instanceId   = msg:getU32()
   local instanceName = msg:getString()
 
-  local creature    = g_map.getCreatureById(creatureId)
-  local localPlayer = g_game.getLocalPlayer()
-
-  if not creature or not localPlayer then
+  local localPlayer  = g_game.getLocalPlayer()
+  if not localPlayer then
     return
   end
 
-  creature:setInstanceId(instanceId)
-  creature:setInstanceName(instanceName)
+  localPlayer:setInstanceId(instanceId)
+  localPlayer:setInstanceName(instanceName)
 
-  -- Creature is local player
-  if creature == localPlayer then
-    local text
+  local text
 
-    -- Instance map
-    if instanceId > 0 then
-      text = instanceName
+  -- Instance map
+  if instanceId > 0 then
+    text = instanceName
 
-    -- Default map
-    else
-      local pos = localPlayer:getPosition()
-      if not pos then
-        return
-      end
-
-      text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
+  -- Default map
+  else
+    local pos = localPlayer:getPosition()
+    if not pos then
+      return
     end
 
-    positionLabel:setText(text)
-    positionLabel:setTooltip(text)
+    text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
   end
+
+  positionLabel:setText(text)
+  positionLabel:setTooltip(text)
 end

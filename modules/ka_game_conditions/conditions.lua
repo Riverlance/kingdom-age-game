@@ -84,10 +84,15 @@ Icons[PlayerStates.Freezing] = { tooltip = tr('You are freezing'), path = '/imag
 Icons[PlayerStates.Dazzled] = { tooltip = tr('You are dazzled'), path = '/images/game/creature/condition/default_dazzled', id = 'condition_dazzled' }
 Icons[PlayerStates.Cursed] = { tooltip = tr('You are cursed'), path = '/images/game/creature/condition/default_cursed', id = 'condition_cursed' }
 Icons[PlayerStates.PartyBuff] = { tooltip = tr('You are strengthened'), path = '/images/game/creature/condition/default_strengthened', id = 'condition_strengthened' }
-Icons[PlayerStates.PzBlock] = { tooltip = tr('You may not logout or enter a protection zone'), path = '/images/game/creature/condition/default_protection_zone_block', id = 'condition_protection_zone_block' }
-Icons[PlayerStates.Pz] = { tooltip = tr('You are within a protection zone'), path = '/images/game/creature/condition/default_protection_zone', id = 'condition_protection_zone' }
+Icons[PlayerStates.PZBlock] = { tooltip = tr('You may not logout or enter a protection zone'), path = '/images/game/creature/condition/default_pzblock', id = 'condition_pz_block' }
+Icons[PlayerStates.Secure] = { tooltip = tr('You are secured'), path = '/images/game/creature/condition/default_secured', id = 'condition_secured' }
 Icons[PlayerStates.Bleeding] = { tooltip = tr('You are bleeding'), path = '/images/game/creature/condition/default_bleeding', id = 'condition_bleeding' }
 Icons[PlayerStates.Hungry] = { tooltip = tr('You are hungry'), path = '/images/game/creature/condition/default_hungry', id = 'condition_hungry' }
+Icons[PlayerStates.SecureBlock] = { tooltip = tr('You are within a secure blocked zone'), path = '/images/game/creature/condition/default_secureblock', id = 'condition_secure_block' }
+Icons[PlayerStates.PZ] = { tooltip = tr('You are within a protection zone'), path = '/images/game/creature/condition/default_pz', id = 'condition_pz' }
+Icons[PlayerStates.WZ] = { tooltip = tr('You are within a white zone'), path = '/images/game/creature/condition/default_wz', id = 'condition_wz' }
+Icons[PlayerStates.RZ] = { tooltip = tr('You are within a red zone'), path = '/images/game/creature/condition/default_rz', id = 'condition_rz' }
+Icons[PlayerStates.BZ] = { tooltip = tr('You are within a black zone'), path = '/images/game/creature/condition/default_bz', id = 'condition_bz' }
 
 
 

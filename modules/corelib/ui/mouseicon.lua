@@ -71,11 +71,14 @@ function g_mouseicon.terminate()
   g_mouseicon = nil
 end
 
-function g_mouseicon.display(filePath, opacity, size, subType) -- (filePath[, opacity = defaultIconOpacity[, size = defaultSize[, subType = 1]]])
+function g_mouseicon.display(filePath, opacity, size, subType, text) -- (filePath[, opacity = defaultIconOpacity[, size = defaultSize[, subType = 1 [, text = '']]]])
+  mouseIcon:setText('')
   if tonumber(filePath) then
     mouseIcon:setIcon('')
     mouseIcon:setItemId(filePath)
     mouseIcon:setItemSubType(subType or 1)
+  elseif string.exists(text) then
+    mouseIcon:setText(text)
   else
     mouseIcon:setIcon(resolvepath(filePath))
     mouseIcon:clearItem()
@@ -100,6 +103,10 @@ function g_mouseicon.displayItem(item, opacity, size, subType) -- (item[, opacit
     return
   end
   g_mouseicon.display(item:getId(), opacity or (ClientOptions.getOption('mouseItemIconOpacity') or defaultItemIconOpacity) / 100, size, subType or item:isStackable() and (g_keyboard and g_keyboard.isShiftPressed() and 1 or item:getCount()) or item:getSubType())
+end
+
+function g_mouseicon.displayText(text)
+  g_mouseicon.display(nil, nil, nil, nil, text)
 end
 
 function g_mouseicon.hide()

@@ -1,7 +1,5 @@
 _G.GamePowerHotkeys = { }
 
-
-
 powerBoost_time    = 1000 -- Time difference between each boost
 powerBoost_maxTime = 60 * 1000 -- boost_maxTime
 
@@ -41,12 +39,6 @@ powerBoost_event_color = nil
 powerBoost_state_image = false
 powerBoost_event_image = nil
 
--- Hotkeys
-
-HotkeyColors.powerColor = '#CD4EFF'
-
-
-
 function GamePowerHotkeys.init()
   -- Alias
   GamePowerHotkeys.m = modules.game_hotkeys
@@ -57,8 +49,7 @@ function GamePowerHotkeys.init()
 end
 
 function GamePowerHotkeys.terminate()
-  GamePowerHotkeys.removeBoostEffect()
-
+  GamePowerHotkeys.unload()
   _G.GamePowerHotkeys = nil
 end
 
@@ -90,7 +81,7 @@ function GamePowerHotkeys.send(flag, keyCombo) -- ([flag], [keyCombo]) -- (flag:
     if modules.ka_game_hotkeybars and lastHotkeyTime > 0 then
       local boostTime  = g_clock.millis() - lastHotkeyTime
       local boostLevel = math.min(math.max(powerBoost_first, math.ceil(boostTime / powerBoost_time)), powerBoost_last)
-      GameHotkeybars.addPowerSendingHotkeyEffect(keyCombo, boostLevel)
+      GameHotkeyBars.addPowerSendingHotkeyEffect(keyCombo, boostLevel)
     end
   end
 end
@@ -109,7 +100,7 @@ function GamePowerHotkeys.cancel(forceStop)
   GamePowerHotkeys.removeBoostEffect()
 
   if modules.ka_game_hotkeybars then
-    GameHotkeybars.setPowerIcon(powerBoost_keyCombo, false)
+    GameHotkeyBars.setPowerIcon(powerBoost_keyCombo, false)
   end
 
   if forceStop then
@@ -236,7 +227,7 @@ function GamePowerHotkeys.unload()
 end
 
 function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
-  local powerId = GamePowerHotkeys.getIdByString(params.hotkey.value)
+  local powerId = params.hotkey.powerId
   if not powerId then
     return
   end
@@ -255,29 +246,25 @@ function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
     GamePowerHotkeys.sendBoostStart()
 
     if modules.ka_game_hotkeybars then
-      GameHotkeybars.setPowerIcon(powerBoost_keyCombo, true)
+      GameHotkeyBars.setPowerIcon(powerBoost_keyCombo, true)
     end
 
     -- By mouse click
     if clickedWidget then
       powerBoost_clickedWidget = clickedWidget
 
-      connect(clickedWidget, {
+      connect(clickedWidget:getParentBar(), {
         onMouseRelease = function(widget, mousePos, mouseButton, elapsedTime)
           -- Should not work with right button because onMouseRelease is not working with the right mouse button
           if g_mouse.isPressed(MouseLeftButton) then -- If right released and left kept pressed
             return
-          elseif not widget:containsPoint(mousePos) then
-            GamePowerHotkeys.cancel()
-            return
           end
-
           GamePowerHotkeys.send(nil, powerBoost_keyCombo)
 
-          disconnect(clickedWidget, 'onMouseRelease')
+          disconnect(clickedWidget:getParentBar(), 'onMouseRelease')
 
           if modules.ka_game_hotkeybars then
-            GameHotkeybars.setPowerIcon(powerBoost_keyCombo, false)
+            GameHotkeyBars.setPowerIcon(powerBoost_keyCombo, false)
           end
 
           scheduleEvent(function()
@@ -296,7 +283,7 @@ function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
         GamePowerHotkeys.send(nil, powerBoost_keyCombo)
 
         if modules.ka_game_hotkeybars then
-          GameHotkeybars.setPowerIcon(powerBoost_keyCombo, false)
+          GameHotkeyBars.setPowerIcon(powerBoost_keyCombo, false)
         end
 
         scheduleEvent(function()
@@ -313,92 +300,4 @@ function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
       GamePowerHotkeys.cancel(true)
     end
   end
-end
-
-function GamePowerHotkeys.getHotkey(keyCombo, params)
-  -- if not hotkey.autoSend then
-  --   return nil
-  -- end
-
-  local powerId = GamePowerHotkeys.getIdByString(params.hotkey.value)
-  if not powerId then
-    return nil
-  end
-
-  local ret = { type = 'power', id = powerId }
-
-  if modules.ka_game_powers then
-    local power = GamePowers.getPower(powerId)
-    if power then
-      ret.name  = power.name
-      ret.level = power.level
-    end
-  end
-
-  return ret
-end
-
-function GamePowerHotkeys.updateHotkeyLabel(hotkeyLabel, params)
-  if not hotkeyLabel.value then
-    return false
-  end
-
-  local powerId = GamePowerHotkeys.getIdByString(hotkeyLabel.value)
-  if not powerId then
-    return false
-  end
-
-  local power = modules.ka_game_powers and GamePowers.getPower(powerId) or nil
-  local name, level
-  if power then
-    name  = power.name
-    level = power.level
-  end
-
-  hotkeyLabel:setText(string.format('%s[Power] %s', params.text, name and string.format('%s%s', name, level and string.format(' (level %d)', level) or '') or 'You are not able to use this power.'))
-
-  if powerId then
-    hotkeyLabel:setColor(HotkeyColors.powerColor)
-  end
-
-  return true
-end
-
-function GamePowerHotkeys.updateHotkeyForm(reset)
-  if not currentHotkeyLabel then
-    return false
-  end
-
-  local powerId = GamePowerHotkeys.getIdByString(currentHotkeyLabel.value)
-  if not powerId then
-    return false
-  end
-
-  local oldValue = currentHotkeyLabel.value
-  hotkeyTextLabel:disable()
-  hotkeyText:clearText()
-  hotkeyText:disable()
-  sendAutomatically:setChecked(true)
-  sendAutomatically:disable()
-  currentItemPreview:setIcon('/images/ui/power/' .. powerId .. '_off')
-
-  -- Keeps hotkeyText invisible
-  currentHotkeyLabel.value = oldValue
-  GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
-
-  return true
-end
-
-function GamePowerHotkeys.dropOnItemPreview(self, widget, mousePos)
-  local widgetClass = widget:getClassName()
-
-  if widgetClass == 'UIPowerButton' then
-    local powerId = widget.power.id
-    currentHotkeyLabel.itemId = nil
-    currentHotkeyLabel.value = '/power ' .. powerId
-    currentHotkeyLabel.autoSend = true
-    currentHotkeyLabel.useType = nil
-    return true
-  end
-  return false
 end

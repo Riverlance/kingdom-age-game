@@ -189,7 +189,7 @@ function GameConsole.init()
   g_keyboard.bindKeyPress('Shift+Down', function() GameConsole.navigateConsoleLog(-1) end, consolePanel)
   g_keyboard.bindKeyPress('Tab', function() consoleTabBar:selectNextTab() end, consolePanel)
   g_keyboard.bindKeyPress('Shift+Tab', function() consoleTabBar:selectPrevTab() end, consolePanel)
-  g_keyboard.bindKeyDown('Enter', GameConsole.sendCurrentMessage, consolePanel)
+  g_keyboard.bindKeyDown('Enter', GameConsole.onEnterKeyDown, consolePanel)
   g_keyboard.bindKeyPress('Ctrl+A', function() consoleTextEdit:clearText() end, consolePanel)
 
   -- apply buttom functions after loaded
@@ -283,12 +283,9 @@ function GameConsole.toggleConsoleChat()
 end
 
 function GameConsole.enableChat()
-
   consoleTextEdit:setVisible(true)
   consoleTextEdit:setText('')
   consoleTextEdit:enable()
-
-  g_keyboard.unbindKeyUp('Enter')
 
   GameInterface.unbindWalkKey('W')
   GameInterface.unbindWalkKey('D')
@@ -305,6 +302,7 @@ function GameConsole.enableChat()
   g_keyboard.unbindKeyPress('Ctrl+S')
   g_keyboard.unbindKeyPress('Ctrl+A')
 
+  consoleToggleChat:setChecked(false)
   consoleToggleChat:setTooltip(tr('Disable chat mode, allow to walk using WASD'))
 end
 
@@ -312,14 +310,6 @@ function GameConsole.disableChat()
   consoleTextEdit:setVisible(false)
   consoleTextEdit:setText('')
   consoleTextEdit:disable()
-
-  local quickFunc = function()
-    if consoleToggleChat:isChecked() then
-      consoleToggleChat:setChecked(false)
-      GameConsole.enableChat()
-    end
-  end
-  g_keyboard.bindKeyUp('Enter', quickFunc)
 
   GameInterface.bindWalkKey('W', North)
   GameInterface.bindWalkKey('D', East)
@@ -336,6 +326,7 @@ function GameConsole.disableChat()
   GameInterface.bindTurnKey('Ctrl+S', South)
   GameInterface.bindTurnKey('Ctrl+D', East)
 
+  consoleToggleChat:setChecked(true)
   consoleToggleChat:setTooltip(tr('Enable chat mode'))
 end
 
@@ -567,8 +558,12 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
     consoleTabBar:blinkTab(tab)
   end
 
+  local lightHour = g_map.getLightHour()
+  local h         = math.floor(lightHour / 60)
+  local m         = lightHour % 60
+
   if ClientOptions.getOption('showTimestampsInConsole') then
-    text = os.date('%H:%M') .. ' ' .. text
+    text = string.format('%.2d:%.2d %s', h, m, text)
   end
 
   local panel = clone and cloneTabBar:getTabPanel(tab) or consoleTabBar:getTabPanel(tab)
@@ -951,21 +946,27 @@ function GameConsole.processCloneTabMenu(tab, mousePos, mouseButton)
   menu:display(mousePos)
 end
 
-function GameConsole.sendCurrentMessage()
-  if consoleToggleChat:isChecked() then
-    return
-  end
-
+function GameConsole.onEnterKeyDown()
   local message = consoleTextEdit:getText()
-  if #message == 0 then
-    if not consoleToggleChat:isChecked() then
+
+  if not consoleToggleChat:isChecked() then
+    if #message == 0 then
       GameConsole.disableChat()
-      scheduleEvent(function() consoleToggleChat:setChecked(true) end, 200)
+      return
     end
+  else
+    GameConsole.enableChat()
     return
   end
 
-  GameConsole.sendMessage(message)
+  if #message > 0 then
+    GameConsole.sendMessage(message)
+
+    if ClientOptions.getOption('autoDisableChatOnSendMessage') then
+      GameConsole.disableChat()
+    end
+  end
+
   consoleTextEdit:clearText()
 end
 
@@ -1601,6 +1602,10 @@ function GameConsole.online()
   end
 
   GameConsole.load()
+
+  if ClientOptions.getOption('autoDisableChatOnSendMessage') then
+    GameConsole.disableChat()
+  end
 end
 
 function GameConsole.offline()
