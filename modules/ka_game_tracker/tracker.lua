@@ -45,6 +45,9 @@ function GameTracker.isTracked(creature)
 end
 
 function GameTracker.sendTrackAction(creature, start)
+  if not creature or creature:isRemoved() then
+    return
+  end
   local protocolGame = g_game.getProtocolGame()
   if not protocolGame then
     return
