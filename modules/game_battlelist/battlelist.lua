@@ -624,7 +624,7 @@ end
 function GameBattleList.onNicknameChange(creature, nickname)
   local button = battleList[creature:getId()]
   if button then
-    button:updateLabelText(nickname)
+    button:updateLabelText(nickname ~= '' and nickname or creature:getName())
 
     if GameBattleList.getSortType() == BATTLE_SORT_NAME then
       GameBattleList.updateList()

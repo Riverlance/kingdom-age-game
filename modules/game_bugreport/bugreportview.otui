@@ -128,6 +128,9 @@ BugReportViewWindow < MainWindow
       end
       GameBugReport.updateRowsPerPageLabel(value)
 
+    $!first:
+      anchors.top: none
+
   Label
     !text: 'Category:'
     anchors.bottom: next.top
@@ -146,7 +149,7 @@ BugReportViewWindow < MainWindow
     !tooltip: 'Refresh list'
     anchors.bottom: bugViewCloseButton.bottom
     anchors.right: bugViewCloseButton.left
-    margin-right: 10
+    margin-right: 4
     width: 80
     @onClick: |
       GameBugReport.bugViewUpdatePage()

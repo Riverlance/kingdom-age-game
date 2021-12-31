@@ -32,7 +32,7 @@ HotkeyAssignWindow < MainWindow
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
-    margin-right: 10
+    margin-right: 4
 
   Button
     id: cancelButton
@@ -46,16 +46,24 @@ HotkeyAssignWindow < MainWindow
 MainWindow
   id: hotkeysWindow
   !text: tr('Hotkeys')
-  size: 350 540
+  size: 350 555
 
   @onEnter: GameHotkeys.ok()
   @onEscape: GameHotkeys.cancel()
 
+  Label
+    !text: tr('Drag and drop the rows below into the hotkey bars')
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    font: verdana-8px-antialised
+    text-auto-resize: true
+
   VerticalScrollBar
     id: currentHotkeysScrollBar
     height: 265
-    anchors.top: parent.top
+    anchors.top: prev.bottom
     anchors.right: parent.right
+    margin-top: 10
     step: 14
     pixels-scroll: true
 
@@ -82,29 +90,30 @@ MainWindow
     id: applyHotkeyButton
     !text: tr('Apply')
     width: 64
-    anchors.top: prev.top
-    anchors.left: prev.right
-    margin-left: 5
+    anchors.top: next.top
+    anchors.right: next.left
+    margin-right: 4
     enabled: false
     @onClick: GameHotkeys.apply()
-
-  Button
-    id: removeHotkeyButton
-    !text: tr('Remove')
-    width: 64
-    anchors.top: prev.top
-    anchors.right: parent.right
-    enabled: false
-    @onClick: GameHotkeys.removeHotkey()
 
   Button
     id: addHotkeyButton
     !text: tr('Add')
     width: 64
-    anchors.top: prev.top
-    anchors.right: prev.left
-    margin-right: 5
+    anchors.top: next.top
+    anchors.right: next.left
+    margin-right: 4
     @onClick: GameHotkeys.assignHotkey()
+
+  Button
+    id: removeHotkeyButton
+    !text: tr('Remove')
+    width: 64
+    anchors.top: currentHotkeys.bottom
+    anchors.right: parent.right
+    margin-top: 8
+    enabled: false
+    @onClick: GameHotkeys.removeHotkey()
 
   HorizontalSeparator
     anchors.top: prev.bottom
@@ -180,14 +189,8 @@ MainWindow
     anchors.top: hotkeyTextLabel.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-top: 3
+    margin-top: 10
     @onTextChange: GameHotkeys.onHotkeyTextChange(self:getText())
-
-  HorizontalSeparator
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: next.top
-    margin-bottom: 10
 
   Button
     id: resetButton
@@ -201,10 +204,10 @@ MainWindow
     id: applyAllButton
     !text: tr('Apply All')
     width: 72
-    anchors.left: prev.right
+    anchors.right: next.left
     anchors.bottom: parent.bottom
     @onClick: GameHotkeys.applyChanges()
-    margin-left: 10
+    margin-right: 4
 
   Button
     id: okButton
@@ -213,7 +216,7 @@ MainWindow
     anchors.right: next.left
     anchors.bottom: parent.bottom
     @onClick: GameHotkeys.ok()
-    margin-right: 10
+    margin-right: 4
 
   Button
     id: cancelButton

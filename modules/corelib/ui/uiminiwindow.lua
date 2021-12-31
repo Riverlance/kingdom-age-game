@@ -271,6 +271,8 @@ function UIMiniWindow:onDragLeave(droppedWidget, mousePos)
   if newParent ~= self.lastPanel then
     signalcall(self.onChangeWindowPanel, self, newParent)
   end
+
+  return true
 end
 
 function UIMiniWindow:onDragMove(mousePos, mouseMoved)

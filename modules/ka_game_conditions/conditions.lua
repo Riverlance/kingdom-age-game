@@ -421,12 +421,12 @@ function GameConditions.sortConditions()
 
     elseif sortType == CONDITION_SORT_PERCENTAGE then
       sortFunction = function(a,b)
-        return a.button.clock:getPercent() < b.button.clock:getPercent()
+        return (a.button.clock and a.button.clock:getPercent() or 0) < (b.button.clock and b.button.clock:getPercent() or 0)
       end
 
     elseif sortType == CONDITION_SORT_REMAININGTIME then
       sortFunction = function(a,b)
-        return a.button.clock:getRemainingTime() < b.button.clock:getRemainingTime()
+        return (a.button.clock and a.button.clock:getRemainingTime() or 0) < (b.button.clock and b.button.clock:getRemainingTime() or 0)
       end
     end
 
@@ -443,12 +443,12 @@ function GameConditions.sortConditions()
 
     elseif sortType == CONDITION_SORT_PERCENTAGE then
       sortFunction = function(a,b)
-        return a.button.clock:getPercent() > b.button.clock:getPercent()
+        return (a.button.clock and a.button.clock:getPercent() or 0) > (b.button.clock and b.button.clock:getPercent() or 0)
       end
 
     elseif sortType == CONDITION_SORT_REMAININGTIME then
       sortFunction = function(a,b)
-        return a.button.clock:getRemainingTime() > b.button.clock:getRemainingTime()
+        return (a.button.clock and a.button.clock:getRemainingTime() or 0) > (b.button.clock and b.button.clock:getRemainingTime() or 0)
       end
     end
   end

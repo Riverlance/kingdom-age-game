@@ -28,7 +28,7 @@ VisibilityButton < UIWidget
 
 HotkeyBarVertical < UIHotkeyBar
   anchors.verticalCenter: gameScreenArea.verticalCenter
-  width: 40
+  width: 36
   margin-left: 8
   margin-right: 8
   padding: 1
@@ -41,6 +41,7 @@ HotkeyBarVertical < UIHotkeyBar
 
   $on:
     border-width: 1
+    padding: 10 0
 
   UIWidget
     id: hotkeyList
@@ -62,7 +63,7 @@ HotkeyBarVertical < UIHotkeyBar
 
 HotkeyBarHorizontal < UIHotkeyBar
   anchors.horizontalCenter: gameScreenArea.horizontalCenter
-  height: 40
+  height: 36
   margin-top: 8
   margin-bottom: 16
   padding: 1
@@ -75,6 +76,7 @@ HotkeyBarHorizontal < UIHotkeyBar
 
   $on:
     border-width: 1
+    padding: 0 10
 
   UIWidget
     id: hotkeyList
@@ -96,11 +98,11 @@ HotkeyBarHorizontal < UIHotkeyBar
 HotkeyBarContainer < UIHotkeyBarContainer
   text-align: center
   image-source: /images/ui/slot/item
-  width: 36
-  height: 36
+  width: 32
+  height: 32
   fixed-size: true
   focusable: false
-  phantom: true
+  border-color: white
 
   UIItem
     id: item

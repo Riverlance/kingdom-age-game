@@ -78,7 +78,7 @@ function UIPowerButton:setIcon(id)
   if id then
     local powerWidget = self:getChildById('power')
     powerWidget:setIcon(string.format('/images/ui/power/%d_off', id))
-    powerWidget:setIconSize({ width = 34, height = 34 })
+    powerWidget:setIconSize({ width = 32, height = 32 })
     return
   end
 

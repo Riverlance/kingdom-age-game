@@ -203,6 +203,9 @@ RVViewWindow < MainWindow
       end
       GameRuleViolation.updateRowsPerPageLabel(value)
 
+    $!first:
+      anchors.top: none
+
   Label
     !text: 'Type:'
     anchors.bottom: next.top
@@ -235,7 +238,7 @@ RVViewWindow < MainWindow
     !tooltip: 'Refresh list'
     anchors.bottom: rvViewCloseButton.bottom
     anchors.right: rvViewCloseButton.left
-    margin-right: 10
+    margin-right: 4
     width: 80
     @onClick: |
       GameRuleViolation.rvViewUpdatePage()

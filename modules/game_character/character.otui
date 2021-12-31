@@ -171,6 +171,7 @@ MiniWindow
 
     CharacterProgressBarValue
       id: healthBarValueLabel
+      @onClick: ClientOptions.toggleOption('showHealth')
 
     CharacterProgressBar
       id: manaBar
@@ -181,6 +182,7 @@ MiniWindow
 
     CharacterProgressBarValue
       id: manaBarValueLabel
+      @onClick: ClientOptions.toggleOption('showMana')
 
     CharacterProgressBar
       id: experienceBar
@@ -191,6 +193,7 @@ MiniWindow
 
     CharacterProgressBarValue
       id: experienceBarValueLabel
+      @onClick: ClientOptions.toggleOption('showExpBar')
 
   MiniWindowContents
     Panel

@@ -223,6 +223,7 @@ end
 -- Hotkeys
 
 function GamePowerHotkeys.unload()
+  powerBoost_clickedWidget = nil
   GamePowerHotkeys.removeBoostEffect()
 end
 
@@ -253,7 +254,7 @@ function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
     if clickedWidget then
       powerBoost_clickedWidget = clickedWidget
 
-      connect(clickedWidget:getParentBar(), {
+      connect(clickedWidget, {
         onMouseRelease = function(widget, mousePos, mouseButton, elapsedTime)
           -- Should not work with right button because onMouseRelease is not working with the right mouse button
           if g_mouse.isPressed(MouseLeftButton) then -- If right released and left kept pressed
@@ -261,7 +262,7 @@ function GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, params)
           end
           GamePowerHotkeys.send(nil, powerBoost_keyCombo)
 
-          disconnect(clickedWidget:getParentBar(), 'onMouseRelease')
+          disconnect(clickedWidget, 'onMouseRelease')
 
           if modules.ka_game_hotkeybars then
             GameHotkeyBars.setPowerIcon(powerBoost_keyCombo, false)

@@ -112,7 +112,8 @@ function GameInterface.init()
     onGameStart      = GameInterface.onGameStart,
     onGameEnd        = GameInterface.onGameEnd,
     onLoginAdvice    = GameInterface.onLoginAdvice,
-    onTrackCreature  = GameInterface.onTrackCreature
+    onTrackCreature  = GameInterface.onTrackCreature,
+    onTrackPosition  = GameInterface.onTrackPosition
   }, true)
 
   connect(gameRootPanel, {
@@ -209,7 +210,11 @@ function GameInterface.bindKeys()
   GameInterface.bindTurnKey('Ctrl+Numpad2', South)
   GameInterface.bindTurnKey('Ctrl+Numpad6', East)
 
-  g_keyboard.bindKeyPress('Escape', function() g_game.cancelAttackAndFollow() end, gameRootPanel)
+  g_keyboard.bindKeyPress('Escape', function()
+    if not g_ui.resetDraggingWidget() then
+      g_game.cancelAttackAndFollow()
+    end
+  end, gameRootPanel)
   g_keyboard.bindKeyPress('Ctrl+=', function() gameMapPanel:zoomIn() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
   g_keyboard.bindKeyPress('Ctrl+-', function() gameMapPanel:zoomOut() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
   g_keyboard.bindKeyDown('Ctrl+L', function() GameInterface.tryLogout(false) end, gameRootPanel)
@@ -274,7 +279,8 @@ function GameInterface.terminate()
     onGameStart      = GameInterface.onGameStart,
     onGameEnd        = GameInterface.onGameEnd,
     onLoginAdvice    = GameInterface.onLoginAdvice,
-    onTrackCreature  = GameInterface.onTrackCreature
+    onTrackCreature  = GameInterface.onTrackCreature,
+    onTrackPosition  = GameInterface.onTrackPosition
   })
 
   disconnect(g_app, {
@@ -1614,17 +1620,32 @@ function GameInterface.onTrackCreature(creature)
   updateTrackArrow(creature)
 end
 
-function updateTrackArrow(creature)
+function GameInterface.onTrackPosition(posNode, remove)
+  if not posNode.widget then
+    local pos = posNode.position
+    posNode.widget = g_ui.createWidget('TrackerWidget', gameScreenArea)
+    posNode.widget:setId(tr('tracked_position_%d_%d_%d', pos.x, pos.y, pos.z))
+  end
+
+  updateTrackArrow(posNode)
+end
+
+function updateTrackArrow(target)
+  if not target.widget then
+    return
+  end
+
   local playerPos = g_game.getLocalPlayer():getPosition()
-  local targetPos = creature.position
+  local targetPos = target.position
 
   local distance = Position.distance(playerPos, targetPos)
-  creature.widget:setVisible(distance ~= 0)
-  local trackerLabel = creature.widget:getChildById('distance')
+  target.widget:setVisible(distance ~= 0)
+
+  local trackerLabel = target.widget:getChildById('distance')
   trackerLabel:setText(string.format('%d m', math.floor(distance)))
 
   local orientation = math.atan2(targetPos.y - playerPos.y, targetPos.x - playerPos.x)
-  local trackerArrow = creature.widget:getChildById('arrow')
+  local trackerArrow = target.widget:getChildById('arrow')
   trackerArrow:setRotation(math.deg(orientation))
 
   trackerLabel:breakAnchors()
@@ -1652,16 +1673,19 @@ function updateTrackArrow(creature)
   local px = gameMapPanel:getX() + (gameMapPanel:getWidth() - gameMapPanel:getMapWidth()) / 2 + (tileX * (mapSize.width - 1) / 2)
   local py = gameMapPanel:getY() + (gameMapPanel:getHeight() - gameMapPanel:getMapHeight()) / 2 + (tileY * (mapSize.height - 1) / 2)
 
-  local rx = ( (distance - 1) * tileX - creature.widget:getWidth()  ) * math.cos(orientation)
-  local ry = ( (distance - 1) * tileY - creature.widget:getHeight() ) * math.sin(orientation)
+  local rx = ( (distance - 1) * tileX - target.widget:getWidth()  ) * math.cos(orientation)
+  local ry = ( (distance - 1) * tileY - target.widget:getHeight() ) * math.sin(orientation)
 
-  creature.widget:setX(px + rx)
-  creature.widget:setY(py + ry)
-  creature.widget:bindRectToParent()
+  target.widget:setX(px + rx)
+  target.widget:setY(py + ry)
+  target.widget:bindRectToParent()
 end
 
 function updateTrackArrows()
-  for _, trackedCreature in pairs(GameTracker.getTrackedCreaturesList()) do
+  for _, trackedCreature in pairs(GameTracker.getTrackedCreatures()) do
     updateTrackArrow(trackedCreature)
+  end
+  for _, trackedPosition in pairs(GameTracker.getTrackedPositions()) do
+    updateTrackArrow(trackedPosition)
   end
 end

@@ -53,6 +53,8 @@ function GameCharacter.init()
   GameCharacter.m = modules.game_character
 
   connect(LocalPlayer, {
+    onNicknameChange = GameCharacter.onNicknameChange,
+
     onChangeOutfit = GameCharacter.onChangeOutfit,
 
     -- Health info
@@ -177,6 +179,8 @@ function GameCharacter.terminate()
   })
 
   disconnect(LocalPlayer, {
+    onNicknameChange = GameCharacter.onNicknameChange,
+
     onChangeOutfit = GameCharacter.onChangeOutfit,
 
     -- Health info
@@ -389,6 +393,15 @@ function GameCharacter.updateOutfitCreatureBox(creature)
   outfitCreatureBox:setCreature(creature)
 end
 
+function GameCharacter.onNicknameChange(creature, nickname)
+  local player = g_game.getLocalPlayer()
+  if creature ~= player then
+    return
+  end
+
+  inventoryWindow:setText(nickname ~= '' and nickname or player:getName())
+end
+
 function GameCharacter.onChangeOutfit(outfit)
   GameCharacter.updateOutfitCreatureBox(g_game.getLocalPlayer())
 end
@@ -396,19 +409,19 @@ end
 function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
   healthBar:setValue(health, 0, maxHealth)
   healthBarValueLabel:setText(health .. ' / ' .. maxHealth)
-  healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d', health, maxHealth))
+  healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d\nClick to show creature health bar', health, maxHealth))
 end
 
 function GameCharacter.onManaChange(localPlayer, mana, maxMana)
   manaBar:setValue(mana, 0, maxMana)
   manaBarValueLabel:setText(mana .. ' / ' .. maxMana)
-  manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d', mana, maxMana))
+  manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d\nClick to show player mana bar', mana, maxMana))
 end
 
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   experienceBar:setPercent(levelPercent)
   experienceBarValueLabel:setText(levelPercent .. '%')
-  experienceBarValueLabel:setTooltip(getExperienceTooltipText(localPlayer, level, levelPercent))
+  experienceBarValueLabel:setTooltip(string.format('%s\nClick to show player experience bar', getExperienceTooltipText(localPlayer, level, levelPercent)))
 end
 
 function GameCharacter.onFreeCapacityChange(player, freeCapacity)
@@ -422,30 +435,26 @@ end
 function GameCharacter.online()
   GameInterface.setupMiniWindow(inventoryWindow, inventoryTopMenuButton)
 
-
-
   local player = g_game.getLocalPlayer()
 
-  GameCharacter.updateOutfitCreatureBox(player)
-
-
-
-  -- Inventory
-
-  for i = InventorySlotFirst, InventorySlotAmmo do
-    if g_game.isOnline() then
-      GameCharacter.onInventoryChange(player, i, player:getInventoryItem(i))
-    else
-      GameCharacter.onInventoryChange(player, i, nil)
-    end
-    GameCharacter.toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
-  end
-
-
-
-  -- Combat controls
-
   if player then
+    inventoryWindow:setText(player:getName())
+
+    GameCharacter.updateOutfitCreatureBox(player)
+
+    -- Inventory
+
+    for i = InventorySlotFirst, InventorySlotAmmo do
+      if g_game.isOnline() then
+        GameCharacter.onInventoryChange(player, i, player:getInventoryItem(i))
+      else
+        GameCharacter.onInventoryChange(player, i, nil)
+      end
+      GameCharacter.toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
+    end
+
+    -- Combat controls
+
     local settings = Client.getPlayerSettings()
     local lastCombatControls = settings:getNode('lastCombatControls') or { }
 

@@ -16,6 +16,10 @@ function GameHotkeyBars.init()
     onClientOptionChanged = GameHotkeyBars.onClientOptionChanged,
   })
 
+  connect(g_ui, {
+    onDragReset = GameHotkeyBars.onDragReset
+  })
+
   connect(GamePowers, {
     onUpdatePowerList = GameHotkeyBars.onUpdateHotkeys
   })
@@ -58,6 +62,10 @@ function GameHotkeyBars.terminate()
     onUpdatePowerList = GameHotkeyBars.onUpdateHotkeys
   })
 
+  disconnect(g_ui, {
+    onDragReset = GameHotkeyBars.onDragReset
+  })
+
   disconnect(g_game, {
     onGameStart           = GameHotkeyBars.online,
     onGameEnd             = GameHotkeyBars.offline,
@@ -69,6 +77,7 @@ end
 
 function GameHotkeyBars.online()
   GameHotkeyBars.loadHotkeyBars()
+  GameHotkeyBars.onToggleHotkeyWindow(nil, GameHotkeys.isOpen())
 end
 
 function GameHotkeyBars.offline()
@@ -135,9 +144,9 @@ function GameHotkeyBars.unloadHotkeyBars()
   end
 end
 
-function GameHotkeyBars.updateLook(keyCombo)
+function GameHotkeyBars.updateHotkey(hotkey)
   for i = 1, #hotkeyBarList do
-    hotkeyBarList[i]:updateLook(keyCombo)
+    hotkeyBarList[i]:updateHotkey(hotkey)
   end
 end
 
@@ -146,7 +155,6 @@ function GameHotkeyBars.onAssignHotkey(keySettings, applied)
     local hotkeyBar = hotkeyBarList[keySettings.hotkeyBarId]
     keySettings.hotkeyBarId = nil
     hotkeyBar:onAssignHotkey(keySettings, applied)
-    GameHotkeyBars.updateLook(keySettings.keyCombo)
   end
 end
 
@@ -164,7 +172,7 @@ end
 
 --Module game_hotkeys has changes
 function GameHotkeyBars.onApplyHotkey(hotkey)
-  GameHotkeyBars.updateLook(hotkey.settings.keyCombo)
+  GameHotkeyBars.updateHotkey(hotkey)
 end
 
 function GameHotkeyBars.onRemoveHotkey(keyCombo)
@@ -172,7 +180,7 @@ function GameHotkeyBars.onRemoveHotkey(keyCombo)
 end
 
 function GameHotkeyBars.onUpdateHotkeys()
-  GameHotkeyBars.updateLook()
+  GameHotkeyBars.updateHotkey()
 end
 
 function GameHotkeyBars.getHotkeyBars()
@@ -196,6 +204,13 @@ function GameHotkeyBars.setHighlight(highlight)
   for _, hotkeyBar in ipairs(hotkeyBarList) do
     hotkeyBar:setHighlight(highlight)
   end
+end
+
+function GameHotkeyBars.onDragReset()
+  for _, hotkeyBar in ipairs(hotkeyBarList) do
+    hotkeyBar:resetTempContainer()
+  end
+  return true
 end
 
 function GameHotkeyBars.onDisplay(show)
@@ -224,9 +239,9 @@ function GameHotkeyBars.addPowerSendingHotkeyEffect(keyCombo, boostLevel)
   for _, hotkeyBar in ipairs(hotkeyBarList) do
     if hotkeyBar.hotkeyList[keyCombo] then
       local powerWidget = hotkeyBar.hotkeyList[keyCombo]:getChildById('power')
-      local particle = g_ui.createWidget(string.format('PowerSendingParticlesBoost%d', boostLevel), powerWidget)
-        particle:fill('parent')
-        scheduleEvent(function() particle:destroy() end, 1000)
+      local particle    = g_ui.createWidget(string.format('PowerSendingParticlesBoost%d', boostLevel), powerWidget)
+      particle:fill('parent')
+      scheduleEvent(function() particle:destroy() end, 1000)
     end
   end
 end

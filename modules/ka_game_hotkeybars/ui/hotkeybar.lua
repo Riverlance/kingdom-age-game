@@ -25,15 +25,15 @@ function UIHotkeyBar:onSetup()
   self.onClick = function() if not self.visibilityButton:isOn() then self:toggle() end end
   self.visibilityButton.onClick = function() self:toggle() end
   self.visibilityButton.onHoverChange = function(button, hovered)
-      UIWidget.onHoverChange(button, hovered)
-      button:setOpacity(hovered and 1 or 0)
-    end
+    UIWidget.onHoverChange(button, hovered)
+    button:setOpacity(hovered and 1 or 0)
+  end
 end
 
 function UIHotkeyBar:unload()
-  self:resetTempContainer()
-  self:getHotkeyList():destroyChildren()
   self.hotkeyList = { }
+  self.tempContainer = nil
+  self:getHotkeyList():destroyChildren()
 end
 
 function UIHotkeyBar:load(settings)
@@ -54,6 +54,7 @@ function UIHotkeyBar:load(settings)
   for _, keyCombo in ipairs(hotkeyList) do
     local keySettings = GameHotkeys.getHotkey(keyCombo)
     if keySettings then
+      keySettings.loading = true
       self:addHotkey(index, keySettings)
       index = index + 1
     else
@@ -72,7 +73,7 @@ function UIHotkeyBar:setup(visible)
   self:setBackgroundColor(bg)
   self:getHotkeyList():setVisible(visible)
   self.visibilityButton:setOn(visible)
-  self.visibilityButton:setTooltip(visible and 'Hide' or 'Show')
+  self.visibilityButton:setTooltip(visible and 'Hide Hotkey Bar' or 'Show Hotkey Bar')
 end
 
 function UIHotkeyBar:toggle()
@@ -84,6 +85,7 @@ function UIHotkeyBar:setHighlight(highlight)
   local open = self.visibilityButton:isOn()
   self:setup(highlight or not self.autoClose)
   self.autoClose = highlight and not open or nil
+  self.visibilityButton:setVisible(not highlight)
   for _, hotkey in ipairs(self:getHotkeyList():getChildren()) do
     hotkey:getChildById('deleteButton'):setVisible(highlight)
   end
@@ -108,6 +110,15 @@ function UIHotkeyBar:getIndexByPos(mousePos)
 end
 
 function UIHotkeyBar:addHotkeyButton(index, hotkeyWidget)
+  if #self.hotkeyList >= containersLimit then
+    return
+  end
+
+  local keyCombo = hotkeyWidget.settings and hotkeyWidget.settings.keyCombo or nil
+  if keyCombo and self.hotkeyList[keyCombo] then
+    return
+  end
+
   self:getHotkeyList():insertChild(index, hotkeyWidget)
   hotkeyWidget:getChildById('deleteButton'):setVisible(self:isOn())
 end
@@ -122,19 +133,19 @@ function UIHotkeyBar:addHotkey(index, keySettings)
   end
 
   local hotkeyWidget = g_ui.createWidget('HotkeyBarContainer')
-  hotkeyWidget.index = index
+  self:addHotkeyButton(index, hotkeyWidget)
+  self:updateDraggable(self:isOn())
   hotkeyWidget:setOpacity(0.5)
   hotkeyWidget.settings = keySettings
-  self:addHotkeyButton(index, hotkeyWidget)
   hotkeyWidget:updateLook()
 
-  if not keySettings.keyCombo then
-    self.tempContainer = hotkeyWidget
-    self.tempContainer:setId('temp')
-  else
-    self:onAssignHotkey(keySettings, true, hotkeyWidget)
-  end
+  self.tempContainer = hotkeyWidget
+  self.tempContainer:setId('temp')
 
+  if keySettings.loading then
+    self:onAssignHotkey(keySettings, true, hotkeyWidget)
+    keySettings.loading = nil
+  end
 end
 
 function UIHotkeyBar:onAssignHotkey(keySettings, applied, hotkeyWidget)
@@ -155,12 +166,15 @@ function UIHotkeyBar:onAssignHotkey(keySettings, applied, hotkeyWidget)
         existingContainer:destroy()
       end
 
-      hotkeyWidget:setId(keyCombo)
+      hotkeyWidget:setId(self:getId() .. "_" .. keyCombo)
       hotkeyWidget:setOpacity(1)
+      hotkeyWidget:setDraggable(self:isOn())
       local callback = function()
-          if GameHotkeys.isOpen() then return end
-          GameHotkeys.doKeyCombo(keyCombo, hotkeyWidget)
+        if GameHotkeys.isOpen() then
+          return
         end
+        GameHotkeys.doKeyCombo(keyCombo, hotkeyWidget)
+      end
       if tonumber(keySettings.powerId) then
         hotkeyWidget.onMousePress = callback
       else
@@ -197,7 +211,7 @@ function UIHotkeyBar:configHotkey(widget)
         keySettings.useType = HotkeyItemUseType.Crosshair
       end
     end
-  elseif widgetClass == 'UIHotkeyLabel' then
+  elseif widgetClass == 'UIHotkeyLabel' or widgetClass == 'UIHotkeyBarContainer' then
     keySettings = widget.settings
   end
   keySettings.hotkeyBarId = self.id
@@ -222,11 +236,13 @@ end
 --mouse events
 
 function UIHotkeyBar:onHoverChange(hovered)
-  local mousePos = g_window.getMousePosition()
+  UIWidget.onHoverChange(self, hovered)
   self.visibilityButton:setOpacity(hovered and 1 or 0)
-  self:updateHoveredWidget(mousePos)
+  local mousePos = g_window.getMousePosition()
   if not hovered then
-    self:resetTempContainer()
+    if not self:containsPoint(mousePos) then
+      self:resetTempContainer()
+    end
     return
   end
   local draggingWidget = g_ui.getDraggingWidget()
@@ -242,9 +258,7 @@ function UIHotkeyBar:onHoverChange(hovered)
   end
   local index = self:getIndexByPos(mousePos)
   local widgetClass = draggingWidget:getClassName()
-  if widgetClass == 'UIHotkeyBarContainer' then
-    draggingWidget:setOpacity(0.5)
-    self:addHotkeyButton(index, draggingWidget)
+  if widgetClass == 'UIHotkeyBarContainer' and draggingWidget:getParentBar() == self then
     return
   elseif widgetClass == 'UIGameMap' then
     if not draggingWidget.currentDragThing:isPickupable() then
@@ -256,57 +270,46 @@ function UIHotkeyBar:onHoverChange(hovered)
 end
 
 function UIHotkeyBar:onMouseMove(mousePos, mouseMoved)
-  if not self:isHovered() then
-    self:resetTempContainer()
-    return
-  end
-
   local draggingWidget = g_ui.getDraggingWidget()
-  if draggingWidget then --only drag and drop
-    if self.tempContainer and not self.tempContainer.locked then
-      local parent =  self.tempContainer:getParent()
+  if draggingWidget then
+    local moveWidget = self.tempContainer
+    if draggingWidget:getClassName() == 'UIHotkeyBarContainer' and draggingWidget:getParentBar() == self then
+      moveWidget = draggingWidget
+    end
+    if moveWidget and not moveWidget.locked then --only drag and drop
+      local parent = moveWidget:getParent()
       local index =  self:getIndexByPos(mousePos)
       if index <= parent:getChildCount() then
-        parent:moveChildToIndex(self.tempContainer, index)
+        parent:moveChildToIndex(moveWidget, index)
       end
     end
     return
   end
   self:resetTempContainer()
-  self:updateHoveredWidget(mousePos)
-end
-
-function UIHotkeyBar:updateHoveredWidget(mousePos, hovered)
-  local hoveredWidget = self:getHotkeyList():isVisible() and self:getHotkeyList():getChildByPos(mousePos) or self:getChildByPos(mousePos) or self:containsPoint(mousePos) and self or nil
-  if self.hoveredWidget ~= hoveredWidget then
-    if self.hoveredWidget then
-      UIWidget.onHoverChange(self.hoveredWidget, false)
-    end
-    self.hoveredWidget = hoveredWidget
-    if hoveredWidget then
-      UIWidget.onHoverChange(hoveredWidget, true)
-    end
-  end
 end
 
 function UIHotkeyBar:onDrop(widget, mousePos)
-  if not self:canAcceptDrop(widget) then
+  self:updateDraggable(self:isOn())
+  if not self.tempContainer then
+    return true
+  elseif not self:canAcceptDrop(widget) then
     return false
   end
-  local index = self:getIndexByPos(mousePos)
-  local widgetClass = widget:getClassName()
-  if widgetClass == 'UIHotkeyBarContainer' then
-    widget:getParentBar():removeHotkey(widget.keyCombo)
-    self:addHotkey(index, widget.settings)
-  elseif self.tempContainer then
+  local keySettings = self.tempContainer.settings
+  if keySettings.keyCombo then
+    self:onAssignHotkey(keySettings, true)
+  else
     self.tempContainer.locked = true
-    GameHotkeys.assignHotkey(self.tempContainer.settings)
+    GameHotkeys.assignHotkey(keySettings)
   end
   return true
 end
 
 function UIHotkeyBar:canAcceptDrop(widget)
   if not widget then
+    return false
+  end
+  if widget:getId() == 'itemPreview' then
     return false
   end
   if not self.visibilityButton:isOn() then
@@ -322,17 +325,21 @@ function UIHotkeyBar:canAcceptDrop(widget)
 end
 
 --update functions
-
-function UIHotkeyBar:updateLook(keyCombo)
-  if keyCombo and self.hotkeyList[keyCombo] then
-    self.hotkeyList[keyCombo]:updateLook()
+function UIHotkeyBar:updateHotkey(hotkey)
+  if not hotkey or not hotkey.settings then
+    local children = self:getHotkeyList():getChildren()
+    for _, widget in ipairs(children) do
+      if widget:getClassName() == 'UIHotkeyBarContainer' then
+        widget:updateLook()
+      end
+    end
     return
   end
-  local children = self:getHotkeyList():getChildren()
-  for _, widget in ipairs(children) do
-    if widget:getClassName() == 'UIHotkeyBarContainer' then
-      widget:updateLook()
-    end
+
+  local keyCombo = hotkey.settings.keyCombo
+  if keyCombo and self.hotkeyList[keyCombo] then
+    self.hotkeyList[keyCombo].settings = hotkey.settings
+    self.hotkeyList[keyCombo]:updateLook(keyCombo)
   end
 end
 

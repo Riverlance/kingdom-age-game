@@ -34,6 +34,8 @@ function UIConditionButton:setup(condition)
     self.clock = Timer.new(timer, condition.remainingTime)
     self.clock.updateTicks = 0.1
     self.clock.onUpdate = function() self:updateConditionClock() end
+  else
+    conditionBarWidget:hide()
   end
 
   self.condition = condition
@@ -66,7 +68,7 @@ function UIConditionButton:updateData(condition)
 
   -- Setup clock
   local conditionClockWidget = self:getChildById('conditionClock')
-  if condition.remainingTime then
+  if condition.remainingTime and self.clock then
     self.clock:start()
     conditionClockWidget:setText(self.clock:getString())
   end
@@ -75,23 +77,27 @@ function UIConditionButton:updateData(condition)
 end
 
 function UIConditionButton:updateConditionClock()
-  local conditionClockWidget = self:getChildById('conditionClock')
-  conditionClockWidget:setText(self.clock:getString())
-
-  local conditionBarWidget = self:getChildById('conditionBar')
-  local percent = self.clock:getPercent()
-  conditionBarWidget:setPercent(percent)
-
-  for _, v in pairs(barColors) do
-    if percent > v.percentAbove then
-      conditionBarWidget:setFillerBackgroundColor(v.color)
-      return
+  if self.clock then
+    local conditionClockWidget = self:getChildById('conditionClock')
+    conditionClockWidget:setText(self.clock:getString())
+  
+    local conditionBarWidget = self:getChildById('conditionBar')
+    local percent = self.clock:getPercent()
+    conditionBarWidget:setPercent(percent)
+    
+    for _, v in pairs(barColors) do
+      if percent > v.percentAbove then
+        conditionBarWidget:setFillerBackgroundColor(v.color)
+        return
+      end
     end
   end
 end
 
 function UIConditionButton:onDestroy()
-  self.clock:destroy()
+  if self.clock then
+    self.clock:destroy()
+  end
 end
 
 function UIConditionButton:setTooltipText()
@@ -115,7 +121,7 @@ function UIConditionButton:setTooltipText()
   end
 
   local attributeBlock = { { text = string.format('Attribute: %s%s', ATTRIBUTE_NAMES[c.attribute], attributeStr), align = AlignLeft } }
-  local durationBlock = { {  text = 'Duration: ' .. (self.clock and self.clock:getString()), align = AlignLeft } }
+  local durationBlock = { {  text = 'Duration: ' .. (self.clock and self.clock:getString() or '?'), align = AlignLeft } }
   local powerBlock = {
     { icon = c.powerId and string.format('/images/ui/power/%d_off', c.powerId), size = { width = 20, height = 20 } },
     { text = c.powerId and c.powerName or 'Unknown' },
@@ -134,7 +140,7 @@ function UIConditionButton:setTooltipText()
     table.insert(blocks, attributeBlock)
   end
 
-  if c.remainingTime then
+  if c.remainingTime and self.clock then
     table.insert(blocks, durationBlock)
   end
 

@@ -12,6 +12,8 @@ HotkeyColors =
 hotkeysManagerLoaded = false
 hotkeysWindow = nil
 hotkeysButton = nil
+assignWindow = nil
+hotkeysOverwriteWindow = nil
 currentHotkeyLabel = nil
 hotkeyItemLabel = nil
 currentItemPreview = nil
@@ -115,6 +117,7 @@ function GameHotkeys.online()
 end
 
 function GameHotkeys.offline()
+  GameHotkeys.save()
   GameHotkeys.unload()
   GameHotkeys.hide()
 end
@@ -140,6 +143,16 @@ end
 function GameHotkeys.hide()
   hotkeysWindow:hide()
   hotkeysButton:setOn(false)
+
+  if assignWindow then
+    assignWindow:destroy()
+    assignWindow = nil
+  end
+
+  if hotkeysOverwriteWindow then
+    hotkeysOverwriteWindow:destroy()
+    hotkeysOverwriteWindow = nil
+  end
 end
 
 function GameHotkeys.toggle()
@@ -301,6 +314,7 @@ function GameHotkeys.unload()
   currentHotkeyLabel = nil
   hotkeyList = { }
   GameHotkeys.updateHotkeyForm(true)
+  GamePowerHotkeys.unload()
 end
 
 function GameHotkeys.reset()
@@ -348,7 +362,11 @@ function GameHotkeys.setDefaultComboKeys(combo)
 end
 
 function GameHotkeys.assignHotkey(keySettings)
-  local assignWindow = g_ui.createWidget('HotkeyAssignWindow', rootWidget)
+  if assignWindow then
+    return
+  end
+
+  assignWindow = g_ui.createWidget('HotkeyAssignWindow', rootWidget)
   assignWindow:grabKeyboard()
 
   local keySettings = keySettings or { }
@@ -360,16 +378,50 @@ function GameHotkeys.assignHotkey(keySettings)
   local addButtonWidget = assignWindow:getChildById('addButton')
   addButtonWidget.onClick = function(widget, mousePos)
     local keyCombo = assignWindow:getChildById('comboPreview').keyCombo
-    keySettings.keyCombo = keyCombo
-    local applied =  GameHotkeys.addKeyCombo(keySettings, true)
-    signalcall(GameHotkeys.onAssignHotkey, keySettings, applied)
+
+    local function applyAssign()
+      keySettings.keyCombo = keyCombo
+      local applied = GameHotkeys.addKeyCombo(keySettings, true)
+      signalcall(GameHotkeys.onAssignHotkey, keySettings, applied)
+    end
+
+    -- Assigned already
+    if hotkeyList[keyCombo] and (hotkeyList[keyCombo].power or string.exists(hotkeyList[keyCombo].text) or hotkeyList[keyCombo].itemId) then
+      if hotkeysOverwriteWindow then
+        return
+      end
+
+      local yesCallback = function()
+        applyAssign()
+        hotkeysOverwriteWindow:destroy()
+        hotkeysOverwriteWindow = nil
+      end
+
+      local noCallback = function()
+        signalcall(GameHotkeys.onAssignHotkey, keySettings, false)
+        hotkeysOverwriteWindow:destroy()
+        hotkeysOverwriteWindow = nil
+      end
+
+      hotkeysOverwriteWindow = displayGeneralBox(tr('Overwrite'), 'This hotkey is set already.\nAre you sure that you want to overwrite it?', {
+        { text = tr('Yes'), callback = yesCallback },
+        { text = tr('No'), callback = noCallback },
+        anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+
+    -- Not assigned yet
+    else
+      applyAssign()
+    end
+
     assignWindow:destroy()
+    assignWindow = nil
   end
 
   local cancelButton = assignWindow:getChildById('cancelButton')
   cancelButton.onClick = function (widget, mousePos)
     signalcall(GameHotkeys.onAssignHotkey, keySettings, false)
     assignWindow:destroy()
+    assignWindow = nil
   end
 end
 
@@ -380,10 +432,10 @@ function GameHotkeys.addKeyCombo(keySettings, focus)
   end
   hotkeyList[keyCombo] = table.copy(keySettings) or { }
 
-  local hotkeyLabel = currentHotkeys:getChildById(keyCombo)
+  local hotkeyLabel = currentHotkeys:getChildById('Hotkey_' .. keyCombo)
   if not hotkeyLabel then
     hotkeyLabel = g_ui.createWidget('HotkeyListLabel')
-    hotkeyLabel:setId(keyCombo)
+    hotkeyLabel:setId('Hotkey_' .. keyCombo)
     hotkeyLabel.settings = keySettings
     if hotkeysManagerLoaded then --adding new hotkey
       GameHotkeys.setStatus(hotkeyLabel, HotkeyStatus.Added)
@@ -452,6 +504,7 @@ function GameHotkeys.doKeyCombo(keyCombo, clickedWidget)
     else
       GameConsole.setTextEditText(hotkey.text)
     end
+    return
   end
 
   if hotkey.itemId then
@@ -706,7 +759,9 @@ function GameHotkeys.dragLeaveItemPreview(self, droppedWidget, mousePos)
   g_mouseicon.hide()
   g_mouse.popCursor('target')
   self:setBorderWidth(0)
-  GameHotkeys.clearObject()
+  if droppedWidget ~= self then
+    GameHotkeys.clearObject()
+  end
   if not currentHotkeyLabel then return end
   GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
@@ -719,6 +774,9 @@ function GameHotkeys.dropOnItemPreview(self, widget, mousePos)
     return false
   end
   local keySettings = { }
+  if widget == self then
+    keySettings = currentHotkeyLabel.settings
+  end
   local item = nil
   local widgetClass = widget:getClassName()
   if widgetClass == 'UIItem' then

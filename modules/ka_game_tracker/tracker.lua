@@ -12,18 +12,25 @@ TrackingInfo = {
 }
 
 trackedCreatures = { }
+trackedPositions = { }
 
 function GameTracker.init()
   GameTracker.m = modules.ka_game_tracker -- Alias
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.onTrackCreature)
-  connect(g_game, { onGameEnd = GameTracker.onGameEnd })
+  connect(g_game, {
+    onGameEnd = GameTracker.onGameEnd,
+    onTrackPositionStart = GameTracker.startTrackPosition
+  })
   connect(LocalPlayer, { onPositionChange = GameTracker.onLocalPlayerPositionChange })
 end
 
 function GameTracker.terminate()
   GameTracker.onGameEnd()
   disconnect(LocalPlayer, { onPositionChange = GameTracker.onLocalPlayerPositionChange })
-  disconnect(g_game, { onGameEnd = GameTracker.onGameEnd })
+  disconnect(g_game, {
+    onGameEnd = GameTracker.onGameEnd,
+    onTrackPositionStart = GameTracker.startTrackPosition
+  })
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.onTrackCreature)
   _G.GameTracker = nil
 end
@@ -36,7 +43,18 @@ function GameTracker.onGameEnd()
   trackedCreatures = { }
 end
 
-function GameTracker.getTrackedCreaturesList()
+function GameTracker.onLocalPlayerPositionChange()
+  for id, trackedCreature in pairs(trackedCreatures) do
+    signalcall(g_game.onTrackCreature, trackedCreature)
+  end
+  for id, trackedPosition in pairs(trackedPositions) do
+    signalcall(g_game.onTrackPosition, trackedPosition)
+  end
+end
+
+--[[ Track Creatures ]]
+
+function GameTracker.getTrackedCreatures()
   return trackedCreatures
 end
 
@@ -103,8 +121,25 @@ function GameTracker.onTrackCreature(protocol, msg)
   return true
 end
 
-function GameTracker.onLocalPlayerPositionChange()
-  for id, trackedCreature in pairs(trackedCreatures) do
-    signalcall(g_game.onTrackCreature, trackedCreature)
+--[[ Track Position ]]
+function GameTracker.getTrackedPositions()
+  return trackedPositions
+end
+
+function GameTracker.isTrackedPosition(position)
+  for _, posNode in ipairs(trackedPositions) do
+    if Position.equals(posNode.position, position) then
+      return true
+    end
   end
+  return false
+end
+
+function GameTracker.startTrackPosition(position)
+  if GameTracker.isTrackedPosition(position) then
+    return
+  end
+  local posNode = { position = position }
+  table.insert(trackedPositions, posNode)
+  signalcall(g_game.onTrackPosition, posNode)
 end

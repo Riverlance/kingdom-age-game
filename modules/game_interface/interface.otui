@@ -44,17 +44,20 @@ GameMapPanel < UIGameMap
 
 TrackerWidget < UIWidget
   size: 48 48
+  phantom: true
 
   UIWidget
     id: arrow
     image-source: /images/ui/minimap/track_arrow
     anchors.centerIn: parent
+    phantom: true
 
   UILabel
     id: distance
     font: verdana-11px-antialised
     color: #ffc659
     text-auto-resize: true
+    phantom: true
 
 UIWidget
   id: gameRootPanel

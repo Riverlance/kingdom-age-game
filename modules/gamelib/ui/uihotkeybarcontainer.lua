@@ -1,14 +1,37 @@
 UIHotkeyBarContainer = extends(UIWidget, 'UIHotkeyBarContainer')
 
+function UIHotkeyBarContainer:onHoverChange(hovered)
+  UIWidget.onHoverChange(self, hovered)
+  if g_ui.getDraggingWidget() then
+    if not hovered and self:containsPoint(g_window.getMousePosition()) then
+      self:getParentBar():resetTempContainer()
+    else
+      self:getParentBar():onHoverChange(hovered)
+    end
+  end
+end
+
 function UIHotkeyBarContainer:onDragEnter(mousePos)
+  self:setOpacity(0.5)
   self:setBorderWidth(1)
   g_mouse.pushCursor('target')
+  local keySettings = self.settings
+  if tonumber(keySettings.itemId) then
+    g_mouseicon.displayItem(Item.create(keySettings.itemId))
+  elseif tonumber(keySettings.powerId) then
+    g_mouseicon.display(string.format('/images/ui/power/%d_off', keySettings.powerId))
+  end
   return true
 end
 
 function UIHotkeyBarContainer:onDragLeave(droppedWidget, mousePos)
-  g_mouse.popCursor('target')
+  self:setOpacity(1)
   self:setBorderWidth(0)
+  g_mouseicon.hide()
+  g_mouse.popCursor('target')
+  if not droppedWidget or droppedWidget ~= self:getParentBar() then
+    self:getParentBar():removeHotkey(self.settings.keyCombo)
+  end
   return true
 end
 
