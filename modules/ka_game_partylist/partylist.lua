@@ -3,6 +3,7 @@ _G.GamePartyList = { }
 
 
 partyTopMenuButton = nil
+partyLevelCalculatorButton = nil
 partyWindow = nil
 partyHeader = nil
 contentsPanel = nil
@@ -181,7 +182,6 @@ function GamePartyList.init()
   partyLevelCalculatorWindow = g_ui.createWidget('PartyLevelCalculatorWindow', rootWidget)
   levelTextEdit              = partyLevelCalculatorWindow:getChildById('levelTextEdit')
   levelLabel                 = partyLevelCalculatorWindow:getChildById('levelLabel')
-  GamePartyList.partyLevelCalculatorWindowHide()
 
   local _filterPanel          = partyHeader:getChildById('filterPanel')
   filterPlayersButton         = _filterPanel:getChildById('filterPlayers')
@@ -208,6 +208,9 @@ function GamePartyList.init()
   GamePartyList.onClickFilterAssassinPlayers(filterAssassinPlayersButton)
   GamePartyList.onClickFilterWizardPlayers(filterWizardPlayersButton)
   GamePartyList.onClickFilterBardPlayers(filterBardPlayersButton)
+
+  partyLevelCalculatorButton = ClientTopMenu.addLeftButton('partyLevelCalculatorButton', tr('Party Level Calculator'), '/images/ui/top_menu/party_level_calculator', GamePartyList.partyLevelCalculatorWindowToggle)
+  GamePartyList.partyLevelCalculatorWindowHide()
 
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePartyList, GamePartyList.parsePartyList)
 
@@ -246,6 +249,9 @@ function GamePartyList.terminate()
   })
 
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePartyList)
+
+  partyLevelCalculatorButton:destroy()
+  partyLevelCalculatorButton = nil
 
   -- Window
 
@@ -705,7 +711,6 @@ function GamePartyList.setSortOrder(state)
   GamePartyList.updateMemberList()
 end
 
--- GamePartyList.partyLevelCalculatorWindowShow() -- REMOVE THIS
 function GamePartyList.createSortMenu() -- todo
   local menu = g_ui.createWidget('PopupMenu')
 
@@ -741,10 +746,6 @@ function GamePartyList.createSortMenu() -- todo
   if sortType ~= SortTypePing then
     menu:addOption(tr('Sort by %s', SortTypeStr[SortTypePing]), function() GamePartyList.setSortType(SortTypePing) end)
   end
-
-  menu:addSeparator()
-
-  menu:addOption(tr('Open party level calculator'), function() GamePartyList.partyLevelCalculatorWindowShow() end)
 
   menu:display()
 end
@@ -1256,11 +1257,21 @@ end
 function GamePartyList.partyLevelCalculatorWindowShow()
   partyLevelCalculatorWindow:show()
   partyLevelCalculatorWindow:focus()
+  partyLevelCalculatorButton:setOn(true)
 end
 
 function GamePartyList.partyLevelCalculatorWindowHide()
   partyLevelCalculatorWindow:hide()
   GamePartyList.partyLevelCalculatorWindowClear()
+  partyLevelCalculatorButton:setOn(false)
+end
+
+function GamePartyList.partyLevelCalculatorWindowToggle()
+  if not partyLevelCalculatorWindow:isVisible() then
+    GamePartyList.partyLevelCalculatorWindowShow()
+  else
+    GamePartyList.partyLevelCalculatorWindowHide()
+  end
 end
 
 function GamePartyList.partyLevelCalculatorWindowClear()

@@ -153,7 +153,7 @@ function GameNpcTrade.onItemBoxChecked(widget)
     tradeButton:enable()
 
     if GameNpcTrade.getCurrentTradeType() == SELL then
-      quantityScroll:setValue(quantityScroll:getMaximum())
+      quantityScroll:setValue(quantityScroll:getMinimum())
     else
       quantityScroll:setValue(quantityScroll:getMinimum())
     end
