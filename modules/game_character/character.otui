@@ -29,7 +29,7 @@ ConditionWidget < UIWidget
 
 InventoryItem < Item
   $on:
-    image-source: /images/ui/slot_item_blessed
+    image-source: /images/ui/slot/item_blessed
 
 HeadSlot < InventoryItem
   id: slot1

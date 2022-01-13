@@ -450,8 +450,8 @@ function GameCharacter.online()
       else
         GameCharacter.onInventoryChange(player, i, nil)
       end
-      GameCharacter.toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
     end
+    GameCharacter.toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
 
     -- Combat controls
 

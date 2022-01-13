@@ -89,16 +89,20 @@ function getSpecialIconPath(iconId)
   return path
 end
 
-function getIconImagePath(iconId)
+function getSpeechBubbleImagePath(speechBubbleId)
   local path = ''
-  if iconId == NpcIconChat then
+  if speechBubbleId == SpeechBubbleChat then
     path = '/images/game/creature/speech_bubble/chat'
-  elseif iconId == NpcIconTrade then
-    path = '/images/game/creature/speech_bubble/trade'
-  elseif iconId == NpcIconQuest then
+  elseif speechBubbleId == SpeechBubbleTrader then
+    path = '/images/game/creature/speech_bubble/trader'
+  elseif speechBubbleId == SpeechBubbleQuest then
     path = '/images/game/creature/speech_bubble/quest'
-  elseif iconId == NpcIconTradeQuest then
-    path = '/images/game/creature/speech_bubble/trade_quest'
+  elseif speechBubbleId == SpeechBubbleHouse then
+    path = '/images/game/creature/speech_bubble/house'
+  elseif speechBubbleId == SpeechBubbleTraderQuest then
+    path = '/images/game/creature/speech_bubble/trader_quest'
+  elseif speechBubbleId == SpeechBubbleTraderHouse then
+    path = '/images/game/creature/speech_bubble/trader_house'
   end
   return path
 end
@@ -131,10 +135,10 @@ function Creature:onEmblemChange(emblemId)
   end
 end
 
-function Creature:onIconChange(iconId)
-  local imagePath = getIconImagePath(iconId)
+function Creature:onSpeechBubbleChange(iconId)
+  local imagePath = getSpeechBubbleImagePath(iconId)
   if imagePath ~= '' then
-    self:setIconTexture(imagePath)
+    self:setSpeechBubbleTexture(imagePath)
   end
 end
 

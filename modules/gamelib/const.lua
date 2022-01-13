@@ -94,11 +94,13 @@ VocationStr =
   [VocationBard] = 'Bard',
 }
 
-NpcIconNone = 0
-NpcIconChat = 1
-NpcIconTrade = 2
-NpcIconQuest = 3
-NpcIconTradeQuest = 4
+SpeechBubbleNone = 0
+SpeechBubbleChat = 1
+SpeechBubbleTrader = 2
+SpeechBubbleQuest = 3
+SpeechBubbleHouse = 4
+SpeechBubbleTraderQuest = 5
+SpeechBubbleTraderHouse = 6
 
 SpecialIconNone = 0
 SpecialIconWanted = 1
@@ -225,7 +227,7 @@ GameIngameStoreHighlights = 68
 GameIngameStoreServiceType = 69
 GameAdditionalSkills = 70
 GameBaseSkillU16 = 71
-GameCreatureIcons = 72
+GameSpeechBubble = 72
 GameHideNpcNames = 73
 
 TextColors = {
