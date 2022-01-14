@@ -29,6 +29,7 @@ Kingdom Age Online.lib
 *.lnk
 *.zip
 *.rar
+git2.dll
 modules/ka_client_dev/
 
 
