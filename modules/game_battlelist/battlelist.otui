@@ -30,7 +30,7 @@ MiniWindow
 
     Panel
       id: filterPanel
-      size: 108 20
+      size: 152 20
       anchors.verticalCenter: parent.verticalCenter
       anchors.horizontalCenter: parent.horizontalCenter
       layout:
@@ -40,12 +40,12 @@ MiniWindow
       BattleTabButton
         id: filterPlayers
         !tooltip: tr('Show players')
-        icon-clip: 60 0 20 20
+        icon-clip: 0 0 20 20
         @onClick: GameBattleList.onClickFilterPlayers(self)
 
         $on:
           !tooltip: tr('Hide players')
-          icon-clip: 60 20 20 20
+          icon-clip: 0 20 20 20
 
       BattleTabButton
         id: filterNPCs
@@ -60,32 +60,52 @@ MiniWindow
       BattleTabButton
         id: filterMonsters
         !tooltip: tr('Show monsters')
-        icon-clip: 0 0 20 20
+        icon-clip: 40 0 20 20
         @onClick: GameBattleList.onClickFilterMonsters(self)
 
         $on:
           !tooltip: tr('Hide monsters')
-          icon-clip: 0 20 20 20
+          icon-clip: 40 20 20 20
+
+      BattleTabButton
+        id: filterOwnSummons
+        !tooltip: tr('Show own summons')
+        icon-clip: 60 0 20 20
+        @onClick: GameBattleList.onClickFilterOwnSummons(self)
+
+        $on:
+          !tooltip: tr('Hide own summons')
+          icon-clip: 60 20 20 20
+
+      BattleTabButton
+        id: filterOtherSummons
+        !tooltip: tr('Show other summons')
+        icon-clip: 80 0 20 20
+        @onClick: GameBattleList.onClickFilterOtherSummons(self)
+
+        $on:
+          !tooltip: tr('Hide other summons')
+          icon-clip: 80 20 20 20
 
       BattleTabButton
         id: filterSkulls
         !tooltip: tr('Show safe players')
-        icon-clip: 80 0 20 20
+        icon-clip: 100 0 20 20
         @onClick: GameBattleList.onClickFilterSkulls(self)
 
         $on:
           !tooltip: tr('Hide safe players')
-          icon-clip: 80 20 20 20
+          icon-clip: 100 20 20 20
 
       BattleTabButton
         id: filterParty
         !tooltip: tr('Show party members')
-        icon-clip: 40 0 20 20
+        icon-clip: 120 0 20 20
         @onClick: GameBattleList.onClickFilterParty(self)
 
         $on:
           !tooltip: tr('Hide party members')
-          icon-clip: 40 20 20 20
+          icon-clip: 120 20 20 20
 
   MiniWindowContents
 

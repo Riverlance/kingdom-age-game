@@ -11,6 +11,8 @@ arrowMenuButton = nil
 filterPlayersButton = nil
 filterNPCsButton = nil
 filterMonstersButton = nil
+filterOwnSummonsButton = nil
+filterOtherSummonsButton = nil
 filterSkullsButton = nil
 filterPartyButton = nil
 
@@ -49,11 +51,13 @@ local defaultValues =
 {
   filterPanel = true,
 
-  filterPlayers  = true,
-  filterNPCs     = true,
-  filterMonsters = true,
-  filterSkulls   = true,
-  filterParty    = true,
+  filterPlayers      = true,
+  filterNPCs         = true,
+  filterMonsters     = true,
+  filterOwnSummons   = true,
+  filterOtherSummons = true,
+  filterSkulls       = true,
+  filterParty        = true,
 
   sortType  = BATTLE_SORT_DISTANCE,
   sortOrder = BATTLE_ORDER_ASCENDING
@@ -94,20 +98,26 @@ function GameBattleList.init()
   arrowMenuButton:setOn(not g_settings.getValue('BattleList', 'filterPanel', defaultValues.filterPanel))
   GameBattleList.onClickArrowMenuButton(arrowMenuButton)
 
-  local _filterPanel   = battleHeader:getChildById('filterPanel')
-  filterPlayersButton  = _filterPanel:getChildById('filterPlayers')
-  filterNPCsButton     = _filterPanel:getChildById('filterNPCs')
-  filterMonstersButton = _filterPanel:getChildById('filterMonsters')
-  filterSkullsButton   = _filterPanel:getChildById('filterSkulls')
-  filterPartyButton    = _filterPanel:getChildById('filterParty')
+  local _filterPanel       = battleHeader:getChildById('filterPanel')
+  filterPlayersButton      = _filterPanel:getChildById('filterPlayers')
+  filterNPCsButton         = _filterPanel:getChildById('filterNPCs')
+  filterMonstersButton     = _filterPanel:getChildById('filterMonsters')
+  filterOwnSummonsButton   = _filterPanel:getChildById('filterOwnSummons')
+  filterOtherSummonsButton = _filterPanel:getChildById('filterOtherSummons')
+  filterSkullsButton       = _filterPanel:getChildById('filterSkulls')
+  filterPartyButton        = _filterPanel:getChildById('filterParty')
   filterPlayersButton:setOn(not g_settings.getValue('BattleList', 'filterPlayers', defaultValues.filterPlayers))
   filterNPCsButton:setOn(not g_settings.getValue('BattleList', 'filterNPCs', defaultValues.filterNPCs))
   filterMonstersButton:setOn(not g_settings.getValue('BattleList', 'filterMonsters', defaultValues.filterMonsters))
+  filterOwnSummonsButton:setOn(not g_settings.getValue('BattleList', 'filterOwnSummons', defaultValues.filterOwnSummons))
+  filterOtherSummonsButton:setOn(not g_settings.getValue('BattleList', 'filterOtherSummons', defaultValues.filterOtherSummons))
   filterSkullsButton:setOn(not g_settings.getValue('BattleList', 'filterSkulls', defaultValues.filterSkulls))
   filterPartyButton:setOn(not g_settings.getValue('BattleList', 'filterParty', defaultValues.filterParty))
   GameBattleList.onClickFilterPlayers(filterPlayersButton)
   GameBattleList.onClickFilterNPCs(filterNPCsButton)
   GameBattleList.onClickFilterMonsters(filterMonstersButton)
+  GameBattleList.onClickFilterOwnSummons(filterOwnSummonsButton)
+  GameBattleList.onClickFilterOtherSummons(filterOtherSummonsButton)
   GameBattleList.onClickFilterSkulls(filterSkullsButton)
   GameBattleList.onClickFilterParty(filterPartyButton)
 
@@ -332,14 +342,23 @@ function GameBattleList.onClickArrowMenuButton(self)
 end
 
 function GameBattleList.buttonFilter(button)
-  local filterPlayers  = not filterPlayersButton:isOn()
-  local filterNPCs     = not filterNPCsButton:isOn()
-  local filterMonsters = not filterMonstersButton:isOn()
-  local filterSkulls   = not filterSkullsButton:isOn()
-  local filterParty    = not filterPartyButton:isOn()
+  local filterPlayers      = not filterPlayersButton:isOn()
+  local filterNPCs         = not filterNPCsButton:isOn()
+  local filterMonsters     = not filterMonstersButton:isOn()
+  local filterOwnSummons   = not filterOwnSummonsButton:isOn()
+  local filterOtherSummons = not filterOtherSummonsButton:isOn()
+  local filterSkulls       = not filterSkullsButton:isOn()
+  local filterParty        = not filterPartyButton:isOn()
 
-  local creature = button.creature
-  return filterPlayers and creature:isPlayer() or filterNPCs and creature:isNpc() or filterMonsters and creature:isMonster() or filterSkulls and (creature:isPlayer() and (creature:getSkull() == SkullNone or creature:getSkull() == SkullProtected)) or filterParty and creature:getShield() > ShieldWhiteBlue or false
+  local creature     = button.creature
+  local creatureType = creature:getType()
+  return filterPlayers and creature:isPlayer() or
+         filterNPCs and creature:isNpc() or
+         filterMonsters and creature:isMonster() or
+         filterOwnSummons and creatureType == CreatureTypeSummonOwn or
+         filterOtherSummons and creatureType == CreatureTypeSummonOther or
+         filterSkulls and (creature:isPlayer() and (creature:getSkull() == SkullNone or creature:getSkull() == SkullProtected)) or
+         filterParty and creature:getShield() > ShieldWhiteBlue or false
 end
 
 function GameBattleList.filterButtons()
@@ -371,6 +390,20 @@ function GameBattleList.onClickFilterMonsters(self)
   local newState = not self:isOn()
   filterMonstersButton:setOn(newState)
   g_settings.setValue('BattleList', 'filterMonsters', newState)
+  GameBattleList.filterButtons()
+end
+
+function GameBattleList.onClickFilterOwnSummons(self)
+  local newState = not self:isOn()
+  filterOwnSummonsButton:setOn(newState)
+  g_settings.setValue('BattleList', 'filterOwnSummons', newState)
+  GameBattleList.filterButtons()
+end
+
+function GameBattleList.onClickFilterOtherSummons(self)
+  local newState = not self:isOn()
+  filterOtherSummonsButton:setOn(newState)
+  g_settings.setValue('BattleList', 'filterOtherSummons', newState)
   GameBattleList.filterButtons()
 end
 

@@ -211,9 +211,7 @@ function GameInterface.bindKeys()
   GameInterface.bindTurnKey('Ctrl+Numpad6', East)
 
   g_keyboard.bindKeyPress('Escape', function()
-    if not g_ui.resetDraggingWidget() then
-      g_game.cancelAttackAndFollow()
-    end
+    g_ui.resetDraggingWidget()
   end, gameRootPanel)
   g_keyboard.bindKeyPress('Ctrl+=', function() gameMapPanel:zoomIn() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
   g_keyboard.bindKeyPress('Ctrl+-', function() gameMapPanel:zoomOut() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
