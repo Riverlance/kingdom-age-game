@@ -340,22 +340,12 @@ function GameConsole.load()
 end
 
 function GameConsole.save()
-  local settings = Client.getPlayerSettings('log.console')
+  local logSettings = Client.getPlayerSettings('log.console')
 
   -- Keep console log after logout
-  settings:setList('consoleLog', consoleLog)
-  settings:save()
-end
+  logSettings:setList('consoleLog', consoleLog)
+  logSettings:save()
 
-function GameConsole.onTabChange(tabBar, tab)
-  if tab == defaultTab or tab == serverTab then
-    headerPanel:getChildById('closeChannelButton'):disable()
-  else
-    headerPanel:getChildById('closeChannelButton'):enable()
-  end
-end
-
-function GameConsole.clear()
   -- Save last open channels
   local settings = Client.getPlayerSettings()
   local lastChannelsOpen = settings:getNode('lastChannelsOpen') or { }
@@ -374,7 +364,17 @@ function GameConsole.clear()
   end
   settings:setNode('lastChannelsOpen', lastChannelsOpen)
   settings:save()
+end
 
+function GameConsole.onTabChange(tabBar, tab)
+  if tab == defaultTab or tab == serverTab then
+    headerPanel:getChildById('closeChannelButton'):disable()
+  else
+    headerPanel:getChildById('closeChannelButton'):enable()
+  end
+end
+
+function GameConsole.clear()
   -- Close channels
   for _, channelName in pairs(channels) do
     local tab = consoleTabBar:getTab(channelName)
@@ -1587,8 +1587,6 @@ function GameConsole.onClickIgnoreButton()
 end
 
 function GameConsole.online()
-  GameConsole.clear()
-
   defaultTab = GameConsole.addTab(tr('Default'), true)
   serverTab = GameConsole.addTab(tr('Server'), false) -- Server Log
 
@@ -1611,6 +1609,7 @@ end
 function GameConsole.offline()
   GameConsole.closeClonedTab()
   GameConsole.save()
+  GameConsole.clear()
 end
 
 function GameConsole.onChannelEvent(channelId, name, type)
