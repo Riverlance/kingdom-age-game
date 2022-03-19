@@ -322,14 +322,57 @@ ScreenRangeX = 12
 ScreenRangeY = 9
 ScreenRangeZ = 16
 
-AudioChannels =
-{
+Vocations = {
+  Knight   = 1,
+  Paladin  = 2,
+  Archer   = 3,
+  Assassin = 4,
+  Wizard   = 5,
+  Bard     = 6,
+}
+Vocations.Warrior = { Vocations.Knight, Vocations.Paladin }
+Vocations.Hunter  = { Vocations.Archer, Vocations.Assassin }
+Vocations.Sage    = { Vocations.Wizard, Vocations.Bard }
+
+function isWarrior(vocationId)
+  return table.contains(Vocations.Warrior, vocationId)
+end
+
+function isHunter(vocationId)
+  return table.contains(Vocations.Hunter, vocationId)
+end
+
+function isSage(vocationId)
+  return table.contains(Vocations.Sage, vocationId)
+end
+
+function Creature:isWarrior()
+  return isWarrior(self:getVocation())
+end
+
+function Creature:isHunter()
+  return isHunter(self:getVocation())
+end
+
+function Creature:isSage()
+  return isSage(self:getVocation())
+end
+
+AudioChannels = {
   Music = 1,
   Ambient = 2,
   Effect = 3,
 
   First = 1,
   Last = 3
+}
+
+TooltipType = {
+  default         = 1,
+  textBlock       = 2,
+  image           = 3,
+  conditionButton = 4,
+  powerButton     = 5,
 }
 
 ViewModes = {

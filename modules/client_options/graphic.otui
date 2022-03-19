@@ -57,19 +57,22 @@ Panel
   OptionCheckBox
     id: dontStretchShrink
     !text: tr('Lock game screen area')
-    &tooltipAddons: { {{ text = tr('You will not be able to stretch or shrink\ngame screen.\nIf enabled, shader filters will make no difference.\nNote:\nThe game screen viewport should be on minimum\nand hotkeybars should be disabled for this to work.'), align = AlignLeft }} }
+    !tooltip: tr('You will not be able to stretch or shrink game screen. If enabled, shader filters will make no difference.\n\nNote:\nThe game screen viewport should be on minimum and hotkeybars should be disabled for this to work.')
+    !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10
 
   OptionCheckBox
     id: fullscreen
     !text: tr('Enable fullscreen mode')
-    &tooltipAddons: { {{ text = '(Ctrl+Shift+F)', align = AlignLeft }} }
+    !tooltip: tr('Shortcut to enable fullscreen mode: Ctrl+Shift+F.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: vsync
     !text: tr('Enable Vsync (Vertical Synchronization)')
-    &tooltipAddons: { {{ text = tr('Limits FPS (Frames Per Second) at 60 for avoid CPU unneeded usage.'), align = AlignLeft }} }
+    !tooltip: tr('Limits FPS (Frames Per Second) at 60 for avoid CPU unneeded usage.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
 

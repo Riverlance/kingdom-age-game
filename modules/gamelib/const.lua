@@ -36,8 +36,7 @@ ShieldYellowNoSharedExpBlink = 8
 ShieldBlueNoSharedExp = 9
 ShieldYellowNoSharedExp = 10
 ShieldGray = 11
-ShieldStr =
-{
+ShieldStr = {
   [ShieldNone] = 'None',
   [ShieldWhiteYellow] = 'Inviter',
   [ShieldWhiteBlue] = 'Invitee',
@@ -51,8 +50,7 @@ ShieldStr[ShieldBlueNoSharedExpBlink] = ShieldStr[ShieldBlue]
 ShieldStr[ShieldYellowNoSharedExpBlink] = ShieldStr[ShieldYellow]
 ShieldStr[ShieldBlueNoSharedExp] = ShieldStr[ShieldBlue]
 ShieldStr[ShieldYellowNoSharedExp] = ShieldStr[ShieldYellow]
-ShieldHierarchy = -- From most to less important
-{
+ShieldHierarchy = { -- From most to less important
   [ShieldYellow]                 = 1,
   [ShieldYellowSharedExp]        = 2,
   [ShieldYellowNoSharedExpBlink] = 3,
@@ -83,8 +81,7 @@ VocationArcher = 3
 VocationAssassin = 4
 VocationWizard = 5
 VocationBard = 6
-VocationStr =
-{
+VocationStr = {
   [VocationLearner] = 'Learner',
   [VocationKnight] = 'Knight',
   [VocationPaladin] = 'Paladin',
@@ -172,7 +169,7 @@ GameEnvironmentEffect = 13
 GameCreatureEmblems = 14
 GameItemAnimationPhase = 15
 GameMagicEffectU16 = 16
-GamePlayerMarket = 17
+-- 17 free
 GameSpritesU32 = 18
 GameChargeableItems = 19
 GameOfflineTrainingTime = 20
@@ -190,7 +187,7 @@ GameDiagonalAnimatedText = 31
 GameLoginPending = 32
 GameNewSpeedLaw = 33
 GameForceFirstAutoWalkStep = 34
-GameMinimapRemove = 35
+-- 35 free
 GameDoubleShopSellAmount = 36
 GameContainerPagination = 37
 GameThingMarks = 38
@@ -207,7 +204,7 @@ GameWritableDate = 48
 GameAdditionalVipInfo = 49
 GameSpritesAlphaChannel = 50
 GamePremiumExpiration = 51
-GameBrowseField = 52
+-- 52 free
 GameEnhancedAnimations = 53
 GameOGLInformation = 54
 GameMessageSizeCheck = 55
@@ -285,7 +282,7 @@ MessageModes = {
   HotkeyUse               = 37,
   TutorialHint            = 38,
   Thankyou                = 39,
-  Market                  = 40,
+  --Market                  = 40, -- Deprecated
   Mana                    = 41,
   BeyondLast              = 42,
   MonsterYell             = 43,
@@ -409,8 +406,7 @@ ChannelEvent = {
   Exclude = 3,
 }
 
-HotkeyStatus =
-{
+HotkeyStatus = {
   Applied = {color = 'alpha',     focusColor = '#CCCCCC22'},
   Added   = {color = '#00FF0022', focusColor = '#00CC0022'},
   Edited  = {color = '#FFFF0022', focusColor = '#CCCC0022'},

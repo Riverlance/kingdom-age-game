@@ -347,8 +347,7 @@ end
 function ClientCharacterList.doLogin()
   local selected = characterList:getFocusedChild()
   if selected then
-    local charInfo =
-    {
+    local charInfo = {
       worldHost     = selected.worldHost,
       worldPort     = selected.worldPort,
       worldName     = selected.worldName,

@@ -23,21 +23,18 @@ POWERS_SORT_LEVEL = 3
 POWERS_ORDER_ASCENDING  = 1
 POWERS_ORDER_DESCENDING = 2
 
-local powersSortStr =
-{
+local powersSortStr = {
   [POWERS_SORT_NAME]  = 'Name',
   [POWERS_SORT_CLASS] = 'Class',
   [POWERS_SORT_LEVEL] = 'Level'
 }
 
-local powersOrderStr =
-{
+local powersOrderStr = {
   [POWERS_ORDER_ASCENDING]  = 'Ascending',
   [POWERS_ORDER_DESCENDING] = 'Descending'
 }
 
-local defaultValues =
-{
+local defaultValues = {
   filterPanel = true,
   filterOffensive = true,
   filterDefensive = true,
@@ -74,9 +71,7 @@ function GamePowers.init()
 
   powersWindow.topMenuButton = powersTopMenuButton
 
-  -- This disables scrollbar auto hiding
-  local scrollbar = powersWindow:getChildById('miniwindowScrollBar')
-  scrollbar:mergeStyle({ ['$!on'] = { } })
+  powersWindow:setScrollBarAutoHiding(false)
 
   sortMenuButton = powersWindow:getChildById('sortMenuButton')
   GamePowers.setSortType(GamePowers.getSortType())
@@ -459,8 +454,8 @@ function GamePowers.onPlayerPowersList(powers, updateNonConstantPower, ignoreMes
 
   if updateNonConstantPower then
     local widget = g_game.getWidgetByPos()
-    if g_tooltip and widget then
-      g_tooltip.widgetHoverChange(widget, true) -- Automatically show updated power tooltip
+    if g_tooltip and widget and widget:hasTooltip() then
+      widget:getTooltipObject():show(widget) -- Automatically show updated power tooltip
     end
   end
 end

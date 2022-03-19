@@ -52,31 +52,30 @@ SortTypeAppear    = 2
 SortTypeDistance  = 3
 SortTypeHealth    = 4
 SortTypeMana      = 5
-SortTypeName      = 6
-SortTypePing      = 7
+SortTypeVigor     = 6
+SortTypeName      = 7
+SortTypePing      = 8
 
 SortOrderAscending  = 1
 SortOrderDescending = 2
 
-SortTypeStr =
-{
+SortTypeStr = {
   [SortTypeHierarchy] = 'Hierarchy',
   [SortTypeAppear]    = 'Display Time',
   [SortTypeDistance]  = 'Distance',
   [SortTypeHealth]    = 'Hitpoints',
   [SortTypeMana]      = 'Manapoints',
+  [SortTypeVigor]     = 'Vigorpoints',
   [SortTypeName]      = 'Name',
   [SortTypePing]      = 'Ping',
 }
 
-SortOrderStr =
-{
+SortOrderStr = {
   [SortOrderAscending]  = 'Ascending',
   [SortOrderDescending] = 'Descending',
 }
 
-local defaultValues =
-{
+local defaultValues = {
   filterPanel = true,
 
   filterPlayers         = true,
@@ -112,9 +111,10 @@ PARTYLIST_SERVERSIGNAL_SENDCREATURESPECIALICON    = 11
 PARTYLIST_SERVERSIGNAL_SENDCREATURESPOSITION      = 12
 PARTYLIST_SERVERSIGNAL_SENDCREATUREHEALTHPERCENT  = 13
 PARTYLIST_SERVERSIGNAL_SENDCREATUREMANAPERCENT    = 14
-PARTYLIST_SERVERSIGNAL_SENDPLAYERSPING            = 15
-PARTYLIST_SERVERSIGNAL_SENDVOCATIONID             = 16
-PARTYLIST_SERVERSIGNAL_SENDEXTRAEXPERIENCETOOLTIP = 17
+PARTYLIST_SERVERSIGNAL_SENDCREATUREVIGORPERCENT   = 15
+PARTYLIST_SERVERSIGNAL_SENDPLAYERSPING            = 16
+PARTYLIST_SERVERSIGNAL_SENDVOCATIONID             = 17
+PARTYLIST_SERVERSIGNAL_SENDEXTRAEXPERIENCETOOLTIP = 18
 
 -- PARTYLIST_CLIENTSIGNAL_REQUESTPOSITIONS = 1 -- Example
 
@@ -151,9 +151,7 @@ function GamePartyList.init()
 
   g_keyboard.bindKeyDown('Ctrl+P', GamePartyList.toggle)
 
-  -- This disables scrollbar auto hiding
-  local scrollbar = partyWindow:getChildById('miniwindowScrollBar')
-  scrollbar:mergeStyle({ ['$!on'] = { } })
+  partyWindow:setScrollBarAutoHiding(false)
 
   contentsPanel = partyWindow:getChildById('contentsPanel')
 
@@ -386,11 +384,11 @@ function GamePartyList.add(data, isInvitee)
   local hiddenWidgetIds = { }
   -- Invitee widgets to hide
   if isInvitee then
-    hiddenWidgetIds = { 'healthBar', 'manaBar', 'positionLabel', 'infoIcon', 'pingLabel', 'creatureType', 'skull', 'emblem', 'specialIcon' }
+    hiddenWidgetIds = { 'healthBar', 'manaBar', 'vigorBar', 'positionLabel', 'infoIcon', 'pingLabel', 'creatureType', 'skull', 'emblem', 'specialIcon' }
   else
     -- Summon widgets to hide
     if table.contains({ CreatureTypeSummonOwn, CreatureTypeSummonOther }, button.creatureTypeId) then
-      hiddenWidgetIds = { 'manaBar', 'pingLabel', 'skull', 'emblem', 'specialIcon' }
+      hiddenWidgetIds = { 'manaBar', 'vigorBar', 'pingLabel', 'skull', 'emblem', 'specialIcon' }
     end
   end
   for _, hiddenWidgetId in ipairs(hiddenWidgetIds) do
@@ -740,6 +738,9 @@ function GamePartyList.createSortMenu() -- todo
   if sortType ~= SortTypeMana then
     menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeMana]), function() GamePartyList.setSortType(SortTypeMana) end)
   end
+  if sortType ~= SortTypeVigor then
+    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeVigor]), function() GamePartyList.setSortType(SortTypeVigor) end)
+  end
   if sortType ~= SortTypeName then
     menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeName]), function() GamePartyList.setSortType(SortTypeName) end)
   end
@@ -756,8 +757,9 @@ function GamePartyList.sortList()
   local sortOrder = GamePartyList.getSortOrder()
   local sortType  = GamePartyList.getSortType()
 
+  -- Ascending
   if sortOrder == SortOrderAscending then
-    -- Ascending - Hierarchy
+    -- Hierarchy
     if sortType == SortTypeHierarchy then
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
@@ -765,11 +767,11 @@ function GamePartyList.sortList()
         sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] < ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
       end
 
-    -- Ascending - Appear
+    -- Appear
     elseif sortType == SortTypeAppear then
       sortFunction = function(a,b) return a.lastAppear < b.lastAppear end
 
-    -- Ascending - Distance
+    -- Distance
     elseif sortType == SortTypeDistance then
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
@@ -777,25 +779,30 @@ function GamePartyList.sortList()
         sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
       end
 
-    -- Ascending - Health
+    -- Health
     elseif sortType == SortTypeHealth then
       sortFunction = function(a,b) return a.healthPercent < b.healthPercent end
 
-    -- Ascending - Mana
+    -- Mana
     elseif sortType == SortTypeMana then
       sortFunction = function(a,b) return a.manaPercent < b.manaPercent end
 
-    -- Ascending - Name
+    -- Vigor
+    elseif sortType == SortTypeVigor then
+      sortFunction = function(a,b) return a.vigorPercent < b.vigorPercent end
+
+    -- Name
     elseif sortType == SortTypeName then
       sortFunction = function(a,b) return a:getCreatureName() < b:getCreatureName() end
 
-    -- Ascending - Ping
+    -- Ping
     elseif sortType == SortTypePing then
       sortFunction = function(a,b) return a.ping < b.ping end
     end
 
+  -- Descending
   elseif sortOrder == SortOrderDescending then
-    -- Descending - Hierarchy
+    -- Hierarchy
     if sortType == SortTypeHierarchy then
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
@@ -803,11 +810,11 @@ function GamePartyList.sortList()
         sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] > ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
       end
 
-    -- Descending - Appear
+    -- Appear
     elseif sortType == SortTypeAppear then
       sortFunction = function(a,b) return a.lastAppear > b.lastAppear end
 
-    -- Descending - Distance
+    -- Distance
     elseif sortType == SortTypeDistance then
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
@@ -815,19 +822,23 @@ function GamePartyList.sortList()
         sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
       end
 
-    -- Descending - Health
+    -- Health
     elseif sortType == SortTypeHealth then
       sortFunction = function(a,b) return a.healthPercent > b.healthPercent end
 
-    -- Descending - Mana
+    -- Mana
     elseif sortType == SortTypeMana then
       sortFunction = function(a,b) return a.manaPercent > b.manaPercent end
 
-    -- Descending - Name
+    -- Vigor
+    elseif sortType == SortTypeVigor then
+      sortFunction = function(a,b) return a.vigorPercent > b.vigorPercent end
+
+    -- Name
     elseif sortType == SortTypeName then
       sortFunction = function(a,b) return a:getCreatureName() > b:getCreatureName() end
 
-    -- Descending - Name
+    -- Name
     elseif sortType == SortTypePing then
       sortFunction = function(a,b) return a.ping > b.ping end
     end
@@ -877,7 +888,7 @@ function GamePartyList.clearList()
 
   GamePartyList.updateInviteeList() -- Necessary to disable invitee widgets when invitee is empty
 
-  emptyMenuButton:setTooltip(tr('You are not in party.'))
+  emptyMenuButton:setTooltip(tr('You are not in party.'), TooltipType.textBlock)
 end
 
 function GamePartyList.refreshList()
@@ -976,6 +987,7 @@ local function getPartyButton(msg, button, isInvitee)
     if button.creatureTypeId == CreatureTypePlayer then
       button.vocationId    = msg:getU16()
       button.manaPercent   = msg:getU8()
+      button.vigorPercent  = msg:getU8()
       button.emblemId      = msg:getU8()
       button.specialIconId = msg:getU8()
     end
@@ -1157,6 +1169,23 @@ serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATUREMANAPERCENT] = function(msg)
   end
 end
 
+serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATUREVIGORPERCENT] = function(msg)
+  local memberCid          = msg:getU32()
+  local memberVigorPercent = msg:getU8()
+
+  local memberButton = partyList[memberCid]
+
+  if not memberButton then
+    return
+  end
+
+  memberButton:updateVigorPercent(memberVigorPercent)
+
+  if GamePartyList.getSortType() == SortTypeVigor then
+    GamePartyList.updateMemberList()
+  end
+end
+
 serverSignals[PARTYLIST_SERVERSIGNAL_SENDPLAYERSPING] = function(msg)
   local membersCount = msg:getU8()
 
@@ -1196,7 +1225,7 @@ serverSignals[PARTYLIST_SERVERSIGNAL_SENDEXTRAEXPERIENCETOOLTIP] = function(msg)
   local extraExperienceTooltip = msg:getString()
   local extraExperienceValue   = msg:getDouble()
 
-  emptyMenuButton:setTooltip(extraExperienceValue > 0 and tr(extraExperienceTooltip, extraExperienceValue) or tr('You have no partners in your party yet.'))
+  emptyMenuButton:setTooltip(extraExperienceValue > 0 and tr(extraExperienceTooltip, extraExperienceValue) or tr('You have no partners in your party yet.'), TooltipType.textBlock)
 end
 
 function GamePartyList.parsePartyList(protocol, msg)

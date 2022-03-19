@@ -1,9 +1,14 @@
+local function bindCopyPositionOption(menu, pos)
+  menu:addOption(tr('Copy position'), function() g_window.setClipboardText(string.format('Position(%d, %d, %d)', pos.x, pos.y, pos.z)) end)
+end
+
 function UIMinimap:onCreate()
   self.autowalk = true
 end
 
 function UIMinimap:onSetup()
-  self.flagWindow = nil
+  self.addFlagWindow = nil
+  self.editFlagWindow = nil
   self.floorUpWidget = self:getChildById('floorUp')
   self.floorDownWidget = self:getChildById('floorDown')
   self.zoomInWidget = self:getChildById('zoomIn')
@@ -11,11 +16,11 @@ function UIMinimap:onSetup()
   self.flags = { }
   self.alternatives = { }
   self.alternativesVisible = true
-  self.onAddAutomapFlag = function(pos, icon, description)
-    self:addFlag(pos, icon, description)
+  self.onAddAutomapFlag = function(pos, icon, description, force)
+    self:addFlag(pos, icon, description, force)
   end
-  self.onRemoveAutomapFlag = function(pos, icon, description)
-    self:removeFlag(pos, icon, description)
+  self.onRemoveAutomapFlag = function(pos)
+    self:removeFlag(pos)
   end
   self.onGameEnd = function()
     for k, widget in pairs(self.alternatives) do
@@ -43,46 +48,9 @@ function UIMinimap:onDestroy()
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
     onGameEnd           = self.onGameEnd,
   })
-  self:destroyFlagWindow()
+  self:destroyAddFlagWindow()
+  self:destroyEditFlagWindow()
   self.flags = { }
-end
-
-function UIMinimap:onVisibilityChange()
-  if not self:isVisible() then
-    self:destroyFlagWindow()
-  end
-end
-
-function UIMinimap:onCameraPositionChange(cameraPos)
-  if self.cross then
-    self:setCrossPosition(self.cross.pos)
-  end
-end
-
-function UIMinimap:hideFloor()
-  self.floorUpWidget:hide()
-  self.floorDownWidget:hide()
-end
-
-function UIMinimap:hideZoom()
-  self.zoomInWidget:hide()
-  self.zoomOutWidget:hide()
-end
-
-function UIMinimap:disableAutoWalk()
-  self.autowalk = false
-end
-
-function UIMinimap:load()
-  local settings = g_settings.getNode('Minimap')
-  if settings then
-    if settings.flags then
-      for _,flag in pairs(settings.flags) do
-        self:addFlag(flag.position, flag.icon, flag.description)
-      end
-    end
-    self:setZoom(settings.zoom)
-  end
 end
 
 function UIMinimap:save()
@@ -100,15 +68,46 @@ function UIMinimap:save()
   g_settings.setNode('Minimap', settings)
 end
 
-local function onFlagMouseRelease(widget, pos, button)
-  if button == MouseRightButton then
-    local menu = g_ui.createWidget('PopupMenu')
-    menu:setGameMenu(true)
-    menu:addOption(tr('Delete mark'), function() widget:destroy() end)
-    menu:display(pos)
-    return true
+function UIMinimap:load()
+  local settings = g_settings.getNode('Minimap')
+  if settings then
+    if settings.flags then
+      for _,flag in pairs(settings.flags) do
+        self:addFlag(flag.position, flag.icon, flag.description)
+      end
+    end
+    self:setZoom(settings.zoom)
   end
-  return false
+end
+
+function UIMinimap:move(x, y)
+  local cameraPos = self:getCameraPosition()
+  local scale = self:getScale()
+  if scale > 1 then
+    scale = 1
+  end
+
+  local dx = x / scale
+  local dy = y / scale
+  local pos = { x = cameraPos.x - dx, y = cameraPos.y - dy, z = cameraPos.z }
+  self:setCameraPosition(pos)
+end
+
+function UIMinimap:reset()
+  self:setZoom(0)
+  if self.cross then
+    self:setCameraPosition(self.cross.pos)
+  end
+end
+
+function UIMinimap:hideFloor()
+  self.floorUpWidget:hide()
+  self.floorDownWidget:hide()
+end
+
+function UIMinimap:hideZoom()
+  self.zoomInWidget:hide()
+  self.zoomOutWidget:hide()
 end
 
 function UIMinimap:setCrossPosition(pos)
@@ -128,20 +127,42 @@ function UIMinimap:setCrossPosition(pos)
   end
 end
 
-function UIMinimap:addFlag(pos, icon, description, temporary)
-  if not pos or not icon then
+function UIMinimap:disableAutoWalk()
+  self.autowalk = false
+end
+
+
+
+function UIMinimap:getFlag(mapPos)
+  for _,flag in pairs(self.flags) do
+    if flag.pos.x == mapPos.x and flag.pos.y == mapPos.y and flag.pos.z == mapPos.z then
+      return flag
+    end
+  end
+  return nil
+end
+
+function UIMinimap:addFlag(mapPos, icon, description, force, temporary)
+  if not mapPos or not icon then
     return
   end
 
-  local flag = self:getFlag(pos, icon, description)
-  if flag or not icon then
-    return
+  local flag = self:getFlag(mapPos)
+  if force then
+    if flag then
+      self:removeFlag(mapPos)
+    end
+  else
+    if flag then
+      return
+    end
   end
+
   temporary = temporary or false
 
   flag = g_ui.createWidget('MinimapFlag')
   self:insertChild(1, flag)
-  flag.pos = pos
+  flag.pos = mapPos
   flag.description = description
   flag.icon = icon
   flag.temporary = temporary
@@ -152,11 +173,32 @@ function UIMinimap:addFlag(pos, icon, description, temporary)
   end
   flag:setIconClip({ width = 11, height = 11 })
   flag:setTooltip(description)
-  flag.onMouseRelease = onFlagMouseRelease
+  flag.onMouseRelease = function(widget, _pos, button)
+    if button == MouseRightButton then
+      local menu = g_ui.createWidget('PopupMenu')
+      menu:setGameMenu(true)
+      menu:addOption(tr('Edit mark'), function() self:createEditFlagWindow(mapPos) end)
+      menu:addOption(tr('Remove mark'), function() widget:destroy() end)
+      menu:addSeparator()
+      bindCopyPositionOption(menu, mapPos)
+      menu:display(_pos)
+      return true
+    end
+    return false
+  end
   flag.onDestroy = function() table.removevalue(self.flags, flag) end
   table.insert(self.flags, flag)
-  self:centerInPosition(flag, pos)
+  self:centerInPosition(flag, mapPos)
 end
+
+function UIMinimap:removeFlag(mapPos)
+  local flag = self:getFlag(mapPos)
+  if flag then
+    flag:destroy()
+  end
+end
+
+
 
 -- Attach data in widget before use this function: pos, alternativeId, temporary, description, minZoom, maxZoom
 function UIMinimap:addAlternativeWidget(widget)
@@ -209,6 +251,123 @@ function UIMinimap:setAlternativeWidgetsVisible(show)
   layout:update()
 end
 
+
+
+function UIMinimap:createAddFlagWindow(mapPos)
+  if self.addFlagWindow or not mapPos then
+    return
+  end
+
+  self.addFlagWindow = g_ui.createWidget('MinimapAddFlagWindow', rootWidget)
+
+  local positionLabel = self.addFlagWindow:getChildById('position')
+  local description = self.addFlagWindow:getChildById('description')
+  local okButton = self.addFlagWindow:getChildById('okButton')
+  local cancelButton = self.addFlagWindow:getChildById('cancelButton')
+
+  local flagRadioGroup = UIRadioGroup.create()
+  for i=0,19 do
+    local checkbox = self.addFlagWindow:getChildById('flag' .. i)
+    checkbox.icon = i
+    flagRadioGroup:addWidget(checkbox)
+  end
+
+  positionLabel:setText(string.format('%i, %i, %i', mapPos.x, mapPos.y, mapPos.z))
+  flagRadioGroup:selectWidget(flagRadioGroup:getFirstWidget())
+
+  local successFunc = function()
+    self:addFlag(mapPos, flagRadioGroup:getSelectedWidget().icon, description:getText())
+    self:destroyAddFlagWindow()
+  end
+
+  local cancelFunc = function()
+    self:destroyAddFlagWindow()
+  end
+
+  okButton.onClick = successFunc
+  cancelButton.onClick = cancelFunc
+
+  self.addFlagWindow.onEnter = successFunc
+  self.addFlagWindow.onEscape = cancelFunc
+
+  self.addFlagWindow.onDestroy = function() flagRadioGroup:destroy() end
+end
+
+function UIMinimap:destroyAddFlagWindow()
+  if self.addFlagWindow then
+    self.addFlagWindow:destroy()
+    self.addFlagWindow = nil
+  end
+end
+
+function UIMinimap:createEditFlagWindow(mapPos)
+  if self.editFlagWindow or not mapPos then
+    return
+  end
+
+  local flag = self:getFlag(mapPos)
+  if not flag then
+    return
+  end
+
+  self.editFlagWindow = g_ui.createWidget('MinimapEditFlagWindow', rootWidget)
+
+  local positionLabel = self.editFlagWindow:getChildById('position')
+  local description = self.editFlagWindow:getChildById('description')
+  local okButton = self.editFlagWindow:getChildById('okButton')
+  local cancelButton = self.editFlagWindow:getChildById('cancelButton')
+
+  local flagRadioGroup = UIRadioGroup.create()
+  for i=0,19 do
+    local checkbox = self.editFlagWindow:getChildById('flag' .. i)
+    checkbox.icon = i
+    flagRadioGroup:addWidget(checkbox)
+  end
+
+  positionLabel:setText(string.format('%i, %i, %i', mapPos.x, mapPos.y, mapPos.z))
+  description:setText(flag.description)
+  flagRadioGroup:selectWidget(flagRadioGroup.widgets[flag.icon + 1])
+
+  local successFunc = function()
+    self:addFlag(mapPos, flagRadioGroup:getSelectedWidget().icon, description:getText(), true)
+    self:destroyEditFlagWindow()
+  end
+
+  local cancelFunc = function()
+    self:destroyEditFlagWindow()
+  end
+
+  okButton.onClick = successFunc
+  cancelButton.onClick = cancelFunc
+
+  self.editFlagWindow.onEnter = successFunc
+  self.editFlagWindow.onEscape = cancelFunc
+
+  self.editFlagWindow.onDestroy = function() flagRadioGroup:destroy() end
+end
+
+function UIMinimap:destroyEditFlagWindow()
+  if self.editFlagWindow then
+    self.editFlagWindow:destroy()
+    self.editFlagWindow = nil
+  end
+end
+
+
+
+function UIMinimap:onVisibilityChange()
+  if not self:isVisible() then
+    self:destroyAddFlagWindow()
+    self:destroyEditFlagWindow()
+  end
+end
+
+function UIMinimap:onCameraPositionChange(cameraPos)
+  if self.cross then
+    self:setCrossPosition(self.cross.pos)
+  end
+end
+
 function UIMinimap:onZoomChange(zoom) -- zoom is from maxZoom -5 (far) to minZoom 5 (near)
   for _,widget in pairs(self.alternatives) do
     if (not widget.minZoom or widget.minZoom >= zoom) and (widget.maxZoom or 0) <= zoom then
@@ -217,42 +376,6 @@ function UIMinimap:onZoomChange(zoom) -- zoom is from maxZoom -5 (far) to minZoo
       widget:hide()
     end
   end
-end
-
-function UIMinimap:getFlag(pos)
-  for _,flag in pairs(self.flags) do
-    if flag.pos.x == pos.x and flag.pos.y == pos.y and flag.pos.z == pos.z then
-      return flag
-    end
-  end
-  return nil
-end
-
-function UIMinimap:removeFlag(pos, icon, description)
-  local flag = self:getFlag(pos)
-  if flag then
-    flag:destroy()
-  end
-end
-
-function UIMinimap:reset()
-  self:setZoom(0)
-  if self.cross then
-    self:setCameraPosition(self.cross.pos)
-  end
-end
-
-function UIMinimap:move(x, y)
-  local cameraPos = self:getCameraPosition()
-  local scale = self:getScale()
-  if scale > 1 then
-    scale = 1
-  end
-
-  local dx = x/scale
-  local dy = y/scale
-  local pos = {x = cameraPos.x - dx, y = cameraPos.y - dy, z = cameraPos.z}
-  self:setCameraPosition(pos)
 end
 
 function UIMinimap:onMouseWheel(mousePos, direction)
@@ -295,7 +418,12 @@ function UIMinimap:onMouseRelease(pos, button)
   elseif button == MouseRightButton then
     local menu = g_ui.createWidget('PopupMenu')
     menu:setGameMenu(true)
-    menu:addOption(tr('Create mark'), function() self:createFlagWindow(mapPos) end)
+    menu:addOption(tr('Add new mark'), function() self:createAddFlagWindow(mapPos) end)
+    if GameTracker then
+      menu:addOption(tr('Track position'), function() signalcall(g_game.onTrackPositionStart, mapPos) end)
+    end
+    menu:addSeparator()
+    bindCopyPositionOption(menu, mapPos)
     menu:display(pos)
     return true
   end
@@ -326,57 +454,5 @@ function UIMinimap:onStyleApply(styleName, styleNode)
     if name == 'autowalk' then
       self.autowalk = value
     end
-  end
-end
-
-function UIMinimap:createFlagWindow(pos)
-  if self.flagWindow then
-    return
-  end
-
-  if not pos then
-    return
-  end
-
-  self.flagWindow = g_ui.createWidget('MinimapFlagWindow', rootWidget)
-
-  local positionLabel = self.flagWindow:getChildById('position')
-  local description = self.flagWindow:getChildById('description')
-  local okButton = self.flagWindow:getChildById('okButton')
-  local cancelButton = self.flagWindow:getChildById('cancelButton')
-
-  positionLabel:setText(string.format('%i, %i, %i', pos.x, pos.y, pos.z))
-
-  local flagRadioGroup = UIRadioGroup.create()
-  for i=0,19 do
-    local checkbox = self.flagWindow:getChildById('flag' .. i)
-    checkbox.icon = i
-    flagRadioGroup:addWidget(checkbox)
-  end
-
-  flagRadioGroup:selectWidget(flagRadioGroup:getFirstWidget())
-
-  local successFunc = function()
-    self:addFlag(pos, flagRadioGroup:getSelectedWidget().icon, description:getText())
-    self:destroyFlagWindow()
-  end
-
-  local cancelFunc = function()
-    self:destroyFlagWindow()
-  end
-
-  okButton.onClick = successFunc
-  cancelButton.onClick = cancelFunc
-
-  self.flagWindow.onEnter = successFunc
-  self.flagWindow.onEscape = cancelFunc
-
-  self.flagWindow.onDestroy = function() flagRadioGroup:destroy() end
-end
-
-function UIMinimap:destroyFlagWindow()
-  if self.flagWindow then
-    self.flagWindow:destroy()
-    self.flagWindow = nil
   end
 end

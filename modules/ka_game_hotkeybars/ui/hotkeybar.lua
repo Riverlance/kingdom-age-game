@@ -16,7 +16,7 @@ function UIHotkeyBar.create()
   local obj = UIHotkeyBar.internalCreate()
   obj:setId('hotkeybar_none')
   obj.hotkeyList = { }
-  obj:setTooltip(tr(defaultTooltip, hotkeyManagerKeyCombo, powerListKeyCombo))
+  obj:setTooltip(tr(defaultTooltip, hotkeyManagerKeyCombo, powerListKeyCombo), TooltipType.textBlock)
   return obj
 end
 
@@ -175,6 +175,7 @@ function UIHotkeyBar:onAssignHotkey(keySettings, applied, hotkeyWidget)
         end
         GameHotkeys.doKeyCombo(keyCombo, hotkeyWidget)
       end
+      --hotkeyWidget:updateCallback(callback)
       if tonumber(keySettings.powerId) then
         hotkeyWidget.onMousePress = callback
       else
@@ -330,6 +331,7 @@ function UIHotkeyBar:updateHotkey(hotkey)
     local children = self:getHotkeyList():getChildren()
     for _, widget in ipairs(children) do
       if widget:getClassName() == 'UIHotkeyBarContainer' then
+        --widget:updateCallback()
         widget:updateLook()
       end
     end

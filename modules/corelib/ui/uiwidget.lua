@@ -78,6 +78,34 @@ function UIWidget:onDrop(widget, mousePos)
   return false
 end
 
+function UIWidget:getContentsSize()
+  local pos = self:getPosition()
+
+  -- Get position of child which is far at south east corner
+  local x = 0
+  local y = 0
+
+  for _, child in ipairs(self:getChildren()) do
+    if child:isExplicitlyVisible() then
+      local childPos          = child:getPosition()
+      local childSize         = child:getSize()
+      local childSECornerPosX = math.max(0, childPos.x + childSize.width - 1)
+      local childSECornerPosY = math.max(0, childPos.y + childSize.height - 1)
+
+      if x < childSECornerPosX then
+        x = childSECornerPosX
+      end
+
+      if y < childSECornerPosY then
+        y = childSECornerPosY
+      end
+    end
+  end
+
+  -- Relative position of south east corner according to parent, which means the contents dimension
+  return { width = math.max(0, x - (pos.x + self:getPaddingLeft())), height = math.max(0, y - (pos.y + self:getPaddingTop())) }
+end
+
 function UIWidget:getHorizontalMargin(withoutWidth)
   return (not withoutWidth and self:getWidth() or 0) + self:getMarginLeft() + self:getMarginRight()
 end

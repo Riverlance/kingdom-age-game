@@ -1,7 +1,12 @@
 -- @docclass table
 
-function pack(...)
-  return {...}
+function pack(...) -- supports nil parameters
+  local newArgs = { }
+  local args    = {...}
+  for i = 1, select('#', ...) do
+    newArgs[i] = select(i, ...)
+  end
+  return newArgs
 end
 
 function table.dump(t, depth)
@@ -50,6 +55,18 @@ function table.selectivecopy(t, keys)
   return res
 end
 
+function table.addKeys(t, keys)
+  for _, key in ipairs(keys) do
+    if type(key) == 'table' then
+      for _key = key.from, key.to do
+        t[_key] = true
+      end
+    else
+      t[key] = true
+    end
+  end
+end
+
 function table.merge(t, src, overwrite)
   if overwrite then
     for k,v in pairs(src) do
@@ -63,6 +80,34 @@ function table.merge(t, src, overwrite)
     table.insert(_t, v)
   end
   return _t
+end
+
+function table.keysAsValues(t, valueAsKey)
+  local ret = { }
+  if valueAsKey then
+    for key, v in pairs(t) do
+      ret[v] = key
+    end
+  else
+    for key, _ in pairs(t) do
+      table.insert(ret, key)
+    end
+  end
+  return ret
+end
+
+function table.valuesAsKeys(t, keyAsValue)
+  local ret = { }
+  if keyAsValue then
+    for k, value in pairs(t) do
+      ret[value] = k
+    end
+  else
+    for _, value in pairs(t) do
+      ret[value] = true
+    end
+  end
+  return ret
 end
 
 function table.find(t, value, lowercase)
@@ -171,15 +216,6 @@ function table.empty(t)
   return true
 end
 
-function table.permute(t, n, count)
-  n = n or #t
-  for i=1,count or n do
-    local j = math.random(i, n)
-    t[i], t[j] = t[j], t[i]
-  end
-  return t
-end
-
 function table.findbyfield(t, fieldname, fieldvalue)
   for _i,subt in pairs(t) do
     if subt[fieldname] == fieldvalue then
@@ -254,6 +290,34 @@ function table.shuffle(t)
   return t
 end
 
+function table.getRatedValue(t) -- Table value needs to be a table which contains a rate value: { ..., rate = 100, ... }
+  local _t = table.shuffle(table.copy(t)) -- Copy and randomize for avoid that first rows have more chance than the others
+
+  local rateFactor = 0 -- (_t[1].rate + _t[2].rate + ... + _t[n].rate)
+  for _, value in ipairs(_t) do
+    rateFactor = rateFactor + value.rate
+  end
+  if rateFactor <= 0 then
+    return nil -- Cannot divide by 0 or is negative
+  end
+
+  local random        = math.random()
+  local percentFactor = 1 / rateFactor
+
+  for i = 1, #_t do
+    local percentPiece = 0
+    for j = 1, i do
+      percentPiece = percentPiece + (_t[j].rate * percentFactor)
+    end
+
+    if random <= percentPiece then
+      return _t[i]
+    end
+  end
+
+  return nil
+end
+
 function table.serialize(_table, recursive) -- (table) -- Do not use the recursive param
   local _type = type(_table)
   recursive = recursive or { }
@@ -316,13 +380,13 @@ function table.removeChild(t, index, recursive)
 end
 
 function table.get(t, ...)
---[[
-  -- Worst way
-  local zip = company and company.director and company.director.address and company.director.address.zipcode
+  --[[
+    -- Worst way
+    local zip = company and company.director and company.director.address and company.director.address.zipcode
 
-  -- Best way
-  local zip = table.get(company, 'director', 'address', 'zipcode')
-]]
+    -- Best way
+    local zip = table.get(company, 'director', 'address', 'zipcode')
+  ]]
   local args = {...}
 
   for i = 1, #args do

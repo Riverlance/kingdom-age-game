@@ -521,3 +521,14 @@ function UIMiniWindow:isResizeable()
   local bottomResizeBorder = self:getChildById('bottomResizeBorder')
   return bottomResizeBorder:isExplicitlyVisible() and bottomResizeBorder:isEnabled()
 end
+
+function UIMiniWindow:setScrollBarAutoHiding(enabled)
+  local scrollbar = self:getChildById('miniwindowScrollBar')
+
+  local data = { }
+  if enabled then
+    data.width = 0
+  end
+
+  scrollbar:mergeStyle({ ['$!on'] = data })
+end

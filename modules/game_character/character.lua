@@ -6,18 +6,22 @@ outfitCreatureBox = nil
 
 
 
+local loginTime = 0
+
+healthBarPrevious = nil
 healthBar = nil
 manaBar = nil
+vigorBar = nil
 experienceBar = nil
 healthBarValueLabel = nil
 manaBarValueLabel = nil
+vigorBarValueLabel = nil
 experienceBarValueLabel = nil
 capLabel = nil
 
 
 
-InventorySlotStyles =
-{
+InventorySlotStyles = {
   [InventorySlotHead] = 'HeadSlot',
   [InventorySlotNeck] = 'NeckSlot',
   [InventorySlotBack] = 'BackSlot',
@@ -60,6 +64,7 @@ function GameCharacter.init()
     -- Health info
     onHealthChange       = GameCharacter.onHealthChange,
     onManaChange         = GameCharacter.onManaChange,
+    onVigorChange        = GameCharacter.onVigorChange,
     onLevelChange        = GameCharacter.onLevelChange,
     onFreeCapacityChange = GameCharacter.onFreeCapacityChange,
 
@@ -113,11 +118,14 @@ function GameCharacter.init()
   outfitCreatureBox = contentsPanel:getChildById('outfitCreatureBox')
 
   -- Health info
+  healthBarPrevious       = inventoryHeader:getChildById('healthBarPrevious')
   healthBar               = inventoryHeader:getChildById('healthBar')
   manaBar                 = inventoryHeader:getChildById('manaBar')
+  vigorBar                = inventoryHeader:getChildById('vigorBar')
   experienceBar           = inventoryHeader:getChildById('experienceBar')
   healthBarValueLabel     = inventoryHeader:getChildById('healthBarValueLabel')
   manaBarValueLabel       = inventoryHeader:getChildById('manaBarValueLabel')
+  vigorBarValueLabel      = inventoryHeader:getChildById('vigorBarValueLabel')
   experienceBarValueLabel = inventoryHeader:getChildById('experienceBarValueLabel')
   capLabel                = inventoryFooter:getChildById('capLabel')
 
@@ -125,6 +133,7 @@ function GameCharacter.init()
   if localPlayer then
     GameCharacter.onHealthChange(localPlayer, localPlayer:getHealth(), localPlayer:getMaxHealth())
     GameCharacter.onManaChange(localPlayer, localPlayer:getMana(), localPlayer:getMaxMana())
+    GameCharacter.onVigorChange(localPlayer, localPlayer:getVigor(), localPlayer:getMaxVigor())
     GameCharacter.onLevelChange(localPlayer, localPlayer:getLevel(), localPlayer:getLevelPercent())
     GameCharacter.onFreeCapacityChange(localPlayer, localPlayer:getFreeCapacity())
   end
@@ -159,12 +168,14 @@ function GameCharacter.init()
 
   GameInterface.setupMiniWindow(inventoryWindow, inventoryTopMenuButton)
 
-  GameCharacter.online()
+  if g_game.isOnline() then
+    GameCharacter.online()
+  end
 end
 
 function GameCharacter.terminate()
   if g_game.isOnline() then
-    GameCharacter.offline() -- CHECK
+    GameCharacter.offline()
   end
 
   -- Combat controls
@@ -186,6 +197,7 @@ function GameCharacter.terminate()
     -- Health info
     onHealthChange       = GameCharacter.onHealthChange,
     onManaChange         = GameCharacter.onManaChange,
+    onVigorChange        = GameCharacter.onVigorChange,
     onLevelChange        = GameCharacter.onLevelChange,
     onFreeCapacityChange = GameCharacter.onFreeCapacityChange,
 
@@ -234,18 +246,24 @@ function GameCharacter.terminate()
   outfitCreatureBox = nil
 
   -- Health info
+  healthBarPrevious:destroy()
   healthBar:destroy()
   manaBar:destroy()
+  vigorBar:destroy()
   experienceBar:destroy()
   healthBarValueLabel:destroy()
   manaBarValueLabel:destroy()
+  vigorBarValueLabel:destroy()
   experienceBarValueLabel:destroy()
   capLabel:destroy()
+  healthBarPrevious = nil
   healthBar = nil
   manaBar = nil
+  vigorBar = nil
   experienceBar = nil
   healthBarValueLabel = nil
   manaBarValueLabel = nil
+  vigorBarValueLabel = nil
   experienceBarValueLabel = nil
   capLabel = nil
 
@@ -265,7 +283,7 @@ end
 
 -- Combat controls
 
-function GameCharacter.update()
+function GameCharacter.updateCombatControls()
   local chaseMode = g_game.getChaseMode()
   chaseModeButton:setChecked(chaseMode == ChaseOpponent)
 
@@ -406,22 +424,38 @@ function GameCharacter.onChangeOutfit(outfit)
   GameCharacter.updateOutfitCreatureBox(g_game.getLocalPlayer())
 end
 
+
+
 function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
+  -- If is not a login health change, make a delayed set
+  if loginTime > 0 and loginTime < g_clock.millis() then
+    healthBarPrevious:setValueDelayed(health, 0, maxHealth, 1000, 25, 1000, false, true)
+  -- Instantly set
+  else
+    healthBarPrevious:setValue(health, 0, maxHealth)
+  end
+
   healthBar:setValue(health, 0, maxHealth)
   healthBarValueLabel:setText(health .. ' / ' .. maxHealth)
-  healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d\nClick to show creature health bar', health, maxHealth))
+  healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d.\nClick to show creature health bar.', health, maxHealth), TooltipType.textBlock)
 end
 
 function GameCharacter.onManaChange(localPlayer, mana, maxMana)
   manaBar:setValue(mana, 0, maxMana)
   manaBarValueLabel:setText(mana .. ' / ' .. maxMana)
-  manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d\nClick to show player mana bar', mana, maxMana))
+  manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d.\nClick to show player mana bar.', mana, maxMana), TooltipType.textBlock)
+end
+
+function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
+  vigorBar:setValue(vigor, 0, maxVigor)
+  vigorBarValueLabel:setText(vigor .. ' / ' .. maxVigor)
+  vigorBarValueLabel:setTooltip(tr('Your character vigor is %d out of %d.\nClick to show player vigor bar.', vigor, maxVigor), TooltipType.textBlock)
 end
 
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   experienceBar:setPercent(levelPercent)
   experienceBarValueLabel:setText(levelPercent .. '%')
-  experienceBarValueLabel:setTooltip(string.format('%s\nClick to show player experience bar', getExperienceTooltipText(localPlayer, level, levelPercent)))
+  experienceBarValueLabel:setTooltip(string.format('%s.\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
 end
 
 function GameCharacter.onFreeCapacityChange(player, freeCapacity)
@@ -433,72 +467,81 @@ end
 
 
 function GameCharacter.online()
+  loginTime = g_clock.millis() + 50
+
   GameInterface.setupMiniWindow(inventoryWindow, inventoryTopMenuButton)
 
   local player = g_game.getLocalPlayer()
 
-  if player then
-    inventoryWindow:setText(player:getName())
+  connect(player, {
+    onVocationChange = GameCharacter.onVocationChange,
+  })
 
-    GameCharacter.updateOutfitCreatureBox(player)
+  inventoryWindow:setText(player:getName())
 
-    -- Inventory
+  GameCharacter.updateOutfitCreatureBox(player)
 
-    for i = InventorySlotFirst, InventorySlotAmmo do
-      if g_game.isOnline() then
-        GameCharacter.onInventoryChange(player, i, player:getInventoryItem(i))
-      else
-        GameCharacter.onInventoryChange(player, i, nil)
-      end
-    end
-    GameCharacter.toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
+  -- Inventory
 
-    -- Combat controls
-
-    local settings = Client.getPlayerSettings()
-    local lastCombatControls = settings:getNode('lastCombatControls') or { }
-
-    g_game.setChaseMode(true, lastCombatControls.chaseMode)
-    g_game.setSafeFight(true, lastCombatControls.safeFight)
-    g_game.setFightMode(true, lastCombatControls.fightMode)
-
-    if lastCombatControls.pvpMode then
-      g_game.setPVPMode(true, lastCombatControls.pvpMode)
-    end
-
-    if g_game.getFeature(GamePlayerMounts) then
-      mountButton:setVisible(true)
-      mountButton:setChecked(player:isMounted())
+  for i = InventorySlotFirst, InventorySlotAmmo do
+    if g_game.isOnline() then
+      GameCharacter.onInventoryChange(player, i, player:getInventoryItem(i))
     else
-      mountButton:setVisible(false)
+      GameCharacter.onInventoryChange(player, i, nil)
     end
   end
+  GameCharacter.toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
 
-  GameCharacter.update()
-end
-
-function GameCharacter.offline()
   -- Combat controls
 
   local settings = Client.getPlayerSettings()
   local lastCombatControls = settings:getNode('lastCombatControls') or { }
 
-  local player = g_game.getLocalPlayer()
-  if player then
-    lastCombatControls = {
-      chaseMode = g_game.getChaseMode(),
-      safeFight = g_game.isSafeFight(),
-      fightMode = g_game.getFightMode()
-    }
+  g_game.setChaseMode(true, lastCombatControls.chaseMode)
+  g_game.setSafeFight(true, lastCombatControls.safeFight)
+  g_game.setFightMode(true, lastCombatControls.fightMode)
 
-    if g_game.getFeature(GamePVPMode) then
-      lastCombatControls.pvpMode = g_game.getPVPMode()
-    end
-
-    -- Save last combat control settings
-    settings:setNode('lastCombatControls', lastCombatControls)
-    settings:save()
+  if lastCombatControls.pvpMode then
+    g_game.setPVPMode(true, lastCombatControls.pvpMode)
   end
+
+  if g_game.getFeature(GamePlayerMounts) then
+    mountButton:setVisible(true)
+    mountButton:setChecked(player:isMounted())
+  else
+    mountButton:setVisible(false)
+  end
+
+  GameCharacter.updateMiniWindowSize()
+
+  GameCharacter.updateCombatControls()
+end
+
+function GameCharacter.offline()
+  local player = g_game.getLocalPlayer()
+
+  disconnect(player, {
+    onVocationChange = GameCharacter.onVocationChange,
+  })
+
+  -- Combat controls
+
+  local settings = Client.getPlayerSettings()
+  local lastCombatControls = settings:getNode('lastCombatControls') or { }
+
+  lastCombatControls = {
+    chaseMode = g_game.getChaseMode(),
+    safeFight = g_game.isSafeFight(),
+    fightMode = g_game.getFightMode()
+  }
+
+  if g_game.getFeature(GamePVPMode) then
+    lastCombatControls.pvpMode = g_game.getPVPMode()
+  end
+
+  -- Save last combat control settings
+  settings:setNode('lastCombatControls', lastCombatControls)
+  settings:save()
 end
 
 function GameCharacter.showMoreInfo(bool) -- true = Show more; false = Show less; nil = Default
@@ -536,13 +579,13 @@ function GameCharacter.showMoreInfo(bool) -- true = Show more; false = Show less
 
   local ballButton = inventoryWindow:getChildById('ballButton')
   if hide then
-    inventoryWindow:setHeight(258)
+    inventoryWindow:setHeight(GameCharacter.getMiniWindowHeight())
 
     if ballButton then
       ballButton:setTooltip('Show less')
     end
   else
-    inventoryWindow:setHeight(94)
+    inventoryWindow:setHeight(GameCharacter.getHeaderHeight())
 
     if ballButton then
       ballButton:setTooltip('Show more')
@@ -550,6 +593,45 @@ function GameCharacter.showMoreInfo(bool) -- true = Show more; false = Show less
   end
 end
 
+function GameCharacter.onVocationChange(creature, vocation, oldVocation)
+  local localPlayer = g_game.getLocalPlayer()
+  if creature ~= localPlayer then
+    return
+  end
+
+  GameCharacter.updateMiniWindowSize()
+end
+
 function GameCharacter.onMiniWindowBallButton()
   GameCharacter.showMoreInfo()
+end
+
+function GameCharacter.getHeaderHeight()
+  local localPlayer = g_game.getLocalPlayer()
+  return 111 - (localPlayer and localPlayer:isWarrior() and 17 or 0)
+end
+
+function GameCharacter.getInventoryHeight()
+  return 165
+end
+
+function GameCharacter.getMiniWindowHeight()
+  return GameCharacter.getHeaderHeight() + GameCharacter.getInventoryHeight()
+end
+
+function GameCharacter.updateHeaderSize()
+  local player    = g_game.getLocalPlayer()
+  local isWarrior = player and player:isWarrior()
+
+  manaBar:setOn(not isWarrior)
+  -- 52 and 69 = 16 for each bar + 1 of top margin between + 2 of top and bottom header border
+  inventoryHeader:setHeight(isWarrior and 52 or 69)
+end
+
+function GameCharacter.updateMiniWindowSize()
+  local contentsPanel = inventoryWindow:getChildById('contentsPanel')
+  local headSlot      = contentsPanel:getChildById('slot1')
+
+  GameCharacter.showMoreInfo(headSlot:isVisible()) -- Force update same size, so it's possible to add/remove vigor bar
+  GameCharacter.updateHeaderSize()
 end

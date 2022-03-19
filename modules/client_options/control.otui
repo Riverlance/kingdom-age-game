@@ -3,31 +3,36 @@ Panel
   OptionCheckBox
     id: classicControl
     !text: tr('Classic control')
-    &tooltipAddons: { {{ text = tr('Changes the game shortcuts to classic mode.'), align = AlignLeft }} }
+    !tooltip: tr('Changes the game shortcuts to classic mode.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: autoChaseOverride
     !text: tr('Allow auto-chase override.')
-    &tooltipAddons: { {{ text = tr('Your character stops to follow your target\nonce you walk.'), align = AlignLeft }} }
+    !tooltip: tr('Your character stops to follow your target once you walk.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
 
   OptionCheckBox
     id: smoothWalk
     !text: tr('Enable smooth walking')
-    &tooltipAddons: { {{ text = tr('Schedule next walk before finishing previous step.'), align = AlignLeft }} }
+    !tooltip: tr('Schedule next walk before finishing previous step.')
+    !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10
 
   OptionCheckBox
     id: smartWalk
     !text: tr('Enable smart walking')
-    &tooltipAddons: { {{ text = tr('Detect when to use diagonal step based on\nthe keys you are pressing.'), align = AlignLeft }} }
+    !tooltip: tr('Detect when to use diagonal step based on the keys you are pressing.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: bouncingKeys
     !text: tr('Enable auto bouncing keys')
-    &tooltipAddons: { {{ text = tr('Whenever new key is pressed, will bounce\nprevious key.'), align = AlignLeft }} }
+    !tooltip: tr('Whenever new key is pressed, will bounce previous key.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
 

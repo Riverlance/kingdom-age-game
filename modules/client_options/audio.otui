@@ -3,7 +3,8 @@ Panel
   OptionCheckBox
     id: enableAudio
     !text: tr('Enable audio')
-    &tooltipAddons: { {{ text = tr('Allows music, ambient sounds and effect sounds\nto be enabled.'), align = AlignLeft }} }
+    !tooltip: tr('Allows music, ambient sounds and effect sounds to be enabled.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
 

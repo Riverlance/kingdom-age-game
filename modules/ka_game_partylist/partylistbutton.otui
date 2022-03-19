@@ -1,7 +1,7 @@
 PartyButton < CreatureButton
-  height: 38
+  height: 44
   &isPartyButton: true
-  &memberButtonHeight: 38
+  &memberButtonHeight: 44
   &inviteeButtonHeight: 20
 
   CreatureButtonProgressBar
@@ -11,10 +11,18 @@ PartyButton < CreatureButton
     anchors.right: healthBar.right
     background-color: #aa44ff
 
+  CreatureButtonProgressBar
+    id: vigorBar
+    anchors.top: manaBar.outsideBottom
+    anchors.left: manaBar.left
+    anchors.right: manaBar.right
+    margin-top: 1
+    background-color: #ffa14f
+
   Label
     id: pingLabel
-    anchors.top: manaBar.outsideBottom
-    anchors.right: manaBar.right
+    anchors.top: vigorBar.outsideBottom
+    anchors.right: vigorBar.right
     margin-top: 1
     font: verdana-8px-antialised
     text-align: right
@@ -23,8 +31,8 @@ PartyButton < CreatureButton
 
   Label
     id: positionLabel
-    anchors.top: manaBar.outsideBottom
-    anchors.left: manaBar.left
+    anchors.top: vigorBar.outsideBottom
+    anchors.left: vigorBar.left
     margin-top: 1
     font: verdana-8px-antialised
     text-auto-resize: true

@@ -15,7 +15,8 @@ PartyLevelCalculatorWindow < MainWindow
 
   Label
     id: levelLabel
-    !tooltip: tr('Type a level for calculate the required level range\nto be able to enable the shared experience in party.')
+    !tooltip: tr('Type a level for calculate the required level range to be able to enable the shared experience in party.')
+    !tooltip-type: TooltipType.textBlock
     text-wrap: true
     text-auto-resize: true
     color: #f2af4eff

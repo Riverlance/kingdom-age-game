@@ -59,6 +59,13 @@ CreatureButton < UICreatureButton
     anchors.left: parent.left
     phantom: true
 
+  CreatureButtonIcon
+    id: trackIcon
+    anchors.top: prev.top
+    anchors.left: prev.outsideRight
+    anchors.right: none
+    icon-source: /images/ui/minimap/track_mark
+
   Label
     id: label
     anchors.top: prev.top

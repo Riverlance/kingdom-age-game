@@ -10,12 +10,23 @@ ConditionButton < UIConditionButton
     height: 0
     visible: false
 
-  UIWidget
-    id: conditionIcon
+  UIItem
+    id: conditionItemIcon
     size: 20 20
+    padding: 2
     anchors.top: parent.top
     anchors.left: parent.left
     phantom: true
+    virtual: true
+
+  UIWidget
+    id: conditionPowerIcon
+    size: 20 20
+    anchors.top: parent.top
+    anchors.left: prev.right
+    phantom: true
+    icon-size: 16 16
+    icon-offset: 2 2
 
   UIWidget
     id: conditionType
@@ -38,7 +49,7 @@ ConditionButton < UIConditionButton
     id: conditionBar
     height: 5
     anchors.top: conditionClock.outsideBottom
-    anchors.left: conditionIcon.outsideRight
+    anchors.left: conditionPowerIcon.outsideRight
     anchors.right: parent.right
     margin-top: 1
     margin-left: 2
@@ -47,7 +58,7 @@ ConditionButton < UIConditionButton
   Label
     id: conditionAuxiliar
     anchors.top: parent.top
-    anchors.left: conditionIcon.outsideRight
+    anchors.left: conditionPowerIcon.outsideRight
     anchors.right: conditionClock.outsideLeft
     margin-left: 2
     margin-right: 2

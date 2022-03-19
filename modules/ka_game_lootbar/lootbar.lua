@@ -5,8 +5,7 @@ _G.GameLootbar = { }
 lootWidget = nil
 
 local queue = { }
-local config =
-{
+local config = {
   maxItems = 10,
   showingTime = 5000,
   shrinkTime = 1800,

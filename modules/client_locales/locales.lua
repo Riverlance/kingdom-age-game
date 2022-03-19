@@ -18,8 +18,7 @@ local GAMELANGUAGE_FIRST   = GAMELANGUAGE_EN
 local GAMELANGUAGE_LAST    = GAMELANGUAGE_SV
 local GAMELANGUAGE_DEFAULT = GAMELANGUAGE_EN
 local defaultLocaleName    = 'en'
-local language =
-{
+local language = {
   ['en'] = GAMELANGUAGE_EN,
   ['pt'] = GAMELANGUAGE_PT,
   ['es'] = GAMELANGUAGE_ES,

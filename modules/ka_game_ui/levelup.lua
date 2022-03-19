@@ -7,8 +7,7 @@ levelUpWidget = nil
 
 
 local queue = { }
-local config =
-{
+local config = {
   -- maxItems = 10,
   showingTime = 5000,
   shrinkTime = 1800,
@@ -17,8 +16,7 @@ local config =
   baseMargin = 4 -- Old: 8
 }
 
-local emblems =
-{
+local emblems = {
   { path = '/images/game/level_up/1', levelMin =   1, levelMax =  15 },
   { path = '/images/game/level_up/2', levelMin =  16, levelMax =  25 },
   { path = '/images/game/level_up/3', levelMin =  26, levelMax =  50 },

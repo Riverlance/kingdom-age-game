@@ -112,8 +112,7 @@ cancelButton             = nil
 
 
 
-local types =
-{
+local types = {
   [REPORT_TYPE_ALL]       = 'All',
   [REPORT_TYPE_NAME]      = 'Name',
   [REPORT_TYPE_STATEMENT] = 'Statement',
@@ -122,10 +121,8 @@ local types =
 
 local typeId = REPORT_TYPE_NAME
 
-local reasons = -- Titles should have until 255 characters.
-{
-  [REPORT_TYPE_NAME] =
-  {
+local reasons = { -- Titles should have until 255 characters.
+  [REPORT_TYPE_NAME] = {
     [0]  = { title = 'Offensive - Racism',                                       description = "Reflect prejudice, or hatred against people from other races or other countries.\n\nExamples:\n\nIllegal - You can report names like:\nJew hater, White Power, Niggerkiller, Stupid Polak\n\nLegal - Names like the following are legal and must not be reported:\nPolish Warrior, Tiago de Brasilia, Black Fighter" },
     [1]  = { title = 'Offensive - Harassing',                                    description = "Made to harass other players or to threaten other players in real life.\n\nExamples:\n\nIllegal - You can report names like:\nIkillyou Reallife, Wheelchair Marcin\n\nLegal - Names like the following are legal and must not be reported:\nTomurka's friend, Bubble Two" },
     [2]  = { title = 'Offensive - Insulting',                                    description = "Contain very rude and offensive vocabulary or created to insult other character names.\n\nExamples:\n\nIllegal - You can report names like:\nStupid Retard, Katie the Moron, Dickhead\n\nLegal - Names like the following are legal and must not be reported:\nNoob, Crazy Guy, Silly Gerta" },
@@ -133,28 +130,27 @@ local reasons = -- Titles should have until 255 characters.
     [4]  = { title = 'Offensive - Sexually related',                             description = "Refer to sex, a sexual orientation or intimate body parts.\nAlso, names of well-known prostitutes or porn stars may be reported.\n\nExamples:\n\nIllegal - You can report names like:\nSixty-nine, Hetero Guy, Nipple, Breastfeeder\n\nLegal - Names like the following are legal and must not be reported:\nSweet Kiss, Macho, Long Legs" },
     [5]  = { title = 'Offensive - Religious or political view',                  description = "Refer to a specific religion or to a person or position that is connected to a certain religion.\nThe same is true for names that express political views or refer to contemporary and well-known politicians.\n\nExamples:\n\nIllegal - You can report names like:\nHindu Master, Jesus Christ, Pope Frank, Anarchist, Dilma\n\nLegal - Names like the following are legal and must not be reported:\nJesus Gonzales, Elfish Priest, God of War, Satan, Abraham Lincoln" },
     [6]  = { title = 'Offensive - Generally objectionable',                      description = "Distasteful and likely to offend people.\n\nFor example, references to body fluids, excrements, serious diseases or organised crime.\nAlso, names of contemporary persons known for serious crimes or inhuman actions.\n\nExamples:\n\nIllegal - You can report names like:\nSnot, Moe the Mongolist, Mafia Hitman, Hitler\n\nLegal - Names like the following are legal and must not be reported:\nVial of Blood, Blind beggar, Genghis Khan" },
-    [7]  = { title = 'Offensive - Supporting rule violation',                    description = "Support a rule break, encourage others to break a Kingdom Age Rule.\n Or imply a violation of the Kingdom Age Rules.\nThe same is true for names that have been created to fake an official position.\n\nExamples:\n\nIllegal - You can report names like:\nSellacc, Spam Sponsor, Bothater, God Durin, System Admin, Senator Kate\n\nLegal - Names like the following are legal and must not be reported:\nEvil Thief, Bad Guy, Steve Johnson, God of War, Count Stephan" },
+    [7]  = { title = 'Offensive - Supporting rule violation',                    description = "Support a rule break, encourage others to break a Kingdom Age Rule.\nOr imply a violation of the Kingdom Age Rules.\nThe same is true for names that have been created to fake an official position.\n\nExamples:\n\nIllegal - You can report names like:\nSellacc, Spam Sponsor, Bothater, God Durin, System Admin, Senator Kate\n\nLegal - Names like the following are legal and must not be reported:\nEvil Thief, Bad Guy, Steve Johnson, God of War, Count Stephan" },
     [8]  = { title = 'Advertising - Brand, product or service of a third party', description = "Contain advertising for worldwide known products, services or companies including titles of other online games.\n\nExamples:\n\nIllegal - You can report names like:\nNike Shoes, Siemens, Frank Google, World of Warcraft\n\nLegal - Names like the following are legal and must not be reported:\nJennifer Lopez, Real Madrid, Chrono, Zelda, Megaman" },
     [9]  = { title = 'Advertising - Content which is not related to the game',   description = "Contain advertising for content which is not related to the game.\n\nExamples:\n\nIllegal - You can report names like:\nMobile Sale, Buy headset, Sell My Car\n\nLegal - Names like the following are legal and must not be reported:\nMerchant, Potionbuyer" },
     [10] = { title = 'Other - Name violation',                                   description = "Other violation." },
   },
 
-  [REPORT_TYPE_STATEMENT] =
-  {
+  [REPORT_TYPE_STATEMENT] = {
     [0]  = { title = 'Spam - Public statements ignoring the default language',      description = "Consist of a bad usage of channel sending messages that is not in the default required.\n\nFor example, the help channel requires only english statements." },
     [1]  = { title = 'Spam - Statements not related to the channel subject',        description = "Consist of a bad usage with no related statement to the channel within.\n\nFor example, do not post trade messages in the help channel." },
-    [2]  = { title = 'Spam - Using badly formatted or nonsensical text',            description = "Consist of nonsensical letter combinations.\n\nFor example, \"asdfsdfskhjkh...\" or \"-*-*-*-*I $eLl @rr0wzz*-*-*-*-...\"." },
+    [2]  = { title = 'Spam - Using badly formatted or nonsensical text',            description = 'Consist of nonsensical letter combinations.\n\nFor example, "asdfsdfskhjkh..." or "-*-*-*-*I $eLl @rr0wzz*-*-*-*-...".' },
     [3]  = { title = 'Spam - Excessively repeating similar statements',             description = "Consist of annoying flood excessively repeating similar statements several times for a longer period of time." },
     [4]  = { title = 'Offensive - Racism',                                          description = "Made to insult a certain country or its inhabitants, a certain nation or an ethnic group." },
     [5]  = { title = 'Offensive - Harassing',                                       description = "Made to harass other players or to threaten other players in real life." },
-    [6]  = { title = 'Offensive - Insulting',                                       description = "Insulting or contain very offensive vocabulary.\nKeep in mind that harmless words like \"noob\" might annoy you, but are tolerated and should not be reported." },
+    [6]  = { title = 'Offensive - Insulting',                                       description = 'Insulting or contain very offensive vocabulary.\nKeep in mind that harmless words like "noob" might annoy you, but are tolerated and should not be reported.' },
     [7]  = { title = 'Offensive - Drug related',                                    description = "Refer to drugs in any way." },
     [8]  = { title = 'Offensive - Sexually related',                                description = "Contain references to sex, sexual related body parts or a sexual orientation." },
     [9]  = { title = 'Offensive - Religious or political view',                     description = "Deal with controversial topics like religion and politics." },
     [10] = { title = 'Offensive - Generally objectionable',                         description = "Grossly distasteful.\n\nFor example, cynical remarks about catastrophes." },
     [11] = { title = 'Offensive - Supporting rule violation',                       description = "Support a rule break, encourage others to break a Kingdom Age Rule.\nOr imply a violation of the Kingdom Age Rules by the posting player." },
     [12] = { title = 'Advertising - Brand, product or service of a third party',    description = "Made to advertise certain goods, services or brands of a third party.\n\nFor example, advertising other games, offering items from another game for Kingdom Age items.\nAlso, advertising other companies or their goods and services is illegal." },
-    [13] = { title = 'Advertising - Content which is not related to the game',      description = "Contain advertising for all kind of goods and services that are not related to Kingdom Age.\n\nFor example, \"sell my car\"." },
+    [13] = { title = 'Advertising - Content which is not related to the game',      description = 'Contain advertising for all kind of goods and services that are not related to Kingdom Age.\n\nFor example, "sell my car".' },
     [14] = { title = 'Advertising - Disclosing personal data of other people',      description = "Contain personal data of other people.\n\nFor example, email address or phone number." },
     [15] = { title = 'Team - False information to Vision Entertainment',            description = "Prove that a player has intentionally given wrong or misleading information,\nconcerning rule violation reports, complaints, bug reports or support requests to Vision Entertainment." },
     [16] = { title = 'Team - Publishing wrong info about Vision Entertainment',     description = "Made to publish clearly wrong information about Vision Entertainment or its services." },
@@ -163,8 +159,7 @@ local reasons = -- Titles should have until 255 characters.
     [19] = { title = 'Other - Statement violation',                                 description = "Other violation." },
   },
 
-  [REPORT_TYPE_VIOLATION] =
-  {
+  [REPORT_TYPE_VIOLATION] = {
     [0] = { title = 'Abuse - Bug abuse on the game',                              description = "Abused an game bug." },
     [1] = { title = "Abuse - Error abuse on the Vision Entertainment's services", description = "Abused an any part of Vision Entertainment's service." },
     [2] = { title = 'Hacking - Using unofficial software to play',                description = "Used unofficial software.\n\nFor example, a macro program or a so-called tasker or bot." },
@@ -309,11 +304,11 @@ function GameRuleViolation.report()
   if typeId == REPORT_TYPE_STATEMENT and not statement then
     err = 'No statement selected. Contact a gamemaster.'
   elseif translation and translation:match(textPattern) then
-    err = 'The \'Translation\' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,.'
+    err = "The 'Translation' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,."
   elseif #comment < minimumCommentSize then
-    err = 'You should write at least ' .. minimumCommentSize .. ' chars on \'Comment\' field.'
+    err = 'You should write at least ' .. minimumCommentSize .. " chars on 'Comment' field."
   elseif comment:match(textPattern) then
-    err = 'The \'Comment\' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,.'
+    err = "The 'Comment' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,."
   end
   if err then
     displayErrorBox('Error', err)
@@ -358,8 +353,7 @@ local REPORT_STATE_NEW     = 0
 local REPORT_STATE_WORKING = 1
 local REPORT_STATE_DONE    = 2
 
-local states =
-{
+local states = {
   [REPORT_STATE_UNDONE]  = 'Undone',
   [REPORT_STATE_NEW]     = 'New',
   [REPORT_STATE_WORKING] = 'Working',
@@ -387,15 +381,12 @@ local ACTION_IPBANISHMENT_30_DAYS = { title = 'IP Banishment of 30 Days', action
 local ACTION_IPBANISHMENT_60_DAYS = { title = 'IP Banishment of 60 Days', actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 60 }
 local ACTION_IPBANISHMENT_90_DAYS = { title = 'IP Banishment of 90 Days', actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 90 }
 
-local actions =
-{
-  [REPORT_TYPE_NAME] =
-  {
+local actions = {
+  [REPORT_TYPE_NAME] = {
     ACTION_NAMELOCK
   },
 
-  [REPORT_TYPE_STATEMENT] =
-  {
+  [REPORT_TYPE_STATEMENT] = {
     ACTION_NOTATION,
     ACTION_BANISHMENT_7_DAYS,
     ACTION_BANISHMENT_14_DAYS,
@@ -410,8 +401,7 @@ local actions =
     ACTION_IPBANISHMENT_90_DAYS
   },
 
-  [REPORT_TYPE_VIOLATION] =
-  {
+  [REPORT_TYPE_VIOLATION] = {
     ACTION_NOTATION,
     ACTION_BANISHMENT_7_DAYS,
     ACTION_BANISHMENT_14_DAYS,
@@ -625,7 +615,7 @@ function GameRuleViolation.openRow(row)
   end
 
   if rvWindow and rvWindow:isVisible() then
-    displayErrorBox('Error', 'You should close the \'Report Rule Violation\' window before do this.')
+    displayErrorBox('Error', "You should close the 'Report Rule Violation' window before do this.")
     return
   end
 
@@ -1025,7 +1015,7 @@ function GameRuleViolation.onViewChangeActionReason(comboBox, option)
     viewActionReason = newViewActionReason
   end
 
-  rvViewActionReasonComboBox:setTooltip(viewActionType and viewActionReason >= 0 and reasons[viewActionType][viewActionReason] and reasons[viewActionType][viewActionReason].description or '')
+  rvViewActionReasonComboBox:setTooltip(viewActionType and viewActionReason >= 0 and reasons[viewActionType][viewActionReason] and reasons[viewActionType][viewActionReason].description or '', TooltipType.textBlock)
 end
 
 local function checkActionFields(row, targetName)
@@ -1033,9 +1023,9 @@ local function checkActionFields(row, targetName)
   if row and (not row.targetName or row.targetName == '') then
     err = 'The selected row has no target.'
   elseif not row and (not targetName or targetName == '') then
-    err = 'No row selected or field \'Target name\' is empty.'
+    err = "No row selected or field 'Target name' is empty."
   elseif rvViewCommentMultilineTextEdit:getText():match(textPattern) then
-    err = 'The \'Action comment\' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,.'
+    err = "The 'Action comment' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,."
   end
   if err then
     displayErrorBox('Error', err)
@@ -1072,7 +1062,7 @@ function GameRuleViolation.rvViewAction()
     return
   end
 
-  local message = 'Are you sure that you want to add the action \'' .. actions[viewActionType][viewAction].title .. '\' to player \'' .. targetName .. '\'?'
+  local message = "Are you sure that you want to add the action '" .. actions[viewActionType][viewAction].title .. "' to player '" .. targetName .. "'?"
 
   -- Notes
   local notes = ''
@@ -1081,7 +1071,7 @@ function GameRuleViolation.rvViewAction()
   end
   if row then
     if row.state == REPORT_STATE_DONE then
-      notes = notes .. '\n' .. '- The selected row has already been marked as \'' .. states[REPORT_STATE_DONE] .. '\'.'
+      notes = notes .. '\n' .. "- The selected row has already been marked as '" .. states[REPORT_STATE_DONE] .. "'."
     end
     if viewActionType ~= row.type then
       notes = notes .. '\n' .. '- The setted action has a different type (' .. types[viewActionType] .. ') of the selected row (' .. types[row.type] .. ').'

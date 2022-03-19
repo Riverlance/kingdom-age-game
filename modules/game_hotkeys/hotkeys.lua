@@ -1,7 +1,6 @@
 _G.GameHotkeys = { }
 
-HotkeyColors =
-{
+HotkeyColors = {
   Text = '#333B43',
   TextAutoSend = '#FFFFFF',
   ItemUse = '#AEF2FF',

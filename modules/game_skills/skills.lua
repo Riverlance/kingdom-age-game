@@ -122,7 +122,7 @@ function GameSkills.setSkillPercent(id, percent, tooltip)
     widget:setPercent(math.floor(percent))
 
     if tooltip then
-      widget:setTooltip(tooltip)
+      widget:setTooltip(tooltip, TooltipType.textBlock)
     end
   end
 end
@@ -253,7 +253,7 @@ end
 
 function GameSkills.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   GameSkills.setSkillValue('level', level)
-  GameSkills.setSkillPercent('level', levelPercent, getExperienceTooltipText(localPlayer, level, levelPercent))
+  GameSkills.setSkillPercent('level', levelPercent, string.format('%s.', getExperienceTooltipText(localPlayer, level, levelPercent)))
 end
 
 function GameSkills.onStaminaChange(localPlayer, stamina)
@@ -266,11 +266,11 @@ function GameSkills.onStaminaChange(localPlayer, stamina)
   GameSkills.setSkillValue('stamina', hours .. ':' .. minutes)
 
   local percent = math.floor(100 * stamina / (42 * 60)) -- max is 42 hours
-  local text    = tr('Remaining %s%% (%s hours and %s minutes)', percent, hours, minutes)
+  local text    = tr('Remaining %s%% (%s hours and %s minutes).', percent, hours, minutes)
   if stamina <= 840 and stamina > 0 then -- red phase
-    text = string.format('%s\n%s', text, tr('You are receiving only 50%% of experience\nand you may not receive loot from monsters'))
+    text = string.format('%s\n%s', text, tr('You are receiving only 50%% of experience and you may not receive loot from monsters.'))
   elseif stamina == 0 then
-    text = string.format('%s\n%s', text, tr('You may not receive experience and loot from monsters'))
+    text = string.format('%s\n%s', text, tr('You may not receive experience and loot from monsters.'))
   end
   GameSkills.setSkillPercent('stamina', percent, text)
 end

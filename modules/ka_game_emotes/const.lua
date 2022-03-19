@@ -42,8 +42,7 @@ EMOTICON_BRAZIL       = 39
 FirstEmote = EMOTICON_STONE
 LastEmote = EMOTICON_BRAZIL
 
-emotes =
-{
+emotes = {
   [EMOTICON_STONE]        = {name = 'Stone'},
   [EMOTICON_PAPER]        = {name = 'Paper'},
   [EMOTICON_SCISSORS]     = {name = 'Scissors'},

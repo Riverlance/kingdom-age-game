@@ -2,8 +2,7 @@ _G.GameConsole = { }
 
 
 
-SpeakTypesSettings =
-{
+SpeakTypesSettings = {
   none = { },
   say = { speakType = MessageModes.Say, color = '#FFFF00' },
   whisper = { speakType = MessageModes.Whisper, color = '#FFFF00' },
@@ -22,8 +21,7 @@ SpeakTypesSettings =
   monsterYell = { speakType = MessageModes.MonsterYell, color = '#FE6500', hideInConsole = true},
 }
 
-SpeakTypes =
-{
+SpeakTypes = {
   [MessageModes.Say] = SpeakTypesSettings.say,
   [MessageModes.Whisper] = SpeakTypesSettings.whisper,
   [MessageModes.Yell] = SpeakTypesSettings.yell,
@@ -46,15 +44,13 @@ SpeakTypes =
   [MessageModes.BarkLoud] = SpeakTypesSettings.none,
 }
 
-SayModes =
-{
+SayModes = {
   [1] = { speakTypeDesc = 'whisper', icon = '/images/ui/console/whisper' },
   [2] = { speakTypeDesc = 'say', icon = '/images/ui/console/say' },
   [3] = { speakTypeDesc = 'yell', icon = '/images/ui/console/yell' }
 }
 
-ChannelEventFormats =
-{
+ChannelEventFormats = {
   [ChannelEvent.Join] = '%s joined the channel.',
   [ChannelEvent.Leave] = '%s left the channel.',
   [ChannelEvent.Invite] = '%s has been invited to the channel.',
@@ -80,8 +76,7 @@ defaultTab = nil
 serverTab = nil
 filters = { }
 
-local communicationSettings =
-{
+local communicationSettings = {
   useIgnoreList = true,
   useWhiteList = true,
   privateMessages = false,
@@ -104,8 +99,7 @@ cloneTab = nil
 clonedSplitter = nil
 
 -- Contains letter width for font 'verdana-11px-antialised' as console is based on it
-local letterWidth = -- New line (10) and Space (32) have width 1 because they are printed and not replaced with spacer
-{
+local letterWidth = { -- New line (10) and Space (32) have width 1 because they are printed and not replaced with spacer
   [10] = 1, [32] = 1, [33] = 3, [34] = 6, [35] = 8, [36] = 7, [37] = 13, [38] = 9, [39] = 3, [40] = 5, [41] = 5, [42] = 6, [43] = 8, [44] = 4, [45] = 5, [46] = 3, [47] = 8,
   [48] = 7, [49] = 6, [50] = 7, [51] = 7, [52] = 7, [53] = 7, [54] = 7, [55] = 7, [56] = 7, [57] = 7, [58] = 3, [59] = 4, [60] = 8, [61] = 8, [62] = 8, [63] = 6,
   [64] = 10, [65] = 9, [66] = 7, [67] = 7, [68] = 8, [69] = 7, [70] = 7, [71] = 8, [72] = 8, [73] = 5, [74] = 5, [75] = 7, [76] = 7, [77] = 9, [78] = 8, [79] = 8,

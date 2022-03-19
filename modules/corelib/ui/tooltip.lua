@@ -1,456 +1,599 @@
+-- Note: To use tooltip on labels, use 'phantom: false' at the label widget
+
+-- TODO:
+-- - Be able to update data without reshowing the tooltip (ex, positionLabel of minimap when you walk keeping your mouse hovered on it)
+
 -- @docclass
 
--- For put tooltip on labels, use 'phantom: false' on the label widget
+local fadeInTime  = 100
+local fadeOutTime = 100
+
+local currentTooltip
+local currentHoveredWidget
+
+
 
 g_tooltip = { }
 
--- private variables
-local fadeInTime = 100
-local fadeOutTime = 100
-local toolTipLabel
-local currentHoveredWidget
-local toolTipAddonLabels = { }
-local toolTipAddonGroupLabels = { } -- Rows background
-local toolTipAddonsBackgroundLabel
-local alignToAnchor =
-{
-  [AlignLeft]   = AnchorLeft,
-  [AlignRight]  = AnchorRight,
-  [AlignCenter] = AnchorHorizontalCenter
+
+
+Tooltip = {
+  widget = nil,
+  type   = TooltipType.default,
+
+
+
+  onTooltipShow   = function(self, hoveredWidget) end,
+  onTooltipShown  = function(self, hoveredWidget) end,
+  onTooltipHide   = function(self, currentHoveredWidget) end, -- (self[, currentHoveredWidget])
+  onTooltipHidden = function(self, currentHoveredWidget) end, -- (self[, currentHoveredWidget])
+
+
+
+  __listById = { },
+
+
+
+  __className = 'Tooltip',
+
+  __onCall = function(self, value)
+    -- Get object by id
+    if type(value) == 'number' then
+      return self.__listById[value]
+    end
+  end,
+
+  __onNew = function(self, obj)
+    assert(obj.widget, '[Tooltip] Widget not defined.')
+
+    -- Attach to list - List by id
+    table.insert(self.__listById, obj)
+
+    -- Hide widget
+    obj.widget:hide()
+  end,
 }
 
--- private functions
-local function removeToolTipAddonLabels()
-  for i = 1, #toolTipAddonLabels do
-    for j = 1, #toolTipAddonLabels[i] do
-      toolTipAddonLabels[i][j]:destroy()
-    end
-    toolTipAddonGroupLabels[i]:destroy()
-  end
-  toolTipAddonLabels = { }
-  toolTipAddonGroupLabels = { }
-end
+setClass(Tooltip)
 
-local function removeTooltip()
-  g_effects.cancelFade(toolTipAddonsBackgroundLabel)
-  toolTipAddonsBackgroundLabel:hide()
-  for i = 1, #toolTipAddonLabels do
-    for j = 1, #toolTipAddonLabels[i] do
-      g_effects.cancelFade(toolTipAddonLabels[i][j])
-    end
-    g_effects.cancelFade(toolTipAddonGroupLabels[i])
-  end
-  removeToolTipAddonLabels()
-end
 
-local function moveToolTip(firstDisplay)
-  if not firstDisplay and (not toolTipLabel:isVisible() or toolTipLabel:getOpacity() < 0.1) then
+
+local function onTooltipMove(firstShow)
+  local currentTooltipWidget = currentTooltip and currentTooltip.widget
+  if not currentTooltipWidget or not firstShow and (not currentTooltipWidget:isVisible() or currentTooltipWidget:getOpacity() < 0.1) then
     return
   end
 
   local pos        = g_window.getMousePosition()
   local windowSize = g_window.getSize()
-  local labelSize  = toolTipLabel:getSize()
-  local hasAddons  = widget and widget.tooltipAddons or false
-
-  if hasAddons then
-    labelSize = toolTipAddonsBackgroundLabel:getSize()
-  end
+  local labelSize  = currentTooltipWidget:getSize()
 
   pos.x = pos.x + 1
   pos.y = pos.y + 1
 
   if windowSize.width - (pos.x + labelSize.width) < 10 then
-    if hasAddons then
-      pos.x = pos.x - labelSize.width + 1
-    else
-      pos.x = pos.x - labelSize.width - 3
-    end
+    pos.x = pos.x - labelSize.width - 3
   else
-    if hasAddons then
-      pos.x = pos.x + 14
-    else
-      pos.x = pos.x + 10
-    end
+    pos.x = pos.x + 10
   end
 
   if windowSize.height - (pos.y + labelSize.height) < 10 then
-    if hasAddons then
-      pos.y = pos.y - labelSize.height + 3
-    else
-      pos.y = pos.y - labelSize.height - 3
-    end
+    pos.y = pos.y - labelSize.height - 3
   else
-    if hasAddons then
-      pos.y = pos.y + 16
-    else
-      pos.y = pos.y + 10
-    end
+    pos.y = pos.y + 10
   end
 
-  toolTipLabel:setPosition(pos)
+  currentTooltipWidget:setPosition(pos)
 end
 
-local function onWidgetStyleApply(widget, styleName, styleNode)
-  if styleNode.tooltip then
-    widget.tooltip = styleNode.tooltip
-  end
-end
-
-local function onWidgetHoverChange(widget, hovered)
-  if widget.onTooltipHoverChange and not widget.onTooltipHoverChange(widget, hovered) then
+function Tooltip:show(hoveredWidget)
+  if not hoveredWidget:hasTooltip() then
     return
   end
 
-  g_tooltip.widgetHoverChange(widget, hovered)
+  local isDefaultTooltipType = self.type == TooltipType.default
+
+  currentHoveredWidget = hoveredWidget
+  currentTooltip       = self
+
+  if isDefaultTooltipType then
+    self.widget:setText(hoveredWidget['tooltip'])
+  end
+
+  onTooltipMove(true) -- Set first position
+
+  -- Callback
+  self:onTooltipShow(hoveredWidget)
+  if hoveredWidget.onTooltipShow then
+    hoveredWidget:onTooltipShow(self)
+  end
+
+  self.widget:raise()
+  self.widget:show()
+  self.widget:enable()
+
+  g_effects.fadeIn(self.widget, fadeInTime)
+
+  -- Callback
+  self:onTooltipShown(hoveredWidget)
+  if hoveredWidget.onTooltipShown then
+    hoveredWidget:onTooltipShown(self)
+  end
+
+  connect(rootWidget, {
+    onMouseMove = onTooltipMove,
+  })
 end
 
--- public functions
+function Tooltip:hide() -- Usable as Tooltip.hide() also
+  if not self then
+    if currentTooltip then
+      currentTooltip:hide()
+
+      currentHoveredWidget = nil
+      currentTooltip       = nil
+    end
+    return
+  end
+
+  if not self.widget:isVisible() then
+    return
+  end
+
+  -- Callback
+  self:onTooltipHide(currentHoveredWidget)
+  if currentHoveredWidget and currentHoveredWidget.onTooltipHide then
+    currentHoveredWidget:onTooltipHide(self)
+  end
+
+  g_effects.fadeOut(self.widget, fadeOutTime)
+
+  disconnect(rootWidget, {
+    onMouseMove = onTooltipMove,
+  })
+
+  -- Callback
+  self:onTooltipHidden(currentHoveredWidget)
+  if currentHoveredWidget and currentHoveredWidget.onTooltipHidden then
+    currentHoveredWidget:onTooltipHidden(self)
+  end
+end
+
+
+
+local function onWidgetStyleApply(widget, styleName, styleNode) -- Create from .otui file
+  if not styleNode['tooltip'] then
+    return
+  end
+
+  widget:setTooltip(styleNode['tooltip'], styleNode['tooltip-type']) -- tooltip-type can be nil
+end
+
+local function onWidgetUpdateHover(widget, hovered)
+  if widget.onTooltipHoverChange and not widget:onTooltipHoverChange(hovered) then
+    return
+  end
+
+  if hovered then
+    if widget:hasTooltip() and not g_mouse.isPressed() and widget:isVisible() and widget:isEnabled() then
+      widget:getTooltipObject():show(widget)
+    end
+  else
+    Tooltip.hide()
+  end
+end
+
 function g_tooltip.init()
   connect(UIWidget, {
-    onStyleApply = onWidgetStyleApply,
-    onHoverChange = onWidgetHoverChange
+    onStyleApply  = onWidgetStyleApply,
+    onHoverChange = onWidgetUpdateHover,
   })
 
   addEvent(function()
-    toolTipAddonsBackgroundLabel = g_ui.createWidget('UILabel', rootWidget)
-    toolTipAddonsBackgroundLabel:setId('toolTipAddonsBackground')
-    toolTipAddonsBackgroundLabel:setBorderWidth(1)
-    toolTipAddonsBackgroundLabel:setBorderColor('#98885e')
+    -- Import tooltip type styles
+    g_ui.importStyle('tooltip/default')
+    g_ui.importStyle('tooltip/textblock')
+    g_ui.importStyle('tooltip/image')
+    g_ui.importStyle('tooltip/conditionbutton')
+    g_ui.importStyle('tooltip/powerbutton')
 
-    toolTipLabel = g_ui.createWidget('UILabel', rootWidget)
-    toolTipLabel:setId('toolTip')
-    toolTipLabel:setTextAlign(AlignCenter)
-    toolTipLabel:setBorderWidth(1)
-    toolTipLabel:setBorderColor('#98885e')
-    toolTipLabel:hide()
+    -- Create tooltip types
+
+    -- Default
+    Tooltip.__listById[TooltipType.default] = Tooltip:new {
+      type   = TooltipType.default,
+      widget = g_ui.createWidget('TooltipDefault', rootWidget)
+    }
+
+    -- Text block
+    Tooltip.__listById[TooltipType.textBlock] = Tooltip:new {
+      type   = TooltipType.textBlock,
+      widget = g_ui.createWidget('TooltipTextBlock', rootWidget),
+
+      onTooltipShow = function(self, hoveredWidget)
+        local label = self.widget:getChildById('label')
+
+        -- Update value
+        label:setText(hoveredWidget['tooltip'])
+
+        -- Update parent height according to child size, then anchor text bottom to parent bottom
+        self.widget:setHeight(label:getHeight() + label:getMarginTop() + label:getMarginBottom())
+        label:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+      end
+    }
+
+    -- Image
+    Tooltip.__listById[TooltipType.image] = Tooltip:new {
+      type   = TooltipType.image,
+      widget = g_ui.createWidget('TooltipImage', rootWidget),
+
+      onTooltipShow = function(self, hoveredWidget)
+        local label = self.widget:getChildById('label')
+
+        -- Update value
+        label:setWidth(table.get(hoveredWidget, 'tooltip-size', 'width') or hoveredWidget['tooltip-width'] or 0)
+        label:setHeight(table.get(hoveredWidget, 'tooltip-size', 'height') or hoveredWidget['tooltip-height'] or 0)
+        label:setImageSource(resolvepath(hoveredWidget['tooltip']))
+
+        -- Update parent size according to child size, then anchor child to parent
+        self.widget:setWidth(label:getWidth() + label:getMarginLeft() + label:getMarginRight())
+        self.widget:setHeight(label:getHeight() + label:getMarginTop() + label:getMarginBottom())
+        label:fill('parent')
+      end
+    }
+
+    -- Power button
+    Tooltip.__listById[TooltipType.powerButton] = Tooltip:new {
+      type   = TooltipType.powerButton,
+      widget = g_ui.createWidget('TooltipPowerButton', rootWidget),
+
+      onTooltipShow = function(self, hoveredWidget)
+        local localPlayer = g_game.getLocalPlayer()
+        local power       = hoveredWidget.power
+        local exhaustTime = power.exhaustTime / 1000
+        local vocations   = hoveredWidget:getVocations()
+        local manaCost    = hoveredWidget:getMana()
+
+        local classValueWidget           = self.widget:getChildById('classValue')
+        local vocationsValueWidget       = self.widget:getChildById('vocationsValue')
+        local levelValueWidget           = self.widget:getChildById('levelValue')
+        local manaCostLabelWidget        = self.widget:getChildById('manaCostLabel')
+        local manaCostValueWidget        = self.widget:getChildById('manaCostValue')
+        local cooldownValueWidget        = self.widget:getChildById('cooldownValue')
+        local premiumValueWidget         = self.widget:getChildById('premiumValue')
+        local descriptionWidget          = self.widget:getChildById('descriptionLabel')
+        local boostNoneDescriptionWidget = self.widget:getChildById('boostNoneDescriptionLabel')
+        local boostLowDescriptionWidget  = self.widget:getChildById('boostLowDescriptionLabel')
+        local boostHighDescriptionWidget = self.widget:getChildById('boostHighDescriptionLabel')
+
+        -- Icon
+        local iconWidget = self.widget:getChildById('icon')
+        iconWidget:setImageSource(string.format('/images/ui/power/%d_off', power.id))
+
+        -- Name
+        local nameLabel = self.widget:getChildById('name')
+        nameLabel:setText(string.exists(power.name) and power.name or 'Unknown')
+
+        -- Class icon
+        local classIconWidget = self.widget:getChildById('classIcon')
+        classIconWidget:setImageSource(string.format('/images/game/creature/power/type_%s', power.aggressive and 'aggressive' or 'non_aggressive'))
+
+        -- Class name
+        classValueWidget:setTextAlign(AlignRight)
+        classValueWidget:setTextWrap(true)
+        classValueWidget:setText(UIPowerButton.powerClass[power.class or 0])
+        classValueWidget:resizeToText()
+
+        -- Vocations
+        vocationsValueWidget:setTextAlign(AlignRight)
+        vocationsValueWidget:setTextWrap(true)
+        vocationsValueWidget:setText(vocations)
+        vocationsValueWidget:resizeToText()
+
+        -- Level
+        levelValueWidget:setTextAlign(AlignRight)
+        levelValueWidget:setTextWrap(true)
+        levelValueWidget:setText(power.level)
+        levelValueWidget:resizeToText()
+
+        -- Mana cost
+        local isManaEnabled = not localPlayer or not localPlayer:isWarrior()
+        manaCostValueWidget:setTextAlign(AlignRight)
+        manaCostValueWidget:setTextWrap(isManaEnabled)
+        if isManaEnabled then
+          manaCostLabelWidget:setHeight(14)
+
+          manaCostValueWidget:setText(manaCost)
+          manaCostValueWidget:resizeToText()
+        else
+          manaCostLabelWidget:setHeight(0)
+          manaCostValueWidget:setHeight(0)
+        end
+        manaCostLabelWidget:setVisible(isManaEnabled)
+        manaCostValueWidget:setVisible(isManaEnabled)
+
+        -- Cooldown
+        cooldownValueWidget:setTextAlign(AlignRight)
+        cooldownValueWidget:setTextWrap(true)
+        cooldownValueWidget:setText(string.format('%s second%s', exhaustTime, exhaustTime > 1 and 's' or ''))
+        cooldownValueWidget:resizeToText()
+
+        -- Premium
+        premiumValueWidget:setTextAlign(AlignRight)
+        premiumValueWidget:setTextWrap(true)
+        premiumValueWidget:setText(power.premium and 'Yes' or 'No')
+        premiumValueWidget:resizeToText()
+
+        -- Description
+        local isDescriptionEnabled = string.exists(power.description) and true or false
+        descriptionWidget:setTextAlign(AlignCenter)
+        descriptionWidget:setTextWrap(isDescriptionEnabled)
+        if isDescriptionEnabled then
+          descriptionWidget:setText(power.description)
+          descriptionWidget:resizeToText()
+        else
+          descriptionWidget:setHeight(0)
+        end
+        descriptionWidget:setVisible(isDescriptionEnabled)
+
+        -- Boost none description
+        local isBoostNoneDescriptionEnabled = string.exists(power.descriptionBoostNone) and true or false
+        boostNoneDescriptionWidget:setTextAlign(AlignCenter)
+        boostNoneDescriptionWidget:setTextWrap(isBoostNoneDescriptionEnabled)
+        if isBoostNoneDescriptionEnabled then
+          boostNoneDescriptionWidget:setText(power.descriptionBoostNone)
+          boostNoneDescriptionWidget:resizeToText()
+        else
+          boostNoneDescriptionWidget:setHeight(0)
+        end
+        boostNoneDescriptionWidget:setVisible(isBoostNoneDescriptionEnabled)
+
+        -- Boost low description
+        local isBoostLowDescriptionEnabled = string.exists(power.descriptionBoostLow) and true or false
+        boostLowDescriptionWidget:setTextAlign(AlignCenter)
+        boostLowDescriptionWidget:setTextWrap(isBoostLowDescriptionEnabled)
+        if isBoostLowDescriptionEnabled then
+          boostLowDescriptionWidget:setText(power.descriptionBoostLow)
+          boostLowDescriptionWidget:resizeToText()
+        else
+          boostLowDescriptionWidget:setHeight(0)
+        end
+        boostLowDescriptionWidget:setVisible(isBoostLowDescriptionEnabled)
+
+        -- Boost high description
+        local isBoostHighDescriptionEnabled = string.exists(power.descriptionBoostHigh) and true or false
+        boostHighDescriptionWidget:setTextAlign(AlignCenter)
+        boostHighDescriptionWidget:setTextWrap(isBoostHighDescriptionEnabled)
+        if isBoostHighDescriptionEnabled then
+          boostHighDescriptionWidget:setText(power.descriptionBoostHigh)
+          boostHighDescriptionWidget:resizeToText()
+        else
+          boostHighDescriptionWidget:setHeight(0)
+        end
+        boostHighDescriptionWidget:setVisible(isBoostHighDescriptionEnabled)
+
+        -- Update layout
+        self.widget:updateLayout()
+
+        -- Set new height
+        self.widget:setHeight(self.widget:getContentsSize().height + self.widget:getPaddingTop() + self.widget:getPaddingBottom())
+      end
+    }
+
+    -- Condition button
+    Tooltip.__listById[TooltipType.conditionButton] = Tooltip:new {
+      type   = TooltipType.conditionButton,
+      widget = g_ui.createWidget('TooltipConditionButton', rootWidget),
+
+      onTooltipShow = function(self, hoveredWidget)
+        local c     = hoveredWidget.condition
+        local clock = hoveredWidget.clock
+
+        local itemIconWidget       = self.widget:getChildById('conditionItemIcon')
+        local powerIconWidget      = self.widget:getChildById('conditionPowerIcon')
+        local boostBarWidget       = self.widget:getChildById('boostBar')
+        local boostLabelWidget     = self.widget:getChildById('boostLabel')
+        local boostValueWidget     = self.widget:getChildById('boostValue')
+        local attributeLabelWidget = self.widget:getChildById('attributeLabel')
+        local attributeValueWidget = self.widget:getChildById('attributeValue')
+        local durationLabelWidget  = self.widget:getChildById('durationLabel')
+        local durationValueWidget  = self.widget:getChildById('durationValue')
+        local ownerLabelWidget     = self.widget:getChildById('ownerLabel')
+        local ownerValueWidget     = self.widget:getChildById('ownerValue')
+
+        local isBoostEnabled = c.boost and true or false
+
+        -- Name
+        local nameLabel = self.widget:getChildById('name')
+        nameLabel:setText((not c.powerName or c.name == c.powerName) and c.name or string.format('%s\n(%s)', c.name, c.powerName))
+
+        -- Item Icon
+        if c.itemId then
+          itemIconWidget:setItemId(c.itemId)
+          itemIconWidget:setWidth(32)
+          itemIconWidget:show()
+        else
+          itemIconWidget:hide()
+          itemIconWidget:setWidth(0)
+        end
+
+        -- Power Icon
+        if c.powerId then
+          powerIconWidget:setImageSource(string.format('/images/ui/power/%d_off', c.powerId))
+          powerIconWidget:setWidth(32)
+          powerIconWidget:show()
+
+          if isBoostEnabled then
+            boostBarWidget:setHeight(4)
+            if UIConditionButton.boostColors then
+              boostBarWidget:setBackgroundColor(UIConditionButton.boostColors[c.boost])
+            end
+          end
+        else
+          powerIconWidget:hide()
+          powerIconWidget:setWidth(0)
+          boostBarWidget:setHeight(0)
+        end
+
+        -- Combat icon
+        local combatIconWidget = self.widget:getChildById('combatIcon')
+        combatIconWidget:setImageSource(string.format('/images/game/creature/condition/type_%s', c.aggressive and 'aggressive' or 'non_aggressive'))
+
+        -- Combat value
+        local combatValueWidget = self.widget:getChildById('combatValue')
+        combatValueWidget:setTextAlign(AlignRight)
+        combatValueWidget:setText(c.aggressive and 'Aggressive' or 'Non-Aggressive')
+
+        -- Boost
+        boostValueWidget:setTextAlign(AlignRight)
+        boostValueWidget:setTextWrap(isBoostEnabled)
+        if isBoostEnabled then
+          boostLabelWidget:setHeight(14)
+
+          if UIConditionButton.boostNames then
+            boostValueWidget:setText(string.format('%d (%s)', c.boost, UIConditionButton.boostNames[c.boost]:lower()))
+            boostValueWidget:resizeToText()
+          end
+          if UIConditionButton.boostColors then
+            boostValueWidget:setColor()
+          end
+        else
+          boostLabelWidget:setHeight(0)
+          boostValueWidget:setHeight(0)
+        end
+        boostValueWidget:setColor(UIConditionButton.boostColors and UIConditionButton.boostColors[c.boost] or 'white')
+        boostLabelWidget:setVisible(isBoostEnabled)
+        boostValueWidget:setVisible(isBoostEnabled)
+
+        -- Attribute
+        local isAttributeEnabled = c.attribute and true or false
+        attributeValueWidget:setTextAlign(AlignRight)
+        attributeValueWidget:setTextWrap(isAttributeEnabled)
+        if isAttributeEnabled then
+          attributeLabelWidget:setHeight(14)
+
+          local attrStr = ''
+          if tonumber(c.offset) > 0 then
+            attrStr = string.format('%s +%s', attrStr, c.offset)
+          end
+          if tonumber(c.factor) ~= 1 then
+            attrStr = string.format('%s x%s', attrStr, c.factor)
+          end
+          attributeValueWidget:setText(string.format('%s%s', ATTRIBUTE_NAMES[c.attribute], attrStr))
+          attributeValueWidget:resizeToText()
+        else
+          attributeLabelWidget:setHeight(0)
+          attributeValueWidget:setHeight(0)
+        end
+        attributeLabelWidget:setVisible(isAttributeEnabled)
+        attributeValueWidget:setVisible(isAttributeEnabled)
+
+        -- Duration
+        local isDurationEnabled = clock and true or false
+        durationValueWidget:setTextAlign(AlignRight)
+        durationValueWidget:setTextWrap(isDurationEnabled)
+        if isDurationEnabled then
+          durationLabelWidget:setHeight(14)
+
+          durationValueWidget:setText(clock.durationString)
+          durationValueWidget:resizeToText()
+        else
+          durationLabelWidget:setHeight(0)
+          durationValueWidget:setHeight(0)
+        end
+        durationLabelWidget:setVisible(isDurationEnabled)
+        durationValueWidget:setVisible(isDurationEnabled)
+
+        -- Owner
+        local isOwnerEnabled = c.originId and true or false
+        ownerValueWidget:setTextAlign(AlignRight)
+        ownerValueWidget:setTextWrap(isOwnerEnabled)
+        if isOwnerEnabled then
+          ownerLabelWidget:setHeight(14)
+
+          ownerValueWidget:setText(c.originName)
+          ownerValueWidget:resizeToText()
+        else
+          ownerLabelWidget:setHeight(0)
+          ownerValueWidget:setHeight(0)
+        end
+        ownerLabelWidget:setVisible(isOwnerEnabled)
+        ownerValueWidget:setVisible(isOwnerEnabled)
+
+        -- Set new height
+        self.widget:setHeight(self.widget:getContentsSize().height + self.widget:getPaddingTop() + self.widget:getPaddingBottom())
+      end
+    }
   end)
 end
 
 function g_tooltip.terminate()
+  -- Destroy tooltip types
+  for k, _ in ipairs(Tooltip.__listById) do
+    if Tooltip.__listById[k].widget then
+      Tooltip.__listById[k].widget:destroy()
+    end
+    Tooltip.__listById[k] = nil
+  end
+
   disconnect(UIWidget, {
-    onStyleApply = onWidgetStyleApply,
-    onHoverChange = onWidgetHoverChange
+    onStyleApply  = onWidgetStyleApply,
+    onHoverChange = onWidgetUpdateHover,
   })
 
-  removeTooltip()
-
   currentHoveredWidget = nil
-
-  toolTipLabel:destroy()
-  toolTipLabel = nil
-
-  toolTipAddonsBackgroundLabel:destroy()
-  toolTipAddonsBackgroundLabel = nil
 
   g_tooltip = nil
 end
 
-function g_tooltip.display(widget)
-  if not widget.tooltip and not widget.tooltipAddons or not toolTipLabel then
-    return
-  end
-
-  currentHoveredWidget = widget
-
-  toolTipLabel:setBackgroundColor('#111111cc')
-  toolTipLabel:setText(widget.tooltip or '')
-  toolTipLabel:resizeToText()
-  if not widget.tooltipAddons then
-    toolTipLabel:resize(toolTipLabel:getWidth() + 8, toolTipLabel:getHeight() + 8)
-  end
-  if not widget.tooltip or widget.tooltip:len() == 0 then
-    toolTipLabel:setHeight(0) -- For fix the heightTotalSum
-  end
-  toolTipLabel:raise()
-  toolTipLabel:show()
-  toolTipLabel:enable()
-  g_effects.fadeIn(toolTipLabel, fadeInTime)
-
-  if widget.tooltipAddons then
-    -- Force previous tooltip remove
-    g_effects.cancelFade(toolTipAddonsBackgroundLabel)
-    for i = 1, #toolTipAddonLabels do
-      for j = 1, #toolTipAddonLabels[i] do
-        g_effects.cancelFade(toolTipAddonLabels[i][j])
-      end
-      g_effects.cancelFade(toolTipAddonGroupLabels[i])
-    end
-    removeToolTipAddonLabels()
-
-    local higherWidth    = 0
-    local heightTotalSum = 0
-
-    toolTipAddonsBackgroundLabel:raise()
-
-    -- Group
-    --[[
-      Options:
-      - backgroundColor
-    ]]
-    for i = 1, #widget.tooltipAddons do
-      local toolTipAddonGroupLabelId = string.format('toolTipAddonGroupLabels_%d', i)
-      toolTipAddonGroupLabels[i] = g_ui.createWidget('UILabel', rootWidget)
-      toolTipAddonGroupLabels[i]:setId(toolTipAddonGroupLabelId)
-      toolTipAddonGroupLabels[i]:addAnchor(AnchorTop, i < 2 and 'toolTipAddonsBackground' or string.format('toolTipAddonGroupLabels_%d', i - 1), i < 2 and AnchorTop or AnchorBottom)
-      if i == 1 then
-        toolTipAddonGroupLabels[i]:setMarginTop(4)
-      end
-      toolTipAddonGroupLabels[i]:addAnchor(AnchorLeft, 'toolTipAddonsBackground', AnchorLeft)
-      toolTipAddonGroupLabels[i]:setMarginLeft(4)
-      toolTipAddonGroupLabels[i]:addAnchor(AnchorRight, 'toolTipAddonsBackground', AnchorRight)
-      toolTipAddonGroupLabels[i]:setMarginRight(4)
-      if i == #widget.tooltipAddons then
-        toolTipAddonGroupLabels[i]:addAnchor(AnchorBottom, 'toolTipAddonsBackground', AnchorBottom)
-        toolTipAddonGroupLabels[i]:setMarginBottom(4)
-      end
-      if widget.tooltipAddons[i].backgroundColor then
-        toolTipAddonGroupLabels[i]:setBackgroundColor(widget.tooltipAddons[i].backgroundColor)
-      end
-      if widget.tooltipAddons[i].backgroundIcon then
-        toolTipAddonGroupLabels[i]:setIcon(resolvepath(widget.tooltipAddons[i].backgroundIcon))
-        if widget.tooltipAddons[i].backgroundIconSize then
-          toolTipAddonGroupLabels[i]:setSize(widget.tooltipAddons[i].backgroundIconSize)
-          toolTipAddonGroupLabels[i]:setIconSize(widget.tooltipAddons[i].backgroundIconSize)
-        end
-      elseif widget.tooltipAddons[i].backgroundImage then
-        if not widget.tooltipAddons[i].backgroundImageSize then
-          -- Make able to get height when change the image source
-          toolTipAddonGroupLabels[i]:setWidth(0)
-          toolTipAddonGroupLabels[i]:setHeight(0)
-        end
-        toolTipAddonGroupLabels[i]:setImageSource(resolvepath(widget.tooltipAddons[i].backgroundImage))
-        if widget.tooltipAddons[i].backgroundImageSize then
-          toolTipAddonGroupLabels[i]:setSize(widget.tooltipAddons[i].backgroundImageSize)
-          toolTipAddonGroupLabels[i]:setImageSize(widget.tooltipAddons[i].backgroundImageSize)
-        end
-      end
-      if widget.tooltipAddons[i].onGroupBackground then
-        widget.tooltipAddons[i].onGroupBackground(toolTipAddonGroupLabels[i], i)
-      end
-
-      toolTipAddonGroupLabels[i]:raise()
-      toolTipAddonGroupLabels[i]:show()
-      toolTipAddonGroupLabels[i]:enable()
-
-      -- Addons
-      --[[
-        Options:
-        - backgroundColor
-        - text
-        - color
-        - align (for text and icon)
-        - icon
-        - size (for icon)
-        - onAddon(group, addon, i, j)
-      ]]
-      local addonsWidthSum = 0
-      local higherHeight   = 0
-      toolTipAddonLabels[i] = { }
-      for j = 1, #widget.tooltipAddons[i] do
-        toolTipAddonLabels[i][j] = g_ui.createWidget('UILabel', rootWidget)
-        local addon = toolTipAddonLabels[i][j]
-        addon:setId(string.format('toolTipAddon_%d_%d', i, j))
-
-        addon:addAnchor(AnchorTop, toolTipAddonGroupLabelId, AnchorTop)
-        addon:addAnchor(AnchorBottom, toolTipAddonGroupLabelId, AnchorBottom)
-        addon:addAnchor(AnchorLeft, j < 2 and toolTipAddonGroupLabelId or string.format('toolTipAddon_%d_%d', i, j - 1), j < 2 and AnchorLeft or AnchorRight)
-
-        if j == #widget.tooltipAddons[i] then
-          addon:addAnchor(AnchorRight, toolTipAddonGroupLabelId, AnchorRight)
-        end
-
-        if widget.tooltipAddons[i][j].backgroundColor then
-          addon:setBackgroundColor(widget.tooltipAddons[i][j].backgroundColor)
-        end
-        if widget.tooltipAddons[i][j].text then
-          addon:setText(widget.tooltipAddons[i][j].text)
-          addon:setColor(widget.tooltipAddons[i][j].color or 'white')
-          addon:resizeToText()
-          addon:setTextAlign(widget.tooltipAddons[i][j].align or AlignCenter)
-        elseif widget.tooltipAddons[i][j].icon then
-          addon:setIcon(resolvepath(widget.tooltipAddons[i][j].icon))
-          if widget.tooltipAddons[i][j].size then
-            addon:setSize(widget.tooltipAddons[i][j].size)
-            addon:setIconSize(widget.tooltipAddons[i][j].size)
-          end
-
-          -- Icon align only if has the icon only on group
-          if #widget.tooltipAddons[i] == 1 then
-            addon:removeAnchor(AnchorLeft)
-            addon:removeAnchor(AnchorRight)
-            local align = alignToAnchor[widget.tooltipAddons[i][j].align or AlignCenter]
-            addon:addAnchor(align, toolTipAddonGroupLabelId, align)
-          end
-        elseif widget.tooltipAddons[i][j].image then
-          if not widget.tooltipAddons[i][j].size then
-            -- Make able to get height when change the image source
-            addon:setWidth(0)
-            addon:setHeight(0)
-          end
-          addon:setImageSource(resolvepath(widget.tooltipAddons[i][j].image))
-          if widget.tooltipAddons[i][j].size then
-            addon:setSize(widget.tooltipAddons[i][j].size)
-            addon:setImageSize(widget.tooltipAddons[i][j].size)
-          end
-        end
-
-        addon:raise()
-        addon:show()
-        addon:enable()
-        g_effects.fadeIn(addon, fadeInTime)
-
-        addonsWidthSum = addonsWidthSum + addon:getWidth()
-        local height   = (widget.tooltipAddons[i][j].icon and addon:getIconHeight() or addon:getHeight())
-        higherHeight   = higherHeight > height and higherHeight or height
-      end
-
-      toolTipAddonGroupLabels[i]:resize(addonsWidthSum, higherHeight)
-
-      higherWidth    = higherWidth > addonsWidthSum and higherWidth or addonsWidthSum
-      heightTotalSum = heightTotalSum + higherHeight
-    end
-
-    toolTipLabel:setWidth(higherWidth)
-
-    -- Background
-    --[[
-      Options:
-      - backgroundColor
-      - onAddonsBackground
-    ]]
-    toolTipAddonsBackgroundLabel:setBackgroundColor(widget.toolTipAddonsBackground and widget.toolTipAddonsBackground.backgroundColor or '#111111cc')
-    toolTipAddonsBackgroundLabel:setWidth(higherWidth + 8)
-    toolTipAddonsBackgroundLabel:setHeight(heightTotalSum + 8)
-    toolTipAddonsBackgroundLabel:show()
-    toolTipAddonsBackgroundLabel:enable()
-    toolTipAddonsBackgroundLabel:addAnchor(AnchorTop, 'toolTip', AnchorTop)
-    toolTipAddonsBackgroundLabel:addAnchor(AnchorHorizontalCenter, 'toolTip', AnchorHorizontalCenter)
-    if widget.toolTipAddonsBackground and widget.toolTipAddonsBackground.onAddonsBackground then
-      widget.toolTipAddonsBackground.onAddonsBackground(toolTipAddonsBackgroundLabel)
-    end
-    g_effects.fadeIn(toolTipAddonsBackgroundLabel, fadeInTime)
-
-    for i = 1, #widget.tooltipAddons do
-      for j = 1, #widget.tooltipAddons[i] do
-        if widget.tooltipAddons[i][j].onAddon then
-          widget.tooltipAddons[i][j].onAddon(toolTipAddonGroupLabels[i], toolTipAddonLabels[i][j], i, j)
-        end
-      end
-    end
-  end
-
-  moveToolTip(true)
-
-  connect(rootWidget, {
-    onMouseMove = moveToolTip,
-  })
-end
-
-function g_tooltip.hide(widget)
-  currentHoveredWidget = nil
-
-  g_effects.fadeOut(toolTipLabel, fadeOutTime)
-
-  g_effects.fadeOut(toolTipAddonsBackgroundLabel, fadeOutTime)
-  for i = 1, #toolTipAddonLabels do
-    for j = 1, #toolTipAddonLabels[i] do
-      g_effects.fadeOut(toolTipAddonLabels[i][j], fadeOutTime)
-    end
-    g_effects.fadeOut(toolTipAddonGroupLabels[i], fadeOutTime)
-  end
-
-  disconnect(rootWidget, {
-    onMouseMove = moveToolTip,
-  })
-end
-
-function g_tooltip.widgetHoverChange(widget, hovered)
-  if hovered then
-    if not g_mouse.isPressed() and widget:hasTooltip() and widget:isVisible() and widget:isEnabled() then
-      g_tooltip.display(widget)
-    end
-  else
-    -- if widget == currentHoveredWidget then
-      g_tooltip.hide(widget)
-    -- end
-  end
-end
-
-function g_tooltip.widgetUpdateHover(widget, hovered)
-  g_tooltip.hide(widget)
-  addEvent(function()
-    g_tooltip.widgetHoverChange(widget, hovered)
-  end)
-end
-
--- Widget callbacks
-
 function g_tooltip.onWidgetMouseRelease(widget, mousePos, mouseButton)
-  g_tooltip.widgetUpdateHover(widget, true)
+  onWidgetUpdateHover(widget, true)
 end
 
 function g_tooltip.onWidgetDestroy(widget)
-  g_tooltip.hide(widget)
+  Tooltip.hide()
 end
+
+-- @}
+
+
 
 -- @docclass UIWidget @{
 
---[[
-  Usage
-
-  Simple:
-    Lua:
-      widget:setTooltip('Title message.')
-    Otui:
-      UIWidget
-        !tooltip: 'Title message.'
-
-  Custom:
-    Lua:
-      widget:setTooltip({ {{ text = 'First message.\nSecond message.' }, backgroundColor = '#ffff0077', backgroundIcon = '/images/ui/top_menu/questlog', onGroupBackground = function(group, i) print_r(group:getSize(), i) end}, {{ icon = '/images/ui/top_menu/battle', size = { width = 20, height = 20 }, align = AlignCenter, onAddon = function(group, addon, i, j) print_r(group:getSize(), addon:getSize(), i, j) end }, { text = 'Duplicated!', color = 'green' }, backgroundColor = '#ff000077'}, {{ text = 'Left', backgroundColor = '#00ff0077', color = 'red', align = AlignLeft }}, {{ text = 'Right', align = AlignRight }} }, { backgroundColor = '#00007777', onAddonsBackground = function (widget) print_r(widget:getSize()) end })
-    Otui:
-      UIWidget
-        &tooltipAddons: { {{ text = 'First message.\nSecond message.' }, backgroundColor = '#ffff0077', backgroundIcon = '/images/ui/top_menu/questlog', onGroupBackground = function(group, i) print_r(group:getSize(), i) end}, {{ icon = '/images/ui/top_menu/battle', size = { width = 20, height = 20 }, align = AlignCenter, onAddon = function(group, addon, i, j) print_r(group:getSize(), addon:getSize(), i, j) end }, { text = 'Duplicated!', color = 'green' }, backgroundColor = '#ff000077'}, {{ text = 'Left', backgroundColor = '#00ff0077', color = 'red', align = AlignLeft }}, {{ text = 'Right', align = AlignRight }} }
-        &toolTipAddonsBackground: { backgroundColor = '#00007777', onAddonsBackground = function (widget) print_r(widget:getSize()) end }
-]]
-
--- UIWidget extensions
-function UIWidget:removeTooltip()
-  self.tooltip = nil
-  self.tooltipAddons = nil
-  self.toolTipAddonsBackground = nil
+function UIWidget:setTooltip(value, tooltipType) -- (value[, tooltipType = TooltipType.default])
+  self['tooltip']      = value -- Text or object
+  self['tooltip-type'] = tooltipType or TooltipType.default
 end
 
-function UIWidget:setTooltip(tooltip, toolTipAddonsBackground)
-  self:removeTooltip()
-  if type(tooltip) == 'string' then
-    self.tooltip = tooltip
-  elseif type(tooltip) == 'table' then
-    self.tooltipAddons = tooltip
-    self.toolTipAddonsBackground = toolTipAddonsBackground
-  end
+function UIWidget:removeTooltip()
+  self['tooltip']     = nil
+  self['tooltip-type'] = nil
 end
 
 function UIWidget:getTooltip()
-  return self.tooltip
+  return self['tooltip']
 end
 
-function UIWidget:getTooltipAddons()
-  return self.tooltipAddons
+function UIWidget:getTooltipType()
+  return self['tooltip-type'] or TooltipType.default
 end
 
-function UIWidget:getTooltipAddonsBackground()
-  return self.toolTipAddonsBackground
+function UIWidget:getTooltipObject()
+  return Tooltip(self:getTooltipType())
 end
 
 function UIWidget:hasTooltip()
-  return (self.tooltip or self.tooltipAddons) and true or false
+  local type = self:getTooltipType()
+  if type == TooltipType.default then
+    return string.exists(self['tooltip'])
+  end
+  return self['tooltip'] and true or false
 end
 
 -- @}
 
 g_tooltip.init()
+
 connect(g_app, {
   onTerminate = g_tooltip.terminate
 })

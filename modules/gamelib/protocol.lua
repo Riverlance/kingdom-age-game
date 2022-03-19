@@ -1,6 +1,5 @@
 -- Server to Client - Opcodes
-ServerOpcodes =
-{
+ServerOpcodes = {
   -- At login only (this is why it may have same value of other opcodes)
   ServerOpcodeLoginOrPendingState        = 10,
   ServerOpcodeLoginErrorNew              = 11, -- 10.76+
@@ -84,9 +83,10 @@ ServerOpcodes =
   ServerOpcodeMissileEffect           = 133,
   ServerOpcodeMarkCreature            = 134,
   ServerOpcodeTrappers                = 135,
-  -- Free                               136 to 138
-  ServerOpcodeCreatureHealth          = 139,
-  ServerOpcodeCreatureMana            = 140,
+  -- Free                               136 to 137
+  ServerOpcodeCreatureHealth          = 138,
+  ServerOpcodeCreatureMana            = 139,
+  ServerOpcodeCreatureVigor           = 140,
   ServerOpcodeCreatureLight           = 141,
   ServerOpcodeCreatureOutfit          = 142,
   ServerOpcodeCreatureSpeed           = 143,
@@ -156,8 +156,7 @@ ServerOpcodes =
 }
 
 -- Server to Client - Extended Opcodes
-ServerExtOpcodes =
-{
+ServerExtOpcodes = {
   ServerExtOpcodeOtclientSignal    = 0, -- From Server ProtocolGame::onRecvFirstMessage
   ServerExtOpcodeLocale            = 1,
   ServerExtOpcodeInstanceInfo      = 2,
@@ -173,8 +172,7 @@ ServerExtOpcodes =
 }
 
 -- Client to Server - Opcodes
-ClientOpcodes =
-{
+ClientOpcodes = {
   -- Free                                 0
   ClientOpcodeEnterAccount              = 1,
   -- Free                                 2 to 9
@@ -261,7 +259,7 @@ ClientOpcodes =
   ClientOpcodeCancelAttackAndFollow     = 190,
   -- Free                                 191 to 201
   ClientOpcodeRefreshContainer          = 202,
-  ClientOpcodeBrowseField               = 203,
+  -- Free                                 203
   ClientOpcodeSeekInContainer           = 204,
   -- Free                                 205 to 209
   ClientOpcodeRequestOutfit             = 210,
@@ -288,8 +286,7 @@ ClientOpcodes =
 }
 
 -- Client to Server - Extended Opcodes (onExtendedOpcode Player Event)
-ClientExtOpcodes =
-{
+ClientExtOpcodes = {
   ClientExtOpcodeLocale            = 0,
   -- Free                            1
   ClientExtOpcodeAction            = 2,
@@ -304,8 +301,7 @@ ClientExtOpcodes =
   -- Free                            11 to 65535
 }
 
-ClientActions =
-{
+ClientActions = {
   QuestItems     = 1,
   QuestTeleports = 2
 }

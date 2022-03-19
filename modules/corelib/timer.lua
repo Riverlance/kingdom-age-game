@@ -9,11 +9,12 @@ function Timer:new(duration)
     timer.duration = math.floor(duration / 1000)
     timer.minutes = math.floor(timer.duration / 60)
     timer.seconds = timer.duration % 60
+    timer.durationString = string.format('%.2d:%.2d', timer.minutes, timer.seconds)
     return setmetatable(timer, { __index = Timer })
 end
 
 function Timer:getString()
-    return string.format('%.2d:%.2d', self.minutes, self.seconds)
+    return string.format('%.2d:%.2d', self.minutes, math.floor(self.seconds))
 end
 
 function Timer:getPercent()
@@ -50,10 +51,8 @@ function Timer:update()
 
     if self.seconds < self.updateTicks then
         self.minutes = self.minutes - 1
-        self.seconds = 60 + self.seconds - self.updateTicks
-    else
-        self.seconds = self.seconds - self.updateTicks
     end
+    self.seconds = (self.seconds - self.updateTicks) % 60
 
     if self.onUpdate then
         self:onUpdate()

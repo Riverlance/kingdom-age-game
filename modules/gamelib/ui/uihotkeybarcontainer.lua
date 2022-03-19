@@ -65,6 +65,9 @@ function UIHotkeyBarContainer:updateLook()
   if string.exists(keySettings.text) then
     self:setText('(...)')
     tooltipText = tr('%s Send message%s:\n%s', tooltipText, keySettings.autoSend and ' (auto)' or '', keySettings.text)
+
+    self:setTooltip(hasTooltip and tooltipText or '', TooltipType.textBlock)
+
   elseif keySettings.powerId and powerWidget then
     powerWidget:setVisible(true)
     powerWidget:setImageSource('/images/ui/power/' .. keySettings.powerId .. '_off')
@@ -73,6 +76,9 @@ function UIHotkeyBarContainer:updateLook()
     if power and power.name and power.level then
       tooltipText = tr('%s %s (level %d)', tooltipText, power.name, power.level)
     end
+
+    self:setTooltip(hasTooltip and tooltipText or '')
+
   elseif keySettings.itemId and itemWidget then
     itemWidget:setVisible(true)
     itemWidget:setItemId(keySettings.itemId)
@@ -86,6 +92,25 @@ function UIHotkeyBarContainer:updateLook()
     elseif keySettings.useType == HotkeyItemUseType.Crosshair then
       tooltipText = tr('%s Use with', tooltipText)
     end
+
+    self:setTooltip(hasTooltip and tooltipText or '')
   end
-  self:setTooltip(hasTooltip and tooltipText or '')
+end
+
+function UIHotkeyBarContainer:updateCallback(callback)
+  --print_r(callback)
+  local keySettings = self.settings
+  if not keySettings then
+    g_logger.error(tr('[UIHotkeyBarContainer.updateLook] missing field `settings` (%s)', self:getId()))
+    return
+  end
+  if tonumber(keySettings.powerId) then
+    self.onMousePress = callback or self.onMouseRelease
+    self.onMouseRelease = nil
+  else
+    self.onMouseRelease = callback or self.onMousePress
+    self.onMousePress = nil
+  end
+  --print_r(self.onMouseRelease)
+  --print_r(self.onMousePress)
 end

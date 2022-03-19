@@ -29,8 +29,7 @@ local REPORT_CATEGORY_TYPO      = 1
 local REPORT_CATEGORY_TECHNICAL = 2
 local REPORT_CATEGORY_OTHER     = 3
 
-local categories =
-{
+local categories = {
   [REPORT_CATEGORY_ALL]       = 'All',
   [REPORT_CATEGORY_MAP]       = 'Map',
   [REPORT_CATEGORY_TYPO]      = 'Typo',
@@ -230,7 +229,7 @@ function GameBugReport.onChangeCategory(comboBox, option)
     bugPositionY:setText(0)
     bugPositionZ:setText(0)
   end
-  bugOkButton:setTooltip(isMap and 'Do not enter your actual player position.\nLeave the default position in blank,\nif you are at the bug position.' or '')
+  bugOkButton:setTooltip(isMap and 'Leave the map position in blank if you are at the bug position.' or '', TooltipType.textBlock)
   bugPositionX:setEnabled(isMap)
   bugPositionY:setEnabled(isMap)
   bugPositionZ:setEnabled(isMap)
@@ -255,8 +254,7 @@ function GameBugReport.doReport()
     return
   end
 
-  local position =
-  {
+  local position = {
     x = tonumber(bugPositionX:getText()) or 0,
     y = tonumber(bugPositionY:getText()) or 0,
     z = tonumber(bugPositionZ:getText()) or 0
@@ -302,8 +300,7 @@ local REPORT_STATE_NEW     = 0
 local REPORT_STATE_WORKING = 1
 local REPORT_STATE_DONE    = 2
 
-local states =
-{
+local states = {
   [REPORT_STATE_UNDONE]  = 'Undone',
   [REPORT_STATE_NEW]     = 'New',
   [REPORT_STATE_WORKING] = 'Working',

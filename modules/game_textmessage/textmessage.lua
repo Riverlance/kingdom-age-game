@@ -4,8 +4,7 @@ _G.GameTextMessage = { }
 
 DefaultFont = 'verdana-11px-rounded'
 
-MessageSettings =
-{
+MessageSettings = {
   none            = { },
   consoleRed      = { color = TextColors.red,       consoleTab='Default' },
   consoleOrange   = { color = TextColors.orange,    consoleTab='Default' },
@@ -23,8 +22,7 @@ MessageSettings =
   statusBigBottom = { color = '#e1e1e1',            consoleTab='Server', screenTarget='statusLabel',       consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
 }
 
-MessageTypes =
-{
+MessageTypes = {
   [MessageModes.MonsterSay] = MessageSettings.consoleOrange,
   [MessageModes.MonsterYell] = MessageSettings.consoleOrange,
   [MessageModes.BarkLow] = MessageSettings.consoleOrange,

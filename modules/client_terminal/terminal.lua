@@ -3,8 +3,7 @@ _G.ClientTerminal = { }
 
 
 -- configs
-local LogColors =
-{
+local LogColors = {
   [LogDebug]   = 'pink',
   [LogInfo]    = 'white',
   [LogWarning] = 'yellow',

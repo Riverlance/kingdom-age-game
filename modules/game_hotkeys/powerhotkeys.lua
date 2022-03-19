@@ -27,8 +27,7 @@ powerBoost_resizey     = 0.5
 powerBoost_color_speed = 200
 
 powerBoost_color_default = { r = 255, g = 255, b = 150 }
-powerBoost_color =
-{
+powerBoost_color = {
   [powerBoost_none] = { r = 255, g = 255, b = 150 },
   [powerBoost_low]  = { r = 255, g = 150, b = 150 },
   [powerBoost_high] = { r = 150, g = 150, b = 255 }

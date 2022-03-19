@@ -29,7 +29,8 @@ MiniWindow
     text: ?
     text-align: center
     phantom: false
-    !tooltip: tr('Hold the left mouse button and drag-and-drop\nor press the \'%s\' holding \'%s\' for navigate.\n\nScroll the mouse wheel for zoom.\nDo the same holding \'%s\' for change the floor level.\n\nPress the right mouse button for create map marks.\n\nPress \'%s\' for view the entire game map.', 'Arrow Keys', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
+    !tooltip: tr("Hold the left mouse button and drag-and-drop or press the '%s' holding '%s' for navigate.\n\nScroll the mouse wheel for zoom. Do the same holding '%s' for change the floor level.\n\nPress the right mouse button for create map marks.\n\nPress '%s' for view the entire game map.", 'Arrow Keys', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
+    !tooltip-type: TooltipType.textBlock
 
   MiniWindowContents
 
@@ -106,7 +107,8 @@ MiniWindow
         UIButton
           id: extraIconsButton
           size: 15 15
-          !tooltip: tr('Show minimap extra icons\n(e.g., party player icon)')
+          !tooltip: tr('Show minimap extra icons (e.g., party player icon).')
+          !tooltip-type: TooltipType.textBlock
           anchors.top: parent.top
           anchors.left: parent.left
           margin-left: 4
@@ -121,7 +123,8 @@ MiniWindow
             image-clip: 30 30 15 15
 
           $on:
-            !tooltip: tr('Hide minimap extra icons\n(e.g., party player icon)')
+            !tooltip: tr('Hide minimap extra icons (e.g., party player icon).')
+            !tooltip-type: TooltipType.textBlock
             image-clip: 45 0 15 15
 
           $on hover:
@@ -327,3 +330,8 @@ MiniWindow
             image-clip: 0 48 24 24
 
           @onClick: GameMinimap.getMinimapWidget():floorUp(1)
+
+TrackPin < UIWidget
+  size: 16 16
+  icon-source: /images/ui/minimap/track_mark
+  margin-bottom: 8

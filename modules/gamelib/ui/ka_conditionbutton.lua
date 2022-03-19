@@ -9,11 +9,17 @@ table.insert(barColors, { percentAbove =  8, color = '#BF0A0A' } )
 table.insert(barColors, { percentAbove =  3, color = '#910F0F' } )
 table.insert(barColors, { percentAbove = -1, color = '#850C0C' } )
 
-local boostColors = { }
-boostColors[0] = '#88888877' -- No boost
-boostColors[1] = '#FF754977'
-boostColors[2] = '#B770FF77'
-boostColors[3] = '#70B8FF77'
+UIConditionButton.boostColors    = { }
+UIConditionButton.boostColors[0] = '#88888877' -- No boost
+UIConditionButton.boostColors[1] = '#FF754977'
+UIConditionButton.boostColors[2] = '#B770FF77'
+UIConditionButton.boostColors[3] = '#70B8FF77'
+
+UIConditionButton.boostNames    = { }
+UIConditionButton.boostNames[0] = ''
+UIConditionButton.boostNames[1] = 'None'
+UIConditionButton.boostNames[2] = 'Low'
+UIConditionButton.boostNames[3] = 'High'
 
 function UIConditionButton.create()
   local button = UIConditionButton.internalCreate()
@@ -27,7 +33,7 @@ function UIConditionButton:setup(condition)
   local conditionBarWidget = self:getChildById('conditionBar')
   conditionBarWidget:setPhases(condition.turns or 0)
   conditionBarWidget:setPhasesBorderWidth(1)
-  conditionBarWidget:setPhasesBorderColor('#00000077')
+  conditionBarWidget:setPhasesBorderColor('#ffffff77')
 
   if type(condition.remainingTime) == 'number' and condition.remainingTime > 0 then
     local timer = { }
@@ -44,17 +50,22 @@ end
 
 function UIConditionButton:updateData(condition)
   -- Setup icon
-  local conditionIconWidget = self:getChildById('conditionIcon')
+  local conditionItemIconWidget = self:getChildById('conditionItemIcon')
+  if condition.itemId then
+    conditionItemIconWidget:setItemId(condition.itemId)
+  else
+    conditionItemIconWidget:setWidth(0)
+  end
+
+  local conditionPowerIconWidget = self:getChildById('conditionPowerIcon')
   if condition.powerId then
-    conditionIconWidget:setIcon(string.format('/images/ui/power/%d_off', condition.powerId))
-    conditionIconWidget:setIconSize({ width = 16, height = 16 })
-    conditionIconWidget:setIconOffset({ x = 2, y = 2})
-    conditionIconWidget:setBackgroundColor(boostColors[condition.boost])
+    conditionPowerIconWidget:setIcon(string.format('/images/ui/power/%d_off', condition.powerId))
+    conditionPowerIconWidget:setBackgroundColor(UIConditionButton.boostColors[condition.boost])
   else
   -- For debug
     -- conditionIconWidget:setText(string.format('%d,%d', condition.id, condition.subId))
   -- Else, remove the icon
-    conditionIconWidget:setWidth(0) -- Comment this line if you want the debug above to work
+    conditionPowerIconWidget:setWidth(0) -- Comment this line if you want the debug above to work
   end
 
   if condition.name then
@@ -80,11 +91,11 @@ function UIConditionButton:updateConditionClock()
   if self.clock then
     local conditionClockWidget = self:getChildById('conditionClock')
     conditionClockWidget:setText(self.clock:getString())
-  
+
     local conditionBarWidget = self:getChildById('conditionBar')
     local percent = self.clock:getPercent()
     conditionBarWidget:setPercent(percent)
-    
+
     for _, v in pairs(barColors) do
       if percent > v.percentAbove then
         conditionBarWidget:setFillerBackgroundColor(v.color)
@@ -101,56 +112,5 @@ function UIConditionButton:onDestroy()
 end
 
 function UIConditionButton:setTooltipText()
-  local c = self.condition
-  local blocks = { }
-
-  local nameBlock = { { text = c.name }, backgroundImage = '/images/ui/_background/default_stone_blue' }
-  local infoBlock = {
-    { text = 'Combat: ', align = AlignLeft },
-    { icon = string.format('/images/game/creature/condition/type_%s', c.aggressive and 'aggressive' or 'non_aggressive'), size = { width = 11, height = 11 }, align = AlignLeft },
-    { text = string.format(' %s', c.aggressive and 'Aggressive' or 'Non-Aggressive'), align = AlignLeft },
-  }
-  local attributeStr = ''
-  if c.attribute then
-    if tonumber(c.offset) > 0 then
-      attributeStr = string.format('%s +%s', attributeStr, c.offset)
-    end
-    if tonumber(c.factor) ~= 1 then
-      attributeStr = string.format('%s x%s', attributeStr, c.factor)
-    end
-  end
-
-  local attributeBlock = { { text = string.format('Attribute: %s%s', ATTRIBUTE_NAMES[c.attribute], attributeStr), align = AlignLeft } }
-  local durationBlock = { {  text = 'Duration: ' .. (self.clock and self.clock:getString() or '?'), align = AlignLeft } }
-  local powerBlock = {
-    { icon = c.powerId and string.format('/images/ui/power/%d_off', c.powerId), size = { width = 20, height = 20 } },
-    { text = c.powerId and c.powerName or 'Unknown' },
-    backgroundColor = boostColors[c.boost]
-  }
-
-  local originBlock = { { text = c.originName }, backgroundColor = '#647D9677' }
-
-  if c.name then
-    table.insert(blocks, nameBlock)
-  end
-
-  table.insert(blocks, infoBlock)
-
-  if c.attribute then
-    table.insert(blocks, attributeBlock)
-  end
-
-  if c.remainingTime and self.clock then
-    table.insert(blocks, durationBlock)
-  end
-
-  if c.powerId then
-    table.insert(blocks, powerBlock)
-  end
-
-  if c.originId then
-    table.insert(blocks, originBlock)
-  end
-
-  self:setTooltip(blocks)
+  self:setTooltip(true, TooltipType.conditionButton)
 end

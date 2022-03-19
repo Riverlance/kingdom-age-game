@@ -105,7 +105,7 @@ QuestLogWindow < MainWindow
   Button
     id: itemsButton
     !text: tr('Items')
-    !tooltip: tr('See it on loot window.')
+    !tooltip: tr('See it on loot window')
     anchors.top: rewardExperienceLabel.top
     anchors.right: parent.right
     width: 80

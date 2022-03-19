@@ -38,7 +38,8 @@ MiniWindow
     text: ?
     text-align: center
     phantom: false
-    &tooltipAddons: { {{ text = '1. \'Distribution\' are points that you distributed manually.\n\n2. \'Alignment\' are recommended points that were\ndistributed automatically due to your vocation.\n\n3. \'Buff/Debuff\' are points that were increased or\ndecreased temporarily due to Powers.', align = AlignLeft }} }
+    !tooltip: tr("1. 'Distribution' are points that you distributed manually.\n\n2. 'Alignment' are recommended points that were distributed automatically due to your vocation.\n\n3. 'Buff/Debuff' are points that were increased or decreased temporarily due to Powers.")
+    !tooltip-type: TooltipType.textBlock
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
 
@@ -77,13 +78,13 @@ MiniWindow
       id: defenseAttributeAddButton
 
     AttributeAddButton
+      id: magicDefenseAttributeAddButton
+
+    AttributeAddButton
+      id: vitalityAttributeAddButton
+
+    AttributeAddButton
       id: willPowerAttributeAddButton
-
-    AttributeAddButton
-      id: healthAttributeAddButton
-
-    AttributeAddButton
-      id: manaAttributeAddButton
 
     AttributeAddButton
       id: agilityAttributeAddButton
@@ -112,22 +113,22 @@ MiniWindow
       anchors.right: defenseAttributeAddButton.left
 
     AttributeLabel
+      id: magicDefenseAttributeLabel
+      !text: 'Magic Def'
+      anchors.verticalCenter: magicDefenseAttributeAddButton.verticalCenter
+      anchors.right: magicDefenseAttributeAddButton.left
+
+    AttributeLabel
+      id: vitalityAttributeLabel
+      !text: 'Vitality'
+      anchors.verticalCenter: vitalityAttributeAddButton.verticalCenter
+      anchors.right: vitalityAttributeAddButton.left
+
+    AttributeLabel
       id: willPowerAttributeLabel
       !text: 'Will Power'
       anchors.verticalCenter: willPowerAttributeAddButton.verticalCenter
       anchors.right: willPowerAttributeAddButton.left
-
-    AttributeLabel
-      id: healthAttributeLabel
-      !text: 'Health'
-      anchors.verticalCenter: healthAttributeAddButton.verticalCenter
-      anchors.right: healthAttributeAddButton.left
-
-    AttributeLabel
-      id: manaAttributeLabel
-      !text: 'Mana'
-      anchors.verticalCenter: manaAttributeAddButton.verticalCenter
-      anchors.right: manaAttributeAddButton.left
 
     AttributeLabel
       id: agilityAttributeLabel
@@ -166,19 +167,19 @@ MiniWindow
       anchors.left: defenseAttributeAddButton.right
 
     AttributeActLabel
+      id: magicDefenseAttributeActLabel
+      anchors.verticalCenter: magicDefenseAttributeAddButton.verticalCenter
+      anchors.left: magicDefenseAttributeAddButton.right
+
+    AttributeActLabel
+      id: vitalityAttributeActLabel
+      anchors.verticalCenter: vitalityAttributeAddButton.verticalCenter
+      anchors.left: vitalityAttributeAddButton.right
+
+    AttributeActLabel
       id: willPowerAttributeActLabel
       anchors.verticalCenter: willPowerAttributeAddButton.verticalCenter
       anchors.left: willPowerAttributeAddButton.right
-
-    AttributeActLabel
-      id: healthAttributeActLabel
-      anchors.verticalCenter: healthAttributeAddButton.verticalCenter
-      anchors.left: healthAttributeAddButton.right
-
-    AttributeActLabel
-      id: manaAttributeActLabel
-      anchors.verticalCenter: manaAttributeAddButton.verticalCenter
-      anchors.left: manaAttributeAddButton.right
 
     AttributeActLabel
       id: agilityAttributeActLabel

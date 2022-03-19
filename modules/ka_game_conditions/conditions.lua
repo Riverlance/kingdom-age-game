@@ -4,11 +4,12 @@ _G.GameConditions = { }
 
 local CONDITION_ATTR_REMAININGTIME = 1
 local CONDITION_ATTR_TURNS         = 2
-local CONDITION_ATTR_POWER         = 3
-local CONDITION_ATTR_DESCRIPTION   = 4
-local CONDITION_ATTR_ORIGINID      = 5
-local CONDITION_ATTR_ORIGINNAME    = 6
-local CONDITION_ATTR_ATTRIBUTE     = 7
+local CONDITION_ATTR_ITEM          = 3
+local CONDITION_ATTR_POWER         = 4
+local CONDITION_ATTR_DESCRIPTION   = 5
+local CONDITION_ATTR_ORIGINID      = 6
+local CONDITION_ATTR_ORIGINNAME    = 7
+local CONDITION_ATTR_ATTRIBUTE     = 8
 local CONDITION_ATTR_ENDLIST       = 255
 
 local CONDITION_ACTION_UPDATE = 1
@@ -116,9 +117,7 @@ function GameConditions.init()
     g_textures.preload(v.path)
   end
 
-  -- This disables scrollbar auto hiding
-  local scrollbar = conditionWindow:getChildById('miniwindowScrollBar')
-  scrollbar:mergeStyle({ ['$!on'] = { } })
+  conditionWindow:setScrollBarAutoHiding(false)
 
   sortMenuButton = conditionWindow:getChildById('sortMenuButton')
   GameConditions.setSortType(GameConditions.getSortType())
@@ -250,6 +249,8 @@ function GameConditions.parseConditions(protocol, msg)
         condition.remainingTime = msg:getU32()
       elseif nextByte == CONDITION_ATTR_TURNS then
         condition.turns = msg:getU32()
+      elseif nextByte == CONDITION_ATTR_ITEM then
+        condition.itemId = msg:getU32()
       elseif nextByte == CONDITION_ATTR_POWER then
         condition.powerId = msg:getU8()
         condition.powerName = msg:getString()

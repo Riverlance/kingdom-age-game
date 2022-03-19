@@ -9,13 +9,13 @@ extraLabelColors[1] = '#FF7549'
 extraLabelColors[2] = '#B770FF'
 extraLabelColors[3] = '#70B8FF'
 
-local POWER_CLASS_ALL       = 0
-local POWER_CLASS_OFFENSIVE = 1
-local POWER_CLASS_DEFENSIVE = 2
-local POWER_CLASS_SUPPORT   = 3
-local POWER_CLASS_SPECIAL   = 4
-local POWER_CLASS_STRING =
-{
+POWER_CLASS_ALL       = 0
+POWER_CLASS_OFFENSIVE = 1
+POWER_CLASS_DEFENSIVE = 2
+POWER_CLASS_SUPPORT   = 3
+POWER_CLASS_SPECIAL   = 4
+
+UIPowerButton.powerClass = {
   [POWER_CLASS_ALL]       = 'All',
   [POWER_CLASS_OFFENSIVE] = 'Offensive',
   [POWER_CLASS_DEFENSIVE] = 'Defensive',
@@ -105,36 +105,8 @@ function UIPowerButton:setTooltipText(text)
     return
   end
 
-  local power  = self.power
-  local blocks = { }
-
-  local exhaustTime = power.exhaustTime / 1000
-
-  local isAggressiveBlock         = {{ icon = power.aggressive and '/images/game/creature/power/type_aggressive' or '/images/game/creature/power/type_non_aggressive', size = { width = 11, height = 11 } }}
-  local mainInfoBlock             = {{ text = string.format('Name: %s\nClass: %s\nVocations: %s\nLevel: %d\nMana Cost: [%s]\nExhaust Time: %s second%s\nPremium: %s', power.name or 'Unknown', POWER_CLASS_STRING[power.class or 0], self:getVocations(), power.level, self:getMana(), exhaustTime, exhaustTime > 1 and 's' or '', power.premium and 'Yes' or 'No'), align = AlignLeft }}
-  local descriptionBlock          = power.description and power.description ~= '' and {{ text = string.format('\n%s%s', power.description, power.descriptionBoostNone and power.descriptionBoostNone ~= '' and '\n' or ''), color = '#E6DB74' }} or nil
-  local descriptionBoostNoneBlock = power.descriptionBoostNone and power.descriptionBoostNone ~= '' and {{ text = power.descriptionBoostNone, backgroundColor = '#FF754977' }} or nil
-  local descriptionBoostLowBlock  = power.descriptionBoostLow and power.descriptionBoostLow ~= '' and {{ text = power.descriptionBoostLow, backgroundColor = '#B770FF77' }} or nil
-  local descriptionBoostHighBlock = power.descriptionBoostHigh and power.descriptionBoostHigh ~= '' and {{ text = power.descriptionBoostHigh, backgroundColor = '#70B8FF77' }} or nil
-
-  table.insert(blocks, isAggressiveBlock)
-  table.insert(blocks, mainInfoBlock)
-  if descriptionBlock then
-    table.insert(blocks, descriptionBlock)
-  end
-  if descriptionBoostNoneBlock then
-    table.insert(blocks, descriptionBoostNoneBlock)
-  end
-  if descriptionBoostLowBlock then
-    table.insert(blocks, descriptionBoostLowBlock)
-  end
-  if descriptionBoostHighBlock then
-    table.insert(blocks, descriptionBoostHighBlock)
-  end
-
-  self.onTooltipHoverChange = power.onTooltipHoverChange
-
-  self:setTooltip(blocks)
+  self.onTooltipHoverChange = self.power.onTooltipHoverChange
+  self:setTooltip(true, TooltipType.powerButton)
 end
 
 function UIPowerButton:updateOffensiveIcon()
@@ -149,8 +121,8 @@ end
 
 function UIPowerButton:getMana()
   local power = self.power
-  if not power.mana then
-    return '0'
+  if not power.mana or power.mana[1] == 0 or power.mana[2] == 0 or power.mana[3] == 0 then
+    return 'Variable'
   end
 
   return table.concat(power.mana, ' / ')

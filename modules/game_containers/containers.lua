@@ -152,9 +152,7 @@ function GameContainers.onContainerOpen(container, previousContainer)
 
 
 
-  -- This disables scrollbar auto hiding
-  local scrollbar = containerWindow:getChildById('miniwindowScrollBar')
-  scrollbar:mergeStyle({ ['$!on'] = { }})
+  containerWindow:setScrollBarAutoHiding(false)
 
   -- onClose callback
   connect(containerWindow, {

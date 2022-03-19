@@ -4,8 +4,7 @@ _G.GamePlayerDeath = { }
 
 deathWindow = nil
 
-local deathTexts =
-{
+local deathTexts = {
   regular = { text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nSimply click on Ok to resume your journeys!', height = 140, width = 0 },
   unfair = { text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nThis death penalty has been reduced by %i%%.\n\nSimply click on Ok to resume your journeys!', height = 185, width = 0 },
   blessed = { text = 'Ouch! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back into this world.\n\nThis death penalty has been reduced by 100%%.\n\nSimply click on Ok to resume your journeys!', height = 170, width = 90 }

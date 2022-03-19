@@ -377,10 +377,10 @@ function GameNpcTrade.refreshPlayerGoods()
   GameNpcTrade.checkSellAllTooltip()
 
   moneyLabel:setText(string.format('%s (%s)', GameNpcTrade.formatCurrency(playerMoney), playerMoneyFromBank and 'from bank' or 'holding'))
-  tradeButton:setTooltip(CURRENCY_ISVIP and 'Your VIP money may not be displayed correctly\nif points are added through the website\nwhile keeping the trade opened.' or '')
+  tradeButton:setTooltip(CURRENCY_ISVIP and tr('Your VIP money may not be displayed correctly if points were added through the website while keeping the trade opened.') or '', TooltipType.textBlock)
   capacityLabel:setText(string.format('%.2f', playerFreeCapacity) .. ' ' .. WEIGHT_UNIT)
 
-  buyWithBackpack:setTooltip(CURRENCY_ISVIP and 'This option is disabled on VIP Shop.' or '')
+  buyWithBackpack:setTooltip(CURRENCY_ISVIP and 'This option is disabled on VIP Shop.' or '', TooltipType.textBlock)
 
   local currentTradeType = GameNpcTrade.getCurrentTradeType()
   local searchFilter = searchText:getText():lower()
@@ -419,8 +419,7 @@ function GameNpcTrade.onOpenNpcTrade(items, isVip)
 
   for _,item in pairs(items) do
     if item[5] > 0 then
-      local newItem =
-      {
+      local newItem = {
         ptr     = item[1],
         maskptr = item[2],
         name    = item[3],
@@ -431,8 +430,7 @@ function GameNpcTrade.onOpenNpcTrade(items, isVip)
     end
 
     if item[6] > 0 then
-      local newItem =
-      {
+      local newItem = {
         ptr     = item[1],
         maskptr = item[2],
         name    = item[3],
@@ -519,7 +517,6 @@ end
 
 function GameNpcTrade.checkSellAllTooltip()
   sellAllButton:setEnabled(true)
-  sellAllButton:removeTooltip()
 
   local total = 0
   local info = ''
@@ -530,7 +527,7 @@ function GameNpcTrade.checkSellAllTooltip()
     if item then
       local items, price = GameNpcTrade.getSellAmount(item)
       if items > 0 then
-        info = string.format('%s%s%d %s (%d %s)', info, (not first and '\n' or ''), items, item.name, price, tr(CURRENCY))
+        info = string.format('%s%s* %d %s: %d %s', info, (not first and '\n' or ''), items, item.name, price, tr(CURRENCY))
         total = total + price
 
         if first then
@@ -541,9 +538,10 @@ function GameNpcTrade.checkSellAllTooltip()
   end
   if info ~= '' then
     info = string.format('%s\nTotal: %d %s', info, total, tr(CURRENCY))
-    sellAllButton:setTooltip(info)
+    sellAllButton:setTooltip(info, TooltipType.textBlock)
   else
     sellAllButton:setEnabled(false)
+    sellAllButton:removeTooltip()
   end
 end
 

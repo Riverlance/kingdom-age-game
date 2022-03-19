@@ -51,6 +51,7 @@ local defaultOptions = {
   showIcons = true,
   showHealth = true,
   showMana = true,
+  showVigor = true,
   showExpBar = true,
   showText = true,
   showHotkeybars = true,
@@ -345,7 +346,9 @@ function ClientOptions.setOption(key, value, force)
   if not force and ClientOptions.getOption(key) == value then
     return
   end
+
   local wasClientSettingUp = clientSettingUp
+  local localPlayer        = g_game.getLocalPlayer()
 
   if key == 'vsync' then
     g_window.setVerticalSync(value)
@@ -521,7 +524,12 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.getMapPanel():setDrawHealthBars(value)
 
   elseif modules.game_interface and key == 'showMana' then
-    GameInterface.getMapPanel():setDrawManaBar(value)
+    if localPlayer and not localPlayer:isWarrior() then
+      GameInterface.getMapPanel():setDrawManaBar(value)
+    end
+
+  elseif modules.game_interface and key == 'showVigor' then
+    GameInterface.getMapPanel():setDrawVigorBar(value)
 
   elseif key == 'showExpBar' then
     if not modules.ka_game_ui then
@@ -643,7 +651,11 @@ function ClientOptions.updateStickers()
     value = type(value) == 'string' and value ~= '' and value or defaultOptions.leftSticker
 
     leftStickerComboBox:setOption(value) -- Make sure combobox has same as value at g_settings
-    leftStickerComboBox.tooltipAddons = value ~= defaultOptions.leftSticker and { {{ image = PanelStickers[value], align = AlignCenter }} } or nil
+    if PanelStickers[value] ~= '' then
+      leftStickerComboBox:setTooltip(PanelStickers[value], TooltipType.image)
+    else
+      leftStickerComboBox:removeTooltip()
+    end
     leftStickerWidget:setImageSource(PanelStickers[value])
   end
 
@@ -654,7 +666,11 @@ function ClientOptions.updateStickers()
     value = type(value) == 'string' and value ~= '' and value or defaultOptions.rightSticker
 
     rightStickerComboBox:setOption(value) -- Make sure combobox has same as value at g_settings
-    rightStickerComboBox.tooltipAddons = value ~= defaultOptions.rightSticker and { {{ image = PanelStickers[value], align = AlignCenter }} } or nil
+    if PanelStickers[value] ~= '' then
+      rightStickerComboBox:setTooltip(PanelStickers[value], TooltipType.image)
+    else
+      rightStickerComboBox:removeTooltip()
+    end
     rightStickerWidget:setImageSource(PanelStickers[value])
   end
 end

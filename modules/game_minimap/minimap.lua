@@ -67,8 +67,11 @@ function GameMinimap.init()
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo, GameMinimap.onInstanceInfo)
 
   connect(g_game, {
-    onGameStart = GameMinimap.online,
-    onGameEnd   = GameMinimap.offline
+    onGameStart        = GameMinimap.online,
+    onGameEnd          = GameMinimap.offline,
+    onTrackPosition    = GameMinimap.onTrackPosition,
+    onTrackPositionEnd = GameMinimap.onTrackPositionEnd,
+    onUpdateTrackColor = GameMinimap.onUpdateTrackColor
   })
 
   connect(LocalPlayer, {
@@ -94,8 +97,11 @@ function GameMinimap.terminate()
   g_settings.setValue('Minimap', 'opacity', minimapOpacityScrollbar:getValue())
 
   disconnect(g_game, {
-    onGameStart = GameMinimap.online,
-    onGameEnd   = GameMinimap.offline
+    onGameStart        = GameMinimap.online,
+    onGameEnd          = GameMinimap.offline,
+    onTrackPosition    = GameMinimap.onTrackPosition,
+    onTrackPositionEnd = GameMinimap.onTrackPositionEnd,
+    onUpdateTrackColor = GameMinimap.onUpdateTrackColor
   })
 
   disconnect(LocalPlayer, {
@@ -316,4 +322,38 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
 
   positionLabel:setText(text)
   positionLabel:setTooltip(text)
+end
+
+function GameMinimap.onTrackPosition(posNode)
+  if not posNode.minimapWidget then
+    posNode.minimapWidget = g_ui.createWidget('TrackPin', minimapWidget)
+    posNode.minimapWidget:setIconColor(posNode.color)
+    posNode.minimapWidget.info = posNode
+    posNode.minimapWidget.onMouseRelease = GameMinimap.createTrackMenu
+    minimapWidget:centerInPosition(posNode.minimapWidget, posNode.position)
+  end
+end
+
+function GameMinimap.onTrackPositionEnd(posNode)
+  if posNode.minimapWidget then
+    posNode.minimapWidget:destroy()
+  end
+end
+
+function GameMinimap.createTrackMenu(widget, mousePos, mouseButton)
+  if mouseButton == MouseRightButton then
+    local menu = g_ui.createWidget('PopupMenu')
+    menu:setGameMenu(true)
+    menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(widget.info) end)
+    menu:addOption(tr('Stop track'), function() GameTracker.stopTrackPosition(widget.info.position) end)
+    menu:display(mousePos)
+    return true
+  end
+  return false
+end
+
+function GameMinimap.onUpdateTrackColor(posNode)
+  if posNode.minimapWidget then
+    posNode.minimapWidget:setIconColor(posNode.color)
+  end
 end

@@ -117,8 +117,7 @@ vec2 modem_uv(vec2 xy, float ofs) {
     vec3 yuv = RGB_to_YUV * rgb;
     float signal = clamp(yuv.x + yuv.y * sinwt + yuv.z * coswt, 0.0, 1.0);
 
-    if (PHASE_NOISE != 0.)
-    {
+    if (PHASE_NOISE != 0.) {
         /* .yy is horizontal noise, .xx looks bad, .xy is classic noise */
         vec2 seed = xy.yy * float(FrameCount);
         wt        = wt + PHASE_NOISE * (rand(seed) - 0.5);

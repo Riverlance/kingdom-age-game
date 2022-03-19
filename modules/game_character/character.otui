@@ -1,6 +1,7 @@
 CharacterProgressBar < ProgressBar
   anchors.left: parent.left
   anchors.right: parent.right
+  margin-top: 1
 
   $first:
     anchors.top: parent.top
@@ -8,7 +9,15 @@ CharacterProgressBar < ProgressBar
 
   $!first:
     anchors.top: prev.outsideBottom
-    margin-top: 1
+
+  $on:
+    visible: true
+    height: 16
+
+  $!on:
+    visible: false
+    height: 0
+    margin-top: 0
 
 CharacterProgressBarValue < Label
   anchors.fill: prev
@@ -153,7 +162,7 @@ MiniWindow
   id: inventoryWindow
   !text: tr('Character')
   icon: /images/ui/top_menu/healthinfo
-  height: 258
+  // Mini window height is set in Lua
   &save: true
 
   BallMenuButton
@@ -163,11 +172,20 @@ MiniWindow
     @onClick: GameCharacter.onMiniWindowBallButton()
 
   MiniWindowHeader
-    height: 52
+    // Header height is set in Lua
+
+    CharacterProgressBar
+      id: healthBarPrevious
+      background-color: #ffd122
 
     CharacterProgressBar
       id: healthBar
       background-color: #ff4444
+      background-area-color: alpha
+
+      $!first:
+        anchors.top: prev.top
+        margin-top: 0
 
     CharacterProgressBarValue
       id: healthBarValueLabel
@@ -185,11 +203,22 @@ MiniWindow
       @onClick: ClientOptions.toggleOption('showMana')
 
     CharacterProgressBar
-      id: experienceBar
-      background-color: #B6E866
+      id: vigorBar
+      background-color: #ffa14f
 
       $!first:
         anchors.top: manaBar.outsideBottom
+
+    CharacterProgressBarValue
+      id: vigorBarValueLabel
+      @onClick: ClientOptions.toggleOption('showVigor')
+
+    CharacterProgressBar
+      id: experienceBar
+      background-color: #b6e866
+
+      $!first:
+        anchors.top: vigorBar.outsideBottom
 
     CharacterProgressBarValue
       id: experienceBarValueLabel

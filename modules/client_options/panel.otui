@@ -2,7 +2,9 @@ Panel
 
   OptionLabel
     !text: tr('Side panels priority')
-    !tooltip: tr('Side panels priority for the new mini windows\nto appear, including containers.')
+    !tooltip: tr('Side panels priority for the new mini windows to appear, including containers.')
+    !tooltip-type: TooltipType.textBlock
+    phantom: false
 
   FirstOptionButtonBox
     id: panelsPriorityLeftSide

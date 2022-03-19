@@ -110,8 +110,7 @@ void main()
     //                    -|D|E|F|x
     //                    -|G|H|I|x
     //                    -|-|x|x|-
-    if (!((eq(E,F) && eq(H,I)) || (eq(E,H) && eq(F,I))))
-    {
+    if (!((eq(E,F) && eq(H,I)) || (eq(E,H) && eq(F,I)))) {
         float dist_H_F = DistYCbCr(G, E) + DistYCbCr(E, C) + DistYCbCr(P(0,2), I) + DistYCbCr(I, P(2.,0.)) + (4.0 * DistYCbCr(H, F));
         float dist_E_I = DistYCbCr(D, H) + DistYCbCr(H, P(1,2)) + DistYCbCr(B, F) + DistYCbCr(F, P(2.,1.)) + (4.0 * DistYCbCr(E, I));
         bool dominantGradient = (DOMINANT_DIRECTION_THRESHOLD * dist_H_F) < dist_E_I;
@@ -124,8 +123,7 @@ void main()
     //                    x|D|E|F|-
     //                    x|G|H|I|-
     //                    -|x|x|-|-
-    if (!((eq(D,E) && eq(G,H)) || (eq(D,G) && eq(E,H))))
-    {
+    if (!((eq(D,E) && eq(G,H)) || (eq(D,G) && eq(E,H)))) {
         float dist_G_E = DistYCbCr(P(-2.,1.)  , D) + DistYCbCr(D, B) + DistYCbCr(P(-1.,2.), H) + DistYCbCr(H, F) + (4.0 * DistYCbCr(G, E));
         float dist_D_H = DistYCbCr(P(-2.,0.)  , G) + DistYCbCr(G, P(0.,2.)) + DistYCbCr(A, E) + DistYCbCr(E, I) + (4.0 * DistYCbCr(D, H));
         bool dominantGradient = (DOMINANT_DIRECTION_THRESHOLD * dist_D_H) < dist_G_E;
@@ -137,8 +135,7 @@ void main()
     //                    -|D|E|F|x
     //                    -|-|H|I|-
     //                    -|-|-|-|-
-    if (!((eq(B,C) && eq(E,F)) || (eq(B,E) && eq(C,F))))
-    {
+    if (!((eq(B,C) && eq(E,F)) || (eq(B,E) && eq(C,F)))) {
         float dist_E_C = DistYCbCr(D, B) + DistYCbCr(B, P(1.,-2.)) + DistYCbCr(H, F) + DistYCbCr(F, P(2.,-1.)) + (4.0 * DistYCbCr(E, C));
         float dist_B_F = DistYCbCr(A, E) + DistYCbCr(E, I) + DistYCbCr(P(0.,-2.), C) + DistYCbCr(C, P(2.,0.)) + (4.0 * DistYCbCr(B, F));
         bool dominantGradient = (DOMINANT_DIRECTION_THRESHOLD * dist_B_F) < dist_E_C;
@@ -150,8 +147,7 @@ void main()
     //                    x|D|E|F|-
     //                    -|G|H|-|-
     //                    -|-|-|-|-
-    if (!((eq(A,B) && eq(D,E)) || (eq(A,D) && eq(B,E))))
-    {
+    if (!((eq(A,B) && eq(D,E)) || (eq(A,D) && eq(B,E)))) {
         float dist_D_B = DistYCbCr(P(-2.,0.), A) + DistYCbCr(A, P(0.,-2.)) + DistYCbCr(G, E) + DistYCbCr(E, C) + (4.0 * DistYCbCr(D, B));
         float dist_A_E = DistYCbCr(P(-2.,-1.), D) + DistYCbCr(D, H) + DistYCbCr(P(-1.,-2.), B) + DistYCbCr(B, F) + (4.0 * DistYCbCr(A, E));
         bool dominantGradient = (DOMINANT_DIRECTION_THRESHOLD * dist_D_B) < dist_A_E;
@@ -165,8 +161,7 @@ void main()
     //                    -|D|E|F|x
     //                    -|G|H|I|x
     //                    -|-|x|x|-
-    if(blendResult.z != BLEND_NONE)
-    {
+    if(blendResult.z != BLEND_NONE) {
         float dist_F_G = DistYCbCr(F, G);
         float dist_H_C = DistYCbCr(H, C);
         bool doLineBlend = (blendResult.z == BLEND_DOMINANT ||
@@ -175,8 +170,7 @@ void main()
 
         vec2 origin = vec2(0.0, 1.0 / sqrt(2.0));
         vec2 direction = vec2(1.0, -1.0);
-        if(doLineBlend)
-        {
+        if(doLineBlend) {
             bool haveShallowLine = (STEEP_DIRECTION_THRESHOLD * dist_F_G <= dist_H_C) && neq(E,G) && neq(D,G);
             bool haveSteepLine = (STEEP_DIRECTION_THRESHOLD * dist_H_C <= dist_F_G) && neq(E,C) && neq(B,C);
             origin = haveShallowLine? vec2(0.0, 0.25) : vec2(0.0, 0.5);
@@ -193,8 +187,7 @@ void main()
     //                    x|D|E|F|-
     //                    x|G|H|I|-
     //                    -|x|x|-|-
-    if(blendResult.w != BLEND_NONE)
-    {
+    if(blendResult.w != BLEND_NONE) {
         float dist_H_A = DistYCbCr(H, A);
         float dist_D_I = DistYCbCr(D, I);
         bool doLineBlend = (blendResult.w == BLEND_DOMINANT ||
@@ -203,8 +196,7 @@ void main()
 
         vec2 origin = vec2(-1.0 / sqrt(2.0), 0.0);
         vec2 direction = vec2(1.0, 1.0);
-        if(doLineBlend)
-        {
+        if(doLineBlend) {
             bool haveShallowLine = (STEEP_DIRECTION_THRESHOLD * dist_H_A <= dist_D_I) && neq(E,A) && neq(B,A);
             bool haveSteepLine  = (STEEP_DIRECTION_THRESHOLD * dist_D_I <= dist_H_A) && neq(E,I) && neq(F,I);
             origin = haveShallowLine? vec2(-0.25, 0.0) : vec2(-0.5, 0.0);
@@ -223,8 +215,7 @@ void main()
     //                    -|D|E|F|x
     //                    -|-|H|I|-
     //                    -|-|-|-|-
-    if(blendResult.y != BLEND_NONE)
-    {
+    if(blendResult.y != BLEND_NONE) {
         float dist_B_I = DistYCbCr(B, I);
         float dist_F_A = DistYCbCr(F, A);
         bool doLineBlend = (blendResult.y == BLEND_DOMINANT ||
@@ -234,8 +225,7 @@ void main()
         vec2 origin = vec2(1.0 / sqrt(2.0), 0.0);
         vec2 direction = vec2(-1.0, -1.0);
 
-        if(doLineBlend)
-        {
+        if(doLineBlend) {
             bool haveShallowLine = (STEEP_DIRECTION_THRESHOLD * dist_B_I <= dist_F_A) && neq(E,I) && neq(H,I);
             bool haveSteepLine  = (STEEP_DIRECTION_THRESHOLD * dist_F_A <= dist_B_I) && neq(E,A) && neq(D,A);
             origin = haveShallowLine? vec2(0.25, 0.0) : vec2(0.5, 0.0);
@@ -252,8 +242,7 @@ void main()
     //                    x|D|E|F|-
     //                    -|G|H|-|-
     //                    -|-|-|-|-
-    if(blendResult.x != BLEND_NONE)
-    {
+    if(blendResult.x != BLEND_NONE) {
         float dist_D_C = DistYCbCr(D, C);
         float dist_B_G = DistYCbCr(B, G);
         bool doLineBlend = (blendResult.x == BLEND_DOMINANT ||
@@ -262,8 +251,7 @@ void main()
 
         vec2 origin = vec2(0.0, -1.0 / sqrt(2.0));
         vec2 direction = vec2(-1.0, 1.0);
-        if(doLineBlend)
-        {
+        if(doLineBlend) {
             bool haveShallowLine = (STEEP_DIRECTION_THRESHOLD * dist_D_C <= dist_B_G) && neq(E,C) && neq(F,C);
             bool haveSteepLine  = (STEEP_DIRECTION_THRESHOLD * dist_B_G <= dist_D_C) && neq(E,G) && neq(H,G);
             origin = haveShallowLine? vec2(0.0, -0.25) : vec2(0.0, -0.5);

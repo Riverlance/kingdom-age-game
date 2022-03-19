@@ -8,6 +8,8 @@ function UIProgressBar.create()
   progressbar.min = 0
   progressbar.max = 100
   progressbar.value = 0
+  progressbar.valueDelayedStartEventId = nil
+  progressbar.valueDelayedEventId = nil
   progressbar.fillerBackgroundWidget = nil
   progressbar.bgBorderLeft = 0
   progressbar.bgBorderRight = 0
@@ -48,6 +50,64 @@ function UIProgressBar:setValue(value, minimum, maximum)
 
   self.value = math.max(math.min(value, self.maximum), self.minimum)
   self:updateBackground()
+end
+
+function UIProgressBar:setValueDelayed(value, minimum, maximum, delayDuration, delayTicks, delayStartDuration, positiveChanges, negativeChanges)
+  delayStartDuration = delayStartDuration or 0
+  if positiveChanges == nil then
+    positiveChanges = true
+  end
+  if negativeChanges == nil then
+    negativeChanges = true
+  end
+  if not positiveChanges and not negativeChanges then
+    return
+  end
+
+  local valueDiff = value - self.value -- final - initial
+  if valueDiff == 0 then
+    return
+  end
+
+  -- Stop previous animation
+  removeEvent(self.valueDelayedStartEventId)
+  removeEvent(self.valueDelayedEventId)
+
+  if self.minimum ~= minimum or self.maximum ~= maximum or -- Minimum or maximum changes
+     positiveChanges and valueDiff < 0 or negativeChanges and valueDiff > 0 -- Should not animate
+  then
+    -- Cannot execute delayed effect, then set it right away
+    self:setValue(value, minimum, maximum)
+    return
+  end
+
+  if self.maximum == 0 then
+    return -- There is no range to do an animation at all
+  end
+
+  local valuePerTicks = (valueDiff * delayTicks) / delayDuration
+
+  local function onSetValueDelayed()
+    local nextValue = math.max(math.min(self.value + valuePerTicks, self.maximum), self.minimum)
+
+    -- If next value difference is less than valuePerTicks
+    if math.abs(nextValue - value) < math.abs(valuePerTicks) then
+      self.value = value
+      self:updateBackground()
+      return
+    end
+
+    if self.value == value then
+      return
+    end
+
+    self.value = nextValue
+    self:updateBackground()
+
+    self.valueDelayedEventId = scheduleEvent(onSetValueDelayed, delayTicks)
+  end
+
+  self.valueDelayedStartEventId = scheduleEvent(onSetValueDelayed, delayStartDuration)
 end
 
 function UIProgressBar:setPercent(percent)
@@ -97,6 +157,14 @@ function UIProgressBar:getPhasesBorderColor()
   return self.phasesBorderColor
 end
 
+function UIProgressBar:setFillerBackgroundColor(color)
+  if not self.fillerBackgroundWidget then
+    return
+  end
+
+  self.fillerBackgroundWidget:setBackgroundColor(color)
+end
+
 function UIProgressBar:updateFillerBackground() -- Should destroy children before at UIProgressBar:updateBackground()
   self.fillerBackgroundWidget = g_ui.createWidget('UIWidget', self)
   self.fillerBackgroundWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
@@ -119,7 +187,8 @@ function UIProgressBar:updatePhases()
   end
 
   local phaseWidth = (self:getWidth() - (self.bgBorderLeft + self.bgBorderRight)) / self.phases
-  local phaseHeight = (self:getHeight() - (self.bgBorderTop + self.bgBorderBottom)) / 4
+  local phaseHeight = math.max( (self:getHeight() - (self.bgBorderTop + self.bgBorderBottom)) / 4, 3)
+  phaseHeight = math.min(self:getHeight(), phaseHeight)
 
   for i = 1, self.phases - 1 do
     local rect = { x = 0, y = 0, width = self.phasesBorderWidth, height = phaseHeight }
@@ -190,12 +259,4 @@ function UIProgressBar:onGeometryChange(oldRect, newRect)
     self:setHeight(0)
   end
   self:updateBackground()
-end
-
-function UIProgressBar:setFillerBackgroundColor(color)
-  if not self.fillerBackgroundWidget then
-    return
-  end
-
-  self.fillerBackgroundWidget:setBackgroundColor(color)
 end

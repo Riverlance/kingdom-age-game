@@ -79,6 +79,13 @@ function ClientTopMenu.terminate()
   })
 
   topMenu:destroy()
+  topMenu = nil
+  leftButtonsPanel = nil
+  rightButtonsPanel = nil
+  leftGameButtonsPanel = nil
+  rightGameButtonsPanel = nil
+  pingLabel = nil
+  fpsLabel = nil
 
   _G.ClientTopMenu = nil
 end

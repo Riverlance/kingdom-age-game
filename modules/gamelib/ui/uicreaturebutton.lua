@@ -3,8 +3,7 @@ UICreatureButton = extends(UIWidget, 'UICreatureButton')
 
 local alpha = 'AA' -- Alpha
 
-local CreatureButtonColors =
-{
+local CreatureButtonColors = {
   onIdle = { notHovered = '#888888'..alpha, hovered = '#FFFFFF'..alpha },
 
   onTargetedOffensive = { notHovered = '#FF0000'..alpha, hovered = '#FF8888'..alpha },
@@ -28,6 +27,7 @@ function UICreatureButton.create()
 
   button.healthPercent  = 100
   button.manaPercent    = 100
+  button.vigorPercent   = 100
   button.position       = { x = 0, y = 0, z = 0 }
   button.ping           = 0
   button.creatureTypeId = CreatureTypePlayer
@@ -64,6 +64,7 @@ function UICreatureButton:setCreature(data)
 
     self.healthPercent  = data:getHealthPercent()
     self.manaPercent    = data:getManaPercent()
+    self.vigorPercent   = data:getVigorPercent()
     self.position.x     = position.x
     self.position.y     = position.y
     self.position.z     = position.z
@@ -115,6 +116,7 @@ function UICreatureButton:update()
   self:updateLabelText('')
   self:updateHealthPercent(true)
   self:updateManaPercent(true)
+  self:updateVigorPercent(true)
   self:updatePosition(true)
   self:updatePing(true)
   self:updateCreatureType()
@@ -188,7 +190,7 @@ function UICreatureButton:updateStaticSquare() -- Update border
   if self.isHovered or self.isTarget or self.isFollowed then
     if creatureWidget then
       if self.creature then
-        self.creature:showStaticSquare(color)
+        self.creature:showStaticCircle(color)
       end
       creatureWidget:setBorderWidth(1)
       creatureWidget:setBorderColor(color)
@@ -202,7 +204,7 @@ function UICreatureButton:updateStaticSquare() -- Update border
   else
     if creatureWidget then
       if self.creature then
-        self.creature:hideStaticSquare()
+        self.creature:hideStaticCircle()
       end
       creatureWidget:setBorderWidth(0)
     end
@@ -411,6 +413,21 @@ function UICreatureButton:updateManaPercent(manaPercent)
   manaPercent = self.creature and self.creature:getManaPercent() or self.manaPercent
 
   manaBarWidget:setPercent(manaPercent)
+end
+
+function UICreatureButton:updateVigorPercent(vigorPercent)
+  local vigorBarWidget = self:getChildById('vigorBar')
+  if not vigorBarWidget then
+    return
+  end
+
+  if vigorPercent ~= true then
+    self.vigorPercent = vigorPercent
+  end
+
+  vigorPercent = self.creature and self.creature:getVigorPercent() or self.vigorPercent
+
+  vigorBarWidget:setPercent(vigorPercent)
 end
 
 function UICreatureButton:updatePosition(position)
@@ -629,4 +646,14 @@ function UICreatureButton:getCreatureName(ignoreNickname)
   local nickname = self.creature and self.creature:getNickname() or self.nickname
 
   return not ignoreNickname and nickname ~= '' and nickname or self.creature and self.creature:getName() or self.name or ''
+end
+
+function UICreatureButton:updateTrackIcon(color)
+  local trackIcon = self:getChildById('trackIcon')
+  if not color then
+    trackIcon:setOn(false)
+  else
+    trackIcon:setOn(true)
+    trackIcon:setIconColor(color)
+  end
 end

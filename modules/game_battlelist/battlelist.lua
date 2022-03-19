@@ -33,22 +33,19 @@ BATTLE_SORT_NAME     = 4
 BATTLE_ORDER_ASCENDING  = 1
 BATTLE_ORDER_DESCENDING = 2
 
-BATTLE_SORT_STR =
-{
+BATTLE_SORT_STR = {
   [BATTLE_SORT_APPEAR]   = 'Display Time',
   [BATTLE_SORT_DISTANCE] = 'Distance',
   [BATTLE_SORT_HEALTH]   = 'Hitpoints',
   [BATTLE_SORT_NAME]     = 'Name',
 }
 
-BATTLE_ORDER_STR =
-{
+BATTLE_ORDER_STR = {
   [BATTLE_ORDER_ASCENDING]  = 'Ascending',
   [BATTLE_ORDER_DESCENDING] = 'Descending'
 }
 
-local defaultValues =
-{
+local defaultValues = {
   filterPanel = true,
 
   filterPlayers      = true,
@@ -86,9 +83,7 @@ function GameBattleList.init()
 
   battleHeader = battleWindow:getChildById('miniWindowHeader')
 
-  -- This disables scrollbar auto hiding
-  local scrollbar = battleWindow:getChildById('miniwindowScrollBar')
-  scrollbar:mergeStyle({ ['$!on'] = { } })
+  battleWindow:setScrollBarAutoHiding(false)
 
   sortMenuButton = battleWindow:getChildById('sortMenuButton')
   GameBattleList.setSortType(GameBattleList.getSortType())
@@ -149,7 +144,9 @@ function GameBattleList.init()
     onAttackingCreatureChange = GameBattleList.onAttackingCreatureChange,
     onFollowingCreatureChange = GameBattleList.onFollowingCreatureChange,
     onGameStart               = GameBattleList.online,
-    onGameEnd                 = GameBattleList.offline
+    onGameEnd                 = GameBattleList.offline,
+    onTrackCreature           = GameBattleList.onTrackCreature,
+    onUpdateTrackColor        = GameBattleList.onUpdateTrackColor
   })
 
   GameBattleList.refreshList()
@@ -165,7 +162,9 @@ function GameBattleList.terminate()
     onAttackingCreatureChange = GameBattleList.onAttackingCreatureChange,
     onFollowingCreatureChange = GameBattleList.onFollowingCreatureChange,
     onGameStart               = GameBattleList.online,
-    onGameEnd                 = GameBattleList.offline
+    onGameEnd                 = GameBattleList.offline,
+    onTrackCreature           = GameBattleList.onTrackCreature,
+    onUpdateTrackColor        = GameBattleList.onUpdateTrackColor
   })
 
   disconnect(LocalPlayer, {
@@ -531,6 +530,11 @@ function GameBattleList.sortList()
   if sortFunction then
     table.sort(battleListByIndex, sortFunction)
   end
+
+  if modules.ka_game_tracker then
+    local highlightTracked = function (a,b) return GameTracker.isTracked(a.creature) and not GameTracker.isTracked(b.creature) end
+    table.sort(battleListByIndex, highlightTracked)
+  end
 end
 
 function GameBattleList.updateList()
@@ -558,6 +562,12 @@ function GameBattleList.refreshList()
 
   for _, creature in pairs(g_map.getSpectators(localPlayer:getPosition(), true)) do
     GameBattleList.add(creature)
+  end
+
+  if modules.ka_game_tracker then
+    for id, creatureNode in pairs(GameTracker.getTrackedCreatures()) do
+      GameBattleList.onTrackCreature(creatureNode)
+    end
   end
 end
 
@@ -589,6 +599,12 @@ function GameBattleList.onAppear(creature)
   end
 
   GameBattleList.add(creature)
+
+  if modules.ka_game_tracker then
+    if GameTracker.isTracked(creature) then
+      GameBattleList.onTrackCreature(GameTracker.getTrackedCreatures()[creature:getId()])
+    end
+  end
 end
 
 function GameBattleList.onDisappear(creature)
@@ -662,5 +678,30 @@ function GameBattleList.onNicknameChange(creature, nickname)
     if GameBattleList.getSortType() == BATTLE_SORT_NAME then
       GameBattleList.updateList()
     end
+  end
+end
+
+function GameBattleList.onTrackCreature(creatureNode)
+  local TrackingInfo = GameTracker.m.TrackingInfo
+
+  local button = battleList[creatureNode.id]
+  if button then
+    button:updateTrackIcon(creatureNode.color)
+    GameBattleList.updateList()
+  end
+
+  local playerPos = g_game.getLocalPlayer():getPosition()
+  if creatureNode.status == TrackingInfo.Stop or creatureNode.status == TrackingInfo.Paused then
+    if button then
+      button:updateTrackIcon(nil)
+    end
+    GameBattleList.updateList()
+  end
+end
+
+function GameBattleList.onUpdateTrackColor(trackNode)
+  local button = battleList[trackNode.id]
+  if button then
+    button:updateTrackIcon(trackNode.color)
   end
 end

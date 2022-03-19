@@ -13,6 +13,7 @@ TrackingInfo = {
 
 trackedCreatures = { }
 trackedPositions = { }
+posIndex = 1
 
 function GameTracker.init()
   GameTracker.m = modules.ka_game_tracker -- Alias
@@ -41,6 +42,11 @@ function GameTracker.onGameEnd()
     signalcall(g_game.onTrackCreature, trackedCreature)
   end
   trackedCreatures = { }
+  for index, posNode in pairs(trackedPositions) do
+    GameTracker.stopTrackPosition(posNode.position)
+  end
+  trackedPositions = { }
+  posIndex = 1
 end
 
 function GameTracker.onLocalPlayerPositionChange()
@@ -60,6 +66,10 @@ end
 
 function GameTracker.isTracked(creature)
   return trackedCreatures[creature:getId()] and true or false
+end
+
+function Creature:getTrackInfo()
+  return trackedCreatures[self:getId()]
 end
 
 function GameTracker.sendTrackAction(creature, start)
@@ -92,7 +102,7 @@ end
 
 function GameTracker.onTrackCreature(protocol, msg)
   local creatureId = msg:getU32()
-  trackedCreatures[creatureId] = trackedCreatures[creatureId] or { }
+  trackedCreatures[creatureId] = trackedCreatures[creatureId] or { color = '#ffc659' }
 
   local trackedCreature = trackedCreatures[creatureId]
   trackedCreature.id = creatureId
@@ -127,7 +137,7 @@ function GameTracker.getTrackedPositions()
 end
 
 function GameTracker.isTrackedPosition(position)
-  for _, posNode in ipairs(trackedPositions) do
+  for _, posNode in pairs(trackedPositions) do
     if Position.equals(posNode.position, position) then
       return true
     end
@@ -135,11 +145,74 @@ function GameTracker.isTrackedPosition(position)
   return false
 end
 
+function GameTracker.getTrackedPosition(position)
+  for _, posNode in pairs(trackedPositions) do
+    if Position.equals(posNode.position, position) then
+      return posNode
+    end
+  end
+  return nil
+end
+
 function GameTracker.startTrackPosition(position)
   if GameTracker.isTrackedPosition(position) then
     return
   end
-  local posNode = { position = position }
-  table.insert(trackedPositions, posNode)
+  local posNode = { index = posIndex, position = position, color = '#ffc659' }
+  posIndex = posIndex + 1
+  trackedPositions[posNode.index] = posNode
   signalcall(g_game.onTrackPosition, posNode)
+end
+
+function GameTracker.stopTrackPosition(position)
+  local posNode = GameTracker.getTrackedPosition(position)
+  if not posNode then
+    return
+  end
+  signalcall(g_game.onTrackPositionEnd, posNode)
+  trackedPositions[posNode.index] = nil
+end
+
+function GameTracker.createEditTrackWindow(trackNode)
+  local trackerWindow = g_ui.displayUI('tracker')
+
+  local red = trackerWindow:getChildById('red')
+  local green = trackerWindow:getChildById('green')
+  local blue = trackerWindow:getChildById('blue')
+
+  local activeColor = tocolor(trackNode.color)
+  red:setValue(activeColor.r)
+  green:setValue(activeColor.g)
+  blue:setValue(activeColor.b)
+
+  local updateColor = function()
+    local display = trackerWindow:getChildById('colorDisplay')
+    display:setBackgroundColor({r = red:getValue(), g = green:getValue(), b = blue:getValue(), a = 255})
+  end
+
+  updateColor()
+
+  local changeFunc = function()
+    trackNode.color = colortostring({r = red:getValue(), g = green:getValue(), b = blue:getValue(), a = 255})
+    signalcall(g_game.onUpdateTrackColor, trackNode)
+    trackerWindow:destroy()
+  end
+
+  local cancelFunc = function()
+    trackerWindow:destroy()
+  end
+
+  trackerWindow.onEnter = changeFunc
+  trackerWindow.onEscape = cancelFunc
+
+  local okButton = trackerWindow:getChildById('okButton')
+  local cancelButton = trackerWindow:getChildById('cancelButton')
+
+  okButton.onClick = changeFunc
+  cancelButton.onClick = cancelFunc
+
+  red.onValueChange = updateColor
+  green.onValueChange = updateColor
+  blue.onValueChange = updateColor
+
 end

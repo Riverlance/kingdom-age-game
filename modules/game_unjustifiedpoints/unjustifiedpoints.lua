@@ -172,8 +172,7 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
   local nextFragRemainingTimeTooltip = string.format('Next frag will be lost in: %.2d:%.2d:%.2d', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, nextFragRemainingTime % 60)
   skullTimeLabel:setTooltip(string.format('Total frags: %d\n%s\nAll frags will be lost in: %.2d:%.2d:%.2d', fragsCount, nextFragRemainingTimeTooltip, math.floor(remainingTime / (60 * 60)), math.floor(remainingTime / 60) % 60, remainingTime % 60))
 
-  skullTimeLabel.data =
-  {
+  skullTimeLabel.data = {
     remainingTime         = remainingTime,
     fragsToRedSkull       = fragsToRedSkull,
     fragsToBlackSkull     = fragsToBlackSkull,

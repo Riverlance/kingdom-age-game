@@ -31,13 +31,11 @@ const float emboss = 0.01;
 
 //---------- crystals effect
 
-  float col(vec2 coord)
-  {
+  float col(vec2 coord) {
     float delta_theta = 2.0 * PI / float(angle);
     float col = 0.0;
     float theta = 0.0;
-    for (int i = 0; i < steps; i++)
-    {
+    for (int i = 0; i < steps; i++) {
       vec2 adjc = coord;
       theta = delta_theta*float(i);
       adjc.x += cos(theta)*u_Time*speed + u_Time * speed_x;
