@@ -40,11 +40,11 @@ function UIProgressBar:setMaximum(maximum)
 end
 
 function UIProgressBar:setValue(value, minimum, maximum)
-  if minimum then
+  if minimum and minimum ~= self.minimum then
     self:setMinimum(minimum)
   end
 
-  if maximum then
+  if maximum and maximum ~= self.maximum then
     self:setMaximum(maximum)
   end
 
@@ -60,24 +60,30 @@ function UIProgressBar:setValueDelayed(value, minimum, maximum, delayDuration, d
   if negativeChanges == nil then
     negativeChanges = true
   end
-  if not positiveChanges and not negativeChanges then
-    return
-  end
-
-  local valueDiff = value - self.value -- final - initial
-  if valueDiff == 0 then
-    return
-  end
 
   -- Stop previous animation
   removeEvent(self.valueDelayedStartEventId)
   removeEvent(self.valueDelayedEventId)
 
-  if self.minimum ~= minimum or self.maximum ~= maximum or -- Minimum or maximum changes
-     positiveChanges and valueDiff < 0 or negativeChanges and valueDiff > 0 -- Should not animate
+  local changeMinimum = minimum and minimum ~= self.minimum
+  if changeMinimum then
+    self:setMinimum(minimum)
+  end
+
+  local changeMaximum = maximum and maximum ~= self.maximum
+  if changeMaximum then
+    self:setMaximum(maximum)
+  end
+
+  local valueDiff = value - self.value -- final - initial
+
+  if changeMinimum or changeMaximum or -- Changed minimum or maximum
+     not positiveChanges and not negativeChanges or -- No animation enabled
+     valueDiff > 0 and not positiveChanges or valueDiff < 0 and not negativeChanges -- Positive and should not animate on positive changes or negative and should not animate on negative changes
   then
     -- Cannot execute delayed effect, then set it right away
-    self:setValue(value, minimum, maximum)
+    self.value = math.max(math.min(value, self.maximum), self.minimum)
+    self:updateBackground()
     return
   end
 

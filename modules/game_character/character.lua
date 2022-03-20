@@ -426,28 +426,43 @@ end
 
 
 
+local function isLogin()
+  return loginTime <= 0 or loginTime > g_clock.millis()
+end
+
 function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
-  -- If is not a login health change, make a delayed set
-  if loginTime > 0 and loginTime < g_clock.millis() then
-    healthBarPrevious:setValueDelayed(health, 0, maxHealth, 1000, 25, 1000, false, true)
-  -- Instantly set
-  else
+  local isLogin = isLogin()
+
+  if isLogin then
     healthBarPrevious:setValue(health, 0, maxHealth)
+  else
+    healthBarPrevious:setValueDelayed(health, 0, maxHealth, 1000, 25, 1000, false, true)
   end
 
   healthBar:setValue(health, 0, maxHealth)
+
   healthBarValueLabel:setText(health .. ' / ' .. maxHealth)
   healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d.\nClick to show creature health bar.', health, maxHealth), TooltipType.textBlock)
 end
 
 function GameCharacter.onManaChange(localPlayer, mana, maxMana)
-  manaBar:setValue(mana, 0, maxMana)
+  if isLogin() then
+    manaBar:setValue(mana, 0, maxMana)
+  else
+    manaBar:setValueDelayed(mana, 0, maxMana, 200, 25, 0, true, false)
+  end
+
   manaBarValueLabel:setText(mana .. ' / ' .. maxMana)
   manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d.\nClick to show player mana bar.', mana, maxMana), TooltipType.textBlock)
 end
 
 function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
-  vigorBar:setValue(vigor, 0, maxVigor)
+  if isLogin() then
+    vigorBar:setValue(vigor, 0, maxVigor)
+  else
+    vigorBar:setValueDelayed(vigor, 0, maxVigor, 200, 25, 0, true, false)
+  end
+
   vigorBarValueLabel:setText(vigor .. ' / ' .. maxVigor)
   vigorBarValueLabel:setTooltip(tr('Your character vigor is %d out of %d.\nClick to show player vigor bar.', vigor, maxVigor), TooltipType.textBlock)
 end
@@ -518,6 +533,8 @@ function GameCharacter.online()
 end
 
 function GameCharacter.offline()
+  loginTime = 0
+
   local player = g_game.getLocalPlayer()
 
   disconnect(player, {
