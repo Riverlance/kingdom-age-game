@@ -34,6 +34,8 @@ function GameHotkeyBars.init()
     onVisibilityChange = GameHotkeyBars.onToggleHotkeyWindow
   })
 
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePowerCast, GameHotkeyBars.onCastPower)
+
   GameHotkeyBars.initHotkeyBars()
 
   if g_game.isOnline() then
@@ -47,6 +49,8 @@ function GameHotkeyBars.terminate()
   end
 
   GameHotkeyBars.deinitHotkeyBars()
+
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePowerCast)
 
   disconnect(GameHotkeys.m.hotkeysWindow, {
     onVisibilityChange = GameHotkeyBars.onToggleHotkeyWindow
@@ -232,6 +236,14 @@ function GameHotkeyBars.setPowerIcon(keyCombo, enabled)
     if hotkeyBar.hotkeyList[keyCombo] then
       hotkeyBar.hotkeyList[keyCombo]:getChildById('power'):setImageSource(path)
     end
+  end
+end
+
+function GameHotkeyBars.onCastPower(protocol, msg)
+  local powerId = msg:getU8()
+  local exhaustTime = msg:getU32()
+  for _, hotkeyBar in ipairs(hotkeyBarList) do
+    hotkeyBar:onCastPower(powerId, exhaustTime)
   end
 end
 

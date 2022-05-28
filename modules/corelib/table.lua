@@ -233,16 +233,9 @@ function table.size(t)
   return size
 end
 
-function table.apply(t, func, copy) -- (t, func [, copy = false])
-  local ret = copy and { } or t
-  for k, v in pairs(t) do
-    ret[k] = func(v)
-  end
-  return ret
-end
-
 function table.list(t)
-  return table.concat(t, ', '):gsub(', ([^,]+)$', ' and %1') -- Returns like '1, 2 and 3'
+  local stringRet = table.concat(t, ', '):gsub(', ([^,]+)$', ' and %1') -- Returns like '1, 2 and 3'
+  return stringRet -- Return only first return parameter of table.concat
 end
 
 function table.collect(t, func)

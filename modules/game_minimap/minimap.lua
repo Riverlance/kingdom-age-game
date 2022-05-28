@@ -4,6 +4,7 @@ _G.GameMinimap = { }
 
 minimapWindow = nil
 minimapTopMenuButton = nil
+minimapBackgroundWidget = nil
 minimapWidget = nil
 
 minimapBar = nil
@@ -36,6 +37,9 @@ function GameMinimap.init()
   minimapTopMenuButton = ClientTopMenu.addRightGameToggleButton('minimapTopMenuButton', tr('Minimap') .. ' (Ctrl+M)', '/images/ui/top_menu/minimap', GameMinimap.toggle)
 
   minimapWindow.topMenuButton = minimapTopMenuButton
+
+  minimapBackgroundWidget = contentsPanel:getChildById('background')
+  minimapBackgroundWidget:hide()
 
   minimapWidget = contentsPanel:getChildById('minimap')
 
@@ -225,6 +229,7 @@ function GameMinimap.toggleFullMap()
   local rootPanel = GameInterface.getRootPanel()
   local parent    = fullmapView and rootPanel or minimapWindow:getChildById('contentsPanel')
 
+  minimapBackgroundWidget:setParent(parent)
   minimapWidget:setParent(parent)
   minimapBar:setParent(parent)
   positionLabel:setParent(parent)
@@ -247,9 +252,13 @@ function GameMinimap.toggleFullMap()
   minimapOpacityScrollbar:setVisible(fullmapView)
 
   if fullmapView then
+    local opacity = minimapOpacityScrollbar:getValue() / 100
+
     minimapWindow:hide()
+    minimapBackgroundWidget:fill('parent')
+    minimapBackgroundWidget:setOpacity(opacity)
     minimapWidget:fill('parent')
-    minimapWidget:setOpacity(minimapOpacityScrollbar:getValue() / 100)
+    minimapWidget:setOpacity(opacity)
 
     fullMapButton:setOn(true)
     ballButton:addAnchor(AnchorTop, 'minimapBar', AnchorTop)
@@ -259,6 +268,11 @@ function GameMinimap.toggleFullMap()
     infoLabel:setMarginTop(3)
   else
     minimapWindow:show()
+    minimapBackgroundWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
+    minimapBackgroundWidget:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+    minimapBackgroundWidget:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+    minimapBackgroundWidget:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
+    minimapBackgroundWidget:setOpacity(1.0)
     minimapWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
     minimapWidget:addAnchor(AnchorBottom, 'parent', AnchorBottom)
     minimapWidget:addAnchor(AnchorLeft, 'parent', AnchorLeft)
@@ -284,6 +298,10 @@ function GameMinimap.toggleFullMap()
   GameMinimap.updateCameraPosition()
 end
 
+function GameMinimap.getMinimapBackgroundWidget()
+  return minimapBackgroundWidget
+end
+
 function GameMinimap.getMinimapWidget()
   return minimapWidget
 end
@@ -293,35 +311,53 @@ function GameMinimap.getMinimapBar()
 end
 
 function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
-  local instanceId   = msg:getU32()
-  local instanceName = msg:getString()
+  local action = msg:getU8()
 
-  local localPlayer  = g_game.getLocalPlayer()
-  if not localPlayer then
-    return
-  end
+  -- Minimap info
+  if action == 1 then
+    local instanceId   = msg:getU32()
+    local instanceName = msg:getString()
 
-  localPlayer:setInstanceId(instanceId)
-  localPlayer:setInstanceName(instanceName)
-
-  local text
-
-  -- Instance map
-  if instanceId > 0 then
-    text = instanceName
-
-  -- Default map
-  else
-    local pos = localPlayer:getPosition()
-    if not pos then
+    local localPlayer  = g_game.getLocalPlayer()
+    if not localPlayer then
       return
     end
 
-    text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
-  end
+    localPlayer:setInstanceId(instanceId)
+    localPlayer:setInstanceName(instanceName)
 
-  positionLabel:setText(text)
-  positionLabel:setTooltip(text)
+    local text
+
+    -- Instance map
+    if instanceId > 0 then
+      text = instanceName
+
+    -- Default map
+    else
+      local pos = localPlayer:getPosition()
+      if not pos then
+        return
+      end
+
+      text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
+    end
+
+    positionLabel:setText(text)
+    positionLabel:setTooltip(text)
+
+  -- View state
+  elseif action == 2 then
+    local state = msg:getU8() == 1
+
+    minimapBackgroundWidget:setVisible(not state)
+    if state then
+      minimapBackgroundWidget:removeTooltip()
+    else
+      minimapBackgroundWidget:setTooltip('Minimap not available')
+    end
+
+    minimapWidget:setVisible(state)
+  end
 end
 
 function GameMinimap.onTrackPosition(posNode)
@@ -344,8 +380,10 @@ function GameMinimap.createTrackMenu(widget, mousePos, mouseButton)
   if mouseButton == MouseRightButton then
     local menu = g_ui.createWidget('PopupMenu')
     menu:setGameMenu(true)
-    menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(widget.info) end)
-    menu:addOption(tr('Stop track'), function() GameTracker.stopTrackPosition(widget.info.position) end)
+    if not widget.info.auto then
+      menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(widget.info) end)
+      menu:addOption(tr('Stop track'), function() GameTracker.stopTrackPosition(widget.info.position) end)
+    end
     menu:display(mousePos)
     return true
   end

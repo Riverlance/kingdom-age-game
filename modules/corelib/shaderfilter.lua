@@ -19,6 +19,7 @@ MapShaders = {
 
 
   -- Shaders (isFilter = false) -- Now isFilter is true just for players have fun for a while
+  { isFilter = true, name = 'Angular', frag = 'shaders/angular.frag'},
   { isFilter = true, name = 'Heat', frag ='shaders/heat.frag' },
   { isFilter = true, name = 'Noise', frag ='shaders/noise.frag' },
   { isFilter = true, name = 'Night', frag ='shaders/night.frag' }, -- linearize

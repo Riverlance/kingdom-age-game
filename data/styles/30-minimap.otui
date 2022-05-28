@@ -14,6 +14,13 @@ Minimap < UIMinimap
   cross: true
   color: black
 
+MinimapRegionLabel < UIWidget
+  focusable: false
+  font: verdana-8px-antialised
+  text-auto-resize: true
+  color: #ffffff
+  background-color: #000000bb
+
 // Minimap Flag Create Window
 
 MinimapFlagCheckBox < CheckBox

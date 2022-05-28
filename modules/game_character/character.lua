@@ -84,9 +84,9 @@ function GameCharacter.init()
     onGameEnd = GameCharacter.offline,
 
     -- Combat controls
-    onChaseModeChange = GameCharacter.update,
-    onSafeFightChange = GameCharacter.update,
-    onFightModeChange = GameCharacter.update,
+    onChaseModeChange = GameCharacter.updateCombatControls,
+    onSafeFightChange = GameCharacter.updateCombatControls,
+    onFightModeChange = GameCharacter.updateCombatControls,
     onWalk            = GameCharacter.check,
     onAutoWalk        = GameCharacter.check
   })
@@ -217,9 +217,9 @@ function GameCharacter.terminate()
     onGameEnd = GameCharacter.offline,
 
     -- Combat controls
-    onChaseModeChange = GameCharacter.update,
-    onSafeFightChange = GameCharacter.update,
-    onFightModeChange = GameCharacter.update,
+    onChaseModeChange = GameCharacter.updateCombatControls,
+    onSafeFightChange = GameCharacter.updateCombatControls,
+    onFightModeChange = GameCharacter.updateCombatControls,
     onWalk            = GameCharacter.check,
     onAutoWalk        = GameCharacter.check
   })

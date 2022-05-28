@@ -47,7 +47,8 @@ ServerOpcodes = {
   ServerOpcodePartyList               = 61,
   ServerOpcodePlayerLevel             = 62,
   ServerOpcodeTracking                = 63,
-  -- Free                               64 to 95
+  ServerOpcodePowerCast               = 64,
+  -- Free                               65 to 95
   ServerOpcodeStaticText              = 96,
   ServerOpcodeUnknownCreature         = 97,
   ServerOpcodeOutdatedCreature        = 98,

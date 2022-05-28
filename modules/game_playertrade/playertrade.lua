@@ -45,7 +45,9 @@ function GamePlayerTrade.createTrade()
     g_game.rejectTrade()
     tradeWindow:hide()
   end
+  tradeWindow:setContentMinimumHeight(80)
   tradeWindow:setup()
+  tradeWindow:setContentHeight(80)
 end
 
 function GamePlayerTrade.fillTrade(name, items, counter)

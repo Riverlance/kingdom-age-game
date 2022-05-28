@@ -1,3 +1,40 @@
+local regionLabels = {
+  { pos = { x = 3400, y = 2670, z = 7 }, text = 'Rookie Island' },
+  { pos = { x = 2743, y = 2721, z = 7 }, text = 'City of Erembor' },
+  { pos = { x = 3017, y = 2619, z = 7 }, text = 'City of Elensar' },
+  { pos = { x = 3224, y = 2687, z = 7 }, text = 'City of Nova' },
+  { pos = { x = 2983, y = 2543, z = 7 }, text = 'City of Nalta' },
+  { pos = { x = 3292, y = 2997, z = 7 }, text = "City of Dron'Ma" },
+  { pos = { x = 2655, y = 2597, z = 7 }, text = 'Amazonia Hideout' },
+  { pos = { x = 2710, y = 2580, z = 7 }, text = 'Vengeance Village' },
+  { pos = { x = 2885, y = 2635, z = 7 }, text = 'Mount Farber' },
+  { pos = { x = 2855, y = 2700, z = 7 }, text = 'Eranin Woods' },
+  { pos = { x = 2740, y = 2795, z = 7 }, text = 'Troll Shaws' },
+  { pos = { x = 2625, y = 2805, z = 7 }, text = 'Death Claw Mountain' },
+  { pos = { x = 3155, y = 2595, z = 7 }, text = 'Krog-Har' },
+  { pos = { x = 3133, y = 2713, z = 7 }, text = 'Sand Hills' },
+  { pos = { x = 2965, y = 2790, z = 7 }, text = 'Mount Christ' },
+  { pos = { x = 3165, y = 2790, z = 7 }, text = 'Mavigic Valley' },
+  { pos = { x = 3140, y = 2855, z = 7 }, text = 'Mavigic Forest' },
+  { pos = { x = 3232, y = 2853, z = 7 }, text = 'Mavigic Citadel' },
+  { pos = { x = 2992, y = 2867, z = 7 }, text = 'Anvhian Mines' },
+  { pos = { x = 2830, y = 2865, z = 7 }, text = 'Holkagan Desert' },
+  { pos = { x = 3077, y = 2920, z = 7 }, text = 'Cyclops Tunnel' },
+  { pos = { x = 3100, y = 2990, z = 7 }, text = 'Elven Camp' },
+  { pos = { x = 3280, y = 2882, z = 7 }, text = 'Lollaard Cave' },
+  { pos = { x = 3000, y = 3052, z = 7 }, text = 'The Altars Switch' },
+  { pos = { x = 3000, y = 3120, z = 7 }, text = 'The Lurkwood' },
+  { pos = { x = 3105, y = 3120, z = 7 }, text = 'Dragon Lair' },
+  { pos = { x = 3180, y = 3120, z = 7 }, text = 'Vampire Mansion' },
+  { pos = { x = 2875, y = 2975, z = 7 }, text = 'Rakkar Hills' },
+  { pos = { x = 2733, y = 3028, z = 7 }, text = 'Greenest' },
+  { pos = { x = 2690, y = 3080, z = 7 }, text = 'Vast Swamp' },
+  { pos = { x = 2495, y = 3120, z = 7 }, text = 'Thartov' },
+  { pos = { x = 2865, y = 3135, z = 7 }, text = 'Outlaw Village' },
+  { pos = { x = 2790, y = 3240, z = 7 }, text = 'Wealth Island' },
+  { pos = { x = 2945, y = 3430, z = 7 }, text = 'Roshamuul' },
+}
+
 local function bindCopyPositionOption(menu, pos)
   menu:addOption(tr('Copy position'), function() g_window.setClipboardText(string.format('Position(%d, %d, %d)', pos.x, pos.y, pos.z)) end)
 end
@@ -16,17 +53,23 @@ function UIMinimap:onSetup()
   self.flags = { }
   self.alternatives = { }
   self.alternativesVisible = true
-  self.onAddAutomapFlag = function(pos, icon, description, force)
-    self:addFlag(pos, icon, description, force)
+  self.onAddAutomapFlag = function(pos, icon, description, force, temporary)
+    self:addFlag(pos, icon, description, force, temporary)
   end
   self.onRemoveAutomapFlag = function(pos)
     self:removeFlag(pos)
   end
   self.onGameEnd = function()
+    for k = #self.flags, 1, -1 do
+      local flag = self.flags[k]
+      if flag.temporary then
+        flag:destroy() -- Removed from list with onDestroy
+      end
+    end
+
     for k, widget in pairs(self.alternatives) do
       if widget.temporary then
-        widget:destroy()
-        -- self.alternatives[k] = nil -- Not needed because of the widget.onDestroy
+        widget:destroy() -- Removed from list with onDestroy
       end
     end
   end
@@ -36,6 +79,17 @@ function UIMinimap:onSetup()
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
     onGameEnd           = self.onGameEnd,
   })
+
+  -- Add title labels
+  for _, regionLabel in ipairs(regionLabels) do
+    local regionLabelWidget         = g_ui.createWidget('MinimapRegionLabel')
+    regionLabelWidget.alternativeId = #self.alternatives + 1 -- ignoring creature minimap widgets
+    regionLabelWidget.pos           = regionLabel.pos
+    regionLabelWidget:setText(regionLabel.text)
+
+    self:addAlternativeWidget(regionLabelWidget)
+    self:centerInPosition(regionLabelWidget, regionLabelWidget.pos)
+  end
 end
 
 function UIMinimap:onDestroy()
@@ -420,7 +474,7 @@ function UIMinimap:onMouseRelease(pos, button)
     menu:setGameMenu(true)
     menu:addOption(tr('Add new mark'), function() self:createAddFlagWindow(mapPos) end)
     if GameTracker then
-      menu:addOption(tr('Track position'), function() signalcall(g_game.onTrackPositionStart, mapPos) end)
+      menu:addOption(tr('Track position'), function() signalcall(g_game.onClickStartTrackPosition, mapPos) end)
     end
     menu:addSeparator()
     bindCopyPositionOption(menu, mapPos)

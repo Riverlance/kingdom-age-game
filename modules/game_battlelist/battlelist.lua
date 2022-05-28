@@ -146,6 +146,7 @@ function GameBattleList.init()
     onGameStart               = GameBattleList.online,
     onGameEnd                 = GameBattleList.offline,
     onTrackCreature           = GameBattleList.onTrackCreature,
+    onTrackCreatureEnd        = GameBattleList.onTrackCreature,
     onUpdateTrackColor        = GameBattleList.onUpdateTrackColor
   })
 
@@ -164,6 +165,7 @@ function GameBattleList.terminate()
     onGameStart               = GameBattleList.online,
     onGameEnd                 = GameBattleList.offline,
     onTrackCreature           = GameBattleList.onTrackCreature,
+    onTrackCreatureEnd        = GameBattleList.onTrackCreature,
     onUpdateTrackColor        = GameBattleList.onUpdateTrackColor
   })
 
@@ -230,6 +232,10 @@ function GameBattleList.add(creature)
 
   -- Register first time creature adding
   if not button then
+    if creature:getHealthPercent() == 0 then
+      return
+    end
+
     button = g_ui.createWidget('BattleButton')
     button:setup(creature)
 
@@ -565,8 +571,10 @@ function GameBattleList.refreshList()
   end
 
   if modules.ka_game_tracker then
-    for id, creatureNode in pairs(GameTracker.getTrackedCreatures()) do
-      GameBattleList.onTrackCreature(creatureNode)
+    for id, trackNode in pairs(GameTracker.getTrackList()) do
+      if trackNode.id then
+        GameBattleList.onTrackCreature(trackNode)
+      end
     end
   end
 end
@@ -602,7 +610,7 @@ function GameBattleList.onAppear(creature)
 
   if modules.ka_game_tracker then
     if GameTracker.isTracked(creature) then
-      GameBattleList.onTrackCreature(GameTracker.getTrackedCreatures()[creature:getId()])
+      GameBattleList.onTrackCreature(GameTracker.getTrackList()[creature:getId()])
     end
   end
 end
@@ -681,27 +689,24 @@ function GameBattleList.onNicknameChange(creature, nickname)
   end
 end
 
-function GameBattleList.onTrackCreature(creatureNode)
-  local TrackingInfo = GameTracker.m.TrackingInfo
-
-  local button = battleList[creatureNode.id]
-  if button then
-    button:updateTrackIcon(creatureNode.color)
-    GameBattleList.updateList()
-  end
-
-  local playerPos = g_game.getLocalPlayer():getPosition()
-  if creatureNode.status == TrackingInfo.Stop or creatureNode.status == TrackingInfo.Paused then
-    if button then
-      button:updateTrackIcon(nil)
-    end
-    GameBattleList.updateList()
-  end
-end
-
 function GameBattleList.onUpdateTrackColor(trackNode)
   local button = battleList[trackNode.id]
   if button then
     button:updateTrackIcon(trackNode.color)
   end
+end
+
+function GameBattleList.onTrackCreature(trackNode)
+  GameBattleList.updateList()
+
+  local TrackingInfo = GameTracker.m.TrackingInfo
+  local button = battleList[trackNode.id]
+  if not button then
+    return
+  end
+  local color = trackNode.color
+  if trackNode.status == TrackingInfo.Stop or trackNode.status == TrackingInfo.Paused then
+    color = nil
+  end
+  button:updateTrackIcon(color)
 end

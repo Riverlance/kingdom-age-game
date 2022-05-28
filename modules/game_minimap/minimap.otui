@@ -35,6 +35,11 @@ MiniWindow
   MiniWindowContents
 
     Minimap
+      id: background
+      anchors.fill: parent
+      background-color: black
+
+    Minimap
       id: minimap
       anchors.top: parent.top
       anchors.bottom: parent.bottom
@@ -68,7 +73,10 @@ MiniWindow
       maximum: 100
       symbol: %
       visible: false
-      @onValueChange: GameMinimap.getMinimapWidget():setOpacity(self:getValue() / 100)
+      @onValueChange: |
+        local opacity = self:getValue() / 100
+        GameMinimap.getMinimapBackgroundWidget():setOpacity(opacity)
+        GameMinimap.getMinimapWidget():setOpacity(opacity)
 
       $!first:
         anchors.top: none
@@ -107,7 +115,7 @@ MiniWindow
         UIButton
           id: extraIconsButton
           size: 15 15
-          !tooltip: tr('Show minimap extra icons (e.g., party player icon).')
+          !tooltip: tr('Show minimap extra icons (e.g., title labels and party player icons).')
           !tooltip-type: TooltipType.textBlock
           anchors.top: parent.top
           anchors.left: parent.left
@@ -123,7 +131,7 @@ MiniWindow
             image-clip: 30 30 15 15
 
           $on:
-            !tooltip: tr('Hide minimap extra icons (e.g., party player icon).')
+            !tooltip: tr('Hide minimap extra icons (e.g., title labels and party player icons).')
             !tooltip-type: TooltipType.textBlock
             image-clip: 45 0 15 15
 

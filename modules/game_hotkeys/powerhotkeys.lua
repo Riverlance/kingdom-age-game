@@ -41,9 +41,6 @@ powerBoost_event_image = nil
 function GamePowerHotkeys.init()
   -- Alias
   GamePowerHotkeys.m = modules.game_hotkeys
-
-  g_keyboard.bindKeyPress('Escape', function() GamePowerHotkeys.cancel(true) end, rootWidget)
-
   GamePowerHotkeys.removeBoostEffect()
 end
 
@@ -92,8 +89,12 @@ end
 
 function GamePowerHotkeys.cancel(forceStop)
   if not g_game.isOnline() then
-    return
+    return false
   end
+
+  if powerBoost_lastPower <= 0 then
+    return false
+  end 
 
   GamePowerHotkeys.send(power_flag_cancel)
   GamePowerHotkeys.removeBoostEffect()
@@ -111,15 +112,17 @@ function GamePowerHotkeys.cancel(forceStop)
 
   if powerBoost_clickedWidget then
     disconnect(powerBoost_clickedWidget, 'onMouseRelease')
-  else
-    if powerBoost_keyCombo then
-      g_keyboard.unbindKeyUp(powerBoost_keyCombo)
-    end
+    ret = true
+  elseif powerBoost_keyCombo then
+    g_keyboard.unbindKeyUp(powerBoost_keyCombo)
+    ret = true
   end
 
   powerBoost_keyCombo      = nil
   powerBoost_clickedWidget = nil
   powerBoost_startAt       = nil
+
+  return ret
 end
 
 function GamePowerHotkeys.removeBoostColor()

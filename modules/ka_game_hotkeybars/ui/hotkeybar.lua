@@ -353,3 +353,9 @@ function UIHotkeyBar:updateDraggable(draggable)
     end
   end
 end
+
+function UIHotkeyBar:onCastPower(powerId, exhaustTime)
+  for _, hotkey in ipairs(self:getHotkeyList():getChildren()) do
+    hotkey:onCastPower(powerId, exhaustTime)
+  end
+end

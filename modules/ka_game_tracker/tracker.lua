@@ -1,9 +1,12 @@
 _G.GameTracker = { }
 
 TrackingInfo = {
-  Name     = 1,
-  Position = 2,
-  Outfit   = 3,
+  Id       = 1,
+  Name     = 2,
+  Position = 3,
+  Outfit   = 4,
+  Color    = 5,
+  Auto     = 250,
   Tracking = 251,
   Paused   = 252,
   Start    = 253,
@@ -11,16 +14,14 @@ TrackingInfo = {
   MsgEnd   = 255
 }
 
-trackedCreatures = { }
-trackedPositions = { }
-posIndex = 1
+trackList = { }
 
 function GameTracker.init()
   GameTracker.m = modules.ka_game_tracker -- Alias
-  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.onTrackCreature)
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.parseTrack)
   connect(g_game, {
     onGameEnd = GameTracker.onGameEnd,
-    onTrackPositionStart = GameTracker.startTrackPosition
+    onClickStartTrackPosition = GameTracker.startTrackPosition
   })
   connect(LocalPlayer, { onPositionChange = GameTracker.onLocalPlayerPositionChange })
 end
@@ -30,148 +31,185 @@ function GameTracker.terminate()
   disconnect(LocalPlayer, { onPositionChange = GameTracker.onLocalPlayerPositionChange })
   disconnect(g_game, {
     onGameEnd = GameTracker.onGameEnd,
-    onTrackPositionStart = GameTracker.startTrackPosition
+    onClickStartTrackPosition = GameTracker.startTrackPosition
   })
-  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.onTrackCreature)
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.parseTrack)
   _G.GameTracker = nil
 end
 
+function GameTracker.getTrackList()
+  return trackList
+end
+
+
+--[[ Client Events ]]
+
 function GameTracker.onGameEnd()
-  for id, trackedCreature in pairs(trackedCreatures) do
-    trackedCreature.status = TrackingInfo.Stop
-    signalcall(g_game.onTrackCreature, trackedCreature)
+  for id, trackNode in pairs(trackList) do
+    GameTracker.onTrackEnd(trackNode)
   end
-  trackedCreatures = { }
-  for index, posNode in pairs(trackedPositions) do
-    GameTracker.stopTrackPosition(posNode.position)
-  end
-  trackedPositions = { }
-  posIndex = 1
 end
 
 function GameTracker.onLocalPlayerPositionChange()
-  for id, trackedCreature in pairs(trackedCreatures) do
-    signalcall(g_game.onTrackCreature, trackedCreature)
+  for id, trackNode in pairs(trackList) do
+    if trackNode.id then
+      signalcall(g_game.onTrackCreature, trackNode)
+    else
+      signalcall(g_game.onTrackPosition, trackNode)
+    end
   end
-  for id, trackedPosition in pairs(trackedPositions) do
-    signalcall(g_game.onTrackPosition, trackedPosition)
-  end
 end
 
---[[ Track Creatures ]]
 
-function GameTracker.getTrackedCreatures()
-  return trackedCreatures
-end
+--[[ Network ]]
 
-function GameTracker.isTracked(creature)
-  return trackedCreatures[creature:getId()] and true or false
-end
-
-function Creature:getTrackInfo()
-  return trackedCreatures[self:getId()]
-end
-
-function GameTracker.sendTrackAction(creature, start)
-  if not creature or creature:isRemoved() then
-    return
-  end
+function GameTracker.sendTrack(trackNode)
   local protocolGame = g_game.getProtocolGame()
   if not protocolGame then
     return
   end
-
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeTracking)
-  msg:addU8(start and TrackingInfo.Start or TrackingInfo.Stop)
-  msg:addU32(creature:getId())
+  msg:addU8(trackNode.status)
+  if trackNode.id then
+    msg:addU8(TrackingInfo.Id)
+    msg:addU32(trackNode.id)
+  else
+    msg:addU8(TrackingInfo.Position)
+    msg:addPosition(trackNode.position)
+  end
   protocolGame:send(msg)
 end
 
-function GameTracker.startTracking(creature)
-  GameTracker.sendTrackAction(creature, true) 
-end
-
-function GameTracker.stopTracking(creature)
-  GameTracker.sendTrackAction(creature, false)
-end
-
-function GameTracker.toggleTracking(creature)
-  GameTracker.sendTrackAction(creature, not GameTracker.isTracked(creature))
-end
-
-function GameTracker.onTrackCreature(protocol, msg)
-  local creatureId = msg:getU32()
-  trackedCreatures[creatureId] = trackedCreatures[creatureId] or { color = '#ffc659' }
-
-  local trackedCreature = trackedCreatures[creatureId]
-  trackedCreature.id = creatureId
-  trackedCreature.status = msg:getU8()
-
+function GameTracker.parseTrack(protocol, msg)
+  local trackNode = { }
+  trackNode.status = msg:getU8()
   while true do
     local flag = msg:getU8()
-    if flag == TrackingInfo.Name then
-      trackedCreature.name = msg:getString()
+    if flag == TrackingInfo.Id then
+      trackNode.id = msg:getU32()
+    elseif flag == TrackingInfo.Name then
+      trackNode.name = msg:getString()
     elseif flag == TrackingInfo.Position then
-      trackedCreature.position = protocol:getPosition(msg)
+      trackNode.position = protocol:getPosition(msg)
     elseif flag == TrackingInfo.Outfit then
-      trackedCreature.outfit = protocol:getOutfit(msg)
+      trackNode.outfit = protocol:getOutfit(msg)
+    elseif flag == TrackingInfo.Color then
+      trackNode.color = msg:getColor()
+    elseif flag == TrackingInfo.Auto then
+      trackNode.auto = true
     elseif flag == TrackingInfo.MsgEnd then
       break
     else
-      print_r("Error flag " .. flag)
+      print_traceback(tr('[GameTracker.onParseTrack] Error with flag %d', flag))
       break
     end
   end
-
-  signalcall(g_game.onTrackCreature, trackedCreature)
-  if trackedCreature.status == TrackingInfo.Stop then
-    trackedCreatures[trackedCreature.id] = nil
-  end
+  GameTracker.onTrack(trackNode)
   return true
 end
 
---[[ Track Position ]]
-function GameTracker.getTrackedPositions()
-  return trackedPositions
+
+--[[ Track Events ]]
+
+function GameTracker.onTrack(trackNode)
+  local trackIndex
+  if trackNode.id then -- creature
+    trackIndex = trackNode.id
+  else -- position
+    trackIndex = postostring(trackNode.position)
+  end
+
+  if not trackList[trackIndex] then
+    trackList[trackIndex] = { }
+  end
+
+  local trackView = trackList[trackIndex]
+  trackView.status = trackNode.status
+
+  if trackNode.status == TrackingInfo.Stop then
+    GameTracker.onTrackEnd(trackNode)
+    return
+  end
+
+  trackView.id = trackNode.id
+  trackView.name = trackNode.name
+  trackView.position =  trackNode.position
+  trackView.outfit = trackNode.outfit
+  trackView.color = trackNode.color or '#ffc659'
+  trackView.auto = trackNode.auto
+
+  if trackView.id then
+    signalcall(g_game.onTrackCreature, trackView)
+  else
+    signalcall(g_game.onTrackPosition, trackView)
+  end
 end
 
-function GameTracker.isTrackedPosition(position)
-  for _, posNode in pairs(trackedPositions) do
-    if Position.equals(posNode.position, position) then
-      return true
-    end
+function GameTracker.onTrackEnd(trackNode)
+  if trackNode.id then
+    signalcall(g_game.onTrackCreatureEnd, trackList[trackNode.id])
+    trackList[trackNode.id] = nil
+  else
+    signalcall(g_game.onTrackPositionEnd, trackList[postostring(trackNode.position)])
+    trackList[postostring(trackNode.position)] = nil
   end
-  return false
 end
+
+
+--[[ Track Creatures ]]
+
+function Creature:getTrackInfo()
+  return trackList[self:getId()]
+end
+
+function GameTracker.isTracked(creature)
+  return trackList[creature:getId()] and true or false
+end
+
+function GameTracker.startTrackCreature(creature)
+  GameTracker.sendTrack({ status = TrackingInfo.Start, id = creature:getId() })
+end
+
+function GameTracker.stopTrackCreature(creature)
+  GameTracker.sendTrack({ status = TrackingInfo.Stop, id = creature:getId() })
+end
+
+function GameTracker.toggleTracking(creature)
+  if not GameTracker.isTracked(creature) then
+    GameTracker.startTrackCreature(creature)
+  else
+    GameTracker.stopTrackCreature(creature)
+  end
+end
+
+
+--[[ Track Position ]]
 
 function GameTracker.getTrackedPosition(position)
-  for _, posNode in pairs(trackedPositions) do
-    if Position.equals(posNode.position, position) then
-      return posNode
-    end
-  end
-  return nil
+  return trackList[postostring(position)]
 end
 
 function GameTracker.startTrackPosition(position)
-  if GameTracker.isTrackedPosition(position) then
-    return
+  local trackNode = GameTracker.getTrackedPosition(position)
+  if trackNode then
+    trackNode.auto = false
+    GameTracker.sendTrack(trackNode)
+  else
+    GameTracker.sendTrack({ status = TrackingInfo.Start, position = position })
   end
-  local posNode = { index = posIndex, position = position, color = '#ffc659' }
-  posIndex = posIndex + 1
-  trackedPositions[posNode.index] = posNode
-  signalcall(g_game.onTrackPosition, posNode)
 end
 
 function GameTracker.stopTrackPosition(position)
-  local posNode = GameTracker.getTrackedPosition(position)
-  if not posNode then
-    return
+  local trackNode = GameTracker.getTrackedPosition(position)
+  if trackNode then
+    trackNode.status = TrackingInfo.Stop
+    GameTracker.sendTrack(trackNode)
   end
-  signalcall(g_game.onTrackPositionEnd, posNode)
-  trackedPositions[posNode.index] = nil
 end
+
+
+--[[ Track Window ]]
 
 function GameTracker.createEditTrackWindow(trackNode)
   local trackerWindow = g_ui.displayUI('tracker')

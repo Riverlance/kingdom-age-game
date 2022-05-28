@@ -52,7 +52,7 @@ MainWindow
   @onEscape: GameHotkeys.cancel()
 
   Label
-    !text: tr('Drag and drop the rows below into the hotkey bars')
+    !text: tr('Drag and drop a row below into any hotkey bar')
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     font: verdana-8px-antialised

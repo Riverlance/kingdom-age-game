@@ -102,6 +102,11 @@ function GameContainers.refreshContainerPages(container)
 end
 
 function GameContainers.refreshContainerSize(containerWindow, resetToMaxHeight)
+  local minimizeButton = containerWindow:getChildById('minimizeButton')
+  if minimizeButton:isOn() then
+    return
+  end
+
   local contentsPanel    = containerWindow:getChildById('contentsPanel')
   local layout           = contentsPanel:getLayout()
   local cellSize         = layout:getCellSize()

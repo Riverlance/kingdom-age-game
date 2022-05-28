@@ -113,6 +113,7 @@ function GameInterface.init()
     onGameEnd          = GameInterface.onGameEnd,
     onLoginAdvice      = GameInterface.onLoginAdvice,
     onTrackCreature    = GameInterface.onTrackCreature,
+    onTrackCreatureEnd = GameInterface.onTrackCreature,
     onTrackPosition    = GameInterface.onTrackPosition,
     onTrackPositionEnd = GameInterface.onTrackPositionEnd,
     onUpdateTrackColor = GameInterface.onUpdateTrackColor
@@ -213,7 +214,9 @@ function GameInterface.bindKeys()
   GameInterface.bindTurnKey('Ctrl+Numpad6', East)
 
   g_keyboard.bindKeyPress('Escape', function()
-    g_ui.resetDraggingWidget()
+    if not g_ui.resetDraggingWidget() and not GamePowerHotkeys.cancel(true) then
+      g_game.cancelAttackAndFollow()
+    end
   end, gameRootPanel)
   g_keyboard.bindKeyPress('Ctrl+=', function() gameMapPanel:zoomIn() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
   g_keyboard.bindKeyPress('Ctrl+-', function() gameMapPanel:zoomOut() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
@@ -280,6 +283,7 @@ function GameInterface.terminate()
     onGameEnd          = GameInterface.onGameEnd,
     onLoginAdvice      = GameInterface.onLoginAdvice,
     onTrackCreature    = GameInterface.onTrackCreature,
+    onTrackCreatureEnd = GameInterface.onTrackCreature,
     onTrackPosition    = GameInterface.onTrackPosition,
     onTrackPositionEnd = GameInterface.onTrackPositionEnd,
     onUpdateTrackColor = GameInterface.onUpdateTrackColor
@@ -1181,9 +1185,9 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
         end
 
         if not GameTracker.isTracked(creatureThing) then
-          menu:addOption(tr('Track'), function() GameTracker.startTracking(creatureThing) end, shortcut)
+          menu:addOption(tr('Track'), function() GameTracker.startTrackCreature(creatureThing) end, shortcut)
         else
-          menu:addOption(tr('Stop track'), function() GameTracker.stopTracking(creatureThing) end, shortcut)
+          menu:addOption(tr('Stop track'), function() GameTracker.stopTrackCreature(creatureThing) end, shortcut)
           menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(creatureThing:getTrackInfo()) end)
         end
       end
@@ -1629,38 +1633,38 @@ function GameInterface.updateManaBar()
   end
 end
 
-function GameInterface.onTrackCreature(creature)
+function GameInterface.onTrackCreature(trackNode)
   local TrackingInfo = GameTracker.m.TrackingInfo
 
-  local mapCreature = g_map.getCreatureById(creature.id)
+  local mapCreature = g_map.getCreatureById(trackNode.id)
   if mapCreature then
-    mapCreature:showTrackRing(creature.color)
+    mapCreature:showTrackRing(trackNode.color)
   end
 
-  if not creature.widget then
-    creature.widget = g_ui.createWidget('TrackerWidget', gameScreenArea)
-    creature.widget:setId('tracked_creature_' .. creature.id)
+  if not trackNode.widget then
+    trackNode.widget = g_ui.createWidget('TrackerWidget', gameScreenArea)
+    trackNode.widget:setId('tracked_creature_' .. trackNode.id)
   end
 
-  if creature.status == TrackingInfo.Stop then
+  if trackNode.status == TrackingInfo.Stop then
     if mapCreature then
       mapCreature:hideTrackRing()
     end
-    creature.widget:destroy()
-    creature.widget = nil
+    trackNode.widget:destroy()
+    trackNode.widget = nil
     return
   end
 
-  if creature.status == TrackingInfo.Paused then
+  if trackNode.status == TrackingInfo.Paused then
     if mapCreature then
       mapCreature:hideTrackRing()
     end
-    creature.widget:hide()
+    trackNode.widget:hide()
   else
-    creature.widget:show()
+    trackNode.widget:show()
   end
 
-  updateTrackArrow(creature)
+  updateTrackArrow(trackNode)
 end
 
 function GameInterface.onTrackPosition(posNode, remove)
@@ -1686,54 +1690,54 @@ function GameInterface.onTrackPositionEnd(posNode)
   posNode.widget:destroy()
 end
 
-function updateTrackArrow(target)
-  if not target.widget then
+function updateTrackArrow(trackNode)
+  if not trackNode.widget then
     return
   end
 
   local playerPos = g_game.getLocalPlayer():getPosition()
-  local targetPos = target.position
+  local trackPos = trackNode.position
 
-  local isInRange = Position.isInRange(playerPos, targetPos, ScreenRangeX, ScreenRangeY)
-  target.widget:setVisible(not isInRange)
+  local isInRange = Position.isInRange(playerPos, trackPos, ScreenRangeX, ScreenRangeY)
+  trackNode.widget:setVisible(not isInRange)
 
-  if not target.id then
+  if not trackNode.id then -- only on track position
     if isInRange then
-      if not target.cycleEvent then
-        g_game.sendMagicEffect(targetPos, 346)
-        target.cycleEvent = cycleEvent(function()
-          g_game.sendMagicEffect(targetPos, 346)
+      if not trackNode.cycleEvent then
+        g_game.sendMagicEffect(trackPos, 346)
+        trackNode.cycleEvent = cycleEvent(function()
+          g_game.sendMagicEffect(trackPos, 346)
         end, 1000)
       end
     else
-      removeEvent(target.cycleEvent)
-      target.cycleEvent = nil
+      removeEvent(trackNode.cycleEvent)
+      trackNode.cycleEvent = nil
     end
   end
 
-  local distance = Position.distance(playerPos, targetPos)
-  if not target.id then
+  local distance = Position.distance(playerPos, trackPos)
+  if not trackNode.id then
     if distance == 0 then
-      GameTracker.stopTrackPosition(target.position)
+      GameTracker.stopTrackPosition(trackNode.position)
       return
     end
   end
 
-  local trackerLabel = target.widget:getChildById('distance')
+  local trackerLabel = trackNode.widget:getChildById('distance')
   trackerLabel:setText(string.format('%d m', math.floor(distance)))
 
-  local orientation = math.atan2(targetPos.y - playerPos.y, targetPos.x - playerPos.x)
-  local trackerArrow = target.widget:getChildById('arrow')
+  local orientation = math.atan2(trackPos.y - playerPos.y, trackPos.x - playerPos.x)
+  local trackerArrow = trackNode.widget:getChildById('arrow')
   trackerArrow:setRotation(math.deg(orientation))
 
-  if target.color then
-    trackerLabel:setColor(target.color)
-    trackerArrow:setImageColor(target.color)
+  if trackNode.color then
+    trackerLabel:setColor(trackNode.color)
+    trackerArrow:setImageColor(trackNode.color)
   end
 
   trackerLabel:breakAnchors()
-  local xDiff = playerPos.x - targetPos.x
-  local yDiff = playerPos.y - targetPos.y
+  local xDiff = playerPos.x - trackPos.x
+  local yDiff = playerPos.y - trackPos.y
   if yDiff < 0 then
     trackerLabel:addAnchor(AnchorBottom, 'arrow', AnchorOutsideTop)
   elseif yDiff > 0 then
@@ -1756,20 +1760,17 @@ function updateTrackArrow(target)
   local px = gameMapPanel:getX() + (gameMapPanel:getWidth() - gameMapPanel:getMapWidth()) / 2 + (tileX * (mapSize.width - 1) / 2)
   local py = gameMapPanel:getY() + (gameMapPanel:getHeight() - gameMapPanel:getMapHeight()) / 2 + (tileY * (mapSize.height - 1) / 2)
 
-  local rx = ( (distance - 1) * tileX - target.widget:getWidth()  ) * math.cos(orientation)
-  local ry = ( (distance - 1) * tileY - target.widget:getHeight() ) * math.sin(orientation)
+  local rx = ( (distance - 1) * tileX - trackNode.widget:getWidth()  ) * math.cos(orientation)
+  local ry = ( (distance - 1) * tileY - trackNode.widget:getHeight() ) * math.sin(orientation)
 
-  target.widget:setX(px + rx)
-  target.widget:setY(py + ry)
-  target.widget:bindRectToParent()
+  trackNode.widget:setX(px + rx)
+  trackNode.widget:setY(py + ry)
+  trackNode.widget:bindRectToParent()
 end
 
 function updateTrackArrows()
-  for _, trackedCreature in pairs(GameTracker.getTrackedCreatures()) do
-    updateTrackArrow(trackedCreature)
-  end
-  for _, trackedPosition in pairs(GameTracker.getTrackedPositions()) do
-    updateTrackArrow(trackedPosition)
+  for _, trackNode in pairs(GameTracker.getTrackList()) do
+    updateTrackArrow(trackNode)
   end
 end
 

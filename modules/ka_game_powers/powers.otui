@@ -30,7 +30,7 @@ MiniWindow
     text: ?
     text-align: center
     phantom: false
-    !tooltip: tr("1. Powers should be used on hotkeys (Ctrl+K).\n\n2. Power hotkeys can be pressed and held to boost it's potency - it will increase the mana's cost also.\n\n3. Some powers needs the mouse on game screen to target.\n\nNote: All powers shows informations according to your character's status. So, your attributes, equipments and others can change these informations in real time. Also, damages may change according to target's defense.")
+    !tooltip: tr("1. Powers should be used on hotkeys. Open the hotkeys window (Ctrl+K), select a hotkey row, then drag and drop a power row below into the hotkey slot.\n\n2. Power hotkeys can be pressed and held to boost it's potency - it will increase the mana's cost also.\n\n3. Some powers needs the mouse on game screen to target.\n\nNote: All powers shows informations according to your character's status. So, your attributes, equipments and others can change these informations in real time. Also, damages may change according to target's defense.")
     !tooltip-type: TooltipType.textBlock
 
   MiniWindowHeader

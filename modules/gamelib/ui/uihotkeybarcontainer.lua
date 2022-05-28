@@ -114,3 +114,32 @@ function UIHotkeyBarContainer:updateCallback(callback)
   --print_r(self.onMouseRelease)
   --print_r(self.onMousePress)
 end
+
+--[[ onCastPower ]]
+
+local PROGRESS_UNIFORM = 15
+
+function UIHotkeyBarContainer:onCastPower(powerId, exhaustTime)
+  if exhaustTime == 0 or powerId ~= self.settings.powerId then
+    return
+  end
+
+  local powerWidget = self:getChildById('power')
+  powerWidget:setShader(g_shaders.getShader('Angular'))
+
+  local shader = powerWidget:getShader()
+  if shader then
+    shader:bindUniformLocation(PROGRESS_UNIFORM,"u_progress")
+    shader:setUniformF(PROGRESS_UNIFORM, 0)
+    powerWidget.endTime = g_clock.millis() + exhaustTime
+    powerWidget.onShader = function(self, shader) 
+        if not shader or not self.endTime then return end
+        local percent = 1 - (self.endTime - g_clock.millis())/exhaustTime
+        shader:setUniformF(PROGRESS_UNIFORM, percent)
+        if percent >= 1 then
+          self:setShader(nil)
+          self.endTime = nil
+        end
+      end
+  end
+end
