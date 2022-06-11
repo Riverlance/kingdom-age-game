@@ -5,6 +5,7 @@ CreatureButtonMinimapWidget < UIWidget
   &temporary: true
   // Maximum possible since zoom is from -5 to 5
   &maxZoom: -5
+  phantom: true
 
   UICreature
     id: creature
@@ -12,7 +13,6 @@ CreatureButtonMinimapWidget < UIWidget
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     background-color: #ffffff88
-    // phantom: true
 
   Label
     id: titleLabel
@@ -24,7 +24,7 @@ CreatureButtonMinimapWidget < UIWidget
     anchors.top: prev.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter
     background-color: #ffffff88
-    // phantom: true
+    phantom: true
 
 CreatureButtonIcon < UIWidget
   width: 11

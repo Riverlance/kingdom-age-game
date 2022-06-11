@@ -16,6 +16,7 @@ Minimap < UIMinimap
 
 MinimapRegionLabel < UIWidget
   focusable: false
+  phantom: true
   font: verdana-8px-antialised
   text-auto-resize: true
   color: #ffffff
