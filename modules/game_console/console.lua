@@ -57,7 +57,7 @@ ChannelEventFormats = {
   [ChannelEvent.Exclude] = '%s has been removed from the channel.',
 }
 
-HELP_CHANNEL = 9
+CHANNEL_ID_LOOT = 2
 
 consolePanel = nil
 headerPanel = nil
@@ -1238,6 +1238,11 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
     local channel = tr('Default')
     if not defaultMessage then
       channel = channels[channelId]
+
+      -- If Loot tab is closed, send loot messages to Server tab
+      if not channel and channelId == CHANNEL_ID_LOOT then
+        channel = serverTab:getText()
+      end
     end
 
     if channel then

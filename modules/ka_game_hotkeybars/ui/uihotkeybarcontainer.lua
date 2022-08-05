@@ -1,0 +1,198 @@
+_G.UIHotkeyBarContainer = extends(UIWidget, 'UIHotkeyBarContainer')
+
+function UIHotkeyBarContainer:onSetup()
+  self.cbChargePower = function(powerId, boost) self:onChargePower(powerId, boost) end
+  self.cbCastPower   = function(powerId, exhaustTime, boost) self:onCastPower(powerId, exhaustTime, boost) end
+  self.cbCancelPower = function() self:onCancelPower() end
+
+  connect(g_game, {
+    onChargePower = self.cbChargePower,
+    onCastPower   = self.cbCastPower,
+    onCancelPower = self.cbCancelPower
+  })
+end
+
+function UIHotkeyBarContainer:onDestroy()
+  disconnect(g_game, {
+    onChargePower = self.cbChargePower,
+    onCastPower   = self.cbCastPower,
+    onCancelPower = self.cbCancelPower
+  })
+end
+
+function UIHotkeyBarContainer:getParentBar()
+  return self:getParent():getParent()
+end
+
+function UIHotkeyBarContainer:updateLook()
+  local keySettings = self.settings
+  if not keySettings then
+    g_logger.error(tr('[UIHotkeyBarContainer.updateLook] missing field `settings` (%s)', self:getId()))
+    return
+  end
+
+  --reset look
+  local hasTooltip = true
+  local tooltipText = ''
+  self:setText('')
+  local itemWidget = self:getChildById('item')
+  itemWidget:setVisible(false)
+  local powerWidget = self:getChildById('power')
+  powerWidget:setVisible(false)
+
+  --update look
+  if string.exists(keySettings.keyCombo) then
+    tooltipText = tr('[%s]', keySettings.keyCombo)
+  else
+    hasTooltip = false
+  end
+
+  if string.exists(keySettings.text) then
+    self:setText('(...)')
+    tooltipText = tr('%s Send message%s:\n%s', tooltipText, keySettings.autoSend and ' (auto)' or '', keySettings.text)
+
+    self:setTooltip(hasTooltip and tooltipText or '', TooltipType.textBlock)
+
+  elseif keySettings.powerId and powerWidget then
+    powerWidget:setVisible(true)
+    powerWidget:setImageSource('/images/ui/power/' .. keySettings.powerId .. '_off')
+
+    local power = GamePowers.getPowerInfo(keySettings.powerId)
+    if power and power.name and power.level then
+      tooltipText = tr('%s %s (level %d)', tooltipText, power.name, power.level)
+    end
+
+    self:setTooltip(hasTooltip and tooltipText or '')
+
+  elseif keySettings.itemId and itemWidget then
+    itemWidget:setVisible(true)
+    itemWidget:setItemId(keySettings.itemId)
+    itemWidget:setItemSubType(keySettings.subType)
+    if keySettings.useType == HotkeyItemUseType.Default then
+      tooltipText = tr('%s Use item', tooltipText)
+    elseif keySettings.useType == HotkeyItemUseType.Self then
+      tooltipText = tr('%s Use on yourself', tooltipText)
+    elseif keySettings.useType == HotkeyItemUseType.Target then
+      tooltipText = tr('%s Use on target', tooltipText)
+    elseif keySettings.useType == HotkeyItemUseType.Crosshair then
+      tooltipText = tr('%s Use with', tooltipText)
+    end
+
+    self:setTooltip(hasTooltip and tooltipText or '')
+  end
+end
+
+
+--[[ Mouse Events ]]
+
+function UIHotkeyBarContainer:onHoverChange(hovered)
+  UIWidget.onHoverChange(self, hovered)
+  if g_ui.getDraggingWidget() then
+    if not hovered and self:containsPoint(g_window.getMousePosition()) then
+      self:getParentBar():resetTempContainer()
+    else
+      self:getParentBar():onHoverChange(hovered)
+    end
+  end
+end
+
+function UIHotkeyBarContainer:onDragEnter(mousePos)
+  self:setOpacity(0.5)
+  self:setBorderWidth(1)
+  g_mouse.pushCursor('target')
+  local keySettings = self.settings
+  if tonumber(keySettings.itemId) then
+    g_mouseicon.displayItem(Item.create(keySettings.itemId))
+  elseif tonumber(keySettings.powerId) then
+    g_mouseicon.display(string.format('/images/ui/power/%d_off', keySettings.powerId))
+  end
+  return true
+end
+
+function UIHotkeyBarContainer:onDragLeave(droppedWidget, mousePos)
+  self:setOpacity(1)
+  self:setBorderWidth(0)
+  g_mouseicon.hide()
+  g_mouse.popCursor('target')
+  if not droppedWidget or droppedWidget ~= self:getParentBar() then
+    self:getParentBar():removeHotkey(self.settings.keyCombo)
+  end
+  return true
+end
+
+function UIHotkeyBarContainer:onMousePress(mousePos, mouseButton)
+  GameHotkeys.doAction(self.settings)
+end
+
+function UIHotkeyBarContainer:onMouseRelease(mousePos, mouseButton)
+  if self.settings.powerId then
+    local mapWidget = GameInterface.getMapPanel()
+    local pos = mapWidget and mapWidget:getPosition(mousePos)
+    GamePowers.castPower(pos)
+  end
+end
+
+
+--[[ Power Events ]]
+
+function UIHotkeyBarContainer:onChargePower(powerId, boostLevel)
+  if powerId == self.settings.powerId then
+    self:setPowerIcon(powerId, true)
+  end
+end
+
+function UIHotkeyBarContainer:onCastPower(powerId, exhaustTime, boostLevel)
+  if powerId ~= self.settings.powerId then
+    return
+  end
+  self:setPowerIcon(powerId, false)
+  if boostLevel ~= 0 then
+    self:setPowerEffect(boostLevel)
+  end
+  if exhaustTime ~= 0 then
+    self:setPowerProgressShader(exhaustTime)
+  end
+end
+
+function UIHotkeyBarContainer:onCancelPower()
+  local powerId = self.settings.powerId
+  if powerId then
+    self:setPowerIcon(powerId, false)
+  end
+end
+
+--[[ Power Effects ]]
+
+local PROGRESS_UNIFORM = 15
+
+function UIHotkeyBarContainer:setPowerIcon(powerId, enabled)
+  local path = string.format('/images/ui/power/%d_%s', powerId, enabled and 'on' or 'off')
+  self:getChildById('power'):setImageSource(path)
+end
+
+function UIHotkeyBarContainer:setPowerEffect(boostLevel)
+  local powerWidget = self:getChildById('power')
+  local particle    = g_ui.createWidget(string.format('PowerSendingParticlesBoost%d', boostLevel), powerWidget)
+  scheduleEvent(function() particle:destroy() end, 1000)
+end
+
+function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
+  local powerWidget = self:getChildById('power')
+  powerWidget:setShader(g_shaders.getShader('Angular'))
+
+  local shader = powerWidget:getShader()
+  if shader then
+    shader:bindUniformLocation(PROGRESS_UNIFORM,"u_progress")
+    shader:setUniformF(PROGRESS_UNIFORM, 0)
+    powerWidget.endTime = g_clock.millis() + exhaustTime
+    powerWidget.onShader = function(self, shader) 
+        if not shader or not self.endTime then return end
+        local percent = 1 - (self.endTime - g_clock.millis())/exhaustTime
+        shader:setUniformF(PROGRESS_UNIFORM, percent)
+        if percent >= 1 then
+          self:setShader(nil)
+          self.endTime = nil
+        end
+      end
+  end
+end

@@ -34,6 +34,12 @@ Panel
     !tooltip: tr('Whenever new key is pressed, will bounce previous key.')
     !tooltip-type: TooltipType.textBlock
 
+  OptionCheckBox
+    id: cycleWalk
+    !text: tr('Enable cycle walking')
+    !tooltip: tr('Cycle walk events by holding the middle mouse button.')
+    !tooltip-type: TooltipType.textBlock
+
   OptionHorizontalSeparator
 
   OptionLabel
@@ -59,6 +65,15 @@ Panel
 
   OptionScrollbar
     id: bouncingKeysDelayScrollBar
+    minimum: 100
+    maximum: 1000
+    symbol: ms
+
+  OptionLabel
+    !text: tr('Cycle walk interval')
+
+  OptionScrollbar
+    id: cycleWalkDelayScrollBar
     minimum: 100
     maximum: 1000
     symbol: ms

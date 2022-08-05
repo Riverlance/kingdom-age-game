@@ -8,7 +8,7 @@ function GameHotkeyBars.init()
   -- Alias
   GameHotkeyBars.m = modules.ka_game_hotkeybars
 
-  g_ui.importStyle('hotkeybars.otui')
+  g_ui.importStyle('hotkeybars')
 
   connect(g_game, {
     onGameStart           = GameHotkeyBars.online,
@@ -34,8 +34,6 @@ function GameHotkeyBars.init()
     onVisibilityChange = GameHotkeyBars.onToggleHotkeyWindow
   })
 
-  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePowerCast, GameHotkeyBars.onCastPower)
-
   GameHotkeyBars.initHotkeyBars()
 
   if g_game.isOnline() then
@@ -49,8 +47,6 @@ function GameHotkeyBars.terminate()
   end
 
   GameHotkeyBars.deinitHotkeyBars()
-
-  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePowerCast)
 
   disconnect(GameHotkeys.m.hotkeysWindow, {
     onVisibilityChange = GameHotkeyBars.onToggleHotkeyWindow
@@ -224,36 +220,4 @@ end
 
 function GameHotkeyBars.isHotkeybarsVisible()
   return showHotkeybars
-end
-
-function GameHotkeyBars.setPowerIcon(keyCombo, enabled)
-  local keySettings = GameHotkeys.getHotkey(keyCombo)
-  if not keySettings or not keySettings.powerId then
-    return
-  end
-  local path = string.format('/images/ui/power/%d_%s', keySettings.powerId, enabled and 'on' or 'off')
-  for _, hotkeyBar in ipairs(hotkeyBarList) do
-    if hotkeyBar.hotkeyList[keyCombo] then
-      hotkeyBar.hotkeyList[keyCombo]:getChildById('power'):setImageSource(path)
-    end
-  end
-end
-
-function GameHotkeyBars.onCastPower(protocol, msg)
-  local powerId = msg:getU8()
-  local exhaustTime = msg:getU32()
-  for _, hotkeyBar in ipairs(hotkeyBarList) do
-    hotkeyBar:onCastPower(powerId, exhaustTime)
-  end
-end
-
-function GameHotkeyBars.addPowerSendingHotkeyEffect(keyCombo, boostLevel)
-  for _, hotkeyBar in ipairs(hotkeyBarList) do
-    if hotkeyBar.hotkeyList[keyCombo] then
-      local powerWidget = hotkeyBar.hotkeyList[keyCombo]:getChildById('power')
-      local particle    = g_ui.createWidget(string.format('PowerSendingParticlesBoost%d', boostLevel), powerWidget)
-      particle:fill('parent')
-      scheduleEvent(function() particle:destroy() end, 1000)
-    end
-  end
 end

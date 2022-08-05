@@ -11,7 +11,6 @@ local defaultOptions = {
   showPing = true,
   fullscreen = false,
   classicControl = false,
-  smartWalk = false,
   dashWalk = false,
   autoChaseOverride = true,
   showStatusMessagesInConsole = true,
@@ -67,10 +66,13 @@ local defaultOptions = {
   leftStickerOpacityScrollbar = 40,
   rightStickerOpacityScrollbar = 40,
   smoothWalk = true,
+  smartWalk = false,
+  bouncingKeys = true,
+  cycleWalk = true,
   walkingSensitivityScrollBar = 100,
   walkingRepeatDelayScrollBar = 200,
-  bouncingKeys = true,
   bouncingKeysDelayScrollBar = 1000,
+  cycleWalkDelayScrollBar = 200,
   turnDelay = 50,
   hotkeyDelay = 50,
   showMinimapExtraIcons = true,
@@ -596,6 +598,12 @@ function ClientOptions.setOption(key, value, force)
 
   elseif key == 'bouncingKeys' then
     controlPanel:getChildById('bouncingKeysDelayScrollBar'):setEnabled(value)
+
+  elseif key == 'cycleWalk' then
+    GameInterface.getMapPanel():setCycleWalkEnabled(value)
+
+  elseif key == 'cycleWalkDelayScrollBar' then
+    GameInterface.getMapPanel():setCycleWalkInterval(value)
 
   elseif key == 'showMinimapExtraIcons' then
     if not modules.game_minimap then

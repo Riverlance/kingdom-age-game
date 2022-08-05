@@ -169,18 +169,6 @@ function UIHotkeyBar:onAssignHotkey(keySettings, applied, hotkeyWidget)
       hotkeyWidget:setId(self:getId() .. "_" .. keyCombo)
       hotkeyWidget:setOpacity(1)
       hotkeyWidget:setDraggable(self:isOn())
-      local callback = function()
-        if GameHotkeys.isOpen() then
-          return
-        end
-        GameHotkeys.doKeyCombo(keyCombo, hotkeyWidget)
-      end
-      --hotkeyWidget:updateCallback(callback)
-      if tonumber(keySettings.powerId) then
-        hotkeyWidget.onMousePress = callback
-      else
-        hotkeyWidget.onMouseRelease = callback
-      end
       self.hotkeyList[keyCombo] = hotkeyWidget
       hotkeyWidget:updateLook()
       self.tempContainer = nil
@@ -331,7 +319,6 @@ function UIHotkeyBar:updateHotkey(hotkey)
     local children = self:getHotkeyList():getChildren()
     for _, widget in ipairs(children) do
       if widget:getClassName() == 'UIHotkeyBarContainer' then
-        --widget:updateCallback()
         widget:updateLook()
       end
     end
@@ -351,11 +338,5 @@ function UIHotkeyBar:updateDraggable(draggable)
     if widget:getClassName() == 'UIHotkeyBarContainer' then
       widget:setDraggable(draggable)
     end
-  end
-end
-
-function UIHotkeyBar:onCastPower(powerId, exhaustTime)
-  for _, hotkey in ipairs(self:getHotkeyList():getChildren()) do
-    hotkey:onCastPower(powerId, exhaustTime)
   end
 end

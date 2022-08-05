@@ -109,12 +109,18 @@ function GamePowers.init()
   if g_game.isOnline() then
     GamePowers.online()
   end
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePowerCast, GamePowers.parsePower)
 end
 
 function GamePowers.terminate()
   powersList = { }
   powerListByIndex = { }
 
+  if g_game.isOnline() then
+    GamePowers.offline()
+  end
+
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePowerCast)
   disconnect(g_game, {
     onGameStart        = GamePowers.online,
     onGameEnd          = GamePowers.offline,
@@ -136,6 +142,7 @@ end
 
 function GamePowers.offline()
   GamePowers.clearList()
+  GamePowers.onCancelPower()
 end
 
 function GamePowers.toggle()

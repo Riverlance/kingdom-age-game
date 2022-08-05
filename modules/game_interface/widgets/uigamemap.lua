@@ -76,9 +76,15 @@ function UIGameMap:onMousePress()
   if not self:isDragging() then
     self.allowNextRelease = true
   end
+
+  if g_mouse.isPressed(MouseMidButton) and g_keyboard.getModifiers() == KeyboardNoModifier then
+    self:initCycleWalkEvent()
+  end
 end
 
 function UIGameMap:onMouseRelease(mousePosition, mouseButton)
+  self:stopCycleWalkEvent()
+
   if not self.allowNextRelease then
     return true
   end

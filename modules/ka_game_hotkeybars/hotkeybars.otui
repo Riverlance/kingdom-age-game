@@ -1,17 +1,17 @@
-PowerSendingParticlesBoost1 < UIParticles
+PowerEffect < UIParticles
+  anchors.fill: parent
+  focusable: false
+  phantom: true
+
+PowerSendingParticlesBoost1 < PowerEffect
   effect: powersending-boost1-effect
-  focusable: false
-  phantom: true
 
-PowerSendingParticlesBoost2 < UIParticles
+PowerSendingParticlesBoost2 < PowerEffect
   effect: powersending-boost2-effect
-  focusable: false
-  phantom: true
 
-PowerSendingParticlesBoost3 < UIParticles
+PowerSendingParticlesBoost3 < PowerEffect
   effect: powersending-boost3-effect
-  focusable: false
-  phantom: true
+
 
 VisibilityButton < UIWidget
   id: visibilityButton

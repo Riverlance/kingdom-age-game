@@ -144,6 +144,7 @@ function GameHotkeys.hide()
   hotkeysButton:setOn(false)
 
   if assignWindow then
+    signalcall(GameHotkeys.onAssignHotkey, assignWindow.keySettings, false)
     assignWindow:destroy()
     assignWindow = nil
   end
@@ -178,6 +179,7 @@ function GameHotkeys.apply(hotkeyLabel, save, sort)
   if hotkeyLabel.status == HotkeyStatus.Deleted then
     if keySettings.powerId then
       g_keyboard.unbindKeyPress(keyCombo, boundCombosCallback[keyCombo])
+      g_keyboard.unbindKeyUp(keyCombo, keySettings.castCallback)
     else
       g_keyboard.unbindKeyDown(keyCombo, boundCombosCallback[keyCombo])
     end
@@ -304,6 +306,7 @@ function GameHotkeys.unload()
     local keySettings = hotkeyLabel.settings
     if keySettings.powerId then
       g_keyboard.unbindKeyPress(keySettings.keyCombo, boundCombosCallback[keySettings.keyCombo])
+      g_keyboard.unbindKeyUp(keySettings.keyCombo, keySettings.castCallback)
     else
       g_keyboard.unbindKeyDown(keySettings.keyCombo, boundCombosCallback[keySettings.keyCombo])
     end
@@ -313,7 +316,6 @@ function GameHotkeys.unload()
   currentHotkeyLabel = nil
   hotkeyList = { }
   GameHotkeys.updateHotkeyForm(true)
-  GamePowerHotkeys.unload()
 end
 
 function GameHotkeys.reset()
@@ -366,6 +368,7 @@ function GameHotkeys.assignHotkey(keySettings)
   end
 
   assignWindow = g_ui.createWidget('HotkeyAssignWindow', rootWidget)
+  assignWindow.keySettings = keySettings
   assignWindow:grabKeyboard()
 
   local keySettings = keySettings or { }
@@ -457,11 +460,19 @@ function GameHotkeys.addKeyCombo(keySettings, focus)
       if chat and chat:isEnabled() and (string.match(keyAlone, '^%C$') or keyAlone == "Space" or keyAlone == "Backspace") then
         return
       end
-      GameHotkeys.doKeyCombo(keyCombo)
+      GameHotkeys.doAction(keySettings)
     end
 
   if tonumber(keySettings.powerId) then
     g_keyboard.bindKeyPress(keyCombo, boundCombosCallback[keyCombo])
+
+    keySettings.castCallback = function() 
+      local mapWidget = GameInterface.getMapPanel()
+      local mousePosition = g_window.getMousePosition()
+      local pos = mapWidget and mapWidget:getPosition(mousePosition)
+      GamePowers.castPower(pos)
+    end
+    g_keyboard.bindKeyUp(keyCombo, keySettings.castCallback)
   else
     g_keyboard.bindKeyDown(keyCombo, boundCombosCallback[keyCombo])
   end
@@ -476,48 +487,47 @@ function GameHotkeys.addKeyCombo(keySettings, focus)
   return true
 end
 
-function GameHotkeys.doKeyCombo(keyCombo, clickedWidget)
-  if not g_game.isOnline() then
+function GameHotkeys.doAction(keySettings)
+  if GameHotkeys.isOpen() then
     return
   end
 
-  local hotkey = hotkeyList[keyCombo]
-  if not hotkey then
+  if not g_game.canPerformGameAction() then
     return
   end
 
-  local actualTime = g_clock.millis()
-  if actualTime - lastHotkeyTime < ClientOptions.getOption('hotkeyDelay') then
-    return
-  end
-  lastHotkeyTime = actualTime
-
-  if hotkey.powerId then
-    GamePowerHotkeys.doKeyCombo(keyCombo, clickedWidget, { hotkey = hotkey, actualTime = actualTime })
+  if keySettings.powerId then
+    GamePowers.chargePower(keySettings.powerId)
     return
   end
 
-  if hotkey.text then
-    if hotkey.autoSend then
-      GameConsole.sendMessage(hotkey.text)
+  local currentTime = g_clock.millis()
+  if currentTime - lastHotkeyTime < ClientOptions.getOption('hotkeyDelay') then
+    return
+  end
+  lastHotkeyTime = currentTime
+
+  if keySettings.text then
+    if keySettings.autoSend then
+      GameConsole.sendMessage(keySettings.text)
     else
-      GameConsole.setTextEditText(hotkey.text)
+      GameConsole.setTextEditText(keySettings.text)
     end
     return
   end
 
-  if hotkey.itemId then
-    if hotkey.useType == HotkeyItemUseType.Default then
-      g_game.useInventoryItem(hotkey.itemId)
-    elseif hotkey.useType == HotkeyItemUseType.Crosshair then
-      local item = Item.create(hotkey.itemId)
+  if keySettings.itemId then
+    if keySettings.useType == HotkeyItemUseType.Default then
+      g_game.useInventoryItem(keySettings.itemId)
+    elseif keySettings.useType == HotkeyItemUseType.Crosshair then
+      local item = Item.create(keySettings.itemId)
       GameInterface.startUseWith(item)
-    elseif hotkey.useType == HotkeyItemUseType.Target then
+    elseif keySettings.useType == HotkeyItemUseType.Target then
       local attackingCreature = g_game.getAttackingCreature()
       if not attackingCreature then GameInterface.startUseWith(item) end
-      if attackingCreature:getTile() then g_game.useInventoryItemWith(hotkey.itemId, attackingCreature) end
-    elseif hotkey.useType == HotkeyItemUseType.Self then
-      g_game.useInventoryItemWith(hotkey.itemId, g_game.getLocalPlayer())
+      if attackingCreature:getTile() then g_game.useInventoryItemWith(keySettings.itemId, attackingCreature) end
+    elseif keySettings.useType == HotkeyItemUseType.Self then
+      g_game.useInventoryItemWith(keySettings.itemId, g_game.getLocalPlayer())
     end
   end
 end

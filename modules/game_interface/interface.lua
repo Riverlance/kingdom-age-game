@@ -214,7 +214,7 @@ function GameInterface.bindKeys()
   GameInterface.bindTurnKey('Ctrl+Numpad6', East)
 
   g_keyboard.bindKeyPress('Escape', function()
-    if not g_ui.resetDraggingWidget() and not GamePowerHotkeys.cancel(true) then
+    if not g_ui.resetDraggingWidget() and not GamePowers.cancelPower() then
       g_game.cancelAttackAndFollow()
     end
   end, gameRootPanel)

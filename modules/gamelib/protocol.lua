@@ -194,7 +194,8 @@ ClientOpcodes = {
   ClientOpcodePartyList                 = 61, -- Needed?
   -- Free                                 62
   ClientOpcodeTracking                  = 63,
-  -- Free                                 64 to 99
+  ClientOpcodePowerCast                 = 64,
+  -- Free                                 65 to 99
   ClientOpcodeAutoWalk                  = 100,
   ClientOpcodeWalkNorth                 = 101,
   ClientOpcodeWalkEast                  = 102,
@@ -292,7 +293,7 @@ ClientExtOpcodes = {
   -- Free                            1
   ClientExtOpcodeAction            = 2,
   ClientExtOpcodeAttribute         = 3,
-  ClientExtOpcodePower             = 4,
+  ClientExtOpcodePowerList         = 4,
   ClientExtOpcodeUnjustifiedPoints = 5,
   ClientExtOpcodeQuestLog          = 6,
   ClientExtOpcodeBugReport         = 7,
