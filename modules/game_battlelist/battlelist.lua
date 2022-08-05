@@ -21,6 +21,8 @@ battlePanel = nil
 mouseWidget = nil
 lastButtonSwitched = nil
 
+nextTargetShortcut = 'Space'
+
 
 
 -- Sorting
@@ -299,6 +301,14 @@ function GameBattleList.onBattleButtonHoverChange(self, hovered)
   end
 end
 
+function GameBattleList.selectTarget(creature)
+  if g_game.isAttacking() then
+    g_game.cancelAttack()
+  else
+    g_game.attack(creature)
+  end
+end
+
 function GameBattleList.onBattleButtonMouseRelease(self, mousePosition, mouseButton)
   if mouseWidget.cancelNextRelease then
     mouseWidget.cancelNextRelease = false
@@ -317,11 +327,7 @@ function GameBattleList.onBattleButtonMouseRelease(self, mousePosition, mouseBut
     GameInterface.createThingMenu(mousePosition, nil, nil, self.creature)
     return true
   elseif mouseButton == MouseLeftButton and not g_mouse.isPressed(MouseRightButton) then
-    if self.isTarget then
-      g_game.cancelAttack()
-    else
-      g_game.attack(self.creature)
-    end
+    GameBattleList.selectTarget(self.creature)
     return true
   end
   return false
@@ -709,4 +715,19 @@ function GameBattleList.onTrackCreature(trackNode)
     color = nil
   end
   button:updateTrackIcon(color)
+end
+
+
+
+-- Select next target (see nextTargetShortcut)
+
+function GameBattleList.selectNextTarget()
+  if not GameCharacter.m or table.empty(battleListByIndex) then
+    return
+  end
+
+  -- Disable chase mode (this is the price to use the select target shortcut feature)
+  GameCharacter.onSetChaseMode(GameCharacter.m.chaseModeButton, false)
+
+  GameBattleList.selectTarget(battleListByIndex[1].creature)
 end

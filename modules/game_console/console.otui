@@ -283,13 +283,15 @@ Panel
       &sayMode: 2
       @onClick: GameConsole.sayModeChange()
 
-    CheckBox
+    Button
       id: toggleChat
-      !tooltip: tr('Disable chat mode, allow to walk using WASD')
+      size: 22 22
+      !tooltip: tr('Disable chat mode (activates shortcuts to walk with WASD and others)')
+      icon: /images/ui/console/chat
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
       margin-right: 1
-      @onCheckChange: GameConsole.toggleConsoleChat()
+      @onClick: GameConsole.toggleConsoleChat()
 
     TextEdit
       id: consoleTextEdit

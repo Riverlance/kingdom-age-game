@@ -269,7 +269,7 @@ function GameConsole.selectAll(consoleBuffer)
 end
 
 function GameConsole.toggleConsoleChat()
-  if consoleToggleChat:isChecked() then
+  if consoleTextEdit:isVisible() then
     GameConsole.disableChat()
   else
     GameConsole.enableChat()
@@ -277,6 +277,11 @@ function GameConsole.toggleConsoleChat()
 end
 
 function GameConsole.enableChat()
+  -- Disable next target shortcut
+  if GameBattleList.m then
+    g_keyboard.unbindKeyDown(GameBattleList.m.nextTargetShortcut)
+  end
+
   consoleTextEdit:setVisible(true)
   consoleTextEdit:setText('')
   consoleTextEdit:enable()
@@ -296,8 +301,7 @@ function GameConsole.enableChat()
   g_keyboard.unbindKeyPress('Ctrl+S')
   g_keyboard.unbindKeyPress('Ctrl+A')
 
-  consoleToggleChat:setChecked(false)
-  consoleToggleChat:setTooltip(tr('Disable chat mode, allow to walk using WASD'))
+  consoleToggleChat:setTooltip(tr('Disable chat mode (activates shortcuts to walk with WASD and others)'))
 end
 
 function GameConsole.disableChat()
@@ -320,8 +324,12 @@ function GameConsole.disableChat()
   GameInterface.bindTurnKey('Ctrl+S', South)
   GameInterface.bindTurnKey('Ctrl+D', East)
 
-  consoleToggleChat:setChecked(true)
   consoleToggleChat:setTooltip(tr('Enable chat mode'))
+
+  -- Enable next target shortcut
+  if GameBattleList.m then
+    g_keyboard.bindKeyDown(GameBattleList.m.nextTargetShortcut, GameBattleList.selectNextTarget)
+  end
 end
 
 function GameConsole.load()
@@ -943,7 +951,7 @@ end
 function GameConsole.onEnterKeyDown()
   local message = consoleTextEdit:getText()
 
-  if not consoleToggleChat:isChecked() then
+  if consoleTextEdit:isVisible() then
     if #message == 0 then
       GameConsole.disableChat()
       return
@@ -1132,7 +1140,7 @@ function GameConsole.setIgnoreNpcMessages(ignore)
 end
 
 function GameConsole.navigateConsoleLog(step)
-  if consoleToggleChat:isChecked() then
+  if not consoleTextEdit:isVisible() then
     return
   end
 

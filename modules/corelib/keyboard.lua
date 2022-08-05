@@ -281,7 +281,7 @@ function g_keyboard.isKeySetPressed(keys, all)
 end
 
 function g_keyboard.isInUse()
-  for i = FirstKey, LastKey do
+  for key = FirstKey, LastKey do
     if g_window.isKeyPressed(key) then
       return true
     end

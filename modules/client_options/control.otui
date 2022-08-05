@@ -8,7 +8,7 @@ Panel
 
   OptionCheckBox
     id: autoChaseOverride
-    !text: tr('Allow auto-chase override.')
+    !text: tr('Allow auto-chase override')
     !tooltip: tr('Your character stops to follow your target once you walk.')
     !tooltip-type: TooltipType.textBlock
 
