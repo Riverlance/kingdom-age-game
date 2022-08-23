@@ -83,6 +83,7 @@ end
 
 function GamePowers.cancelPower()--onEsc
   GamePowers.sendPowerCancel()
+  return not table.empty(PowerCastQueue)
 end
 
 

@@ -34,10 +34,7 @@ MiniWindow
   height: 235
   &save: true
 
-  EmptyMenuButton
-    text: ?
-    text-align: center
-    phantom: false
+  InfoMenuButton
     !tooltip: tr("1. 'Distribution' are points that you distributed manually.\n\n2. 'Alignment' are recommended points that were distributed automatically due to your vocation.\n\n3. 'Buff/Debuff' are points that were increased or decreased temporarily due to Powers.")
     !tooltip-type: TooltipType.textBlock
     anchors.verticalCenter: lockButton.verticalCenter

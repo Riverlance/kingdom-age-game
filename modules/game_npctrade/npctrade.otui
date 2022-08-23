@@ -1,39 +1,51 @@
 NPCOfferLabel < Label
   anchors.left: prev.right
+  anchors.right: parent.right
   anchors.top: prev.top
   margin-left: 5
-  text-auto-resize: true
+  margin-right: 5
+  text-auto-resize: false
 
-NPCItemBox < UICheckBox
-  border-width: 1
-  color: #aaaaaa
-  text-align: center
-  text-offset: 0 20
-  @onCheckChange: GameNpcTrade.onItemBoxChecked(self)
+NPCItemBox < Panel
+  UICheckBox
+    id: itemBox
+    anchors.fill: parent
+    border-width: 1
+    color: #aaaaaa
+    text-align: center
+    text-offset: 0 20
+    @onCheckChange: GameNpcTrade.onItemBoxChecked(self)
 
-  Item
-    id: item
-    phantom: true
-    anchors.top: parent.top
-    anchors.horizontalCenter: parent.horizontalCenter
-    image-color: #ffffffff
+    Item
+      id: item
+      phantom: true
+      anchors.top: parent.top
+      anchors.horizontalCenter: parent.horizontalCenter
+      image-color: #ffffffff
+      margin-top: 5
+
+    $checked on:
+      border-color: #faebd5
+
+    $!checked:
+      border-color: #98885e
+
+    $!on:
+      border-color: #98885e88
+      image-color: #ffffff88
+      color: #aaaaaa88
+
+  InfoMenuButton
+    anchors.top: prev.top
+    anchors.right: prev.right
+    anchors.verticalCenter: none
     margin-top: 5
-
-  $checked on:
-    border-color: #faebd5
-
-  $!checked:
-    border-color: #98885e
-
-  $!on:
-    border-color: #98885e88
-    image-color: #ffffff88
-    color: #aaaaaa88
+    margin-right: 5
 
 MainWindow
   id: npcWindow
   !text: tr('NPC Trade')
-  size: 550 515
+  size: 550 555
   @onEscape: GameNpcTrade.closeNpcTrade()
 
   TabButton
@@ -59,7 +71,7 @@ MainWindow
     margin-top: 5
 
   LightFlatPanel
-    height: 250
+    height: 300
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: prev.bottom
@@ -93,93 +105,12 @@ MainWindow
         auto-spacing: true
 
   LightFlatPanel
-    id: setupPanel
-    height: 140
-    enabled: false
-    anchors.left: parent.left
-    anchors.right: parent.horizontalCenter
-    anchors.top: prev.bottom
-    margin-top: 10
-    margin-right: 5
-
-    Label
-      !text: tr('Name') .. ':'
-      anchors.left: parent.left
-      anchors.top: parent.top
-      margin-top: 5
-      margin-left: 5
-      width: 85
-
-    NPCOfferLabel
-      id: name
-
-    Label
-      !text: tr('Price') .. ':'
-      anchors.left: parent.left
-      anchors.top: prev.bottom
-      margin-top: 10
-      margin-left: 5
-      width: 85
-
-    NPCOfferLabel
-      id: price
-
-    Label
-      !text: tr('Your Money') .. ':'
-      anchors.left: parent.left
-      anchors.top: prev.bottom
-      margin-top: 3
-      margin-left: 5
-      width: 85
-
-    NPCOfferLabel
-      id: money
-
-    Label
-      id: weightDesc
-      !text: tr('Weight') .. ':'
-      anchors.left: parent.left
-      anchors.top: prev.bottom
-      margin-top: 10
-      margin-left: 5
-      width: 85
-
-    NPCOfferLabel
-      id: weight
-
-    Label
-      id: capacityDesc
-      !text: tr('Your Capacity') .. ':'
-      anchors.left: parent.left
-      anchors.top: prev.bottom
-      margin-top: 3
-      margin-left: 5
-      width: 85
-
-    NPCOfferLabel
-      id: capacity
-
-    HorizontalScrollBar
-      id: quantityScroll
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.bottom: parent.bottom
-      margin-bottom: 5
-      margin-left: 5
-      margin-right: 5
-      show-value: true
-      minimum: 1
-      maximum: 100
-      step: 1
-      @onValueChange: GameNpcTrade.onQuantityValueChange(self:getValue())
-
-  LightFlatPanel
     id: buyOptions
+    width: 200
     height: 140
-    anchors.top: prev.top
-    anchors.left: parent.horizontalCenter
+    anchors.top: prev.bottom
     anchors.right: parent.right
-    margin-left: 5
+    margin-top: 10
 
     Label
       id: searchLabel
@@ -243,6 +174,112 @@ MainWindow
       visible: false
       checked: true
       @onCheckChange: GameNpcTrade.onShowAllItemsChange()
+
+  LightFlatPanel
+    id: setupPanel
+    height: 140
+    enabled: false
+    anchors.top: prev.top
+    anchors.left: parent.left
+    anchors.right: prev.outsideLeft
+    margin-right: 5
+
+    Label
+      phantom: false
+      !text: tr('Name') .. ':'
+      !tooltip: tr('Item name')
+      anchors.left: parent.left
+      anchors.top: parent.top
+      margin-top: 5
+      margin-left: 5
+      width: 85
+
+    NPCOfferLabel
+      id: name
+
+    Label
+      phantom: false
+      !text: tr('Price') .. ':'
+      !tooltip: tr('Item price')
+      anchors.left: parent.left
+      anchors.top: prev.bottom
+      margin-top: 3
+      margin-left: 5
+      width: 85
+
+    NPCOfferLabel
+      id: price
+
+    Label
+      phantom: false
+      id: weightDesc
+      !text: tr('Weight') .. ':'
+      !tooltip: tr('Item weight')
+      anchors.left: parent.left
+      anchors.top: prev.bottom
+      margin-top: 3
+      margin-left: 5
+      width: 85
+
+    NPCOfferLabel
+      id: weight
+
+    Label
+      phantom: false
+      !text: tr('Money') .. ':'
+      !tooltip: tr('Your money')
+      anchors.left: parent.left
+      anchors.top: prev.bottom
+      margin-top: 10
+      margin-left: 5
+      width: 85
+
+    NPCOfferLabel
+      id: money
+      phantom: false
+
+    Label
+      phantom: false
+      id: capacityDesc
+      !text: tr('Capacity') .. ':'
+      !tooltip: tr('Your capacity')
+      anchors.left: parent.left
+      anchors.top: prev.bottom
+      margin-top: 3
+      margin-left: 5
+      width: 85
+
+    NPCOfferLabel
+      id: capacity
+
+    Label
+      phantom: false
+      id: trustDesc
+      !text: tr('Trust') .. ':'
+      !tooltip: tr('Your trust on this city')
+      anchors.left: parent.left
+      anchors.top: prev.bottom
+      margin-top: 3
+      margin-left: 5
+      width: 85
+
+    NPCOfferLabel
+      id: trust
+      phantom: false
+
+    HorizontalScrollBar
+      id: quantityScroll
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      margin-bottom: 5
+      margin-left: 5
+      margin-right: 5
+      show-value: true
+      minimum: 1
+      maximum: 100
+      step: 1
+      @onValueChange: GameNpcTrade.onQuantityValueChange(self:getValue())
 
   Button
     id: sellAllButton

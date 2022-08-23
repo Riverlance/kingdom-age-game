@@ -9,7 +9,7 @@ partyHeader = nil
 contentsPanel = nil
 arrowMenuButton = nil
 sortMenuButton = nil
-emptyMenuButton = nil
+infoButton = nil
 
 partyLevelCalculatorWindow = nil
 levelTextEdit = nil
@@ -175,7 +175,7 @@ function GamePartyList.init()
   GamePartyList.setSortType(GamePartyList.getSortType())
   GamePartyList.setSortOrder(GamePartyList.getSortOrder())
 
-  emptyMenuButton = partyWindow:getChildById('emptyMenuButton')
+  infoButton = partyWindow:getChildById('infoButton')
 
   partyLevelCalculatorWindow = g_ui.createWidget('PartyLevelCalculatorWindow', rootWidget)
   levelTextEdit              = partyLevelCalculatorWindow:getChildById('levelTextEdit')
@@ -261,7 +261,7 @@ function GamePartyList.terminate()
   partyLevelCalculatorWindow:destroy()
   partyLevelCalculatorWindow = nil
 
-  emptyMenuButton = nil
+  infoButton = nil
   sortMenuButton = nil
   arrowMenuButton = nil
 
@@ -888,7 +888,7 @@ function GamePartyList.clearList()
 
   GamePartyList.updateInviteeList() -- Necessary to disable invitee widgets when invitee is empty
 
-  emptyMenuButton:setTooltip(tr('You are not in party.'), TooltipType.textBlock)
+  infoButton:setTooltip(tr('You are not in party.'), TooltipType.textBlock)
 end
 
 function GamePartyList.refreshList()
@@ -1225,7 +1225,7 @@ serverSignals[PARTYLIST_SERVERSIGNAL_SENDEXTRAEXPERIENCETOOLTIP] = function(msg)
   local extraExperienceTooltip = msg:getString()
   local extraExperienceValue   = msg:getDouble()
 
-  emptyMenuButton:setTooltip(extraExperienceValue > 0 and tr(extraExperienceTooltip, extraExperienceValue) or tr('You have no partners in your party yet.'), TooltipType.textBlock)
+  infoButton:setTooltip(extraExperienceValue > 0 and tr(extraExperienceTooltip, extraExperienceValue) or tr('You have no partners in your party yet.'), TooltipType.textBlock)
 end
 
 function GamePartyList.parsePartyList(protocol, msg)

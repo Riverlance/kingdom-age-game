@@ -5,6 +5,21 @@ _G.GameNpcTrade = { }
 local backpackSize  = 20
 local backpackPrice = 20
 
+TradeNoError               = 0
+TradeUnknownError          = 1
+TradeErrorNoEnoughMoney    = 2
+TradeErrorNoEnoughCapacity = 3
+TradeErrorNoEnoughTrust    = 4
+TradeErrorItemNotFound     = 5
+
+TradeErrorStr = {
+  [TradeUnknownError]          = 'You cannot trade this item.',
+  [TradeErrorNoEnoughMoney]    = 'You have no enough money for trade this item.',
+  [TradeErrorNoEnoughCapacity] = 'You have no enough capacity for trade this item.',
+  [TradeErrorNoEnoughTrust]    = 'You have no enough trust in this city for trade this item.',
+  [TradeErrorItemNotFound]     = "You don't have this item.",
+}
+
 BUY = 1
 SELL = 2
 CURRENCY = 'GPs'
@@ -15,6 +30,7 @@ WEIGHT_UNIT = 'oz'
 LAST_INVENTORY = 10
 
 npcWindow = nil
+itemsPanelListScrollBar = nil
 itemsPanel = nil
 radioTabs = nil
 radioItems = nil
@@ -29,12 +45,13 @@ weightDesc = nil
 weightLabel = nil
 capacityDesc = nil
 capacityLabel = nil
+trustDesc = nil
+trustLabel = nil
 tradeButton = nil
 buyTab = nil
 sellTab = nil
 initialized = false
 
-showWeight = true
 buyWithBackpack = nil
 ignoreCapacity = nil
 ignoreEquipped = nil
@@ -49,6 +66,22 @@ tradeItems = { }
 playerItems = { }
 selectedItem = nil
 
+townId                    = 0
+trustMaxLevel             = 0
+townTrustLevel            = 0
+townTrustExperience       = 0
+townTrustExpOfActualLevel = 0
+townTrustExpToNextLevel   = 0
+
+local howToTownTrust = [[Equipments can be bought if you have enough money and trust.
+Extra missions can be made if you have enough trust.
+Higher trust levels unlocks access to buy or sell new items.
+Your trust of each city increases individually by selling some items and decreases over time.]] -- See achievements on server
+
+local function getTownStr()
+  return townId > 0 and TownStr[townId] and ' (' .. TownStr[townId] .. ' City)' or ''
+end
+
 cancelNextRelease = nil
 
 function GameNpcTrade.init()
@@ -58,10 +91,12 @@ function GameNpcTrade.init()
   npcWindow = g_ui.displayUI('npctrade')
   npcWindow:setVisible(false)
 
+  itemsPanelListScrollBar = npcWindow:recursiveGetChildById('itemsPanelListScrollBar')
+
   itemsPanel = npcWindow:recursiveGetChildById('itemsPanel')
   searchText = npcWindow:recursiveGetChildById('searchText')
 
-  setupPanel = npcWindow:recursiveGetChildById('setupPanel')
+  setupPanel = npcWindow:getChildById('setupPanel')
   quantityScroll = setupPanel:getChildById('quantityScroll')
   nameLabel = setupPanel:getChildById('name')
   priceLabel = setupPanel:getChildById('price')
@@ -70,6 +105,8 @@ function GameNpcTrade.init()
   weightLabel = setupPanel:getChildById('weight')
   capacityDesc = setupPanel:getChildById('capacityDesc')
   capacityLabel = setupPanel:getChildById('capacity')
+  trustDesc = setupPanel:getChildById('trustDesc')
+  trustLabel = setupPanel:getChildById('trust')
   tradeButton = npcWindow:recursiveGetChildById('tradeButton')
 
   buyWithBackpack = npcWindow:recursiveGetChildById('buyWithBackpack')
@@ -161,11 +198,17 @@ function GameNpcTrade.onItemBoxChecked(widget)
 end
 
 function GameNpcTrade.onQuantityValueChange(quantity)
-  if selectedItem then
-    local items, backpacks, price = GameNpcTrade.getBuyAmount(selectedItem, quantity)
-    priceLabel:setText(GameNpcTrade.formatCurrency(price))
-    weightLabel:setText(string.format('%.2f', quantity * selectedItem.weight) .. ' ' .. WEIGHT_UNIT)
+  if not selectedItem then
+    return
   end
+
+  local tradeType = GameNpcTrade.getCurrentTradeType()
+
+  local items, backpacks, price = GameNpcTrade.getBuyAmount(selectedItem, quantity)
+  priceLabel:setText(GameNpcTrade.formatCurrency(price) .. GameNpcTrade.formatTrust(selectedItem) .. GameNpcTrade.formatTown(selectedItem))
+  weightLabel:setText(tradeType == BUY and string.format('%.2f', quantity * selectedItem.weight) .. ' ' .. WEIGHT_UNIT or '')
+
+  GameNpcTrade.checkTradeTooltip()
 end
 
 function GameNpcTrade.onTradeTypeChange(radioTabs, selected, deselected)
@@ -182,6 +225,8 @@ function GameNpcTrade.onTradeTypeChange(radioTabs, selected, deselected)
 
   GameNpcTrade.refreshTradeItems()
   GameNpcTrade.refreshPlayerGoods()
+
+  itemsPanelListScrollBar:setValue(0)
 end
 
 function GameNpcTrade.onTradeClick()
@@ -245,18 +290,6 @@ function GameNpcTrade.setCurrency(currency, decimal, isVip)
   CURRENCY_ISVIP = isVip
 end
 
-function GameNpcTrade.setShowWeight(state)
-  showWeight = state
-  weightDesc:setVisible(state)
-  weightLabel:setVisible(state)
-end
-
-function GameNpcTrade.setShowYourCapacity(state)
-  capacityDesc:setVisible(state)
-  capacityLabel:setVisible(state)
-  ignoreCapacity:setVisible(state)
-end
-
 function GameNpcTrade.clearSelectedItem()
   nameLabel:clearText()
   weightLabel:clearText()
@@ -298,20 +331,44 @@ function GameNpcTrade.getSellQuantity(item)
 end
 
 function GameNpcTrade.canTradeItem(item)
-  if GameNpcTrade.getCurrentTradeType() == BUY then
-    local items, backpacks, price = GameNpcTrade.getBuyAmount(item, 1)
-    return (ignoreCapacity:isChecked() or (not ignoreCapacity:isChecked() and playerFreeCapacity >= item.weight)) and playerMoney >= price and price ~= 0
-  else
-    local items, price = GameNpcTrade.getSellAmount(item)
-    return items >= 1 and price ~= 0
+  if townTrustLevel < item.tradeTrustLevel then
+    return TradeErrorNoEnoughTrust
   end
+
+  local tradeType = GameNpcTrade.getCurrentTradeType()
+
+  if tradeType == BUY then
+    local items, backpacks, price = GameNpcTrade.getBuyAmount(item, 1)
+    local isIgnoreCapacityChecked = ignoreCapacity:isChecked()
+
+    if price < 0 then
+      return TradeUnknownError
+    elseif playerMoney < price then
+      return TradeErrorNoEnoughMoney
+    elseif not isIgnoreCapacityChecked and playerFreeCapacity < item.weight then
+      return TradeErrorNoEnoughCapacity
+    end
+
+  elseif tradeType == SELL then
+    local items, price = GameNpcTrade.getSellAmount(item)
+
+    if price < 0 then
+      return TradeUnknownError
+    elseif items < 1 then
+      return TradeErrorItemNotFound
+    end
+  end
+
+  return TradeNoError
 end
 
 function GameNpcTrade.refreshItem(item)
-  local quantity = quantityScroll:getValue()
-  local items, backpacks, price = 0, 0, 0
+  local tradeType = GameNpcTrade.getCurrentTradeType()
+  local quantity  = quantityScroll:getValue()
+
+  local items, backpacks, price    = 0, 0, 0
   local _items, _backpacks, _price = 0, 0, 0
-  if GameNpcTrade.getCurrentTradeType() == BUY then
+  if tradeType == BUY then
     items, backpacks, price = GameNpcTrade.getBuyAmount(item)
     _items, _backpacks, _price = GameNpcTrade.getBuyAmount(item, quantity)
   else
@@ -319,12 +376,14 @@ function GameNpcTrade.refreshItem(item)
   end
 
   nameLabel:setText(item.name)
-  priceLabel:setText(GameNpcTrade.formatCurrency(GameNpcTrade.getCurrentTradeType() == BUY and _price ~= 0 and _price or quantity * item.price))
-  weightLabel:setText(string.format('%.2f', quantity * item.weight) .. ' ' .. WEIGHT_UNIT)
+  priceLabel:setText(GameNpcTrade.formatCurrency(GameNpcTrade.getCurrentTradeType() == BUY and _price ~= 0 and _price or quantity * item.price) .. GameNpcTrade.formatTrust(item) .. GameNpcTrade.formatTown(item))
+  weightLabel:setText(tradeType == BUY and string.format('%.2f', quantity * item.weight) .. ' ' .. WEIGHT_UNIT or '')
   quantityScroll:setMinimum(items ~= 0 and 1 or 0)
   quantityScroll:setMaximum(items)
 
   setupPanel:enable()
+
+  GameNpcTrade.checkTradeTooltip()
 end
 
 function GameNpcTrade.refreshTradeItems()
@@ -344,19 +403,22 @@ function GameNpcTrade.refreshTradeItems()
 
   local currentTradeItems = tradeItems[GameNpcTrade.getCurrentTradeType()]
   for _,item in pairs(currentTradeItems) do
-    local itemBox = g_ui.createWidget('NPCItemBox', itemsPanel)
-    itemBox.item = item
+    local npcItemBox = g_ui.createWidget('NPCItemBox', itemsPanel)
 
-    local text = ''
-    local name = item.name
-    text = text .. name
-    if showWeight then
-      local weight = string.format('%.2f', item.weight) .. ' ' .. WEIGHT_UNIT
-      text = text .. '\n' .. weight
-    end
-    local price = GameNpcTrade.formatCurrency(item.price)
-    text = text .. '\n' .. price
+    local itemBox = npcItemBox:getChildById('itemBox')
+    itemBox.item  = item
+
+    local text = item.name
+    text       = text .. '\n' .. GameNpcTrade.formatCurrency(item.price) .. GameNpcTrade.formatTrust(item)
+    text       = text .. '\n' .. (string.format('%.2f', item.weight) .. ' ' .. WEIGHT_UNIT)
     itemBox:setText(text)
+
+    local infoWidget       = npcItemBox:getChildById('infoButton')
+    local tooltipText      = string.format('Name: %s', item.name)
+    tooltipText            = tooltipText .. '\n' .. 'Price' .. ': ' .. GameNpcTrade.formatCurrency(item.price) .. GameNpcTrade.formatTrust(item) .. GameNpcTrade.formatTown(item)
+    tooltipText            = tooltipText .. '\n' .. 'Weight' .. ': ' .. string.format('%.2f', item.weight) .. ' ' .. WEIGHT_UNIT
+    infoWidget.tooltipText = tooltipText
+    infoWidget:setTooltip(tooltipText, TooltipType.textBlock)
 
     local itemWidget = itemBox:getChildById('item')
     itemWidget:setItem(item.maskptr or item.ptr)
@@ -374,13 +436,29 @@ function GameNpcTrade.refreshPlayerGoods()
     return
   end
 
+  GameNpcTrade.checkTradeTooltip()
   GameNpcTrade.checkSellAllTooltip()
 
   moneyLabel:setText(string.format('%s (%s)', GameNpcTrade.formatCurrency(playerMoney), playerMoneyFromBank and 'from bank' or 'holding'))
-  tradeButton:setTooltip(CURRENCY_ISVIP and tr('Your VIP money may not be displayed correctly if points were added through the website while keeping the trade opened.') or '', TooltipType.textBlock)
+  if CURRENCY_ISVIP then
+    moneyLabel:setTooltip(tr('Your VIP money may not be displayed correctly if points were added through the website while keeping the trade window opened.'), TooltipType.textBlock)
+    buyWithBackpack:setTooltip('This option is disabled on VIP Shop.', TooltipType.textBlock)
+  else
+    moneyLabel:removeTooltip()
+    buyWithBackpack:removeTooltip()
+  end
   capacityLabel:setText(string.format('%.2f', playerFreeCapacity) .. ' ' .. WEIGHT_UNIT)
-
-  buyWithBackpack:setTooltip(CURRENCY_ISVIP and 'This option is disabled on VIP Shop.' or '', TooltipType.textBlock)
+  trustLabel:setText(string.format('Level %d (%d XP)', townTrustLevel, townTrustExperience))
+  local trustInfoMessage = ''
+  if townTrustLevel < trustMaxLevel then
+    local trustExpDiff      = townTrustExpToNextLevel - townTrustExpOfActualLevel
+    local trustExpToAdvance = townTrustExpToNextLevel - townTrustExperience
+    local trustExpPercent   = (trustExpToAdvance / trustExpDiff) * 100
+    trustInfoMessage        = string.format('Remaining %.2f%% (about %d XP) to advance to trust level %d%s.', trustExpPercent, trustExpToAdvance, townTrustLevel + 1, getTownStr())
+  else
+    trustInfoMessage = string.format('You are on the maximum trust level%s.', getTownStr())
+  end
+  trustLabel:setTooltip(trustInfoMessage .. '\n\n' .. howToTownTrust, TooltipType.textBlock)
 
   local currentTradeType = GameNpcTrade.getCurrentTradeType()
   local searchFilter = searchText:getText():lower()
@@ -388,18 +466,24 @@ function GameNpcTrade.refreshPlayerGoods()
 
   local items = itemsPanel:getChildCount()
   for i=1,items do
-    local itemWidget = itemsPanel:getChildByIndex(i)
-    local item = itemWidget.item
+    local npcItemBox = itemsPanel:getChildByIndex(i)
+    local itemBox    = npcItemBox:getChildById('itemBox')
+    local item       = itemBox.item
 
-    local canTrade = GameNpcTrade.canTradeItem(item)
-    itemWidget:setOn(canTrade)
-    itemWidget:setEnabled(canTrade)
+    local canTrade = GameNpcTrade.canTradeItem(item) == TradeNoError
+    itemBox:setOn(canTrade)
+    itemBox:setEnabled(canTrade)
 
     local searchCondition = (searchFilter == '') or (searchFilter ~= '' and string.find(item.name:lower(), searchFilter) ~= nil)
     local showAllItemsCondition = (currentTradeType == BUY) or (showAllItems:isChecked()) or (currentTradeType == SELL and not showAllItems:isChecked() and canTrade)
-    itemWidget:setVisible(searchCondition and showAllItemsCondition)
+    npcItemBox:setVisible(searchCondition and showAllItemsCondition)
 
-    if selectedItem == item and itemWidget:isEnabled() and itemWidget:isVisible() then
+    local tradeRet    = GameNpcTrade.canTradeItem(item)
+    local infoWidget  = npcItemBox:getChildById('infoButton')
+    local tooltipText = infoWidget.tooltipText .. (tradeRet ~= TradeNoError and TradeErrorStr[tradeRet] and '\n\n' .. TradeErrorStr[tradeRet] or '')
+    infoWidget:setTooltip(tooltipText, TooltipType.textBlock)
+
+    if selectedItem == item and npcItemBox:isVisible() and itemBox:isEnabled() then
       foundSelectedItem = true
     end
   end
@@ -413,34 +497,38 @@ function GameNpcTrade.refreshPlayerGoods()
   end
 end
 
-function GameNpcTrade.onOpenNpcTrade(items, isVip)
-  tradeItems[BUY] = { }
+function GameNpcTrade.onOpenNpcTrade(items, _townId, _trustMaxLevel, isVip)
+  tradeItems[BUY]  = { }
   tradeItems[SELL] = { }
 
   for _,item in pairs(items) do
-    if item[5] > 0 then
-      local newItem = {
-        ptr     = item[1],
-        maskptr = item[2],
-        name    = item[3],
-        weight  = item[4] / 100,
-        price   = item[5]
-      }
-      table.insert(tradeItems[BUY], newItem)
+    if item[7] > 0 then
+      table.insert(tradeItems[BUY], {
+        ptr             = item[1],
+        maskptr         = item[2],
+        name            = item[3],
+        weight          = item[4] / 100,
+        addTrustOnSell  = item[5],
+        tradeTrustLevel = item[6],
+        price           = item[7],
+      })
     end
 
-    if item[6] > 0 then
-      local newItem = {
-        ptr     = item[1],
-        maskptr = item[2],
-        name    = item[3],
-        weight  = item[4] / 100,
-        price   = item[6]
-      }
-      table.insert(tradeItems[SELL], newItem)
+    if item[8] > 0 then
+      table.insert(tradeItems[SELL], {
+        ptr             = item[1],
+        maskptr         = item[2],
+        name            = item[3],
+        weight          = item[4] / 100,
+        addTrustOnSell  = item[5],
+        tradeTrustLevel = item[6],
+        price           = item[8],
+      })
     end
   end
 
+  townId         = _townId
+  trustMaxLevel  = _trustMaxLevel
   CURRENCY_ISVIP = isVip
 
   GameNpcTrade.refreshTradeItems()
@@ -456,10 +544,11 @@ function GameNpcTrade.onCloseNpcTrade()
   GameNpcTrade.hide()
 end
 
-function GameNpcTrade.onPlayerGoods(isPremium, bankPaymentMode, money, bankMoney, kaps, items)
+function GameNpcTrade.onPlayerGoods(isPremium, bankPaymentMode, money, bankMoney, kaps, _townTrustLevel, _townTrustExperience, _townTrustExpOfActualLevel, _townTrustExpToNextLevel, items)
   playerMoneyFromBank = false
-  playerIsPremium = isPremium
-  playerMoney = money
+  playerIsPremium     = isPremium
+  playerMoney         = money
+
   if CURRENCY_ISVIP then
     playerMoney = kaps
   elseif isPremium and bankPaymentMode then
@@ -476,6 +565,11 @@ function GameNpcTrade.onPlayerGoods(isPremium, bankPaymentMode, money, bankMoney
       playerItems[id] = playerItems[id] + item[2]
     end
   end
+
+  townTrustLevel            = _townTrustLevel
+  townTrustExperience       = _townTrustExperience
+  townTrustExpOfActualLevel = _townTrustExpOfActualLevel
+  townTrustExpToNextLevel   = _townTrustExpToNextLevel
 
   GameNpcTrade.refreshPlayerGoods()
 end
@@ -515,6 +609,25 @@ function GameNpcTrade.getTradeItemData(id, type)
   return false
 end
 
+function GameNpcTrade.checkTradeTooltip()
+  if not selectedItem then
+    tradeButton:removeTooltip()
+    return
+  end
+  local tradeType = GameNpcTrade.getCurrentTradeType()
+
+  local quantity                = quantityScroll:getValue()
+  local items, backpacks, price = GameNpcTrade.getBuyAmount(selectedItem, quantity)
+  local tooltipText             = string.format('Name: %s', selectedItem.name)
+  tooltipText                   = tooltipText .. '\n\n' .. 'Price' .. ': ' .. GameNpcTrade.formatCurrency(selectedItem.price) .. GameNpcTrade.formatTrust(selectedItem) .. GameNpcTrade.formatTown(selectedItem)
+  tooltipText                   = tooltipText .. (tradeType == BUY and '\n' .. 'Weight' .. ': ' .. string.format('%.2f', selectedItem.weight) .. ' ' .. WEIGHT_UNIT or '')
+  tooltipText                   = tooltipText .. '\n\n' .. 'Count' .. ': ' .. quantity
+  tooltipText                   = tooltipText .. '\n' .. 'Total price' .. ': ' .. GameNpcTrade.formatCurrency(price) .. GameNpcTrade.formatTrust(selectedItem) .. GameNpcTrade.formatTown(selectedItem)
+  tooltipText                   = tooltipText .. (tradeType == BUY and '\n' .. 'Total weight' .. ': ' .. string.format('%.2f', selectedItem.weight * quantity) .. ' ' .. WEIGHT_UNIT or '')
+
+  tradeButton:setTooltip(tooltipText, TooltipType.textBlock)
+end
+
 function GameNpcTrade.checkSellAllTooltip()
   sellAllButton:setEnabled(true)
 
@@ -527,7 +640,7 @@ function GameNpcTrade.checkSellAllTooltip()
     if item then
       local items, price = GameNpcTrade.getSellAmount(item)
       if items > 0 then
-        info = string.format('%s%s* %d %s: %d %s', info, (not first and '\n' or ''), items, item.name, price, tr(CURRENCY))
+        info = string.format('%s%s* %dx %s: %d %s', info, (not first and '\n' or ''), items, item.name, price, tr(CURRENCY))
         total = total + price
 
         if first then
@@ -537,7 +650,7 @@ function GameNpcTrade.checkSellAllTooltip()
     end
   end
   if info ~= '' then
-    info = string.format('%s\nTotal: %d %s', info, total, tr(CURRENCY))
+    info = string.format('%s\n\nTotal price: %d %s', info, total, tr(CURRENCY))
     sellAllButton:setTooltip(info, TooltipType.textBlock)
   else
     sellAllButton:setEnabled(false)
@@ -551,6 +664,14 @@ function GameNpcTrade.formatCurrency(amount)
   else
     return amount .. ' ' .. (CURRENCY_ISVIP and CURRENCY_VIP or CURRENCY)
   end
+end
+
+function GameNpcTrade.formatTrust(item)
+  return GameNpcTrade.getCurrentTradeType() == SELL and item.addTrustOnSell and ' + trust' or ''
+end
+
+function GameNpcTrade.formatTown(item)
+  return GameNpcTrade.getCurrentTradeType() == SELL and item.addTrustOnSell and getTownStr() or ''
 end
 
 function GameNpcTrade.getMaxAmount()
@@ -567,10 +688,9 @@ function GameNpcTrade.sellAll()
       local quantity = GameNpcTrade.getSellQuantity(item.ptr)
       if quantity > 0 then
         g_game.sellItem(item.ptr, item.maskptr, quantity, ignoreEquipped:isChecked())
-        GameNpcTrade.checkSellAllTooltip()
         addEvent(function()
           if g_tooltip then
-            g_tooltip.hide(sellAllButton)
+            Tooltip.hide()
           end
         end)
       end

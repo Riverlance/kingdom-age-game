@@ -117,6 +117,28 @@ EmptyMenuButton < UIButton
   $on:
     image-clip: 112 28 14 14
 
+InfoMenuButton < UIButton
+  id: infoButton
+  text: ?
+  text-align: center
+  size: 14 14
+  font: verdana-11px-antialised
+  color: #e6db74dd
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.right: prev.outsideLeft
+  image-source: /images/ui/_button/mini_window
+  image-clip: 112 0 14 14
+  phantom: false
+
+  $hover:
+    image-clip: 112 14 14 14
+
+  $pressed:
+    image-clip: 112 28 14 14
+
+  $on:
+    image-clip: 112 28 14 14
+
 LockMenuButton < UIButton
   id: lockButton
   size: 14 14

@@ -257,6 +257,20 @@ function UIMiniWindow:onDragEnter(mousePos)
 end
 
 function UIMiniWindow:onDragLeave(droppedWidget, mousePos)
+  if droppedWidget and droppedWidget:getClassName() ~= 'UIMiniWindowContainer' then
+    return false
+  end
+
+  if self:getParent() == rootWidget and self.lastPanel then
+    if self.movedWidget then
+      local index = self.lastPanel:getChildIndex(self.movedWidget)
+      self.lastPanel:insertChild(index + self.movedIndex, self)
+    else
+      self.lastPanel:addChild(self)
+    end
+    signalcall(self.lastPanel.onFitAll, self.lastPanel, self)
+  end
+
   if self.movedWidget then
     self.setMovedChildMargin(self.movedOldMargin or 0)
     self.movedWidget = nil

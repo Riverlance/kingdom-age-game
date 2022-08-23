@@ -42,42 +42,6 @@ function UIWidget:setMargin(...)
   end
 end
 
-function UIWidget:onDrop(widget, mousePos)
-  if self == widget then
-    return false
-  end
-
-  -- Avoid dropping miniwindow outside it's panel
-  local miniWindowContainer = nil
-  if widget:getClassName() == 'UIMiniWindow' then
-    -- Finding if dropped widget is UIMiniWindowContainer
-    local children = rootWidget:recursiveGetChildrenByPos(mousePos)
-    for i=1,#children do
-      local child = children[i]
-      if child:getClassName() == 'UIMiniWindowContainer' then
-        miniWindowContainer = child
-        break
-      end
-    end
-  end
-  if not miniWindowContainer and widget.lastPanel then
-    local oldParent = widget:getParent()
-    if oldParent then
-      oldParent:removeChild(widget)
-    end
-
-    if widget.movedWidget then
-      local index = widget.lastPanel:getChildIndex(widget.movedWidget)
-      widget.lastPanel:insertChild(index + widget.movedIndex, widget)
-    else
-      widget.lastPanel:addChild(widget)
-    end
-
-    signalcall(widget.lastPanel.onFitAll, widget.lastPanel, self)
-  end
-  return false
-end
-
 function UIWidget:getContentsSize()
   local pos = self:getPosition()
 

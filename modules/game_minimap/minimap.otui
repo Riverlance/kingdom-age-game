@@ -25,10 +25,7 @@ MiniWindow
         end
       end
 
-  EmptyMenuButton
-    text: ?
-    text-align: center
-    phantom: false
+  InfoMenuButton
     !tooltip: tr("Hold the left mouse button and drag-and-drop or press the '%s' holding '%s' for navigate.\n\nScroll the mouse wheel for zoom. Do the same holding '%s' for change the floor level.\n\nPress the right mouse button for create map marks.\n\nPress '%s' for view the entire game map.", 'Arrow Keys', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
     !tooltip-type: TooltipType.textBlock
 

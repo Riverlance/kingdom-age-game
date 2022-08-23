@@ -22,10 +22,7 @@ MiniWindow
     id: sortMenuButton
     @onClick: GameBattleList.createSortMenu()
 
-  EmptyMenuButton
-    text: ?
-    text-align: center
-    phantom: false
+  InfoMenuButton
     !tooltip: tr('Once chat mode is disabled, you are able to use the shortcut (Space) to select the next target from this window.\n\nNote: On select the next target with this shortchut, the Chase Mode will be deactivated.')
     !tooltip-type: TooltipType.textBlock
     anchors.verticalCenter: sortMenuButton.verticalCenter

@@ -15,4 +15,4 @@ TooltipTextBlock < Panel
     text-align: left
     text-vertical-auto-resize: true
     text-wrap: true
-    color: #E6DB74
+    color: #e6db74

@@ -27,7 +27,6 @@ hotkeyText = nil
 sendAutomatically = nil
 defaultComboKeys = nil
 currentHotkeys = nil
-boundCombosCallback = { }
 hotkeyList = { }
 lastHotkeyTime = g_clock.millis()
 
@@ -177,14 +176,9 @@ function GameHotkeys.apply(hotkeyLabel, save, sort)
   local keySettings = hotkeyLabel.settings
   local keyCombo = keySettings.keyCombo
   if hotkeyLabel.status == HotkeyStatus.Deleted then
-    if keySettings.powerId then
-      g_keyboard.unbindKeyPress(keyCombo, boundCombosCallback[keyCombo])
-      g_keyboard.unbindKeyUp(keyCombo, keySettings.castCallback)
-    else
-      g_keyboard.unbindKeyDown(keyCombo, boundCombosCallback[keyCombo])
-    end
+    g_keyboard.unbindKeyDown(keyCombo, GameHotkeys.onKeyDown)
+    g_keyboard.unbindKeyUp(keyCombo, GameHotkeys.onKeyUp)
     hotkeyList[keyCombo] = nil
-    boundCombosCallback[keyCombo] = nil
     currentHotkeyLabel = nil
     currentHotkeys:focusNextChild(OtherFocusReason)
     hotkeyLabel:destroy()
@@ -304,14 +298,9 @@ end
 function GameHotkeys.unload()
   for _, hotkeyLabel in ipairs(currentHotkeys:getChildren()) do
     local keySettings = hotkeyLabel.settings
-    if keySettings.powerId then
-      g_keyboard.unbindKeyPress(keySettings.keyCombo, boundCombosCallback[keySettings.keyCombo])
-      g_keyboard.unbindKeyUp(keySettings.keyCombo, keySettings.castCallback)
-    else
-      g_keyboard.unbindKeyDown(keySettings.keyCombo, boundCombosCallback[keySettings.keyCombo])
-    end
+    g_keyboard.unbindKeyDown(keySettings.keyCombo, GameHotkeys.onKeyDown)
+    g_keyboard.unbindKeyUp(keySettings.keyCombo, GameHotkeys.onKeyUp)
   end
-  boundCombosCallback = { }
   currentHotkeys:destroyChildren()
   currentHotkeyLabel = nil
   hotkeyList = { }
@@ -427,6 +416,34 @@ function GameHotkeys.assignHotkey(keySettings)
   end
 end
 
+function GameHotkeys.canUseHotkey(keySettings)
+  local chat = GameConsole.getFooterPanel():getChildById('consoleTextEdit')
+  local keyAlone = translateKeyCombo({ backtranslateKeyComboDesc(keySettings.keyCombo).keyCode })
+  if chat and chat:isEnabled() and (string.match(keyAlone, '^%C$') or keyAlone == "Space" or keyAlone == "Backspace") then
+    return false
+  end
+  return true
+end
+
+function GameHotkeys.onKeyDown(rootWidget, keyCode, keyboardModifiers)
+  local keyCombo = determineKeyComboDesc(keyCode, keyboardModifiers)
+  local keySettings = hotkeyList[keyCombo]
+  if keySettings and GameHotkeys.canUseHotkey(keySettings) then
+    GameHotkeys.doAction(keySettings)
+  end
+end
+
+function GameHotkeys.onKeyUp(rootWidget, keyCode, keyboardModifiers)
+  local keyCombo = determineKeyComboDesc(keyCode, keyboardModifiers)
+  local keySettings = hotkeyList[keyCombo]
+  if keySettings and keySettings.powerId then
+    local mapWidget = GameInterface.getMapPanel()
+    local mousePosition = g_window.getMousePosition()
+    local pos = mapWidget and mapWidget:getPosition(mousePosition)
+    GamePowers.castPower(pos)
+  end
+end
+
 function GameHotkeys.addKeyCombo(keySettings, focus)
   local keyCombo = keySettings.keyCombo
   if not string.exists(keyCombo) then
@@ -454,28 +471,8 @@ function GameHotkeys.addKeyCombo(keySettings, focus)
     GameHotkeys.apply(hotkeyLabel, true, true)
   end
 
-  boundCombosCallback[keyCombo] = function()
-      local chat = GameConsole.getFooterPanel():getChildById('consoleTextEdit')
-      local keyAlone = translateKeyCombo({ backtranslateKeyComboDesc(keyCombo).keyCode })
-      if chat and chat:isEnabled() and (string.match(keyAlone, '^%C$') or keyAlone == "Space" or keyAlone == "Backspace") then
-        return
-      end
-      GameHotkeys.doAction(keySettings)
-    end
-
-  if tonumber(keySettings.powerId) then
-    g_keyboard.bindKeyPress(keyCombo, boundCombosCallback[keyCombo])
-
-    keySettings.castCallback = function() 
-      local mapWidget = GameInterface.getMapPanel()
-      local mousePosition = g_window.getMousePosition()
-      local pos = mapWidget and mapWidget:getPosition(mousePosition)
-      GamePowers.castPower(pos)
-    end
-    g_keyboard.bindKeyUp(keyCombo, keySettings.castCallback)
-  else
-    g_keyboard.bindKeyDown(keyCombo, boundCombosCallback[keyCombo])
-  end
+  g_keyboard.bindKeyDown(keyCombo, GameHotkeys.onKeyDown)
+  g_keyboard.bindKeyUp(keyCombo, GameHotkeys.onKeyUp)
 
   GameHotkeys.onEdit(hotkeyLabel)
   GameHotkeys.updateHotkeyLabel(hotkeyLabel)

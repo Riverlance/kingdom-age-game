@@ -111,7 +111,7 @@ local function onWidgetKeyDown(widget, keyCode, keyboardModifiers)
   local callback = widget.boundAloneKeyDownCombos[determineKeyComboDesc(keyCode, KeyboardNoModifier)]
   signalcall(callback, widget, keyCode)
   callback = widget.boundKeyDownCombos[determineKeyComboDesc(keyCode, keyboardModifiers)]
-  return signalcall(callback, widget, keyCode)
+  return signalcall(callback, widget, keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyUp(widget, keyCode, keyboardModifiers)
@@ -122,7 +122,7 @@ local function onWidgetKeyUp(widget, keyCode, keyboardModifiers)
   local callback = widget.boundAloneKeyUpCombos[determineKeyComboDesc(keyCode, KeyboardNoModifier)]
   signalcall(callback, widget, keyCode)
   callback = widget.boundKeyUpCombos[determineKeyComboDesc(keyCode, keyboardModifiers)]
-  return signalcall(callback, widget, keyCode)
+  return signalcall(callback, widget, keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyPress(widget, keyCode, keyboardModifiers, autoRepeatTicks)
@@ -131,7 +131,7 @@ local function onWidgetKeyPress(widget, keyCode, keyboardModifiers, autoRepeatTi
   end
 
   local callback = widget.boundKeyPressCombos[determineKeyComboDesc(keyCode, keyboardModifiers)]
-  return signalcall(callback, widget, keyCode, autoRepeatTicks)
+  return signalcall(callback, widget, keyCode, keyboardModifiers, autoRepeatTicks)
 end
 
 local function connectKeyDownEvent(widget)

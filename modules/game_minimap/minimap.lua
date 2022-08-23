@@ -1,6 +1,9 @@
 _G.GameMinimap = { }
 
-
+MinimapFlags = {
+  Info = 1,
+  View = 2,
+}
 
 minimapWindow = nil
 minimapTopMenuButton = nil
@@ -17,12 +20,12 @@ infoLabel = nil
 extraIconsButton = nil
 fullMapButton = nil
 
-otmm = true
 preloaded = false
 fullmapView = false
 oldZoom = nil
 oldPos = nil
 
+currentMapName = ''
 
 local lastMinimapMarkId = 19
 
@@ -49,7 +52,7 @@ function GameMinimap.init()
   positionLabel = contentsPanel:getChildById('positionLabel')
 
   ballButton = minimapWindow:getChildById('ballButton')
-  infoLabel = minimapWindow:getChildById('emptyMenuButton')
+  infoLabel = minimapWindow:getChildById('infoButton')
 
   local compassWidget = minimapBar:getChildById('compass')
   extraIconsButton = compassWidget:getChildById('extraIconsButton')
@@ -158,35 +161,28 @@ function GameMinimap.offline()
 end
 
 function GameMinimap.loadMap(clean)
-  local clientVersion = g_game.getClientVersion()
-
   if clean then
     g_minimap.clean()
   end
 
-  if otmm then
     local minimapFile = '/minimap.otmm'
-    if g_resources.fileExists(minimapFile) then
-      g_minimap.loadOtmm(minimapFile)
-    end
-  else
-    local minimapFile = '/minimap_' .. clientVersion .. '.otcm'
-    if g_resources.fileExists(minimapFile) then
-      g_map.loadOtcm(minimapFile)
-    end
+  if string.exists(currentMapName) then
+    minimapFile = tr('/%s.otmm', currentMapName)
+  end
+
+  if g_resources.fileExists(minimapFile) then
+    g_minimap.loadOtmm(minimapFile)
   end
   minimapWidget:load()
 end
 
 function GameMinimap.saveMap()
-  local clientVersion = g_game.getClientVersion()
-  if otmm then
     local minimapFile = '/minimap.otmm'
-    g_minimap.saveOtmm(minimapFile)
-  else
-    local minimapFile = '/minimap_' .. clientVersion .. '.otcm'
-    g_map.saveOtcm(minimapFile)
+  if string.exists(currentMapName) then
+    minimapFile = tr('/%s.otmm', currentMapName)
   end
+
+  g_minimap.saveOtmm(minimapFile)
   minimapWidget:save()
 end
 
@@ -311,10 +307,10 @@ function GameMinimap.getMinimapBar()
 end
 
 function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
-  local action = msg:getU8()
+  local flag = msg:getU8()
 
   -- Minimap info
-  if action == 1 then
+  if flag == MinimapFlags.Info then
     local instanceId   = msg:getU32()
     local instanceName = msg:getString()
 
@@ -326,27 +322,29 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
     localPlayer:setInstanceId(instanceId)
     localPlayer:setInstanceName(instanceName)
 
-    local text
-
-    -- Instance map
-    if instanceId > 0 then
+    local text = ''
+    if instanceId > 0 then -- Instance map
+      instanceMapName = instanceName:gsub('%p',''):gsub('%s','_'):lower()
       text = instanceName
-
-    -- Default map
-    else
+    else -- Default map
+      instanceMapName = ''
       local pos = localPlayer:getPosition()
-      if not pos then
-        return
+      if pos then
+        text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
       end
-
-      text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
     end
 
     positionLabel:setText(text)
     positionLabel:setTooltip(text)
 
+    if instanceMapName ~= currentMapName then
+      GameMinimap.saveMap()
+      currentMapName = instanceMapName
+      GameMinimap.loadMap(true)
+    end
+
   -- View state
-  elseif action == 2 then
+  elseif flag == MinimapFlags.View then
     local state = msg:getU8() == 1
 
     minimapBackgroundWidget:setVisible(not state)

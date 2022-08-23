@@ -23,10 +23,7 @@ MiniWindow
     id: sortMenuButton
     @onClick: GamePartyList.createSortMenu()
 
-  EmptyMenuButton
-    text: ?
-    text-align: center
-    phantom: false
+  InfoMenuButton
 
   MiniWindowHeader
     height: 41

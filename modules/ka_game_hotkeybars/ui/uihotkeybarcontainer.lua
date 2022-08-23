@@ -121,7 +121,9 @@ function UIHotkeyBarContainer:onDragLeave(droppedWidget, mousePos)
 end
 
 function UIHotkeyBarContainer:onMousePress(mousePos, mouseButton)
-  GameHotkeys.doAction(self.settings)
+  if self.settings.powerId and not GameHotkeys.isOpen() then
+    GamePowers.chargePower(self.settings.powerId)
+  end
 end
 
 function UIHotkeyBarContainer:onMouseRelease(mousePos, mouseButton)
@@ -129,6 +131,8 @@ function UIHotkeyBarContainer:onMouseRelease(mousePos, mouseButton)
     local mapWidget = GameInterface.getMapPanel()
     local pos = mapWidget and mapWidget:getPosition(mousePos)
     GamePowers.castPower(pos)
+  else
+    GameHotkeys.doAction(self.settings)
   end
 end
 

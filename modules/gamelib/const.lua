@@ -91,6 +91,20 @@ VocationStr = {
   [VocationBard] = 'Bard',
 }
 
+TownNone = 0
+TownErembor = 1
+TownNova = 2
+TownNalta = 3
+TownDronma = 4
+TownFirst = TownErembor
+TownLast = TownDronma
+TownStr = {
+  [TownErembor] = 'Erembor',
+  [TownNova] = 'Nova',
+  [TownNalta] = 'Nalta',
+  [TownDronma] = 'Dronma',
+}
+
 SpeechBubbleNone = 0
 SpeechBubbleChat = 1
 SpeechBubbleTrader = 2
