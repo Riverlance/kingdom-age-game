@@ -10,9 +10,9 @@ Panel
   OptionHorizontalSeparator
 
   OptionCheckBox
-    id: showNpcDialogWindows
-    !text: tr('Show NPC dialog windows')
-    !tooltip: tr("Shows a dialog window to choose an option by shortcuts, instead messages. You can choose the recommended option by clicking or pressing 'Enter', or cancel by pressing 'Esc'. Note: It will not override all messages.")
+    id: moveFullStack
+    !text: tr('Move full item stack')
+    !tooltip: tr('Move full item stack without using (Ctrl). Use (Ctrl) to choose how many you want to move.')
     !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10

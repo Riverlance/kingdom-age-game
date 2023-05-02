@@ -1,0 +1,8 @@
+Module
+  name: client_autoreload
+  description: Auto reload module
+  author: Mehah
+  reloadable: false
+  sandboxed: true
+  scripts: [ autoreload ]
+  @onLoad: init()

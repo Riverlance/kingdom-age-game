@@ -33,16 +33,12 @@ function GameSkills.init()
 
   g_keyboard.bindKeyDown('Ctrl+T', GameSkills.toggle)
 
-  GameInterface.setupMiniWindow(skillsWindow, skillsTopMenuButton)
-
   if g_game.isOnline() then
     GameSkills.online()
   end
 end
 
 function GameSkills.terminate()
-  GameSkills.setupRegeneration(0)
-
   disconnect(LocalPlayer, {
     onExperienceChange      = GameSkills.onExperienceChange,
     onLevelChange           = GameSkills.onLevelChange,
@@ -61,8 +57,8 @@ function GameSkills.terminate()
   skillsWindow:destroy()
 
   contentsPanel = nil
-  skillsTopMenuButton = nil
   skillsWindow = nil
+  skillsTopMenuButton = nil
 
   _G.GameSkills = nil
 end
@@ -184,7 +180,7 @@ function GameSkills.update()
 end
 
 function GameSkills.online()
-  GameInterface.setupMiniWindow(skillsWindow, skillsTopMenuButton)
+  skillsWindow:setup(skillsTopMenuButton)
 
   local player = g_game.getLocalPlayer()
 
@@ -207,8 +203,6 @@ function GameSkills.offline()
   if expSpeedEvent then
     expSpeedEvent:cancel() expSpeedEvent = nil
   end
-
-  GameSkills.setupRegeneration(0)
 end
 
 function GameSkills.toggle()
@@ -248,12 +242,12 @@ function GameSkills.onSkillButtonClick(button)
 end
 
 function GameSkills.onExperienceChange(localPlayer, value)
-  GameSkills.setSkillValue('experience', value)
+  GameSkills.setSkillValue('experience', tostring(value):comma())
 end
 
 function GameSkills.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   GameSkills.setSkillValue('level', level)
-  GameSkills.setSkillPercent('level', levelPercent, string.format('%s.', getExperienceTooltipText(localPlayer, level, levelPercent)))
+  GameSkills.setSkillPercent('level', levelPercent, getExperienceTooltipText(localPlayer, level, levelPercent))
 end
 
 function GameSkills.onStaminaChange(localPlayer, stamina)
@@ -275,17 +269,9 @@ function GameSkills.onStaminaChange(localPlayer, stamina)
   GameSkills.setSkillPercent('stamina', percent, text)
 end
 
-local regenerationEvent       = nil
-local regenerationTime        = 0
-local elapsedRegenerationTime = 0
-function GameSkills.setupRegeneration(time)
-  if time <= 0 then
-    removeEvent(regenerationEvent)
-    regenerationEvent = nil
-
-    if time < 0 then
-      time = 0
-    end
+function GameSkills.onRegenerationChange(localPlayer, time)
+  if not g_game.getFeature(GamePlayerRegenerationTime) or time < 0 then
+    return
   end
 
   local minutes = math.floor(time / 60)
@@ -296,22 +282,6 @@ function GameSkills.setupRegeneration(time)
 
   GameSkills.setSkillValue('regenerationTime', minutes .. ':' .. seconds)
   GameSkills.checkAlert('regenerationTime', time, false, 300)
-end
-function GameSkills.onRegenerationChange(localPlayer, time)
-  if not g_game.getFeature(GamePlayerRegenerationTime) or time < 0 then
-    return
-  end
-
-  regenerationTime        = time
-  elapsedRegenerationTime = 0
-
-  removeEvent(regenerationEvent)
-  regenerationEvent = cycleEvent(function()
-    GameSkills.setupRegeneration(regenerationTime - elapsedRegenerationTime)
-    elapsedRegenerationTime = elapsedRegenerationTime + 1
-  end, 1000)
-
-  GameSkills.setupRegeneration(time)
 end
 
 function GameSkills.onSpeedChange(localPlayer, speed)

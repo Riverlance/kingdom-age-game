@@ -21,11 +21,9 @@ extraIconsButton = nil
 fullMapButton = nil
 
 preloaded = false
-fullmapView = false
-oldZoom = nil
 oldPos = nil
 
-currentMapName = ''
+currentMapFilename = ''
 
 local lastMinimapMarkId = 19
 
@@ -69,7 +67,7 @@ function GameMinimap.init()
   g_keyboard.bindKeyPress('Alt+Down', function() minimapWidget:move(0,-1) end, gameRootPanel)
   g_keyboard.bindKeyDown('Ctrl+M', GameMinimap.toggle)
   g_keyboard.bindKeyDown('Ctrl+Shift+M', GameMinimap.toggleFullMap)
-  g_keyboard.bindKeyDown('Escape', function() if fullmapView then GameMinimap.toggleFullMap() end end)
+  g_keyboard.bindKeyDown('Escape', function() if minimapWidget.fullMapView then GameMinimap.toggleFullMap() end end)
 
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo, GameMinimap.onInstanceInfo)
 
@@ -85,8 +83,6 @@ function GameMinimap.init()
     onPositionChange = GameMinimap.updateCameraPosition
   })
 
-  GameInterface.setupMiniWindow(minimapWindow, minimapTopMenuButton)
-
   if g_game.isOnline() then
     GameMinimap.online()
   end
@@ -97,11 +93,15 @@ function GameMinimap.terminate()
     GameMinimap.saveMap()
   end
 
-  if fullmapView then
+  if minimapWidget.fullMapView then
     GameMinimap.toggleFullMap()
   end
 
   g_settings.setValue('Minimap', 'opacity', minimapOpacityScrollbar:getValue())
+
+  disconnect(LocalPlayer, {
+    onPositionChange = GameMinimap.updateCameraPosition
+  })
 
   disconnect(g_game, {
     onGameStart        = GameMinimap.online,
@@ -109,10 +109,6 @@ function GameMinimap.terminate()
     onTrackPosition    = GameMinimap.onTrackPosition,
     onTrackPositionEnd = GameMinimap.onTrackPositionEnd,
     onUpdateTrackColor = GameMinimap.onUpdateTrackColor
-  })
-
-  disconnect(LocalPlayer, {
-    onPositionChange = GameMinimap.updateCameraPosition
   })
 
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo)
@@ -133,7 +129,7 @@ function GameMinimap.terminate()
 end
 
 function GameMinimap.toggle()
-  if fullmapView then
+  if minimapWidget.fullMapView then
     GameMinimap.toggleFullMap()
   end
   GameInterface.toggleMiniWindow(minimapWindow)
@@ -145,7 +141,7 @@ function GameMinimap.preload()
 end
 
 function GameMinimap.online()
-  GameInterface.setupMiniWindow(minimapWindow, minimapTopMenuButton)
+  minimapWindow:setup(minimapTopMenuButton)
 
   GameMinimap.loadMap(not preloaded)
   GameMinimap.updateCameraPosition()
@@ -155,7 +151,7 @@ end
 
 function GameMinimap.offline()
   GameMinimap.saveMap()
-  if fullmapView then
+  if minimapWidget.fullMapView then
     GameMinimap.toggleFullMap()
   end
 end
@@ -165,9 +161,9 @@ function GameMinimap.loadMap(clean)
     g_minimap.clean()
   end
 
-    local minimapFile = '/minimap.otmm'
-  if string.exists(currentMapName) then
-    minimapFile = tr('/%s.otmm', currentMapName)
+  local minimapFile = '/minimap.otmm'
+  if string.exists(currentMapFilename) then
+    minimapFile = tr('/%s.otmm', currentMapFilename)
   end
 
   if g_resources.fileExists(minimapFile) then
@@ -177,9 +173,9 @@ function GameMinimap.loadMap(clean)
 end
 
 function GameMinimap.saveMap()
-    local minimapFile = '/minimap.otmm'
-  if string.exists(currentMapName) then
-    minimapFile = tr('/%s.otmm', currentMapName)
+  local minimapFile = '/minimap.otmm'
+  if string.exists(currentMapFilename) then
+    minimapFile = tr('/%s.otmm', currentMapFilename)
   end
 
   g_minimap.saveOtmm(minimapFile)
@@ -205,7 +201,7 @@ function GameMinimap.updateCameraPosition()
   end
 
   if not minimapWidget:isDragging() then
-    if not fullmapView then
+    if not minimapWidget.fullMapView then
       minimapWidget:setCameraPosition(localPlayer:getPosition())
     end
     minimapWidget:setCrossPosition(localPlayer:getPosition())
@@ -214,16 +210,16 @@ end
 
 function GameMinimap.toggleFullMap()
   -- Try to open fullscreen without minimap being opened
-  if not fullmapView and not minimapWindow:isVisible() then
+  if not minimapWidget.fullMapView and not minimapWindow:isVisible() then
     return
   end
 
-  fullmapView = not fullmapView
+  minimapWidget.fullMapView = not minimapWidget.fullMapView
 
   -- Update parent
 
   local rootPanel = GameInterface.getRootPanel()
-  local parent    = fullmapView and rootPanel or minimapWindow:getChildById('contentsPanel')
+  local parent    = minimapWidget.fullMapView and rootPanel or minimapWindow:getChildById('contentsPanel')
 
   minimapBackgroundWidget:setParent(parent)
   minimapWidget:setParent(parent)
@@ -231,8 +227,8 @@ function GameMinimap.toggleFullMap()
   positionLabel:setParent(parent)
   minimapOpacityScrollbar:setParent(parent)
 
-  ballButton:setParent(fullmapView and rootPanel or minimapWindow)
-  infoLabel:setParent(fullmapView and rootPanel or minimapWindow)
+  ballButton:setParent(minimapWidget.fullMapView and rootPanel or minimapWindow)
+  infoLabel:setParent(minimapWidget.fullMapView and rootPanel or minimapWindow)
 
   -- Update anchors and others
 
@@ -245,9 +241,9 @@ function GameMinimap.toggleFullMap()
   minimapOpacityScrollbar:addAnchor(AnchorBottom, 'positionLabel', AnchorOutsideTop)
   minimapOpacityScrollbar:addAnchor(AnchorLeft, 'parent', AnchorLeft)
   minimapOpacityScrollbar:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
-  minimapOpacityScrollbar:setVisible(fullmapView)
+  minimapOpacityScrollbar:setVisible(minimapWidget.fullMapView)
 
-  if fullmapView then
+  if minimapWidget.fullMapView then
     local opacity = minimapOpacityScrollbar:getValue() / 100
 
     minimapWindow:hide()
@@ -262,6 +258,8 @@ function GameMinimap.toggleFullMap()
     infoLabel:addAnchor(AnchorTop, 'prev', AnchorBottom)
     infoLabel:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
     infoLabel:setMarginTop(3)
+
+    minimapWidget:setZoom(minimapWidget.zoomFullmap)
   else
     minimapWindow:show()
     minimapBackgroundWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
@@ -281,13 +279,9 @@ function GameMinimap.toggleFullMap()
     infoLabel:addAnchor(AnchorVerticalCenter, 'prev', AnchorVerticalCenter)
     infoLabel:addAnchor(AnchorRight, 'prev', AnchorOutsideLeft)
     infoLabel:setMarginTop(0)
+
+    minimapWidget:setZoom(minimapWidget.zoomMinimap)
   end
-
-  -- Update zoom
-
-  local zoom = oldZoom or 0
-  oldZoom    = minimapWidget:getZoom()
-  minimapWidget:setZoom(zoom)
 
   -- Update camera position
 
@@ -312,6 +306,7 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
   -- Minimap info
   if flag == MinimapFlags.Info then
     local instanceId   = msg:getU32()
+    local instancePath = msg:getString()
     local instanceName = msg:getString()
 
     local localPlayer  = g_game.getLocalPlayer()
@@ -322,24 +317,28 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
     localPlayer:setInstanceId(instanceId)
     localPlayer:setInstanceName(instanceName)
 
-    local text = ''
-    if instanceId > 0 then -- Instance map
-      instanceMapName = instanceName:gsub('%p',''):gsub('%s','_'):lower()
-      text = instanceName
-    else -- Default map
-      instanceMapName = ''
+    local formattedPath    = ''
+    local minimapLabelText = ''
+
+    -- Instance map
+    if instanceId > 0 then
+      formattedPath    = instancePath:gsub('.otbm', ''):gsub('/', '  '):gsub('%p', '_'):gsub('  ', '-'):gsub('%s','_'):lower()
+      minimapLabelText = instanceName
+
+    -- Default map
+    else
       local pos = localPlayer:getPosition()
       if pos then
-        text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
+        minimapLabelText = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
       end
     end
 
-    positionLabel:setText(text)
-    positionLabel:setTooltip(text)
+    positionLabel:setText(minimapLabelText)
+    positionLabel:setTooltip(minimapLabelText)
 
-    if instanceMapName ~= currentMapName then
+    if formattedPath ~= currentMapFilename then
       GameMinimap.saveMap()
-      currentMapName = instanceMapName
+      currentMapFilename = formattedPath
       GameMinimap.loadMap(true)
     end
 

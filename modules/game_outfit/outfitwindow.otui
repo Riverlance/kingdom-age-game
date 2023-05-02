@@ -5,7 +5,7 @@ PrevMountButton < PreviousButton
 
 MainWindow
   !text: tr('Select Outfit')
-  size: 338 375
+  size: 340 340
 
   @onEnter: GameOutfit.accept()
   @onEscape: GameOutfit.destroy()
@@ -16,17 +16,17 @@ MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     margin-top: 15
-    margin-left: 22
-    padding: 4 4 4 4
-    fixed-creature-size: true
+    margin-left: 16
+    padding: 1
+    creature-size: 123
 
   Label
     id: outfitName
     !text: tr('No outfit')
     text-auto-resize: true
-    width: 115
     anchors.bottom: prev.top
     anchors.left: prev.left
+    anchors.right: parent.right
     margin-bottom: 2
 
   NextOutfitButton
@@ -50,17 +50,18 @@ MainWindow
     anchors.top: parent.top
     anchors.right: parent.right
     margin-top: 15
-    margin-right: 22
-    padding: 4 4 4 4
-    fixed-creature-size: true
+    margin-right: 16
+    padding: 1
+    creature-size: 123
 
   Label
     id: mountName
     !text: tr('No mount')
     text-auto-resize: true
-    width: 115
+    text-align: right
     anchors.bottom: prev.top
-    anchors.left: prev.left
+    anchors.left: parent.left
+    anchors.right: prev.right
     margin-bottom: 2
 
   NextMountButton
@@ -105,7 +106,7 @@ MainWindow
     id: head
     !text: tr('Head')
     anchors.top: addon1.bottom
-    anchors.left: addon1.left
+    anchors.left: parent.left
     margin-top: 5
     checked: true
     width: 75
@@ -135,11 +136,10 @@ MainWindow
 
   Panel
     id: colorBoxPanel
-    size: 302 119
+    size: 302 110
     anchors.top: head.bottom
-    anchors.left: head.left
-    margin-top: 3
-    margin-right: 20
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 10
     layout:
       type: grid
       cell-size: 14 14
@@ -154,31 +154,23 @@ MainWindow
     !text: tr('Randomize')
     !tooltip: tr('Randomize characters outfit')
     width: 75
-    anchors.left: prev.left
-    anchors.top: prev.bottom
-    margin-right: 16
-    @onClick: GameOutfit.randomize()
-
-  HorizontalSeparator
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: next.top
-    margin-bottom: 10
-    margin-top: 5
-
-  Button
-    id: outfitOkButton
-    !text: tr('Ok')
-    width: 64
-    anchors.right: next.left
     anchors.bottom: parent.bottom
-    margin-right: 16
-    @onClick: GameOutfit.accept()
+    anchors.left: parent.left
+    @onClick: GameOutfit.randomize()
 
   Button
     id: outfitCancelButton
     !text: tr('Cancel')
     width: 64
-    anchors.right: parent.right
     anchors.bottom: parent.bottom
+    anchors.right: parent.right
     @onClick: GameOutfit.destroy()
+
+  Button
+    id: outfitOkButton
+    !text: tr('Ok')
+    width: 64
+    anchors.bottom: parent.bottom
+    anchors.right: prev.left
+    margin-right: 16
+    @onClick: GameOutfit.accept()

@@ -11,12 +11,13 @@ Module
 
   load-later:
     - client_styles
+    - client_shader
     - client_locales
     - client_topmenu
     - client_background
     - client_options
     - client_entergame
     - client_terminal
-    - client_modulemanager
+    - client_autoreload
     - client_serverlist
     - ka_client_audio

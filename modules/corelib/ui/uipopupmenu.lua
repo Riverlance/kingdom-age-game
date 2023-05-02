@@ -40,7 +40,7 @@ function UIPopupMenu:display(pos)
   currentMenu = self
 end
 
-function UIPopupMenu:onGeometryChange(oldRect, newRect)
+function UIPopupMenu:onGeometryChange(newRect, oldRect)
   local parent = self:getParent()
   if not parent then
     return
@@ -128,10 +128,20 @@ local function onGameEnd()
   end
 end
 
+local function onPositionChange(newPos, oldPos)
+  if currentMenu then
+    currentMenu:destroy()
+  end
+end
+
 connect(rootWidget, {
   onGeometryChange = onRootGeometryUpdate
 })
 
 connect(g_game, {
   onGameEnd = onGameEnd
+})
+
+connect(LocalPlayer, {
+  onPositionChange = onPositionChange,
 })

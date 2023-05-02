@@ -175,6 +175,8 @@ function GameNpcTrade.show()
     npcWindow:show()
     npcWindow:raise()
     npcWindow:focus()
+
+    itemsPanelListScrollBar:setValue(0)
   end
 end
 
@@ -231,9 +233,9 @@ end
 
 function GameNpcTrade.onTradeClick()
   if GameNpcTrade.getCurrentTradeType() == BUY then
-    g_game.buyItem(selectedItem.ptr, selectedItem.maskptr, quantityScroll:getValue(), ignoreCapacity:isChecked(), buyWithBackpack:isChecked())
+    g_game.buyItem(selectedItem.ptr, selectedItem.maskptr, selectedItem.maskOutfitType, selectedItem.maskOutfitMount, quantityScroll:getValue(), ignoreCapacity:isChecked(), buyWithBackpack:isChecked())
   else
-    g_game.sellItem(selectedItem.ptr, selectedItem.maskptr, quantityScroll:getValue(), ignoreEquipped:isChecked())
+    g_game.sellItem(selectedItem.ptr, selectedItem.maskptr, selectedItem.maskOutfitType, selectedItem.maskOutfitMount, quantityScroll:getValue(), ignoreEquipped:isChecked())
   end
 end
 
@@ -401,6 +403,10 @@ function GameNpcTrade.refreshTradeItems()
   end
   radioItems = UIRadioGroup.create()
 
+  local localPlayer           = g_game.getLocalPlayer()
+  local localPlayerOutfit     = localPlayer:getOutfit()
+  local localPlayerOutfitType = localPlayerOutfit.type
+
   local currentTradeItems = tradeItems[GameNpcTrade.getCurrentTradeType()]
   for _,item in pairs(currentTradeItems) do
     local npcItemBox = g_ui.createWidget('NPCItemBox', itemsPanel)
@@ -420,9 +426,26 @@ function GameNpcTrade.refreshTradeItems()
     infoWidget.tooltipText = tooltipText
     infoWidget:setTooltip(tooltipText, TooltipType.textBlock)
 
-    local itemWidget = itemBox:getChildById('item')
-    itemWidget:setItem(item.maskptr or item.ptr)
-    itemWidget.onMouseRelease = GameNpcTrade.itemPopup
+    local outfitWidget = itemBox:getChildById('outfit')
+    local itemWidget   = itemBox:getChildById('item')
+
+    if item.maskOutfitType ~= 0 or item.maskOutfitMount ~= 0 then
+      if item.maskOutfitType ~= 0 then
+        localPlayerOutfit.type = item.maskOutfitType
+        localPlayerOutfit.mount = 0
+      elseif item.maskOutfitMount ~= 0 then
+        localPlayerOutfit.type  = localPlayerOutfitType
+        localPlayerOutfit.mount = item.maskOutfitMount
+      end
+      outfitWidget:setOutfit(localPlayerOutfit)
+
+      itemWidget:hide()
+    else
+      itemWidget:setItem(item.maskptr or item.ptr)
+      itemWidget.onMouseRelease = GameNpcTrade.itemPopup
+
+      outfitWidget:hide()
+    end
 
     radioItems:addWidget(itemBox)
   end
@@ -448,13 +471,13 @@ function GameNpcTrade.refreshPlayerGoods()
     buyWithBackpack:removeTooltip()
   end
   capacityLabel:setText(string.format('%.2f', playerFreeCapacity) .. ' ' .. WEIGHT_UNIT)
-  trustLabel:setText(string.format('Level %d (%d XP)', townTrustLevel, townTrustExperience))
+  trustLabel:setText(string.format('Level %d (%s XP)', townTrustLevel, tostring(townTrustExperience):comma()))
   local trustInfoMessage = ''
   if townTrustLevel < trustMaxLevel then
     local trustExpDiff      = townTrustExpToNextLevel - townTrustExpOfActualLevel
     local trustExpToAdvance = townTrustExpToNextLevel - townTrustExperience
     local trustExpPercent   = (trustExpToAdvance / trustExpDiff) * 100
-    trustInfoMessage        = string.format('Remaining %.2f%% (about %d XP) to advance to trust level %d%s.', trustExpPercent, trustExpToAdvance, townTrustLevel + 1, getTownStr())
+    trustInfoMessage        = string.format('Remaining %.2f%% (about %s XP) to advance to trust level %d%s.', trustExpPercent, tostring(trustExpToAdvance):comma(), townTrustLevel + 1, getTownStr())
   else
     trustInfoMessage = string.format('You are on the maximum trust level%s.', getTownStr())
   end
@@ -465,14 +488,16 @@ function GameNpcTrade.refreshPlayerGoods()
   local foundSelectedItem = false
 
   local items = itemsPanel:getChildCount()
-  for i=1,items do
+  for i = 1, items do
     local npcItemBox = itemsPanel:getChildByIndex(i)
-    local itemBox    = npcItemBox:getChildById('itemBox')
+    local itemBox    = npcItemBox.itemBox
     local item       = itemBox.item
+    local outfit     = itemBox.outfit
 
     local canTrade = GameNpcTrade.canTradeItem(item) == TradeNoError
     itemBox:setOn(canTrade)
     itemBox:setEnabled(canTrade)
+    outfit:setOn(canTrade)
 
     local searchCondition = (searchFilter == '') or (searchFilter ~= '' and string.find(item.name:lower(), searchFilter) ~= nil)
     local showAllItemsCondition = (currentTradeType == BUY) or (showAllItems:isChecked()) or (currentTradeType == SELL and not showAllItems:isChecked() and canTrade)
@@ -502,27 +527,33 @@ function GameNpcTrade.onOpenNpcTrade(items, _townId, _trustMaxLevel, isVip)
   tradeItems[SELL] = { }
 
   for _,item in pairs(items) do
-    if item[7] > 0 then
+    if item[9] > 0 then
       table.insert(tradeItems[BUY], {
         ptr             = item[1],
         maskptr         = item[2],
-        name            = item[3],
-        weight          = item[4] / 100,
-        addTrustOnSell  = item[5],
-        tradeTrustLevel = item[6],
-        price           = item[7],
+        maskOutfitType  = item[3],
+        maskOutfitMount = item[4],
+        name            = item[5],
+        weight          = item[6] / 100,
+        addTrustOnSell  = item[7],
+        tradeTrustLevel = item[8],
+
+        price           = item[9],
       })
     end
 
-    if item[8] > 0 then
+    if item[10] > 0 then
       table.insert(tradeItems[SELL], {
         ptr             = item[1],
         maskptr         = item[2],
-        name            = item[3],
-        weight          = item[4] / 100,
-        addTrustOnSell  = item[5],
-        tradeTrustLevel = item[6],
-        price           = item[8],
+        maskOutfitType  = item[3],
+        maskOutfitMount = item[4],
+        name            = item[5],
+        weight          = item[6] / 100,
+        addTrustOnSell  = item[7],
+        tradeTrustLevel = item[8],
+
+        price           = item[10],
       })
     end
   end
@@ -687,7 +718,7 @@ function GameNpcTrade.sellAll()
     if item then
       local quantity = GameNpcTrade.getSellQuantity(item.ptr)
       if quantity > 0 then
-        g_game.sellItem(item.ptr, item.maskptr, quantity, ignoreEquipped:isChecked())
+        g_game.sellItem(item.ptr, item.maskptr, item.maskOutfitType, item.maskOutfitMount, quantity, ignoreEquipped:isChecked())
         addEvent(function()
           if g_tooltip then
             Tooltip.hide()

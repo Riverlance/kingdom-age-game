@@ -102,7 +102,7 @@ function g_mouseicon.displayItem(item, opacity, size, subType) -- (item[, opacit
   if not ClientOptions.getOption('showMouseItemIcon') then
     return
   end
-  g_mouseicon.display(item:getId(), opacity or (ClientOptions.getOption('mouseItemIconOpacity') or defaultItemIconOpacity) / 100, size, subType or item:isStackable() and (g_keyboard and g_keyboard.isShiftPressed() and 1 or item:getCount()) or item:getSubType())
+  g_mouseicon.display(item:getId(), opacity or (ClientOptions.getOption('mouseItemIconOpacity') or defaultItemIconOpacity) / 100, size, subType or item:isStackable() and (g_keyboard and g_keyboard.isAltPressed() and 1 or item:getCount()) or item:getSubType())
 end
 
 function g_mouseicon.displayText(text)

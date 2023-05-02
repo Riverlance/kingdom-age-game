@@ -122,9 +122,11 @@ function ProtocolLogin:sendLoginPacket()
   end
 
   self:send(msg)
+
   if g_game.getFeature(GameLoginPacketEncryption) then
     self:enableXteaEncryption()
   end
+
   self:recv()
 end
 

@@ -3,8 +3,8 @@ UICreatureButton = extends(UIWidget, 'UICreatureButton')
 
 local alpha = 'AA' -- Alpha
 
-local CreatureButtonColors = {
-  onIdle = { notHovered = '#888888'..alpha, hovered = '#FFFFFF'..alpha },
+local creatureButtonColors = {
+  onIdle = { notHovered = '#888888'..alpha, hovered = '#FFFFFF'..alpha }, -- Update label default color on 10-creaturebuttons.otui as onIdle.notHovered
 
   onTargetedOffensive = { notHovered = '#FF0000'..alpha, hovered = '#FF8888'..alpha },
   onTargetedBalanced  = { notHovered = '#FFFF00'..alpha, hovered = '#FFFF88'..alpha },
@@ -12,6 +12,8 @@ local CreatureButtonColors = {
 
   onFollowed = { notHovered = '#00FF00'..alpha, hovered = '#88FF88'..alpha }
 }
+
+
 
 function UICreatureButton.create()
   local button = UICreatureButton.internalCreate()
@@ -23,7 +25,7 @@ function UICreatureButton.create()
   button.cid      = nil
   button.outfit   = nil
   button.name     = nil
-  button.nickname = ''
+  button.nickname = nil
 
   button.healthPercent  = 100
   button.manaPercent    = 100
@@ -47,6 +49,31 @@ function UICreatureButton.create()
   button.lastAppear = os.time()
 
   return button
+end
+
+function UICreatureButton:onDestroy()
+  local creatureMinimapWidget = self:getCreatureMinimapWidget()
+  if creatureMinimapWidget and self:getStyleName() == 'PartyButton' then
+    creatureMinimapWidget:destroy()
+  end
+end
+
+function UICreatureButton.getStaticCircleTargetColor()
+  local fightMode = g_game.getFightMode()
+
+  if fightMode == FightOffensive then
+    return creatureButtonColors.onTargetedOffensive
+  elseif fightMode == FightBalanced then
+    return creatureButtonColors.onTargetedBalanced
+  elseif fightMode == FightDefensive then
+    return creatureButtonColors.onTargetedDefensive
+  end
+
+  return creatureButtonColors.onTargetedOffensive
+end
+
+function UICreatureButton.getStaticCircleFollowColor()
+  return creatureButtonColors.onFollowed
 end
 
 function UICreatureButton:setCreature(data)
@@ -112,7 +139,7 @@ end
 
 function UICreatureButton:update()
   self:updateCreature(true)
-  self:updateStaticSquare()
+  self:updateStaticCircle()
   self:updateLabelText('')
   self:updateHealthPercent(true)
   self:updateManaPercent(true)
@@ -128,7 +155,7 @@ function UICreatureButton:update()
 end
 
 function UICreatureButton:updateCreature(data)
-  local creatureWidget = self:getChildById('creature')
+  local creatureWidget = self:getChildById('creatureWidget')
   if not creatureWidget then
     return
   end
@@ -146,42 +173,32 @@ function UICreatureButton:updateCreature(data)
   end
 
   -- Creature
-  if self.creature then
+  if not self.onlyOutfit and self.creature then
     creatureWidget:setCreature(self.creature)
 
   -- Outfit
   elseif self.outfit then
-    creatureWidget:setOutfit(self.outfit)
+    creatureWidget:setOutfit(self.onlyOutfit and self.creature and self.creature:getOutfit() or self.outfit)
   end
 
   self:updateCreatureMinimapWidgetCreature()
 end
 
-function UICreatureButton:updateStaticSquare() -- Update border
-  local creatureWidget = self:getChildById('creature')
+function UICreatureButton:updateStaticCircle() -- Update border
+  local creatureWidget = self:getChildById('creatureWidget')
   local labelWidget    = self:getChildById('label')
 
   if not creatureWidget and not labelWidget then
     return
   end
 
-  local color = CreatureButtonColors.onIdle
+  local color = creatureButtonColors.onIdle
 
   if self.isTarget then
-    local fightMode = g_game.getFightMode()
-
-    if fightMode == FightOffensive then
-      color = CreatureButtonColors.onTargetedOffensive
-    elseif fightMode == FightBalanced then
-      color = CreatureButtonColors.onTargetedBalanced
-    elseif fightMode == FightDefensive then
-      color = CreatureButtonColors.onTargetedDefensive
-    else
-      color = CreatureButtonColors.onTargetedOffensive
-    end
+    color = UICreatureButton.getStaticCircleTargetColor()
 
   elseif self.isFollowed then
-    color = CreatureButtonColors.onFollowed
+    color = UICreatureButton.getStaticCircleFollowColor()
   end
 
   color = self.isHovered and color.hovered or color.notHovered
@@ -189,9 +206,6 @@ function UICreatureButton:updateStaticSquare() -- Update border
   -- Colored border
   if self.isHovered or self.isTarget or self.isFollowed then
     if creatureWidget then
-      if self.creature then
-        self.creature:showStaticCircle(color)
-      end
       creatureWidget:setBorderWidth(1)
       creatureWidget:setBorderColor(color)
     end
@@ -203,9 +217,6 @@ function UICreatureButton:updateStaticSquare() -- Update border
   -- No color/border
   else
     if creatureWidget then
-      if self.creature then
-        self.creature:hideStaticCircle()
-      end
       creatureWidget:setBorderWidth(0)
     end
 
@@ -243,15 +254,6 @@ function UICreatureButton:enableCreatureMinimapWidget()
   self:updateCreatureMinimapWidgetLabelText(creatureMinimapWidget, true)
   self:updateCreatureMinimapWidgetTooltip(creatureMinimapWidget)
 
-  connect(self, {
-    onDestroy = function()
-      local creatureMinimapWidget = self:getCreatureMinimapWidget()
-      if creatureMinimapWidget then
-        creatureMinimapWidget:destroy()
-      end
-    end
-  })
-
   minimapWidget:addAlternativeWidget(creatureMinimapWidget)
 
   return true -- Added successfully
@@ -282,25 +284,23 @@ function UICreatureButton:updateCreatureMinimapWidgetCreature(creatureMinimapWid
     return false -- Not found
   end
 
-  local minimapWidgetCreature = creatureMinimapWidget:getChildById('creature')
+  local minimapWidgetCreature = creatureMinimapWidget:getChildById('creatureWidget')
   if not minimapWidgetCreature then
     return false
   end
 
-  local ret = false
-
   -- Creature
-  if self.creature then
+  if not self.onlyOutfit and self.creature then
     minimapWidgetCreature:setCreature(self.creature)
-    ret = true -- Updated successfully
+    return true
 
   -- Outfit
   elseif self.outfit then
-    minimapWidgetCreature:setOutfit(self.outfit)
-    ret = true -- Updated successfully
+    minimapWidgetCreature:setOutfit(self.onlyOutfit and self.creature and self.creature:getOutfit() or self.outfit)
+    return true
   end
 
-  return ret
+  return false
 end
 
 function UICreatureButton:updateCreatureMinimapWidgetPosition(creatureMinimapWidget, ignoreTooltipUpdate)
@@ -360,7 +360,7 @@ function UICreatureButton:updateCreatureMinimapWidgetTooltip(creatureMinimapWidg
     return false -- Not found
   end
 
-  local minimapWidgetCreature   = creatureMinimapWidget:getChildById('creature')
+  local minimapWidgetCreature   = creatureMinimapWidget:getChildById('creatureWidget')
   local minimapWidgetTitleLabel = creatureMinimapWidget:getChildById('titleLabel')
   if not minimapWidgetCreature or not minimapWidgetTitleLabel then
     return false
@@ -643,9 +643,14 @@ end
 
 
 function UICreatureButton:getCreatureName(ignoreNickname)
-  local nickname = self.creature and self.creature:getNickname() or self.nickname
+  if not ignoreNickname then
+    local nickname = self.creature and self.creature:getNickname() or self.nickname or ''
+    if nickname ~= '' then
+      return nickname
+    end
+  end
 
-  return not ignoreNickname and nickname ~= '' and nickname or self.creature and self.creature:getName() or self.name or ''
+  return self.creature and self.creature:getName() or self.name or ''
 end
 
 function UICreatureButton:updateTrackIcon(color)

@@ -2,34 +2,229 @@ _G.ClientLocales = { }
 
 
 
+local debugInfo = false
+
+
+
+local currentLocaleId = DefaultLocaleId
+
+
+
 localesWindow = nil
 
 
 
-local installedLocales
-local currentLocale
-local GAMELANGUAGE_EN      = 1
-local GAMELANGUAGE_PT      = 2
-local GAMELANGUAGE_ES      = 3
-local GAMELANGUAGE_DE      = 4
-local GAMELANGUAGE_PL      = 5
-local GAMELANGUAGE_SV      = 6
-local GAMELANGUAGE_FIRST   = GAMELANGUAGE_EN
-local GAMELANGUAGE_LAST    = GAMELANGUAGE_SV
-local GAMELANGUAGE_DEFAULT = GAMELANGUAGE_EN
-local defaultLocaleName    = 'en'
-local language = {
-  ['en'] = GAMELANGUAGE_EN,
-  ['pt'] = GAMELANGUAGE_PT,
-  ['es'] = GAMELANGUAGE_ES,
-  ['de'] = GAMELANGUAGE_DE,
-  ['pl'] = GAMELANGUAGE_PL,
-  ['sv'] = GAMELANGUAGE_SV
-}
+function ClientLocales.init()
+  -- Alias
+  ClientLocales.m = modules.client_locales
+
+  InstalledLocales = { }
+
+  ClientLocales.installLocales()
+
+  local localeId = tonumber(g_settings.get('locale'))
+  ClientLocales.setLocale(localeId or DefaultLocaleId)
+
+  if not localeId then
+    connect(g_app, {
+      onRun = ClientLocales.createWindow
+    })
+  end
+
+  connect(g_game, {
+    onGameStart = ClientLocales.onGameStart
+  })
+end
+
+function ClientLocales.terminate()
+  InstalledLocales = nil
+
+  disconnect(g_game, {
+    onGameStart = ClientLocales.onGameStart
+  })
+
+  disconnect(g_app, {
+    onRun = ClientLocales.createWindow
+  })
+
+  _G.ClientLocales = nil
+end
+
+function ClientLocales.onGameStart()
+  ClientLocales.sendLocale()
+end
 
 
 
-function ClientLocales.sendLocale(localeName)
+function ClientLocales.getInstalledLocales()
+  return InstalledLocales
+end
+
+function ClientLocales.installLocale(locale)
+  if not locale or not locale.id then
+    error('Unable to install locale.')
+  end
+
+  if debugInfo and locale.id ~= DefaultLocaleId then
+    local updatesNamesMissing = { }
+
+    for _, msg in pairs(NeededTranslations) do
+      if locale.translation[msg] == nil then
+        updatesNamesMissing[#updatesNamesMissing + 1] = msg
+      end
+    end
+
+    if #updatesNamesMissing > 0 then
+      pdebug(string.format('Locale \'%d\' is missing %d translations.', locale.id, #updatesNamesMissing))
+      for _, name in pairs(updatesNamesMissing) do
+        pdebug(string.format('Missing translation:\t"%s"', name))
+      end
+    end
+  end
+
+  local installedLocale = InstalledLocales[locale.id]
+
+  -- If installed already, overwrite translations
+  if installedLocale then
+    for msg, translation in pairs(locale.translation) do
+      installedLocale.translation[msg] = translation
+    end
+  -- Else, set up
+  else
+    InstalledLocales[locale.id] = locale
+  end
+end
+
+function ClientLocales.installLocales()
+  dofiles('/locales')
+end
+
+function ClientLocales.getLocale()
+  return InstalledLocales[currentLocaleId]
+end
+
+function ClientLocales.setLocale(id)
+  local locale = InstalledLocales[id]
+
+  if not locale then
+    error(string.format('Locale %d does not exist.', id))
+
+  elseif locale == ClientLocales.getLocale() then
+    g_settings.set('locale', id)
+    return
+  end
+
+  currentLocaleId = id
+  g_settings.set('locale', id)
+
+  ClientLocales.sendLocale()
+
+  if debugInfo then
+    pdebug(string.format('Using configured locale: %d', id))
+  end
+end
+
+function ClientLocales.createWindow()
+  localesWindow          = g_ui.displayUI('locales')
+  localesWindow.onEscape = ClientLocales.destroyWindow
+
+  local localesPanel = localesWindow:getChildById('localesPanel')
+  local layout       = localesPanel:getLayout()
+  local spacing      = layout:getCellSpacing()
+  local size         = layout:getCellSize()
+
+  local count = 0
+  for id, locale in ipairs(InstalledLocales) do
+    local widget = g_ui.createWidget('LocalesButton', localesPanel)
+
+    widget:setImageSource(string.format('/images/ui/flags/%s', locale.name))
+    widget:setText(locale.languageName)
+
+    widget.onClick = function()
+      ClientLocales.destroyWindow()
+      ClientLocales.setLocale(id)
+      g_modules.reloadModules()
+    end
+
+    count = count + 1
+  end
+
+  count = math.max(1, math.min(count, 3)) -- Display 3 per line
+  localesPanel:setWidth(size.width * count + spacing * (count - 1))
+
+  addEvent(function()
+    localesWindow:raise()
+    localesWindow:focus()
+  end)
+end
+
+function ClientLocales.destroyWindow()
+  if not localesWindow then
+    return
+  end
+
+  localesWindow:destroy()
+  localesWindow = nil
+end
+
+
+
+-- Global function used to translate texts
+function _G.tr(text, ...)
+  local locale = ClientLocales.getLocale()
+  if not locale then
+    return text
+  end
+
+  -- Number
+  if tonumber(text) and locale.formatNumbers then
+    local number        = tostring(text):split('.')
+    local reverseNumber = number[1]:reverse()
+    local out           = ''
+
+    for i = 1, #reverseNumber do
+      out = out .. reverseNumber:sub(i, i)
+      if i % 3 == 0 and i ~= #number and i ~= #reverseNumber then
+        out = out .. locale.thousandsSeperator
+      end
+    end
+
+    if number[2] then
+      out = number[2] .. locale.decimalSeperator .. out
+    end
+
+    return out:reverse()
+
+  -- Text
+  elseif tostring(text) then
+    local translation = locale.translation[text]
+
+    if not translation then
+      if debugInfo and translation == nil and locale.id ~= DefaultLocaleId and g_game.getAccountType() >= ACCOUNT_TYPE_GAMEMASTER then
+        pdebug('Unable to translate: \"' .. text .. '\"')
+      end
+
+      translation = text
+    end
+
+    return string.format(translation, ...)
+  end
+
+  return text
+end
+
+
+
+-- Client to server
+
+function ClientLocales.sendLocale()
+  if not ClientLocales.getLocale() then
+    if debugInfo then
+      pdebug(string.format('Current locale %d is unknown.', currentLocaleId))
+    end
+    return
+  end
+
   local protocolGame = g_game.getProtocolGame()
   if not protocolGame then
     return false
@@ -38,226 +233,8 @@ function ClientLocales.sendLocale(localeName)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeLocale)
-  msg:addString(localeName)
+  msg:addU8(currentLocaleId)
   protocolGame:send(msg)
 
   return true
-end
-
-function ClientLocales.createWindow()
-  localesWindow = g_ui.displayUI('locales')
-  localesWindow.onEscape = ClientLocales.destroyWindow
-  local localesPanel = localesWindow:getChildById('localesPanel')
-  local layout = localesPanel:getLayout()
-  local spacing = layout:getCellSpacing()
-  local size = layout:getCellSize()
-
-  local count = 0
-  for name,locale in pairs(installedLocales) do
-    local widget = g_ui.createWidget('LocalesButton', localesPanel)
-    widget:setImageSource('/images/ui/flags/' .. name .. '')
-    widget:setText(locale.languageName)
-    widget.onClick = function() ClientLocales.selectFirstLocale(name) end
-    count = count + 1
-  end
-
-  count = math.max(1, math.min(count, 3))
-  localesPanel:setWidth(size.width*count + spacing*(count-1))
-
-  addEvent(function() localesWindow:raise() localesWindow:focus() end)
-end
-
-function ClientLocales.destroyWindow()
-  if localesWindow then
-    localesWindow:destroy()
-    localesWindow = nil
-  end
-end
-
-function ClientLocales.selectFirstLocale(name)
-  ClientLocales.destroyWindow()
-  if ClientLocales.setLocale(name) then
-    g_modules.reloadModules()
-  end
-end
-
-function ClientLocales.onGameStart()
-  ClientLocales.sendLocale(currentLocale.name)
-end
-
-function ClientLocales.onExtendedLocales(protocolGame, opcode, msg)
-  local buffer = msg:getString()
-
-  local locale = installedLocales[buffer]
-  if locale and ClientLocales.setLocale(locale.name) then
-    g_modules.reloadModules()
-  end
-end
-
-function ClientLocales.init()
-  -- Alias
-  ClientLocales.m = modules.client_locales
-
-  installedLocales = { }
-
-  ClientLocales.installLocales('/locales')
-
-  local userLocaleName = g_settings.get('locale', 'false')
-  if userLocaleName ~= 'false' and ClientLocales.setLocale(userLocaleName) then
-    -- pdebug('Using configured locale: ' .. userLocaleName)
-  else
-    ClientLocales.setLocale(defaultLocaleName)
-    connect(g_app, {
-      onRun = ClientLocales.createWindow
-    })
-  end
-
-  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeLocale, ClientLocales.onExtendedLocales)
-  connect(g_game, {
-    onGameStart = ClientLocales.onGameStart
-  })
-end
-
-function ClientLocales.terminate()
-  installedLocales = nil
-  currentLocale = nil
-
-  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeLocale)
-
-  disconnect(g_app, {
-    onRun = ClientLocales.createWindow
-  })
-
-  disconnect(g_game, {
-    onGameStart = ClientLocales.onGameStart
-  })
-
-  _G.ClientLocales = nil
-end
-
-function ClientLocales.generateNewTranslationTable(localename)
-  local locale = installedLocales[localename]
-  for _i,k in pairs(neededTranslations) do
-    local trans = locale.translation[k]
-    k = k:gsub('\n','\\n')
-    k = k:gsub('\t','\\t')
-    k = k:gsub('\"','\\\"')
-    if trans then
-      trans = trans:gsub('\n','\\n')
-      trans = trans:gsub('\t','\\t')
-      trans = trans:gsub('\"','\\\"')
-    end
-    if not trans then
-      print('    ["' .. k .. '"]' .. ' = false,')
-    else
-      print('    ["' .. k .. '"]' .. ' = "' .. trans .. '",')
-    end
-  end
-end
-
-function ClientLocales.installLocale(locale)
-  if not locale or not locale.name then
-    error('Unable to install locale.')
-  end
-
-  if _G.allowedLocales and not _G.allowedLocales[locale.name] then
-    return
-  end
-
-  if locale.name ~= defaultLocaleName then
-    local updatesNamesMissing = { }
-    for _,k in pairs(neededTranslations) do
-      if locale.translation[k] == nil then
-        updatesNamesMissing[#updatesNamesMissing + 1] = k
-      end
-    end
-
-    if #updatesNamesMissing > 0 then
-      pdebug('Locale \'' .. locale.name .. '\' is missing ' .. #updatesNamesMissing .. ' translations.')
-      for _,name in pairs(updatesNamesMissing) do
-        pdebug('\t"' .. name ..'"')
-      end
-    end
-  end
-
-  local installedLocale = installedLocales[locale.name]
-  if installedLocale then
-    for word,translation in pairs(locale.translation) do
-      installedLocale.translation[word] = translation
-    end
-  else
-    installedLocales[locale.name] = locale
-  end
-end
-
-function ClientLocales.installLocales(directory)
-  dofiles(directory)
-end
-
-function ClientLocales.setLocale(name)
-  local locale = installedLocales[name]
-  if locale == currentLocale then
-    g_settings.set('locale', name)
-    return
-  end
-  if not locale then
-    pwarning('Locale ' .. name .. ' does not exist.')
-    return false
-  end
-  if currentLocale then
-    ClientLocales.sendLocale(locale.name)
-  end
-  currentLocale = locale
-  g_settings.set('locale', name)
-  if onLocaleChanged then
-    onLocaleChanged(name)
-  end
-
-  return true
-end
-
-function ClientLocales.getInstalledLocales()
-  return installedLocales
-end
-
-function ClientLocales.getCurrentLocale()
-  return currentLocale
-end
-
-
-
--- global function used to translate texts
-function _G.tr(text, ...)
-  if currentLocale then
-    if tonumber(text) and currentLocale.formatNumbers then
-      local number = tostring(text):split('.')
-      local out = ''
-      local reverseNumber = number[1]:reverse()
-      for i=1,#reverseNumber do
-        out = out .. reverseNumber:sub(i, i)
-        if i % 3 == 0 and i ~= #number and i ~= #reverseNumber then
-          out = out .. currentLocale.thousandsSeperator
-        end
-      end
-
-      if number[2] then
-        out = number[2] .. currentLocale.decimalSeperator .. out
-      end
-      return out:reverse()
-    elseif tostring(text) then
-      local translation = currentLocale.translation[text]
-      if not translation then
-        if translation == nil then
-          if currentLocale.name ~= defaultLocaleName then
-            if g_game.getAccountType() >= ACCOUNT_TYPE_GAMEMASTER then
-              pdebug('Unable to translate: \"' .. text .. '\"')
-            end
-          end
-        end
-        translation = text
-      end
-      return string.format(translation, ...)
-    end
-  end
-  return text
 end

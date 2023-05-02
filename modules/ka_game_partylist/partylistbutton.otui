@@ -40,10 +40,10 @@ PartyButton < CreatureButton
     //phantom: false
 
   UIWidget
-    anchors.top: creature.outsideBottom
+    anchors.top: creatureWidget.outsideBottom
     anchors.bottom: parent.bottom
     anchors.left: parent.left
-    anchors.right: creature.right
+    anchors.right: creatureWidget.right
 
   UIWidget
     id: infoIcon

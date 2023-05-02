@@ -254,7 +254,7 @@ MiniWindow
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 4
       padding: 1
-      fixed-creature-size: true
+      creature-size: 107
 
     HeadSlot
       anchors.top: outfitCreatureBox.top

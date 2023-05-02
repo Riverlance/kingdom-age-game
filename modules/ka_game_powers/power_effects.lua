@@ -1,18 +1,37 @@
 --[[Config]]
 
-PowerBoostFadeIn     = 400
-PowerBoostFadeOut    = 200
-PowerBoostResizeX    = 0.5
-PowerBoostResizeY    = 0.5
+local powerBoostScreenImage = {
+  fadeIn                = 400,
+  fadeOut               = 200,
+  sizeX                 = 0.5,
+  sizeY                 = 0.5,
+  sizeByFactor          = true,
+  sizeBasedOnGameScreen = true,
+  position              = ScreenImagePos.Center,
+  scale                 = ScreenImageScale.Inside,
+}
+
+local powerNormalBoostScreenImage = { }
+local powerExtraBoostScreenImage  = { }
+
+for i = PowerBoostFirst, PowerBoostLast do
+  powerNormalBoostScreenImage[i]      = table.copy(powerBoostScreenImage)
+  powerNormalBoostScreenImage[i].path = string.format('system/power_boost/normal_%d.png', i)
+
+  powerExtraBoostScreenImage[i]      = table.copy(powerBoostScreenImage)
+  powerExtraBoostScreenImage[i].path = string.format('system/power_boost/extra_%d.png', i)
+end
+
 PowerBoostColorSpeed = 200
 
 PowerBoostColor = {
-  [PowerBoost.None]   = {255, 255, 255, 255},
-  [PowerBoost.Low]    = {255, 255, 150, 255},
-  [PowerBoost.Medium] = {255, 150, 150, 255},
-  [PowerBoost.High]   = {150, 150, 255, 255}
+  [PowerBoost.None]   = '#ffffffff',
+  [PowerBoost.Low]    = '#ffff96ff',
+  [PowerBoost.Medium] = '#ff9696ff',
+  [PowerBoost.High]   = '#9696ffff'
 }
 PowerBoostColorDefault = PowerBoostColor[PowerBoost.None]
+
 
 
 --[[Effects]]
@@ -20,28 +39,30 @@ PowerBoostColorDefault = PowerBoostColor[PowerBoost.None]
 function GamePowers.setBoostColor(boostLevel)
   local localPlayer = g_game.getLocalPlayer()
   if localPlayer then
-    localPlayer:setColor(unpack(PowerBoostColor[boostLevel]))
+    localPlayer:setColor(PowerBoostColor[boostLevel])
   end
 end
 
 function GamePowers.removeBoostColor()
   local localPlayer = g_game.getLocalPlayer()
   if localPlayer then
-    localPlayer:setColor(unpack(PowerBoostColorDefault))
+    localPlayer:setColor(PowerBoostColorDefault)
   end
 end
 
 function GamePowers.setBoostImage(boostLevel)
   if modules.ka_game_screenimage then
-    GameScreenImage.addImage(string.format('system/power_boost/normal_%d.png', boostLevel), PowerBoostFadeIn, 1, PowerBoostResizeX, PowerBoostResizeY, 0)
-    GameScreenImage.addImage(string.format('system/power_boost/extra_%d.png', boostLevel), PowerBoostFadeIn, 1, PowerBoostResizeX, PowerBoostResizeY, 0)
+    GameScreenImage.addImage(powerNormalBoostScreenImage[boostLevel])
+    GameScreenImage.addImage(powerExtraBoostScreenImage[boostLevel])
   end
 end
 
 function GamePowers.removeBoostImage(boostLevel)
   if modules.ka_game_screenimage then
-    GameScreenImage.removeImage(string.format('system/power_boost/normal_%d.png', boostLevel), PowerBoostFadeOut, 0)
-    GameScreenImage.removeImage(string.format('system/power_boost/extra_%d.png', boostLevel), PowerBoostFadeOut, 0)
+    local normalBoost = powerNormalBoostScreenImage[boostLevel]
+    local extraBoost  = powerExtraBoostScreenImage[boostLevel]
+    GameScreenImage.removeImage(normalBoost.path, normalBoost.fadeOut, normalBoost.removeMode)
+    GameScreenImage.removeImage(extraBoost.path, extraBoost.fadeOut, extraBoost.removeMode)
   end
 end
 

@@ -179,7 +179,7 @@ function GameContainers.onContainerOpen(container, previousContainer)
 
   local contentsPanel = containerWindow:getChildById('contentsPanel')
   connect(contentsPanel, {
-    onGeometryChange = function(self, oldRect, newRect)
+    onGeometryChange = function(self)
       local minimizeButton = containerWindow:getChildById('minimizeButton')
       if minimizeButton:isOn() then
         return
@@ -202,8 +202,15 @@ function GameContainers.onContainerOpen(container, previousContainer)
   containerItemWidget:setPhantom(true)
 
   -- Set item name
+
   local name = container:getName()
   name = name:sub(1,1):upper() .. name:sub(2)
+
+  if name:len() > 11 then
+    name = string.sub(name, 1, #name - 3)
+    name = name .. "..."
+  end
+
   containerWindow:setText(name)
 
 

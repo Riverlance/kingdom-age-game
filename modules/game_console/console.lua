@@ -2,6 +2,10 @@ _G.GameConsole = { }
 
 
 
+NpcChannelName = 'NPCs' -- Do not translate it!
+
+
+
 SpeakTypesSettings = {
   none = { },
   say = { speakType = MessageModes.Say, color = '#FFFF00' },
@@ -26,6 +30,7 @@ SpeakTypes = {
   [MessageModes.Whisper] = SpeakTypesSettings.whisper,
   [MessageModes.Yell] = SpeakTypesSettings.yell,
   [MessageModes.GamemasterBroadcast] = SpeakTypesSettings.broadcast,
+  [MessageModes.PrivateTo] = SpeakTypesSettings.private,
   [MessageModes.PrivateFrom] = SpeakTypesSettings.private,
   [MessageModes.GamemasterPrivateFrom] = SpeakTypesSettings.privateRed,
   [MessageModes.NpcTo] = SpeakTypesSettings.privatePlayerToNpc,
@@ -190,11 +195,10 @@ function GameConsole.init()
   consoleTabBar:setNavigation(headerPanel:getChildById('prevChannelButton'), headerPanel:getChildById('nextChannelButton'))
   consoleTabBar.onTabChange = GameConsole.onTabChange
 
-  -- tibia like hotkeys
-  g_keyboard.bindKeyDown('Ctrl+O', g_game.requestChannels)
-  g_keyboard.bindKeyDown('Ctrl+W', GameConsole.removeCurrentTab)
-
   consoleToggleChat = footerPanel:getChildById('toggleChat')
+
+  g_keyboard.bindKeyDown('Ctrl+O', g_game.requestChannels)
+  GameConsole.enableChat()
 
   if g_game.isOnline() then
     GameConsole.online()
@@ -215,7 +219,6 @@ function GameConsole.terminate()
   })
 
   g_keyboard.unbindKeyDown('Ctrl+O')
-  g_keyboard.unbindKeyDown('Ctrl+W')
 
   GameConsole.saveCommunicationSettings()
   GameConsole.closeClonedTab()
@@ -278,7 +281,7 @@ end
 
 function GameConsole.enableChat()
   -- Disable next target shortcut
-  if GameBattleList.m then
+  if GameBattleList then
     g_keyboard.unbindKeyDown(GameBattleList.m.nextTargetShortcut)
   end
 
@@ -296,10 +299,12 @@ function GameConsole.enableChat()
   GameInterface.unbindWalkKey('C')
   GameInterface.unbindWalkKey('Z')
 
-  g_keyboard.unbindKeyPress('Ctrl+W')
-  g_keyboard.unbindKeyPress('Ctrl+D')
-  g_keyboard.unbindKeyPress('Ctrl+S')
-  g_keyboard.unbindKeyPress('Ctrl+A')
+  g_keyboard.unbindKeyPress('Ctrl+W', gameRootPanel)
+  g_keyboard.unbindKeyPress('Ctrl+D', gameRootPanel)
+  g_keyboard.unbindKeyPress('Ctrl+S', gameRootPanel)
+  g_keyboard.unbindKeyPress('Ctrl+A', gameRootPanel)
+
+  g_keyboard.bindKeyDown('Ctrl+W', GameConsole.removeCurrentTab)
 
   consoleToggleChat:setTooltip(tr('Disable chat mode (activates shortcuts to walk with WASD and others)'))
 end
@@ -308,6 +313,8 @@ function GameConsole.disableChat()
   consoleTextEdit:setVisible(false)
   consoleTextEdit:setText('')
   consoleTextEdit:disable()
+
+  g_keyboard.unbindKeyDown('Ctrl+W')
 
   GameInterface.bindWalkKey('W', North)
   GameInterface.bindWalkKey('D', East)
@@ -319,10 +326,10 @@ function GameConsole.disableChat()
   GameInterface.bindWalkKey('C', SouthEast)
   GameInterface.bindWalkKey('Z', SouthWest)
 
-  GameInterface.bindTurnKey('Ctrl+W', North)
-  GameInterface.bindTurnKey('Ctrl+A', West)
-  GameInterface.bindTurnKey('Ctrl+S', South)
-  GameInterface.bindTurnKey('Ctrl+D', East)
+  GameInterface.bindTurnKey('Ctrl+W', North, true)
+  GameInterface.bindTurnKey('Ctrl+A', West, true)
+  GameInterface.bindTurnKey('Ctrl+S', South, true)
+  GameInterface.bindTurnKey('Ctrl+D', East, true)
 
   consoleToggleChat:setTooltip(tr('Enable chat mode'))
 
@@ -389,7 +396,7 @@ function GameConsole.clear()
   consoleTabBar:removeTab(serverTab)
   serverTab = nil
 
-  local npcTab = consoleTabBar:getTab('NPCs')
+  local npcTab = consoleTabBar:getTab(NpcChannelName)
   if npcTab then
     consoleTabBar:removeTab(npcTab)
     npcTab = nil
@@ -467,7 +474,7 @@ function GameConsole.removeTab(tab)
       end
     end
     g_game.leaveChannel(tab.channelId)
-  elseif tab:getText() == 'NPCs' then
+  elseif tab:getText() == NpcChannelName then
     g_game.closeNpcChannel()
   end
 
@@ -509,7 +516,7 @@ end
 function GameConsole.addPrivateText(text, speaktype, name, isPrivateCommand, creatureName)
   local focus = false
   if speaktype.npcChat then
-    name = 'NPCs'
+    name  = NpcChannelName
     focus = true
   end
 
@@ -574,6 +581,7 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
   label:setId('consoleLabel' .. consoleBuffer:getChildCount())
   label:setText(text)
   label:setColor(speaktype.color)
+  label.highlightWords = { }
 
   -- Overlay for consoleBuffer which shows highlighted words only
 
@@ -621,21 +629,10 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
 
           tmpText = tmpText .. string.rep(fillChar, letterWidth[tmpChar])
       end
-      label.highlightWords = { }
       for i = 1, #highlightData, 3 do
-        label.highlightWords[highlightData[i]] = {last = highlightData[i+1], word = highlightData[i+2]}
+        table.insert(label.highlightWords, { start = highlightData[i], last = highlightData[i+1], word = highlightData[i+2] } )
       end
-
       labelHighlight:setText(tmpText)
-
-      label.onClick = function(self, mousePos)
-        local charPos = self:getTextPos(mousePos)
-        for start, highlight in pairs(self.highlightWords) do
-          if charPos >= start and charPos < highlight.last then
-            GameConsole.sendMessage(highlight.word)
-          end
-        end
-      end
     end
   end
 
@@ -645,7 +642,17 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
   end
 
   label.onMouseRelease = function(self, mousePos, mouseButton)
-    GameConsole.processMessageMenu(mousePos, mouseButton, creatureName, text, self, tab)
+    if mouseButton == MouseLeftButton then
+      local charPos = self:getTextPos(mousePos)
+      for _, highlight in ipairs(self.highlightWords) do
+        if charPos >= highlight.start and charPos < highlight.last then
+          GameConsole.sendMessage(highlight.word)
+          break
+        end
+      end
+    elseif mouseButton == MouseRightButton then
+      GameConsole.processMessageMenu(mousePos, mouseButton, creatureName, text, self, tab)
+    end
   end
 
   label.onMousePress = function(self, mousePos, button)
@@ -1219,8 +1226,9 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
       end
       staticText:setColor(speaktype.color)
     end
+
     staticText:addMessage(name, mode, staticMessage)
-    g_map.addThing(staticText, creaturePos, -1)
+    g_map.addStaticText(staticText, creaturePos)
   end
 
   local defaultMessage = mode <= 3 and true or false
@@ -1649,4 +1657,23 @@ end
 
 function GameConsole.getFooterPanel()
   return footerPanel
+end
+
+function GameConsole.greetNpc(npc)
+  if not g_game.canPerformGameAction() then
+    return
+  end
+
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeGreetNpc)
+
+  msg:addU32(npc:getId())
+
+  protocolGame:send(msg)
 end

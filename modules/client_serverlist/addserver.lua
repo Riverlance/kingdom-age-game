@@ -15,6 +15,7 @@ end
 
 function ClientAddServer.terminate()
   addServerWindow:destroy()
+  addServerWindow = nil
 
   _G.ClientAddServer = nil
 end

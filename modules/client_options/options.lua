@@ -6,13 +6,14 @@ local optionsShortcut = 'Ctrl+Alt+O'
 local audioShortcut = 'Ctrl+Alt+A'
 
 local defaultOptions = {
-  vsync = false,
+  optimizeFps = true,
+  vsync = true,
   showFps = true,
   showPing = true,
   fullscreen = false,
   classicControl = false,
-  dashWalk = false,
   autoChaseOverride = true,
+  moveFullStack = false,
   showStatusMessagesInConsole = true,
   showEventMessagesInConsole = true,
   showInfoMessagesInConsole = true,
@@ -35,9 +36,7 @@ local defaultOptions = {
   showTopMenu = true,
   showChat = true,
   gameScreenSize = 19,
-  foregroundFrameRate = 61,
   backgroundFrameRate = 201,
-  painterEngine = 0,
   enableAudio = true,
   enableMusic = true,
   enableSoundAmbient = true,
@@ -55,27 +54,31 @@ local defaultOptions = {
   showText = true,
   showHotkeybars = true,
   clearLootbarItemsOnEachDrop = true,
-  showNpcDialogWindows = true,
+  enableHighlightMouseTarget = true,
+  crosshair = 'default',
+  floorViewMode = 1,
+  floorFadingDelay = 150,
+  shadowFloorIntensity = 50,
   showMouseItemIcon = true,
-  mouseItemIconOpacity = 30,
+  mouseItemIconOpacity = 50,
   dontStretchShrink = false,
-  shaderFilter = ShaderFilter,
-  viewMode = ViewModes[3].name,
-  leftSticker = 'None',
-  rightSticker = 'None',
-  leftStickerOpacityScrollbar = 40,
-  rightStickerOpacityScrollbar = 40,
-  smoothWalk = true,
+  shaderFilter = 1,
+  viewMode = 3,
+  leftSticker = 1,
+  rightSticker = 1,
+  leftStickerOpacityScrollbar = 50,
+  rightStickerOpacityScrollbar = 50,
   smartWalk = false,
   bouncingKeys = true,
   cycleWalk = true,
-  walkingSensitivityScrollBar = 100,
-  walkingRepeatDelayScrollBar = 200,
+  cycleWalkDelay = 100,
   bouncingKeysDelayScrollBar = 1000,
-  cycleWalkDelayScrollBar = 200,
   turnDelay = 50,
-  hotkeyDelay = 50,
+  hotkeyDelay = 70,
   showMinimapExtraIcons = true,
+  creatureInformationScale = 0,
+  staticTextScale = 0,
+  animatedTextScale = 0,
 }
 
 local optionsWindow
@@ -85,62 +88,23 @@ local options = { }
 
 local generalPanel
 local controlPanel
-local graphicPanel
 local audioPanel
+local graphicPanel
 local displayPanel
 local panelOptionsPanel
 local consolePanel
 local audioButton
+
 local leftStickerComboBox
 local rightStickerComboBox
 local shaderFilterComboBox
 local viewModeComboBox
+local crosshairComboBox
+local floorViewModeComboBox
 
 local sidePanelsRadioGroup
 
 
-
-local function setupGraphicsEngines()
-  local enginesRadioGroup = UIRadioGroup.create()
-  local ogl1 = graphicPanel:getChildById('opengl1')
-  local ogl2 = graphicPanel:getChildById('opengl2')
-  local dx9  = graphicPanel:getChildById('directx9')
-  enginesRadioGroup:addWidget(ogl1)
-  enginesRadioGroup:addWidget(ogl2)
-  enginesRadioGroup:addWidget(dx9)
-
-  if g_window.getPlatformType() == 'WIN32-EGL' then
-    enginesRadioGroup:selectWidget(dx9)
-    ogl1:setEnabled(false)
-    ogl2:setEnabled(false)
-    dx9:setEnabled(true)
-  else
-    ogl1:setEnabled(g_graphics.isPainterEngineAvailable(1))
-    ogl2:setEnabled(g_graphics.isPainterEngineAvailable(2))
-    dx9:setEnabled(false)
-    if g_graphics.getPainterEngine() == 2 then
-      enginesRadioGroup:selectWidget(ogl2)
-    else
-      enginesRadioGroup:selectWidget(ogl1)
-    end
-
-    if g_app.getOs() ~= 'windows' then
-      dx9:hide()
-    end
-  end
-
-  enginesRadioGroup.onSelectionChange = function(self, selected)
-    if selected == ogl1 then
-      ClientOptions.setOption('painterEngine', 1)
-    elseif selected == ogl2 then
-      ClientOptions.setOption('painterEngine', 2)
-    end
-  end
-
-  if not g_graphics.canCacheBackbuffer() then
-    graphicPanel:getChildById('foregroundFrameRate'):disable()
-  end
-end
 
 local function setupSidePanelsPriority()
   local priorityLeftSide  = panelOptionsPanel:getChildById('panelsPriorityLeftSide')
@@ -187,10 +151,16 @@ end
 
 local clientSettingUp = true
 function ClientOptions.setup()
-  setupGraphicsEngines()
-  setupSidePanelsPriority()
+  local mapPanel = GameInterface.getMapPanel()
+  -- Disable not needed features of Mehah's client
+  g_map.setFloatingEffect(false)
+  g_app.setDrawEffectOnTop(false)
+  g_app.forceEffectOptimization(false)
+  if not g_app.isEncrypted() then -- Async texture load does not work with encryption enabled
+    g_app.setLoadingAsyncTexture(false) -- Async texture load makes them load asynchronously and uses less RAM
+  end
+  mapPanel:setLimitVisibleDimension(false)
 
-  -- load options
   for k,v in pairs(defaultOptions) do
     if type(v) == 'boolean' then
       ClientOptions.setOption(k, g_settings.getBoolean(k), true)
@@ -198,13 +168,13 @@ function ClientOptions.setup()
       ClientOptions.setOption(k, g_settings.getNumber(k), true)
     elseif type(v) == 'string' then
       ClientOptions.setOption(k, g_settings.getString(k), true)
-    elseif k == 'rightStickerComboBox' or k == 'leftStickerComboBox' then
-      ClientOptions.setOption(k, g_settings.get(k), true)
     end
   end
 
   clientSettingUp = false
 end
+
+
 
 function ClientOptions.init()
   -- Alias
@@ -221,53 +191,34 @@ function ClientOptions.init()
   optionsTabBar = optionsWindow:getChildById('optionsTabBar')
   optionsTabBar:setContentWidget(optionsWindow:getChildById('optionsTabContent'))
 
-  g_keyboard.bindKeyDown('Ctrl+Shift+F', function() ClientOptions.toggleOption('fullscreen') end)
-
   generalPanel      = g_ui.loadUI('game')
   controlPanel      = g_ui.loadUI('control')
-  graphicPanel      = g_ui.loadUI('graphic')
   audioPanel        = g_ui.loadUI('audio')
+  graphicPanel      = g_ui.loadUI('graphic')
   displayPanel      = g_ui.loadUI('display')
   panelOptionsPanel = g_ui.loadUI('panel')
   consolePanel      = g_ui.loadUI('console')
+
+  setupSidePanelsPriority()
+
   optionsTabBar:addTab(tr('Game'), generalPanel, '/images/ui/options/game')
   optionsTabBar:addTab(tr('Control'), controlPanel, '/images/ui/options/control')
-  optionsTabBar:addTab(tr('Graphic'), graphicPanel, '/images/ui/options/graphic')
   optionsTabBar:addTab(tr('Audio'), audioPanel, '/images/ui/options/audio')
+  optionsTabBar:addTab(tr('Graphic'), graphicPanel, '/images/ui/options/graphic')
   optionsTabBar:addTab(tr('Display'), displayPanel, '/images/ui/options/display')
   optionsTabBar:addTab(tr('Panel'), panelOptionsPanel, '/images/ui/options/panel')
   optionsTabBar:addTab(tr('Console'), consolePanel, '/images/ui/options/console')
 
-  -- Shader filters
-  shaderFilterComboBox = graphicPanel:getChildById('shaderFilterComboBox')
-  if shaderFilterComboBox then
-    for _, shaderFilter in ipairs(MapShaders) do
-      if shaderFilter.isFilter then
-        shaderFilterComboBox:addOption(shaderFilter.name)
-      end
-    end
-    shaderFilterComboBox.onOptionChange = ClientOptions.setShaderFilter
+  g_keyboard.bindKeyDown('Ctrl+Shift+F', function() ClientOptions.toggleOption('fullscreen') end)
 
-    -- Select default shader
-    local shaderFilter = g_settings.get(shaderFilterComboBox:getId(), defaultOptions.shaderFilter)
-    shaderFilterComboBox:setOption(shaderFilter)
-  end
-
-  -- View mode combobox
-  viewModeComboBox = graphicPanel:getChildById('viewModeComboBox')
-  if viewModeComboBox then
-    for k = 0, #ViewModes do
-      viewModeComboBox:addOption(ViewModes[k].name)
-    end
-    viewModeComboBox.onOptionChange = ClientOptions.setViewMode
-
-    -- Select default view mode
-    local viewMode = g_settings.get(viewModeComboBox:getId(), defaultOptions.viewMode)
-    viewModeComboBox:setOption(viewMode)
-  end
+  optionsButton = ClientTopMenu.addLeftButton('optionsButton', tr('Options') .. string.format(' (%s)', optionsShortcut), '/images/ui/top_menu/options', ClientOptions.toggle)
+  g_keyboard.bindKeyDown(optionsShortcut, ClientOptions.toggle)
+  audioButton = ClientTopMenu.addLeftButton('audioButton', tr('Audio') .. string.format(' (%s)', audioShortcut), '/images/ui/top_menu/audio', function() ClientOptions.toggleOption('enableAudio') end)
+  g_keyboard.bindKeyDown(audioShortcut, function() ClientOptions.toggleOption('enableAudio') end)
 
   -- Mouse item icon example
-  local showMouseItemIcon = displayPanel:getChildById('showMouseItemIcon')
+
+  local showMouseItemIcon = graphicPanel:getChildById('showMouseItemIcon')
   showMouseItemIcon.onHoverChange = function (self, hovered)
     if hovered then
       g_mouseicon.display(3585, ClientOptions.getOption('mouseItemIconOpacity') / 100, nil, 7)
@@ -275,29 +226,85 @@ function ClientOptions.init()
       g_mouseicon.hide()
     end
   end
-  local mouseItemIconOpacity = displayPanel:getChildById('mouseItemIconOpacity')
+  local mouseItemIconOpacity = graphicPanel:getChildById('mouseItemIconOpacity')
   mouseItemIconOpacity.onHoverChange = showMouseItemIcon.onHoverChange
 
-  -- Sticker combobox
-  leftStickerComboBox = panelOptionsPanel:getChildById('leftStickerComboBox')
-  rightStickerComboBox = panelOptionsPanel:getChildById('rightStickerComboBox')
-  if leftStickerComboBox and rightStickerComboBox then
-    for _, sticker in ipairs(PanelStickers) do
-      leftStickerComboBox:addOption(sticker.opt)
-      rightStickerComboBox:addOption(sticker.opt)
-    end
-    leftStickerComboBox.onOptionChange = ClientOptions.setSticker
-    rightStickerComboBox.onOptionChange = ClientOptions.setSticker
+  -- Map shaders
 
+  shaderFilterComboBox = graphicPanel:getChildById('shaderFilter')
+  if shaderFilterComboBox then
+    for k, shader in ipairs(MapShaders) do
+      shaderFilterComboBox:addOption(shader.name, k)
+    end
+  end
+
+  -- View mode combobox
+
+  viewModeComboBox = graphicPanel:getChildById('viewMode')
+  if viewModeComboBox then
+    for k = 0, #ViewModes do
+      viewModeComboBox:addOption(ViewModes[k].name, k)
+    end
+  end
+
+  -- Sticker combobox
+
+  leftStickerComboBox = panelOptionsPanel:getChildById('leftSticker')
+  rightStickerComboBox = panelOptionsPanel:getChildById('rightSticker')
+  if leftStickerComboBox and rightStickerComboBox then
+    for k, sticker in ipairs(PanelStickers) do
+      leftStickerComboBox:addOption(sticker.opt, k)
+      rightStickerComboBox:addOption(sticker.opt, k)
+    end
     addEvent(ClientOptions.updateStickers, 500)
   end
 
-  optionsButton = ClientTopMenu.addLeftButton('optionsButton', tr('Options') .. string.format(' (%s)', optionsShortcut), '/images/ui/top_menu/options', ClientOptions.toggle)
-  g_keyboard.bindKeyDown(optionsShortcut, ClientOptions.toggle)
-  audioButton = ClientTopMenu.addLeftButton('audioButton', tr('Audio') .. string.format(' (%s)', audioShortcut), '/images/ui/top_menu/audio', function() ClientOptions.toggleOption('enableAudio') end)
-  g_keyboard.bindKeyDown(audioShortcut, function() ClientOptions.toggleOption('enableAudio') end)
+  -- Crosshair
 
-  addEvent(function() ClientOptions.setup() end)
+  crosshairCombobox = displayPanel:getChildById('crosshair')
+
+  crosshairCombobox:addOption('Disabled', 'disabled')
+  crosshairCombobox:addOption('Default', 'default')
+  crosshairCombobox:addOption('Full', 'full')
+
+  -- Floor view mode
+
+  floorViewModeComboBox = displayPanel:getChildById('floorViewMode')
+
+  floorViewModeComboBox:addOption('Default', 0)
+  floorViewModeComboBox:addOption('Fading', 1)
+  floorViewModeComboBox:addOption('Locked', 2)
+  floorViewModeComboBox:addOption('Always visible', 3)
+  floorViewModeComboBox:addOption('Spy', 4)
+
+  addEvent(function()
+    ClientOptions.setup()
+
+
+
+    shaderFilterComboBox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('shaderFilter', comboBox:getCurrentOption().data)
+    end
+
+    viewModeComboBox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('viewMode', comboBox:getCurrentOption().data)
+    end
+
+    leftStickerComboBox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('leftSticker', comboBox:getCurrentOption().data)
+    end
+    rightStickerComboBox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('rightSticker', comboBox:getCurrentOption().data)
+    end
+
+    crosshairCombobox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('crosshair', comboBox:getCurrentOption().data)
+    end
+
+    floorViewModeComboBox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('floorViewMode', comboBox:getCurrentOption().data)
+    end
+  end)
 end
 
 function ClientOptions.terminate()
@@ -352,7 +359,16 @@ function ClientOptions.setOption(key, value, force)
   local wasClientSettingUp = clientSettingUp
   local localPlayer        = g_game.getLocalPlayer()
 
-  if key == 'vsync' then
+  if key == 'bouncingKeys' then
+    controlPanel:getChildById('bouncingKeysDelayScrollBar'):setEnabled(value)
+
+  elseif key == 'cycleWalk' or key == 'cycleWalkDelay' then
+    GameInterface.stopCycleWalkEvent()
+
+  elseif key == 'optimizeFps' then
+    g_app.optimize(value)
+
+  elseif key == 'vsync' then
     g_window.setVerticalSync(value)
 
   elseif key == 'showFps' then
@@ -364,36 +380,58 @@ function ClientOptions.setOption(key, value, force)
   elseif key == 'fullscreen' then
     g_window.setFullscreen(value)
 
+  elseif key == 'shaderFilter' then
+    ClientShaders.setMapShaderById(value)
+
+  elseif key == 'viewMode' then
+    if modules.game_interface then
+      GameInterface.setupViewMode(g_app.isScaled() and ViewModes[2].id or value)
+    end
+
   elseif key == 'enableAudio' then
-    g_sounds.setEnabled(value)
-    g_sounds.getChannel(AudioChannels.Music):setEnabled(value and ClientOptions.getOption('enableMusic'))
-    g_sounds.getChannel(AudioChannels.Ambient):setEnabled(value and ClientOptions.getOption('enableSoundAmbient'))
-    g_sounds.getChannel(AudioChannels.Effect):setEnabled(value and ClientOptions.getOption('enableSoundEffect'))
-    if value then
-      audioButton:setIcon('/images/ui/top_menu/audio')
-      audioButton:setOn(true)
-    else
-      audioButton:setIcon('/images/ui/top_menu/audio_mute')
-      audioButton:setOn(false)
+    if g_sounds then
+      g_sounds.setEnabled(value)
+      g_sounds.getChannel(AudioChannels.Music):setEnabled(value and ClientOptions.getOption('enableMusic'))
+      g_sounds.getChannel(AudioChannels.Ambient):setEnabled(value and ClientOptions.getOption('enableSoundAmbient'))
+      g_sounds.getChannel(AudioChannels.Effect):setEnabled(value and ClientOptions.getOption('enableSoundEffect'))
+      if value then
+        audioButton:setIcon('/images/ui/top_menu/audio')
+        audioButton:setOn(true)
+      else
+        audioButton:setIcon('/images/ui/top_menu/audio_mute')
+        audioButton:setOn(false)
+      end
     end
 
   elseif key == 'enableMusic' then
-    g_sounds.getChannel(AudioChannels.Music):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    if g_sounds then
+      g_sounds.getChannel(AudioChannels.Music):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    end
 
   elseif key == 'musicVolume' then
-    ClientAudio.setMusicVolume(value / 100)
+    if g_sounds then
+      ClientAudio.setMusicVolume(value / 100)
+    end
 
   elseif key == 'enableSoundAmbient' then
-    g_sounds.getChannel(AudioChannels.Ambient):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    if g_sounds then
+      g_sounds.getChannel(AudioChannels.Ambient):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    end
 
   elseif key == 'soundAmbientVolume' then
-    ClientAudio.setAmbientVolume(value / 100)
+    if g_sounds then
+      ClientAudio.setAmbientVolume(value / 100)
+    end
 
   elseif key == 'enableSoundEffect' then
-    g_sounds.getChannel(AudioChannels.Effect):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    if g_sounds then
+      g_sounds.getChannel(AudioChannels.Effect):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    end
 
   elseif key == 'soundEffectVolume' then
-    ClientAudio.setEffectVolume(value / 100)
+    if g_sounds then
+      ClientAudio.setEffectVolume(value / 100)
+    end
 
   elseif modules.game_interface and key == 'enabledLeftPanels' then
     addEvent(function()
@@ -404,7 +442,7 @@ function ClientOptions.setOption(key, value, force)
 
       GameInterface.setLeftPanels()
       if hasEnabled then -- Force left panel to appear
-        ClientOptions.setOption('showLeftPanel', true)
+        ClientOptions.updateOption('showLeftPanel')
       end
       GameInterface.moveHiddenPanelMiniWindows()
 
@@ -418,7 +456,7 @@ function ClientOptions.setOption(key, value, force)
       panelOptionsPanel:getChildById('leftThirdPanelWidth'):setEnabled(value >= 3)
 
       panelOptionsPanel:getChildById('leftStickerLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('leftStickerComboBox'):setEnabled(value >= 1)
+      panelOptionsPanel:getChildById('leftSticker'):setEnabled(value >= 1)
       panelOptionsPanel:getChildById('leftStickerOpacityLabel'):setEnabled(value >= 1)
       panelOptionsPanel:getChildById('leftStickerOpacityScrollbar'):setEnabled(value >= 1)
     end)
@@ -432,7 +470,7 @@ function ClientOptions.setOption(key, value, force)
 
       GameInterface.setRightPanels()
       if hasEnabled then -- Force right panel to appear
-        ClientOptions.setOption('showRightPanel', true)
+        ClientOptions.updateOption('showRightPanel')
       end
       GameInterface.moveHiddenPanelMiniWindows()
 
@@ -446,7 +484,7 @@ function ClientOptions.setOption(key, value, force)
       panelOptionsPanel:getChildById('rightThirdPanelWidth'):setEnabled(value >= 3)
 
       panelOptionsPanel:getChildById('rightStickerLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('rightStickerComboBox'):setEnabled(value >= 1)
+      panelOptionsPanel:getChildById('rightSticker'):setEnabled(value >= 1)
       panelOptionsPanel:getChildById('rightStickerOpacityLabel'):setEnabled(value >= 1)
       panelOptionsPanel:getChildById('rightStickerOpacityScrollbar'):setEnabled(value >= 1)
     end)
@@ -505,13 +543,7 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.getMapPanel():setZoom( value % 2 == 0 and value + 1 or value )
 
   elseif key == 'backgroundFrameRate' then
-    g_app.setBackgroundPaneMaxFps( value > 0 and value < 201 and value or 0 )
-
-  elseif key == 'foregroundFrameRate' then
-    g_app.setForegroundPaneMaxFps( value > 0 and value < 61 and value or 0 )
-
-  elseif key == 'painterEngine' then
-    g_graphics.selectPainterEngine(value)
+    g_app.setMaxFps(value > 0 and value < 201 and value or 0)
 
   elseif modules.game_interface and key == 'showNames' then
     GameInterface.getMapPanel():setDrawNames(value)
@@ -540,16 +572,13 @@ function ClientOptions.setOption(key, value, force)
     GameUIExpBar.setExpBar(value)
 
   elseif modules.game_interface and key == 'showText' then
-    GameInterface.getMapPanel():setDrawTexts(value)
+    g_app.setDrawTexts(value)
 
   elseif key == 'showHotkeybars' then
     if not modules.ka_game_hotkeybars then
       return
     end
     GameHotkeyBars.onDisplay(value)
-
-  elseif key == 'showNpcDialogWindows' then
-    g_game.setNpcDialogWindows(value)
 
   elseif modules.game_interface and key == 'dontStretchShrink' then
     addEvent(function() GameInterface.updateStretchShrink() end)
@@ -574,36 +603,38 @@ function ClientOptions.setOption(key, value, force)
     local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
     rightStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
 
-  elseif key == 'shaderFilterComboBox' then
-    shaderFilterComboBox:setOption(value)
+  elseif key == 'leftSticker' then
+    ClientOptions.updateLeftSticker(value)
 
-  elseif key == 'viewModeComboBox' then
-    viewModeComboBox:setOption(value)
+  elseif key == 'rightSticker' then
+    ClientOptions.updateRightSticker(value)
 
-  elseif key == 'leftStickerComboBox' then
-    leftStickerComboBox:setOption(value)
+  elseif key == 'enableHighlightMouseTarget' then
+    GameInterface.getMapPanel():setDrawHighlightTarget(value)
 
-  elseif key == 'rightStickerComboBox' then
-    rightStickerComboBox:setOption(value)
+  elseif key == 'crosshair' then
+    local newValue = value
+    if newValue == 'disabled' then
+      newValue = nil
+    end
+    GameInterface.getMapPanel():setCrosshairTexture(newValue and '/images/game/crosshair/' .. newValue or nil)
 
-  elseif modules.game_interface and key == 'walkingRepeatDelayScrollBar' then
-    GameInterface.setWalkingRepeatDelay(value)
+  elseif key == 'floorViewMode' then
+    GameInterface.getMapPanel():setFloorViewMode(value)
 
-  elseif key == 'smoothWalk' then
-    controlPanel:getChildById('walkingSensitivityScrollBar'):setEnabled(value)
-    controlPanel:getChildById('walkingRepeatDelayScrollBar'):setEnabled(value)
-    if not value then
-      ClientOptions.setOption('walkingRepeatDelayScrollBar', 200)
+    local floorFadingDelayWidget = displayPanel:getChildById('floorFadingDelay')
+    if floorFadingDelayWidget then
+      floorFadingDelayWidget:setEnabled(value == 1)
     end
 
-  elseif key == 'bouncingKeys' then
-    controlPanel:getChildById('bouncingKeysDelayScrollBar'):setEnabled(value)
+  elseif key == 'floorFadingDelay' then
+    GameInterface.getMapPanel():setFloorFading(tonumber(value) or 150)
 
-  elseif key == 'cycleWalk' then
-    GameInterface.getMapPanel():setCycleWalkEnabled(value)
-
-  elseif key == 'cycleWalkDelayScrollBar' then
-    GameInterface.getMapPanel():setCycleWalkInterval(value)
+  elseif key == 'shadowFloorIntensity' then
+    local mapPanel = GameInterface and GameInterface.getMapPanel()
+    if mapPanel then
+      mapPanel:setShadowFloorIntensity(1 - (value / 100))
+    end
 
   elseif key == 'showMinimapExtraIcons' then
     if not modules.game_minimap then
@@ -614,6 +645,15 @@ function ClientOptions.setOption(key, value, force)
     minimapWidget:setAlternativeWidgetsVisible(value)
 
     GameMinimap.m.extraIconsButton:setOn(value)
+
+  elseif key == 'creatureInformationScale' then
+    g_app.setCreatureInformationScale(math.max((value == 0 and g_window.getDisplayDensity() - 0.5 or value / 2) + 0.5, 1))
+
+  elseif key == 'staticTextScale' then
+    g_app.setStaticTextScale(math.max((value == 0 and g_window.getDisplayDensity() - 0.5 or value / 2) + 0.5, 1))
+
+  elseif key == 'animatedTextScale' then
+    g_app.setAnimatedTextScale(math.max((value == 0 and g_window.getDisplayDensity() - 0.5 or value / 2) + 0.5, 1))
   end
 
   -- change value for keybind updates
@@ -624,6 +664,8 @@ function ClientOptions.setOption(key, value, force)
         widget:setChecked(value)
       elseif widget:getStyle().__class == 'UIScrollBar' then
         widget:setValue(value)
+      elseif widget:getStyle().__class == 'UIComboBox' then
+        widget:setCurrentOptionByData(value)
       end
       break
     end
@@ -643,6 +685,14 @@ function ClientOptions.addTab(name, panel, icon)
   optionsTabBar:addTab(name, panel, icon)
 end
 
+function ClientOptions.removeTab(tab)
+  if type(tab) == "string" then
+    tab = optionsTabBar:getTab(tab)
+  end
+
+  optionsTabBar:removeTab(tab)
+end
+
 function ClientOptions.addButton(name, func, icon)
   optionsTabBar:addButton(name, func, icon)
 end
@@ -651,67 +701,37 @@ end
 
 -- Panel Stickers
 
-function ClientOptions.updateStickers()
-  -- Left panel
+function ClientOptions.updateLeftSticker(value)
   local leftStickerWidget = GameInterface.getLeftFirstPanel():getChildById('gameLeftPanelSticker')
   if leftStickerWidget then
-    local value = g_settings.get(leftStickerComboBox:getId())
-    value = type(value) == 'string' and value ~= '' and value or defaultOptions.leftSticker
+    value      = value or g_settings.getNumber('leftSticker')
+    local path = PanelStickers[value] and PanelStickers[value].path or ''
 
-    leftStickerComboBox:setOption(value) -- Make sure combobox has same as value at g_settings
-    if PanelStickers[value] ~= '' then
-      leftStickerComboBox:setTooltip(PanelStickers[value], TooltipType.image)
+    if path ~= '' then
+      leftStickerComboBox:setTooltip(path, TooltipType.image)
     else
       leftStickerComboBox:removeTooltip()
     end
-    leftStickerWidget:setImageSource(PanelStickers[value])
+    leftStickerWidget:setImageSource(path)
   end
+end
 
-  -- Right panel
+function ClientOptions.updateRightSticker(value)
   local rightStickerWidget = GameInterface.getRightFirstPanel():getChildById('gameRightPanelSticker')
   if rightStickerWidget then
-    local value = g_settings.get(rightStickerComboBox:getId())
-    value = type(value) == 'string' and value ~= '' and value or defaultOptions.rightSticker
+    value      = value or g_settings.getNumber('rightSticker')
+    local path = PanelStickers[value] and PanelStickers[value].path or ''
 
-    rightStickerComboBox:setOption(value) -- Make sure combobox has same as value at g_settings
-    if PanelStickers[value] ~= '' then
-      rightStickerComboBox:setTooltip(PanelStickers[value], TooltipType.image)
+    if path ~= '' then
+      rightStickerComboBox:setTooltip(path, TooltipType.image)
     else
       rightStickerComboBox:removeTooltip()
     end
-    rightStickerWidget:setImageSource(PanelStickers[value])
+    rightStickerWidget:setImageSource(path)
   end
 end
 
-function ClientOptions.setSticker(comboBox, opt)
-  g_settings.set(comboBox:getId(), opt)
-  ClientOptions.setOption(comboBox:getId(), opt)
-  ClientOptions.updateStickers()
-end
-
-
-
--- Shader Filter
-
-function ClientOptions.setShaderFilter(comboBox, opt)
-  g_settings.set(comboBox:getId(), opt)
-  ClientOptions.setOption(comboBox:getId(), opt)
-  setMapShader(opt)
-end
-
--- View Mode
-
-function ClientOptions.setViewMode(comboBox, opt)
-  g_settings.set(comboBox:getId(), opt)
-  ClientOptions.setOption(comboBox:getId(), opt)
-  if modules.game_interface then
-    local viewModeId = 0
-    for k = 0, #ViewModes do
-      if opt == ViewModes[k].name then
-        viewModeId = k
-        break
-      end
-    end
-    GameInterface.setupViewMode(viewModeId)
-  end
+function ClientOptions.updateStickers()
+  ClientOptions.updateLeftSticker()
+  ClientOptions.updateRightSticker()
 end

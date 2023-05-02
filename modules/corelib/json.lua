@@ -1,7 +1,7 @@
 --
 -- json.lua
 --
--- Copyright (c) 2018 rxi
+-- Copyright (c) 2020 rxi
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy of
 -- this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,7 @@
 -- SOFTWARE.
 --
 
-json = { _version = "0.1.1" }
+local json = { _version = "0.1.2" }
 
 -------------------------------------------------------------------------------
 -- Encode
@@ -31,23 +31,23 @@ json = { _version = "0.1.1" }
 local encode
 
 local escape_char_map = {
-  [ "\\" ] = "\\\\",
-  [ "\"" ] = "\\\"",
-  [ "\b" ] = "\\b",
-  [ "\f" ] = "\\f",
-  [ "\n" ] = "\\n",
-  [ "\r" ] = "\\r",
-  [ "\t" ] = "\\t",
+  [ "\\" ] = "\\",
+  [ "\"" ] = "\"",
+  [ "\b" ] = "b",
+  [ "\f" ] = "f",
+  [ "\n" ] = "n",
+  [ "\r" ] = "r",
+  [ "\t" ] = "t",
 }
 
-local escape_char_map_inv = { [ "\\/" ] = "/" }
+local escape_char_map_inv = { [ "/" ] = "/" }
 for k, v in pairs(escape_char_map) do
   escape_char_map_inv[v] = k
 end
 
 
 local function escape_char(c)
-  return escape_char_map[c] or string.format("\\u%04x", c:byte())
+  return "\\" .. (escape_char_map[c] or string.format("u%04x", c:byte()))
 end
 
 
@@ -57,17 +57,15 @@ end
 
 
 local function encode_table(val, stack)
-  local res = { }
-  stack = stack or { }
+  local res = {}
+  stack = stack or {}
 
   -- Circular reference?
-  if stack[val] then
-    error("circular reference")
-  end
+  if stack[val] then error("circular reference") end
 
   stack[val] = true
 
-  if val[1] ~= nil or next(val) == nil then
+  if rawget(val, 1) ~= nil or next(val) == nil then
     -- Treat as array -- check keys are valid and it is not sparse
     local n = 0
     for k in pairs(val) do
@@ -145,7 +143,7 @@ end
 local parse
 
 local function create_set(...)
-  local res = { }
+  local res = {}
   for i = 1, select("#", ...) do
     res[ select(i, ...) ] = true
   end
@@ -206,9 +204,9 @@ end
 
 
 local function parse_unicode_escape(s)
-  local n1 = tonumber( s:sub(3, 6),  16 )
-  local n2 = tonumber( s:sub(9, 12), 16 )
-  -- Surrogate pair?
+  local n1 = tonumber( s:sub(1, 4),  16 )
+  local n2 = tonumber( s:sub(7, 10), 16 )
+   -- Surrogate pair?
   if n2 then
     return codepoint_to_utf8((n1 - 0xd800) * 0x400 + (n2 - 0xdc00) + 0x10000)
   else
@@ -218,54 +216,42 @@ end
 
 
 local function parse_string(str, i)
-  local has_unicode_escape = false
-  local has_surrogate_escape = false
-  local has_escape = false
-  local last
-  for j = i + 1, #str do
+  local res = ""
+  local j = i + 1
+  local k = j
+
+  while j <= #str do
     local x = str:byte(j)
 
     if x < 32 then
       decode_error(str, j, "control character in string")
-    end
 
-    if last == 92 then -- "\\" (escape char)
-      if x == 117 then -- "u" (unicode escape sequence)
-        local hex = str:sub(j + 1, j + 5)
-        if not hex:find("%x%x%x%x") then
-          decode_error(str, j, "invalid unicode escape in string")
-        end
-        if hex:find("^[dD][89aAbB]") then
-          has_surrogate_escape = true
-        else
-          has_unicode_escape = true
-        end
+    elseif x == 92 then -- `\`: Escape
+      res = res .. str:sub(k, j - 1)
+      j = j + 1
+      local c = str:sub(j, j)
+      if c == "u" then
+        local hex = str:match("^[dD][89aAbB]%x%x\\u%x%x%x%x", j + 1)
+                 or str:match("^%x%x%x%x", j + 1)
+                 or decode_error(str, j - 1, "invalid unicode escape in string")
+        res = res .. parse_unicode_escape(hex)
+        j = j + #hex
       else
-        local c = string.char(x)
         if not escape_chars[c] then
-          decode_error(str, j, "invalid escape char '" .. c .. "' in string")
+          decode_error(str, j - 1, "invalid escape char '" .. c .. "' in string")
         end
-        has_escape = true
+        res = res .. escape_char_map_inv[c]
       end
-      last = nil
+      k = j + 1
 
-    elseif x == 34 then -- '"' (end of string)
-      local s = str:sub(i + 1, j - 1)
-      if has_surrogate_escape then
-        s = s:gsub("\\u[dD][89aAbB]..\\u....", parse_unicode_escape)
-      end
-      if has_unicode_escape then
-        s = s:gsub("\\u....", parse_unicode_escape)
-      end
-      if has_escape then
-        s = s:gsub("\\.", escape_char_map_inv)
-      end
-      return s, j + 1
-
-    else
-      last = x
+    elseif x == 34 then -- `"`: End of string
+      res = res .. str:sub(k, j - 1)
+      return res, j + 1
     end
+
+    j = j + 1
   end
+
   decode_error(str, i, "expected closing quote for string")
 end
 
@@ -292,7 +278,7 @@ end
 
 
 local function parse_array(str, i)
-  local res = { }
+  local res = {}
   local n = 1
   i = i + 1
   while 1 do
@@ -303,7 +289,6 @@ local function parse_array(str, i)
       i = i + 1
       break
     end
-
     -- Read token
     x, i = parse(str, i)
     res[n] = x
@@ -312,21 +297,15 @@ local function parse_array(str, i)
     i = next_char(str, i, space_chars, true)
     local chr = str:sub(i, i)
     i = i + 1
-
-    if chr == "]" then
-      break
-    end
-
-    if chr ~= "," then
-      decode_error(str, i, "expected ']' or ','")
-    end
+    if chr == "]" then break end
+    if chr ~= "," then decode_error(str, i, "expected ']' or ','") end
   end
   return res, i
 end
 
 
 local function parse_object(str, i)
-  local res = { }
+  local res = {}
   i = i + 1
   while 1 do
     local key, val
@@ -336,7 +315,6 @@ local function parse_object(str, i)
       i = i + 1
       break
     end
-
     -- Read key
     if str:sub(i, i) ~= '"' then
       decode_error(str, i, "expected string for key")
@@ -356,14 +334,8 @@ local function parse_object(str, i)
     i = next_char(str, i, space_chars, true)
     local chr = str:sub(i, i)
     i = i + 1
-
-    if chr == "}" then
-      break
-    end
-
-    if chr ~= "," then
-      decode_error(str, i, "expected '}' or ','")
-    end
+    if chr == "}" then break end
+    if chr ~= "," then decode_error(str, i, "expected '}' or ','") end
   end
   return res, i
 end
@@ -411,3 +383,6 @@ function json.decode(str)
   end
   return res
 end
+
+
+return json

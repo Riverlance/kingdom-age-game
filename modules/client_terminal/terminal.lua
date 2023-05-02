@@ -233,8 +233,8 @@ function ClientTerminal.terminate()
   terminalWindow:destroy()
   terminalWindow = nil
   clearButton = nil
-
   commandEnv = nil
+
   _G.terminalLines = allLines
 
   _G.ClientTerminal = nil

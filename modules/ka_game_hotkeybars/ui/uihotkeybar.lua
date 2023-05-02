@@ -64,7 +64,7 @@ function UIHotkeyBar:load(settings)
 end
 
 function UIHotkeyBar:getHotkeyList()
-  return self:getChildById('hotkeyList')
+  return self:getChildById('hotkeyBarList')
 end
 
 function UIHotkeyBar:setup(visible)

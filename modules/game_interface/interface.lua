@@ -4,6 +4,10 @@ _G.GameInterface = { }
 
 WALK_STEPS_RETRY = 10
 
+Npc.DefaultDistance = 4 -- Check also on server: lib/class/npc.lua
+
+local cycleWalkEvent = nil
+
 gameRootPanel = nil
 gameMapPanel = nil
 gameScreenArea = nil
@@ -20,6 +24,7 @@ gameLeftFirstPanelContainer = nil
 gameLeftSecondPanelContainer = nil
 gameLeftThirdPanelContainer = nil
 gameBottomPanel = nil
+shopButton = nil
 logoutButton = nil
 mouseGrabberWidget = nil
 countWindow = nil
@@ -34,7 +39,7 @@ chatButton = nil
 currentViewMode = 0
 smartWalkDirs = { }
 smartWalkDir = nil
-walkFunction = nil
+firstStep = false
 hookedMenuOptions = { }
 lastDirTime = g_clock.millis()
 gamePanels = { }
@@ -43,6 +48,10 @@ gamePanelsContainer = { }
 -- List of panels, even if panelsPriority is not set
 local _gamePanels = { }
 local _gamePanelsContainer = { }
+
+local function getDistanceBetween(p1, p2)
+  return math.max(math.abs(p1.x - p2.x), math.abs(p1.y - p2.y))
+end
 
 function GameInterface.init()
   -- Alias
@@ -109,14 +118,17 @@ function GameInterface.init()
   })
 
   connect(g_game, {
-    onGameStart        = GameInterface.onGameStart,
-    onGameEnd          = GameInterface.onGameEnd,
-    onLoginAdvice      = GameInterface.onLoginAdvice,
-    onTrackCreature    = GameInterface.onTrackCreature,
-    onTrackCreatureEnd = GameInterface.onTrackCreature,
-    onTrackPosition    = GameInterface.onTrackPosition,
-    onTrackPositionEnd = GameInterface.onTrackPositionEnd,
-    onUpdateTrackColor = GameInterface.onUpdateTrackColor
+    onGameStart               = GameInterface.onGameStart,
+    onGameEnd                 = GameInterface.onGameEnd,
+    onLoginAdvice             = GameInterface.onLoginAdvice,
+    onAttackingCreatureChange = GameInterface.onAttackingCreatureChange,
+    onFollowingCreatureChange = GameInterface.onFollowingCreatureChange,
+    onFightModeChange         = GameInterface.onFightModeChange,
+    onTrackCreature           = GameInterface.onTrackCreature,
+    onTrackCreatureEnd        = GameInterface.onTrackCreature,
+    onTrackPosition           = GameInterface.onTrackPosition,
+    onTrackPositionEnd        = GameInterface.onTrackPositionEnd,
+    onUpdateTrackColor        = GameInterface.onUpdateTrackColor
   }, true)
 
   connect(gameRootPanel, {
@@ -148,6 +160,10 @@ function GameInterface.init()
     onDoubleClick = GameInterface.onSplitterDoubleClick,
   })
 
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeWidgetLock, GameInterface.parseWidgetLock)
+
+  shopButton = ClientTopMenu.addLeftButton('shopButton', tr('Visit the VIP shop on our Website'), '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
+  shopButton:setOn(true)
   logoutButton = ClientTopMenu.addLeftButton('logoutButton', tr('Exit'), '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
 
   GameInterface.bindKeys()
@@ -158,7 +174,7 @@ function GameInterface.init()
 end
 
 function GameInterface.bindWalkKey(key, dir)
-  g_keyboard.bindKeyDown(key, function() GameInterface.changeWalkDir(dir) end, gameRootPanel, true)
+  g_keyboard.bindKeyDown(key, function() GameInterface.onWalkKeyDown(dir) end, gameRootPanel, true)
   g_keyboard.bindKeyUp(key, function() GameInterface.changeWalkDir(dir, true) end, gameRootPanel, true)
   g_keyboard.bindKeyPress(key, function() GameInterface.smartWalk(dir) end, gameRootPanel)
 end
@@ -169,8 +185,12 @@ function GameInterface.unbindWalkKey(key)
   g_keyboard.unbindKeyPress(key, gameRootPanel)
 end
 
-function GameInterface.bindTurnKey(key, dir)
+function GameInterface.bindTurnKey(key, dir, checkConsole)
   local function callback(widget, code, repeatTicks)
+    if checkConsole and GameConsole and GameConsole.m.consoleTextEdit:isVisible() then
+      return
+    end
+
     if g_clock.millis() - lastDirTime >= ClientOptions.getOption('turnDelay') then
       g_game.turn(dir)
       GameInterface.changeWalkDir(dir)
@@ -189,7 +209,7 @@ function GameInterface.bindActionKeyDown(key)
 end
 
 function GameInterface.bindKeys()
-  gameRootPanel:setAutoRepeatDelay(200)
+  gameRootPanel:setAutoRepeatDelay(50)
 
   GameInterface.bindWalkKey('Up', North)
   GameInterface.bindWalkKey('Right', East)
@@ -225,7 +245,6 @@ function GameInterface.bindKeys()
   g_keyboard.bindKeyPress('Ctrl+=', function() gameMapPanel:zoomIn() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
   g_keyboard.bindKeyPress('Ctrl+-', function() gameMapPanel:zoomOut() ClientOptions.setOption('gameScreenSize', gameMapPanel:getZoom(), false) end, gameRootPanel)
   g_keyboard.bindKeyDown('Ctrl+L', function() GameInterface.tryLogout(false) end, gameRootPanel)
-  -- g_keyboard.bindKeyDown('Ctrl+W', function() g_map.cleanTexts() if modules.game_textmessage then GameTextMessage.clearMessages() end end, gameRootPanel)
   g_keyboard.bindKeyDown('Ctrl+.', GameInterface.nextViewMode, gameRootPanel)
 
   g_keyboard.bindKeyDown('Ctrl+Shift+Q', function() ClientOptions.setOption('showTopMenu', not ClientOptions.getOption('showTopMenu')) end)
@@ -252,6 +271,8 @@ function GameInterface.terminate()
 
   hookedMenuOptions = { }
   GameInterface.stopSmartWalk()
+
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeWidgetLock)
 
   disconnect(bottomSplitter, {
     onDoubleClick = GameInterface.onSplitterDoubleClick,
@@ -283,14 +304,17 @@ function GameInterface.terminate()
   })
 
   disconnect(g_game, {
-    onGameStart        = GameInterface.onGameStart,
-    onGameEnd          = GameInterface.onGameEnd,
-    onLoginAdvice      = GameInterface.onLoginAdvice,
-    onTrackCreature    = GameInterface.onTrackCreature,
-    onTrackCreatureEnd = GameInterface.onTrackCreature,
-    onTrackPosition    = GameInterface.onTrackPosition,
-    onTrackPositionEnd = GameInterface.onTrackPositionEnd,
-    onUpdateTrackColor = GameInterface.onUpdateTrackColor
+    onGameStart               = GameInterface.onGameStart,
+    onGameEnd                 = GameInterface.onGameEnd,
+    onLoginAdvice             = GameInterface.onLoginAdvice,
+    onAttackingCreatureChange = GameInterface.onAttackingCreatureChange,
+    onFollowingCreatureChange = GameInterface.onFollowingCreatureChange,
+    onFightModeChange         = GameInterface.onFightModeChange,
+    onTrackCreature           = GameInterface.onTrackCreature,
+    onTrackCreatureEnd        = GameInterface.onTrackCreature,
+    onTrackPosition           = GameInterface.onTrackPosition,
+    onTrackPositionEnd        = GameInterface.onTrackPositionEnd,
+    onUpdateTrackColor        = GameInterface.onUpdateTrackColor
   })
 
   disconnect(g_app, {
@@ -303,6 +327,7 @@ function GameInterface.terminate()
   gamePanelsContainer = { }
   gamePanels = { }
 
+  shopButton:destroy()
   logoutButton:destroy()
   gameRootPanel:destroy()
 
@@ -326,9 +351,6 @@ function GameInterface.onGameStart()
   ClientOptions.updateOption('leftFirstPanelWidth')
   ClientOptions.updateOption('leftSecondPanelWidth')
   ClientOptions.updateOption('leftThirdPanelWidth')
-
-  -- Panels stickers
-  ClientOptions.updateStickers()
 
   g_game.enableFeature(GameForceFirstAutoWalkStep)
 
@@ -354,7 +376,6 @@ function GameInterface.show()
   gameRootPanel:show()
   gameRootPanel:focus()
   gameMapPanel:followCreature(g_game.getLocalPlayer())
-  GameInterface.updateViewMode()
   GameInterface.updateStretchShrink()
   logoutButton:setTooltip(tr('Logout'))
 end
@@ -482,6 +503,16 @@ function GameInterface.stopSmartWalk()
   smartWalkDir = nil
 end
 
+function GameInterface.onWalkKeyDown(dir)
+  if ClientOptions.getOption('autoChaseOverride') then
+    if g_game.isAttacking() and g_game.getChaseMode() == ChaseOpponent then
+      g_game.setChaseMode(DontChase)
+    end
+  end
+  firstStep = true
+  GameInterface.changeWalkDir(dir)
+end
+
 function GameInterface.changeWalkDir(dir, pop)
   while table.removevalue(smartWalkDirs, dir) do end
   if pop then
@@ -514,35 +545,28 @@ function GameInterface.changeWalkDir(dir, pop)
 end
 
 function GameInterface.smartWalk(dir)
-  if g_keyboard.getModifiers() == KeyboardNoModifier then
-    local func = walkFunction
-    if not func then
-      local dire = smartWalkDir or dir
-      if ClientOptions.getOption('smoothWalk') then
-        local sensitivity = ClientOptions.getOption('walkingSensitivityScrollBar')
-        g_game.smoothWalk(dire, sensitivity)
-      else
-        g_game.walk(dire)
-      end
-    end
-    return true
+  if g_keyboard.getModifiers() ~= KeyboardNoModifier then
+    return false
   end
-  return false
-end
 
-function GameInterface.setWalkingRepeatDelay(value)
-  gameRootPanel:setAutoRepeatDelay(value)
+  local _dir = smartWalkDir or dir
+  g_game.walk(_dir, firstStep)
+  firstStep = false
+  return true
 end
 
 function GameInterface.updateStretchShrink()
-  if not ClientOptions.getOption('dontStretchShrink') or alternativeView then
+  if alternativeView or currentViewMode ~= 0 then
+    ClientOptions.setOption('dontStretchShrink', false)
+    return
+  elseif not ClientOptions.getOption('dontStretchShrink') then
     return
   end
 
-  gameMapPanel:setVisibleDimension({ width = 15, height = 11 })
+  ClientOptions.setOption('gameScreenSize', 19) -- Height of 19 SQMs
 
-  -- Set gameMapPanel size to height = 11 * 32 + 2
-  bottomSplitter:setMarginBottom(bottomSplitter:getMarginBottom() + (gameMapPanel:getHeight() - 32 * 11) - 10)
+  local gameMapMargin = gameMapPanel:getPaddingTop() + gameMapPanel:getPaddingBottom() + 2 -- 2 because of black border line of game screen
+  bottomSplitter:setMarginBottom(bottomSplitter:getMarginBottom() + gameMapPanel:getHeight() - (32 * 19 + gameMapMargin))
 end
 
 function GameInterface.onSplitterDoubleClick(mousePosition)
@@ -819,28 +843,6 @@ function GameInterface.toggleMiniWindow(miniWindow) -- To use on each top menu m
   end
 end
 
-function GameInterface.setupMiniWindow(miniWindow, miniWindowButton) -- To use on each top menu mini window
-  if not miniWindow or not miniWindowButton then
-    return
-  end
-
-  local parent = miniWindow:getParent()
-  if parent and not parent:isVisible() then
-    return
-  end
-
-  -- Attach top menu button to mini window
-  miniWindow.topMenuButton = miniWindowButton
-
-  miniWindow:setup()
-
-  if miniWindow:getSettings(true) then -- Opened once before
-    if miniWindow:isVisible() then
-      miniWindowButton:setOn(true)
-    end
-  end
-end
-
 function GameInterface.isRightPanel(panel)
   return panel.sidePanelId % 2 == 1
 end
@@ -1076,12 +1078,14 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
   end
 
   if wrapThing then
+    local onWrapItem = function() g_game.wrap(wrapThing) end
+
     if wrapThing:isUnwrappable() then
-      menu:addOption(tr('Unwrap'), function() g_game.wrap(wrapThing) end)
+      menu:addOption(tr('Unwrap'), onWrapItem)
     end
 
     if wrapThing:isWrappable() then
-      menu:addOption(tr('Wrap'), function() g_game.wrap(wrapThing) end)
+      menu:addOption(tr('Wrap'), onWrapItem)
     end
   end
 
@@ -1179,20 +1183,25 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
         else
           menu:addOption(tr('Stop follow'), function() g_game.cancelFollow() end, shortcut)
         end
-      end
 
-      if modules.ka_game_tracker then
-        if not classic then
-          shortcut = '(Alt+Shift)'
-        else
-          shortcut = nil
+        if GameTracker then
+          if not classic then
+            shortcut = '(Alt+Shift)'
+          else
+            shortcut = nil
+          end
+
+          if not GameTracker.isTracked(creatureThing) then
+            menu:addOption(tr('Track'), function() GameTracker.startTrackCreature(creatureThing) end, shortcut)
+          else
+            menu:addOption(tr('Stop track'), function() GameTracker.stopTrackCreature(creatureThing) end, shortcut)
+            menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(creatureThing:getTrackInfo()) end)
+          end
         end
 
-        if not GameTracker.isTracked(creatureThing) then
-          menu:addOption(tr('Track'), function() GameTracker.startTrackCreature(creatureThing) end, shortcut)
-        else
-          menu:addOption(tr('Stop track'), function() GameTracker.stopTrackCreature(creatureThing) end, shortcut)
-          menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(creatureThing:getTrackInfo()) end)
+        local creatureDistance = getDistanceBetween(creatureThing:getPosition(), localPosition)
+        if GameConsole and creatureThing:isNpc() and creatureDistance <= Npc.DefaultDistance then
+          menu:addOption(tr('Talk'), function() if GameConsole then GameConsole.greetNpc(creatureThing) end end)
         end
       end
 
@@ -1274,92 +1283,141 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
   menu:display(menuPosition)
 end
 
-local function getDistanceBetween(p1, p2)
-  return math.max(math.abs(p1.x - p2.x), math.abs(p1.y - p2.y))
-end
-
-function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, wrapThing)
+function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, useThing, wrapThing, creatureThing)
   local player = g_game.getLocalPlayer()
-  local keyboardModifiers = g_keyboard.getModifiers()
-  local isMouseBothPressed = g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton or g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton
-  if not ClientOptions.getOption('classicControl') then
-    if keyboardModifiers == KeyboardNoModifier and mouseButton == MouseRightButton and not g_mouse.isPressed(MouseLeftButton) then
-      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
-      return true
-    elseif modules.ka_game_tracker and attackCreature and g_keyboard.isShiftPressed() and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton or isMouseBothPressed) then
-      GameTracker.toggleTracking(attackCreature)
-    elseif creatureThing and getDistanceBetween(creatureThing:getPosition(), player:getPosition()) >= 1 and (creatureThing:getPosition().z == autoWalkPos.z and g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) or not creatureThing:isMonster() and isMouseBothPressed) then
-      g_game.follow(creatureThing)
-      return true
-    elseif attackCreature and getDistanceBetween(attackCreature:getPosition(), player:getPosition()) >= 1 and (g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) or attackCreature:isMonster() and isMouseBothPressed) then
-      g_game.attack(attackCreature)
-      return true
-    elseif creatureThing and getDistanceBetween(creatureThing:getPosition(), player:getPosition()) >= 1 and (creatureThing:getPosition().z == autoWalkPos.z and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) or creatureThing:isMonster() and isMouseBothPressed) then
+  if not player then
+    return false
+  end
+
+  local pos = player:getPosition()
+  if not pos then
+    return false
+  end
+
+  local keyCtrl      = g_keyboard.isCtrlPressed()
+  local keyShift     = g_keyboard.isShiftPressed()
+  local keyAlt       = g_keyboard.isAltPressed()
+  local keyMods      = g_keyboard.getModifiers()
+  local keyNoMods    = keyMods == KeyboardNoModifier
+  -- local keyCtrlOnly  = keyMods == KeyboardCtrlModifier
+  -- local keyShiftOnly = keyMods == KeyboardShiftModifier
+  local keyAltOnly   = keyMods == KeyboardAltModifier
+
+  local mouseLeft         = mouseButton == MouseLeftButton
+  local mouseRight        = mouseButton == MouseRightButton
+  -- local mouseMid          = mouseButton == MouseMidButton
+  local mouseLeftOnly     = mouseLeft and not g_mouse.isPressed(MouseRightButton)
+  local mouseRightOnly    = mouseRight and not g_mouse.isPressed(MouseLeftButton)
+  local mouseLeftOrRight  = mouseLeft or mouseRight
+  local mouseLeftAndRight = g_mouse.isPressed(MouseLeftButton) and mouseRight or g_mouse.isPressed(MouseRightButton) and mouseLeft
+
+  -- Near, but not on same player position
+  local creatureDistance = creatureThing and getDistanceBetween(creatureThing:getPosition(), pos) or 0
+  local isCreatureNear   = creatureThing and creatureThing:getPosition().z == autoWalkPos.z and creatureDistance > 0
+
+  local isMultiUse = useThing:isMultiUse()
+
+  -- Classic controls
+  if ClientOptions.getOption('classicControl') then
+
+    -- Main action
+    local mainShortcut = keyNoMods and mouseRightOnly or keyAltOnly and mouseLeftOnly
+
+    -- Attack 'creatureThing'
+    if creatureThing and mainShortcut and creatureThing ~= player and isCreatureNear then
       g_game.attack(creatureThing)
       return true
-    elseif useThing and ((keyboardModifiers == KeyboardCtrlModifier or keyboardModifiers == KeyboardAltModifier) and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) or isMouseBothPressed) then
-      if keyboardModifiers == KeyboardCtrlModifier or isMouseBothPressed then
-        if useThing:isContainer() then
-          g_game.open(useThing, useThing:getParentContainer() and not isMouseBothPressed and useThing:getParentContainer() or nil)
-          return true
-        elseif useThing:isMultiUse() then
-          GameInterface.startUseWith(useThing)
-          return true
-        end
-      end
+
+    -- Open container (same window, or in new window if no parent)
+    elseif useThing and mainShortcut and useThing:isContainer() then
+      g_game.open(useThing, useThing:getParentContainer() or nil)
+      return true
+
+    -- Use with
+    elseif useThing and mainShortcut and isMultiUse then
+      GameInterface.startUseWith(useThing)
+      return true
+
+    -- Force use: Open container in new window or use it
+    elseif useThing and mainShortcut and not isMultiUse then
       g_game.use(useThing)
       return true
-    elseif lookThing and keyboardModifiers == KeyboardShiftModifier and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
+
+    -- Greet NPC
+    elseif creatureThing and GameConsole and keyNoMods and mouseLeft and creatureThing:isNpc() and isCreatureNear and creatureDistance <= Npc.DefaultDistance then
+      GameConsole.greetNpc(creatureThing)
+      return true
+
+    -- Tracker
+    elseif creatureThing and GameTracker and keyShift and keyAlt and mouseLeftOrRight then
+      GameTracker.toggleTracking(creatureThing)
+      return true
+
+    -- Look
+    elseif lookThing and keyShift and mouseLeftOrRight then
       g_game.look(lookThing)
+      return true
+
+    -- Context menu
+    elseif useThing and keyCtrl and mouseLeftOrRight then
+      GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
       return true
     end
 
-  -- Classic control
+  -- Normal controls
   else
-    if useThing and (keyboardModifiers == KeyboardNoModifier or keyboardModifiers == KeyboardAltModifier) and mouseButton == MouseRightButton and not g_mouse.isPressed(MouseLeftButton) then
-      if keyboardModifiers == KeyboardNoModifier then
-        if attackCreature and attackCreature ~= player then
-          g_game.attack(attackCreature)
-          return true
-        elseif creatureThing and creatureThing ~= player and creatureThing:getPosition().z == autoWalkPos.z then
-          g_game.attack(creatureThing)
-          return true
-        elseif useThing:isContainer() then
-          g_game.open(useThing, useThing:getParentContainer() and useThing:getParentContainer() or nil)
-          return true
-        elseif useThing:isMultiUse() then
-          GameInterface.startUseWith(useThing)
-          return true
-        end
-      end
-      g_game.use(useThing)
-      return true
-    elseif lookThing and keyboardModifiers == KeyboardShiftModifier and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
-      g_game.look(lookThing)
-      return true
-    elseif lookThing and ((g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton) or (g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton)) then
-      g_game.look(lookThing)
-      return true
-    elseif useThing and keyboardModifiers == KeyboardCtrlModifier and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
+
+    -- Context menu
+    if keyNoMods and mouseRightOnly then
       GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
       return true
-    elseif modules.ka_game_tracker and attackCreature and g_keyboard.isShiftPressed() and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton or isMouseBothPressed) then
-      GameTracker.toggleTracking(attackCreature)
+
+    -- Tracker
+    elseif creatureThing and GameTracker and keyShift and keyAlt and mouseLeftOrRight then
+      GameTracker.toggleTracking(creatureThing)
       return true
-    elseif attackCreature and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
-      g_game.attack(attackCreature)
+
+    -- Greet NPC
+    elseif creatureThing and GameConsole and keyNoMods and mouseLeft and creatureThing:isNpc() and isCreatureNear and creatureDistance <= Npc.DefaultDistance then
+      GameConsole.greetNpc(creatureThing)
       return true
-    elseif creatureThing and creatureThing:getPosition().z == autoWalkPos.z and g_keyboard.isAltPressed() and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
+
+    -- Follow 'creatureThing'
+    elseif creatureThing and (keyCtrl and keyShift and mouseLeftOrRight or keyNoMods and mouseLeftAndRight and not creatureThing:isMonster()) and isCreatureNear then
+      g_game.follow(creatureThing)
+      return true
+
+    -- Attack 'creatureThing'
+    elseif creatureThing and (keyAlt and mouseLeftOrRight or keyNoMods and mouseLeftAndRight and creatureThing:isMonster()) and isCreatureNear then
       g_game.attack(creatureThing)
+      return true
+
+    -- Open container
+    -- Left or Right = same window, or in new window if no parent
+    -- Left and Right = new window
+    elseif useThing and (keyCtrl and mouseLeftOrRight or keyNoMods and mouseLeftAndRight) and useThing:isContainer() then
+      g_game.open(useThing, not mouseLeftAndRight and useThing:getParentContainer() or nil)
+      return true
+
+    -- Use with
+    elseif useThing and keyCtrl and mouseLeftOrRight and isMultiUse then
+      GameInterface.startUseWith(useThing)
+      return true
+
+    -- Force use: Open container in new window or use it
+    elseif useThing and ((keyCtrl or keyAlt) and mouseLeftOrRight or keyNoMods and mouseLeftAndRight) and not isMultiUse then
+      g_game.use(useThing)
+      return true
+
+    -- Look
+    elseif lookThing and keyShift and mouseLeftOrRight then
+      g_game.look(lookThing)
       return true
     end
   end
 
-
-  local player = g_game.getLocalPlayer()
   player:stopAutoWalk()
-
-  if autoWalkPos and keyboardModifiers == KeyboardNoModifier and mouseButton == MouseLeftButton then
+  if autoWalkPos and keyNoMods and mouseLeft then
     player:autoWalk(autoWalkPos)
     return true
   end
@@ -1371,25 +1429,26 @@ function GameInterface.moveStackableItem(item, toPos)
   if countWindow then
     return
   end
-  if g_keyboard.isCtrlPressed() then
-    g_game.move(item, toPos, item:getCount())
-    return
-  elseif g_keyboard.isShiftPressed() then
+  if g_keyboard.isAltPressed() then
     g_game.move(item, toPos, 1)
     return
   end
   local count = item:getCount()
+  if g_keyboard.isCtrlPressed() ~= ClientOptions.getOption('moveFullStack') then
+    g_game.move(item, toPos, count)
+    return
+  end
 
-  countWindow = g_ui.createWidget('CountWindow', rootWidget)
-  local itembox = countWindow:getChildById('item')
-  local scrollbar = countWindow:getChildById('countScrollBar')
+  countWindow     = g_ui.createWidget('CountWindow', rootWidget)
+  local itembox   = countWindow.item
+  local scrollbar = countWindow.countScrollBar
   itembox:setItemId(item:getId())
   itembox:setItemCount(count)
   scrollbar:setMaximum(count)
   scrollbar:setMinimum(1)
   scrollbar:setValue(count)
 
-  local spinbox = countWindow:getChildById('spinBox')
+  local spinbox = countWindow.spinBox
   spinbox:setMaximum(count)
   spinbox:setMinimum(0)
   spinbox:setValue(0)
@@ -1413,12 +1472,12 @@ function GameInterface.moveStackableItem(item, toPos)
   g_keyboard.bindKeyPress('Right', function() check() spinbox:up() end, spinbox)
   g_keyboard.bindKeyPress('Down', function() check() spinbox:down() end, spinbox)
   g_keyboard.bindKeyPress('Left', function() check() spinbox:down() end, spinbox)
-  g_keyboard.bindKeyPress('PageUp', function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Up', function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Right', function() check() spinbox:setValue(spinbox:getValue()+10) end, spinbox)
-  g_keyboard.bindKeyPress('PageDown', function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Down', function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Left', function() check() spinbox:setValue(spinbox:getValue()-10) end, spinbox)
+  g_keyboard.bindKeyPress('PageUp', function() check() spinbox:setValue(spinbox:getValue() + 10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Up', function() check() spinbox:setValue(spinbox:getValue() + 10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Right', function() check() spinbox:setValue(spinbox:getValue() + 10) end, spinbox)
+  g_keyboard.bindKeyPress('PageDown', function() check() spinbox:setValue(spinbox:getValue() - 10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Down', function() check() spinbox:setValue(spinbox:getValue() - 10) end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Left', function() check() spinbox:setValue(spinbox:getValue() - 10) end, spinbox)
 
   scrollbar.onValueChange = function(self, value)
     itembox:setItemCount(value)
@@ -1427,15 +1486,14 @@ function GameInterface.moveStackableItem(item, toPos)
     spinbox.onValueChange = spinBoxValueChange
   end
 
-  scrollbar.onClick =
-  function()
+  scrollbar.onClick = function()
     local mousePos = g_window.getMousePosition()
     local slider = scrollbar:getChildById('sliderButton')
     check()
     if slider:getPosition().x > mousePos.x then
-      spinbox:setValue(spinbox:getValue()-10)
+      spinbox:setValue(spinbox:getValue() - 10)
     elseif slider:getPosition().x < mousePos.x then
-      spinbox:setValue(spinbox:getValue()+10)
+      spinbox:setValue(spinbox:getValue() + 10)
     end
   end
 
@@ -1464,6 +1522,10 @@ end
 
 function GameInterface.getMapPanel()
   return gameMapPanel
+end
+
+function GameInterface.getGameScreenArea()
+  return gameScreenArea
 end
 
 function GameInterface.getRightFirstPanel()
@@ -1551,19 +1613,11 @@ function GameInterface.isViewModeFull()
 end
 
 function GameInterface.nextViewMode()
-  GameInterface.setupViewMode((currentViewMode + 1) % table.size(ViewModes))
-end
-
-function GameInterface.updateViewMode()
-  local viewMode    = ViewModes[0]
-  local viewModeStr = ClientOptions.getOption('viewModeComboBox')
-  for k = 0, #ViewModes do
-    if viewModeStr == ViewModes[k].name then
-      viewMode = ViewModes[k]
-      break
-    end
+  if g_app.isScaled() then
+    return
   end
-  GameInterface.setupViewMode(viewMode.id)
+
+  ClientOptions.setOption('viewMode', (currentViewMode + 1) % table.size(ViewModes))
 end
 
 function GameInterface.setupViewMode(mode)
@@ -1583,15 +1637,20 @@ function GameInterface.setupViewMode(mode)
     gameMapPanel:addAnchor(AnchorBottom, 'parent', AnchorBottom)
     gameMapPanel:addAnchor(AnchorLeft, 'gameLeftThirdPanel', AnchorOutsideRight)
     gameMapPanel:addAnchor(AnchorRight, 'gameRightThirdPanel', AnchorOutsideLeft)
+    gameBottomPanel:setOn(true)
+
   -- Crop Full
   elseif viewMode.id == 2 then
     gameMapPanel:fill('parent')
+    gameBottomPanel:setOn(true)
+
   -- Crop (1) or Normal (0)
   else
     gameMapPanel:addAnchor(AnchorTop, 'parent', AnchorTop)
     gameMapPanel:addAnchor(AnchorBottom, 'gameBottomPanel', AnchorOutsideTop)
     gameMapPanel:addAnchor(AnchorLeft, 'gameLeftThirdPanel', AnchorOutsideRight)
     gameMapPanel:addAnchor(AnchorRight, 'gameRightThirdPanel', AnchorOutsideLeft)
+    gameBottomPanel:setOn(false)
   end
 
   -- Range
@@ -1607,15 +1666,10 @@ function GameInterface.setupViewMode(mode)
   gameRightFirstPanel:setImageColor(panelsColor)
   gameRightSecondPanel:setImageColor(panelsColor)
   gameRightThirdPanel:setImageColor(panelsColor)
-  gameBottomPanel:setImageColor(bottomPanelColor)
-
-  gameBottomPanel:setOn(viewMode.isFull)
 
   -- Event
   gameMapPanel:changeViewMode(mode, currentViewMode)
   currentViewMode = mode
-
-  ClientOptions.setOption('viewModeComboBox', viewMode.name, false)
 end
 
 function GameInterface.onVocationChange(creature, vocation, oldVocation)
@@ -1785,5 +1839,101 @@ function GameInterface.onUpdateTrackColor(trackNode)
     if mapCreature then
       mapCreature:showTrackRing(trackNode.color)
     end
+  end
+end
+
+-- Cycle walk
+
+function GameInterface.initCycleWalkEvent()
+  GameInterface.stopCycleWalkEvent()
+
+  if not ClientOptions.getOption('cycleWalk') then
+    return
+  end
+
+  cycleWalkEvent = cycleEvent(function()
+    local player = g_game.getLocalPlayer()
+    if not player then
+      return
+    end
+
+    -- Happens when clicking outside of map boundaries
+    local autoWalkPos = gameMapPanel:getPosition(g_window.getMousePosition())
+    if not autoWalkPos or (autoWalkPos.x == 0 and autoWalkPos.y == 0 and autoWalkPos.z == 0) then
+      return
+    end
+
+    local keyMods = g_window.getKeyboardModifiers()
+    if keyMods ~= KeyboardNoModifier or not g_mouse.isPressed(MouseMidButton) then
+      GameInterface.stopCycleWalkEvent()
+      return
+    end
+
+    -- Auto walk pos is mouse pos behind walls
+    local playerPos = player:getPosition()
+    if autoWalkPos.z ~= playerPos.z then
+      local dz = autoWalkPos.z - playerPos.z
+      autoWalkPos.x = autoWalkPos.x + dz
+      autoWalkPos.y = autoWalkPos.y + dz
+      autoWalkPos.z = playerPos.z
+    end
+
+    player:autoWalk(autoWalkPos)
+
+  end, ClientOptions.getOption('cycleWalkDelay'))
+end
+
+function GameInterface.stopCycleWalkEvent()
+  if not cycleWalkEvent then
+    return
+  end
+
+  removeEvent(cycleWalkEvent)
+  cycleWalkEvent = nil
+end
+
+-- Widget lock
+
+function GameInterface.parseWidgetLock(protocolGame, opcode, msg)
+  local widgetId   = msg:getString()
+  local actionFlag = msg:getU8()
+
+  local widget = rootWidget:recursiveGetChildById(widgetId)
+  if not widget then
+    return
+  end
+
+  if actionFlag == WidgetLockActionFlag.Unlock then
+    widget:unlock()
+  elseif actionFlag == WidgetLockActionFlag.Lock then
+    widget:lock()
+  end
+end
+
+-- Static Circles
+function GameInterface.onAttackingCreatureChange(creature, prevCreature)
+  if prevCreature then
+    prevCreature:hideStaticCircle()
+  end
+
+  if creature then
+    creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().notHovered)
+  end
+end
+
+function GameInterface.onFollowingCreatureChange(creature, prevCreature)
+  if prevCreature then
+    prevCreature:hideStaticCircle()
+  end
+
+  if creature then
+    creature:showStaticCircle(UICreatureButton.getStaticCircleFollowColor().notHovered)
+  end
+end
+
+function GameInterface.onFightModeChange(fightMode)
+  local creature = g_game.getAttackingCreature()
+  if creature then
+    creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().notHovered)
   end
 end

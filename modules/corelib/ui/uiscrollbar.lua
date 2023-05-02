@@ -170,7 +170,7 @@ function UIScrollBar:onDecrement()
   local inverted = self.maximum == 0
   if g_keyboard.isCtrlPressed() then
     self:decrement(inverted and math.abs(self.minimum) or self.value)
-  elseif g_keyboard.isShiftPressed() then
+  elseif g_keyboard.isAltPressed() then
     self:decrement(math.max(math.floor((inverted and math.abs(self.minimum) or self.maximum) * 0.1), self.step))
   else
     self:decrement()
@@ -181,7 +181,7 @@ function UIScrollBar:onIncrement()
   local inverted = self.maximum == 0
   if g_keyboard.isCtrlPressed() then
     self:increment(inverted and math.abs(self.value) or self.maximum)
-  elseif g_keyboard.isShiftPressed() then
+  elseif g_keyboard.isAltPressed() then
     self:increment(math.max(math.floor((inverted and math.abs(self.minimum) or self.maximum) * 0.1), self.step))
   else
     self:increment()

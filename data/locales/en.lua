@@ -1,14 +1,14 @@
-locale = {
-  name = 'en',
-  charset = 'cp1252',
+local locale = {
+  id           = Locale.En,
+  name         = 'en',
   languageName = 'English',
+  -- charset      = 'cp1252',
 
-  formatNumbers = true,
-  decimalSeperator = '.',
+  formatNumbers      = true,
+  decimalSeperator   = '.',
   thousandsSeperator = ',',
 
-  -- translations are not needed because everything is already in english
-  translation = { }
+  translation = { }, -- Empty because everything is in english already
 }
 
 ClientLocales.installLocale(locale)

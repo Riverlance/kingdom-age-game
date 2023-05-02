@@ -77,31 +77,36 @@ function UIGameMap:onMousePress()
     self.allowNextRelease = true
   end
 
-  if g_mouse.isPressed(MouseMidButton) and g_keyboard.getModifiers() == KeyboardNoModifier then
-    self:initCycleWalkEvent()
+  -- Cycle walk
+  if g_keyboard.getModifiers() == KeyboardNoModifier and g_mouse.isPressed(MouseMidButton) then
+    GameInterface.initCycleWalkEvent()
   end
 end
 
+function UIGameMap:onMouseMove()
+  return false
+end
+
 function UIGameMap:onMouseRelease(mousePosition, mouseButton)
-  self:stopCycleWalkEvent()
+  GameInterface.stopCycleWalkEvent()
 
   if not self.allowNextRelease then
     return true
   end
 
+  -- Happens when clicking outside of map boundaries
   local autoWalkPos = self:getPosition(mousePosition)
-
-  -- happens when clicking outside of map boundaries
   if not autoWalkPos or (autoWalkPos.x == 0 and autoWalkPos.y == 0 and autoWalkPos.z == 0) then
     return false
   end
 
-  local localPlayerPos = g_game.getLocalPlayer():getPosition()
-  if autoWalkPos.z ~= localPlayerPos.z then
-    local dz = autoWalkPos.z - localPlayerPos.z
+  -- Auto walk pos is mouse pos behind walls
+  local playerPos = g_game.getLocalPlayer():getPosition()
+  if autoWalkPos.z ~= playerPos.z then
+    local dz = autoWalkPos.z - playerPos.z
     autoWalkPos.x = autoWalkPos.x + dz
     autoWalkPos.y = autoWalkPos.y + dz
-    autoWalkPos.z = localPlayerPos.z
+    autoWalkPos.z = playerPos.z
   end
 
   local lookThing
@@ -109,7 +114,6 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
   local creatureThing
   local multiUseThing
   local wrapThing
-  local attackCreature
 
   local tile = self:getTile(mousePosition)
   if tile then
@@ -119,12 +123,14 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
     wrapThing = tile:getTopWrapThing()
   end
 
-  local autoWalkTile = g_map.getTile(autoWalkPos)
-  if autoWalkTile then
-    attackCreature = autoWalkTile:getTopCreature()
+  if not creatureThing then
+    local autoWalkTile = g_map.getTile(autoWalkPos)
+    if autoWalkTile then
+      creatureThing = autoWalkTile:getTopCreature()
+    end
   end
 
-  local ret = GameInterface.processMouseAction(mousePosition, mouseButton, autoWalkPos, lookThing, useThing, creatureThing, attackCreature, wrapThing)
+  local ret = GameInterface.processMouseAction(mousePosition, mouseButton, autoWalkPos, lookThing, useThing, wrapThing, creatureThing)
   if ret then
     self.allowNextRelease = false
   end
@@ -151,6 +157,18 @@ function UIGameMap:onDoubleClick(mousePosition)
   end
 
   return ret
+end
+
+function UIGameMap:onMouseWheel(mousePos, direction)
+  if g_keyboard.getModifiers() == KeyboardCtrlModifier then
+    if direction == MouseWheelUp then
+      self:zoomIn()
+    elseif direction == MouseWheelDown then
+      self:zoomOut()
+    end
+  end
+  ClientOptions.setOption('gameScreenSize', self:getZoom(), false) -- See 'Ctrl+=' & 'Ctrl+-' interface.lua
+  return true
 end
 
 function UIGameMap:canAcceptDrop(widget, mousePos)

@@ -23,11 +23,16 @@ function UIItem:onDragLeave(droppedWidget, mousePos)
   g_mouseicon.hide()
   g_mouse.popCursor('target')
   self:setBorderWidth(0)
+  if self.hoveredWho then
+    self.hoveredWho:setBorderWidth(0)
+  end
   self.hoveredWho = nil
   return true
 end
 
 function UIItem:onDrop(widget, mousePos)
+  self:setBorderWidth(0)
+
   if not self:canAcceptDrop(widget, mousePos) then
     return false
   end
@@ -54,7 +59,6 @@ function UIItem:onDrop(widget, mousePos)
     g_game.move(item, toPos, 1)
   end
 
-  self:setBorderWidth(0)
   return true
 end
 
@@ -108,11 +112,11 @@ function UIItem:onMouseRelease(mousePosition, mouseButton)
      ((g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton) or
       (g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton)) then
     self.cancelNextRelease = true
-    if GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil, item) then
+    if GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, item) then
       return true
     end
     return false
-  elseif GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, nil, nil, item) then
+  elseif GameInterface.processMouseAction(mousePosition, mouseButton, nil, item, item, item) then
     return true
   elseif g_ui.isMouseGrabbed() then -- For double click of item 'use with' work
     return true

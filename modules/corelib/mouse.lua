@@ -29,6 +29,15 @@ function g_mouse.bindPressMove(widget, callback)
   })
 end
 
+function g_mouse.bindMove(widget, callback)
+  connect(widget, {
+    onMouseMove = function(widget, mousePos, mouseMoved)
+      callback(mousePos, mouseMoved)
+      return true
+    end
+  })
+end
+
 function g_mouse.bindPress(widget, callback, button)
   connect(widget, {
     onMousePress = function(widget, mousePos, mouseButton)
@@ -37,6 +46,15 @@ function g_mouse.bindPress(widget, callback, button)
         return true
       end
       return false
+    end
+  })
+end
+
+function g_mouse.bindOnDrop(widget, callback)
+  connect(widget, {
+    onDrop = function(widget, mousePos)
+      callback(mousePos, mouseButton)
+      return true
     end
   })
 end

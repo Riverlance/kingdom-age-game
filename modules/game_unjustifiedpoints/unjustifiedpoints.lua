@@ -80,10 +80,6 @@ function GameUnjustifiedPoints.init()
 
   g_keyboard.bindKeyDown(shortcut, GameUnjustifiedPoints.toggle)
 
-  if g_game.getFeature(GameUnjustifiedPointsPacket) then
-    GameInterface.setupMiniWindow(unjustifiedPointsWindow, unjustifiedPointsTopMenuButton)
-  end
-
   if g_game.isOnline() then
     GameUnjustifiedPoints.online()
   end
@@ -128,7 +124,7 @@ end
 
 function GameUnjustifiedPoints.online()
   if g_game.getFeature(GameUnjustifiedPointsPacket) then
-    GameInterface.setupMiniWindow(unjustifiedPointsWindow, unjustifiedPointsTopMenuButton)
+    unjustifiedPointsWindow:setup(unjustifiedPointsTopMenuButton)
     unjustifiedPointsTopMenuButton:show()
     g_game.sendUnjustifiedPointsBuffer()
 

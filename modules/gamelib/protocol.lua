@@ -35,20 +35,24 @@ ServerOpcodes = {
   -- Free                               41 to 49
   ServerOpcodeExtendedOpcode          = 50,
   ServerOpcodeChangeMapAwareRange     = 51,
-  ServerOpcodeCreatureColor           = 52,
-  ServerOpcodeCreatureNickname        = 53,
-  ServerOpcodePlayerLoginname         = 54,
-  ServerOpcodeCreatureSpecialIcon     = 55,
-  ServerOpcodeAttributesList          = 56,
-  ServerOpcodePowersList              = 57,
-  ServerOpcodeConditionsList          = 58,
-  ServerOpcodeCreatureJump            = 59,
-  ServerOpcodeEmote                   = 60,
-  ServerOpcodePartyList               = 61,
-  ServerOpcodePlayerLevel             = 62,
-  ServerOpcodeTracking                = 63,
-  ServerOpcodePowerCast               = 64,
-  -- Free                               65 to 95
+  ServerAttachedEffect                = 52, -- KA - Renamed from GameServerAttchedEffect
+  ServerDetachEffect                  = 53, -- KA - Renamed from GameServerDetachEffect
+  ServerCreatureShader                = 54, -- KA - Renamed from GameServerCreatureShader
+  ServerMapShader                     = 55, -- KA - Renamed from GameServerMapShader
+  -- Free                               56 to 82
+  ServerOpcodeCreatureColor           = 83,
+  ServerOpcodeCreatureNickname        = 84,
+  ServerOpcodePlayerLoginname         = 85,
+  ServerOpcodeCreatureSpecialIcon     = 86,
+  ServerOpcodeAttributesList          = 87,
+  ServerOpcodePowersList              = 88,
+  ServerOpcodeConditionsList          = 89,
+  ServerOpcodeCreatureJump            = 90,
+  ServerOpcodeEmote                   = 91,
+  ServerOpcodePartyList               = 92,
+  ServerOpcodePlayerLevel             = 93,
+  ServerOpcodeTracking                = 94,
+  ServerOpcodePowerCast               = 95,
   ServerOpcodeStaticText              = 96,
   ServerOpcodeUnknownCreature         = 97,
   ServerOpcodeOutdatedCreature        = 98,
@@ -105,7 +109,7 @@ ServerOpcodes = {
   ServerOpcodePremiumTrigger          = 158, -- 1038
   ServerOpcodePlayerDataBasic         = 159, -- 950
   ServerOpcodePlayerData              = 160,
-  ServerOpcodePlayerSkills            = 161,
+  -- Free                             = 161,
   ServerOpcodePlayerState             = 162,
   ServerOpcodeClearTarget             = 163,
   ServerOpcodeSpellDelay              = 164, -- 870
@@ -159,7 +163,7 @@ ServerOpcodes = {
 -- Server to Client - Extended Opcodes
 ServerExtOpcodes = {
   ServerExtOpcodeOtclientSignal    = 0, -- From Server ProtocolGame::onRecvFirstMessage
-  ServerExtOpcodeLocale            = 1,
+  -- Free                            1
   ServerExtOpcodeInstanceInfo      = 2,
   ServerExtOpcodeBlinkHit          = 3,
   ServerExtOpcodeLootWindow        = 4,
@@ -169,7 +173,9 @@ ServerExtOpcodes = {
   ServerExtOpcodeQuestLog          = 8,
   ServerExtOpcodeBugReport         = 9,
   ServerExtOpcodeRuleViolation     = 10,
-  -- Free                            11 to 65535
+  ServerExtOpcodeDailyReward       = 11,
+  ServerExtOpcodeWidgetLock        = 12,
+  -- Free                            13 to 65535
 }
 
 -- Client to Server - Opcodes
@@ -188,7 +194,7 @@ ClientOpcodes = {
   -- Free                                 31 to 49
   ClientOpcodeExtendedOpcode            = 50,
   ClientOpcodeChangeMapAwareRange       = 51,
-  ClientOpcodeNpcDialogWindows          = 52,
+  -- Free
   ClientOpcodeActionKey                 = 53,
   -- Free                                 54 to 60
   ClientOpcodePartyList                 = 61, -- Needed?
@@ -289,8 +295,8 @@ ClientOpcodes = {
 
 -- Client to Server - Extended Opcodes (onExtendedOpcode Player Event)
 ClientExtOpcodes = {
-  ClientExtOpcodeLocale            = 0,
-  -- Free                            1
+  -- Free                            0
+  ClientExtOpcodeLocale            = 1,
   ClientExtOpcodeAction            = 2,
   ClientExtOpcodeAttribute         = 3,
   ClientExtOpcodePowerList         = 4,
@@ -300,7 +306,9 @@ ClientExtOpcodes = {
   ClientExtOpcodeRuleViolation     = 8,
   ClientExtOpcodeConditionsList    = 9,
   ClientExtOpcodeEmote             = 10,
-  -- Free                            11 to 65535
+  ClientExtOpcodeDailyReward       = 11,
+  ClientExtOpcodeGreetNpc          = 12,
+  -- Free                            13 to 65535
 }
 
 ClientActions = {

@@ -256,11 +256,18 @@ function UIProgressBar:onStyleApply(name, node)
       self.imageSource = tostring(value)
     elseif name == 'image-border' then
       self.imageBorder = tonumber(value)
+
+    elseif name == 'phases' then
+      self:setPhases(tonumber(value))
+    elseif name == 'phases-border-width' then
+      self:setPhasesBorderWidth(tonumber(value))
+    elseif name == 'phases-border-color' then
+      self:setPhasesBorderColor(tostring(value))
     end
   end
 end
 
-function UIProgressBar:onGeometryChange(oldRect, newRect)
+function UIProgressBar:onGeometryChange(newRect, oldRect)
   if not self:isOn() then
     self:setHeight(0)
   end

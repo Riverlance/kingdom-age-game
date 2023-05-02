@@ -10,7 +10,7 @@ function translateKeyCombo(keyCombo)
   local keyComboDesc = ''
   for k,v in pairs(keyCombo) do
     local keyDesc = KeyCodeDescs[v]
-    if keyDesc == nil then
+    if not keyDesc then
       return nil
     end
 
@@ -29,8 +29,8 @@ local function getKeyCode(key)
 end
 
 local function retranslateKeyComboDesc(keyComboDesc)
-  if keyComboDesc == nil then
-    error('Unable to translate key combo \'' .. keyComboDesc .. '\'')
+  if not keyComboDesc then
+    error('Unable to translate key combo')
   end
 
   if type(keyComboDesc) == 'number' then
@@ -61,11 +61,11 @@ function backtranslateKeyComboDesc(keyComboDesc)
   local keyModifiers = KeyboardNoModifier
   for _, keyCode in ipairs(keyCombo) do
     if keyCode == KeyCtrl then
-      keyModifiers = bit32.bor(keyModifiers, KeyboardCtrlModifier)
+      keyModifiers = bit.bor(keyModifiers, KeyboardCtrlModifier)
     elseif keyCode == KeyShift then
-      keyModifiers = bit32.bor(keyModifiers, KeyboardShiftModifier)
+      keyModifiers = bit.bor(keyModifiers, KeyboardShiftModifier)
     elseif keyCode == KeyAlt then
-      keyModifiers = bit32.bor(keyModifiers, KeyboardAltModifier)
+      keyModifiers = bit.bor(keyModifiers, KeyboardAltModifier)
     else
       mainKeyCode = keyCode
     end
@@ -77,7 +77,7 @@ function determineKeyComboDesc(keyCode, keyboardModifiers)
   local keyCombo = { }
   if keyCode == KeyCtrl or keyCode == KeyShift or keyCode == KeyAlt then
     table.insert(keyCombo, keyCode)
-  elseif KeyCodeDescs[keyCode] ~= nil then
+  elseif KeyCodeDescs[keyCode] then
     if keyboardModifiers == KeyboardCtrlModifier then
       table.insert(keyCombo, KeyCtrl)
     elseif keyboardModifiers == KeyboardAltModifier then
@@ -104,7 +104,7 @@ function determineKeyComboDesc(keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyDown(widget, keyCode, keyboardModifiers)
-  if keyCode == KeyUnknown then
+  if keyCode == KeyUnknown or not widget.boundAloneKeyDownCombos or not widget.boundKeyDownCombos then
     return false
   end
 
@@ -115,7 +115,7 @@ local function onWidgetKeyDown(widget, keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyUp(widget, keyCode, keyboardModifiers)
-  if keyCode == KeyUnknown then
+  if keyCode == KeyUnknown or not widget.boundAloneKeyUpCombos or not widget.boundKeyUpCombos then
     return false
   end
 
@@ -126,7 +126,7 @@ local function onWidgetKeyUp(widget, keyCode, keyboardModifiers)
 end
 
 local function onWidgetKeyPress(widget, keyCode, keyboardModifiers, autoRepeatTicks)
-  if keyCode == KeyUnknown then
+  if keyCode == KeyUnknown or not widget.boundKeyPressCombos then
     return false
   end
 
@@ -142,7 +142,7 @@ local function connectKeyDownEvent(widget)
   connect(widget, {
     onKeyDown = onWidgetKeyDown
   })
-  widget.boundKeyDownCombos = { }
+  widget.boundKeyDownCombos      = { }
   widget.boundAloneKeyDownCombos = { }
 end
 
@@ -154,7 +154,7 @@ local function connectKeyUpEvent(widget)
   connect(widget, {
     onKeyUp = onWidgetKeyUp
   })
-  widget.boundKeyUpCombos = { }
+  widget.boundKeyUpCombos      = { }
   widget.boundAloneKeyUpCombos = { }
 end
 
@@ -173,30 +173,43 @@ end
 function g_keyboard.bindKeyDown(keyComboDesc, callback, widget, alone)
   widget = widget or rootWidget
   connectKeyDownEvent(widget)
+
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
   if alone then
-    connect(widget.boundAloneKeyDownCombos, keyComboDesc, callback)
+    if widget.boundAloneKeyDownCombos then
+      connect(widget.boundAloneKeyDownCombos, keyComboDesc, callback)
+    end
   else
-    connect(widget.boundKeyDownCombos, keyComboDesc, callback)
+    if widget.boundKeyDownCombos then
+      connect(widget.boundKeyDownCombos, keyComboDesc, callback)
+    end
   end
 end
 
 function g_keyboard.bindKeyUp(keyComboDesc, callback, widget, alone)
   widget = widget or rootWidget
   connectKeyUpEvent(widget)
+
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
   if alone then
-    connect(widget.boundAloneKeyUpCombos, keyComboDesc, callback)
+    if widget.boundAloneKeyUpCombos then
+      connect(widget.boundAloneKeyUpCombos, keyComboDesc, callback)
+    end
   else
-    connect(widget.boundKeyUpCombos, keyComboDesc, callback)
+    if widget.boundKeyUpCombos then
+      connect(widget.boundKeyUpCombos, keyComboDesc, callback)
+    end
   end
 end
 
 function g_keyboard.bindKeyPress(keyComboDesc, callback, widget)
   widget = widget or rootWidget
   connectKeyPressEvent(widget)
+
   local keyComboDesc = retranslateKeyComboDesc(keyComboDesc)
-  connect(widget.boundKeyPressCombos, keyComboDesc, callback)
+  if widget.boundKeyPressCombos then
+    connect(widget.boundKeyPressCombos, keyComboDesc, callback)
+  end
 end
 
 local function getUnbindArgs(arg1, arg2)
@@ -220,7 +233,7 @@ end
 
 function g_keyboard.unbindKeyDown(keyComboDesc, arg1, arg2)
   local callback, widget = getUnbindArgs(arg1, arg2)
-  if widget.boundKeyDownCombos == nil then
+  if not widget.boundAloneKeyDownCombos or not widget.boundKeyDownCombos then
     return
   end
 
@@ -232,7 +245,7 @@ end
 
 function g_keyboard.unbindKeyUp(keyComboDesc, arg1, arg2)
   local callback, widget = getUnbindArgs(arg1, arg2)
-  if widget.boundKeyUpCombos == nil then
+  if not widget.boundAloneKeyUpCombos or not widget.boundKeyUpCombos then
     return
   end
 
@@ -244,7 +257,7 @@ end
 
 function g_keyboard.unbindKeyPress(keyComboDesc, arg1, arg2)
   local callback, widget = getUnbindArgs(arg1, arg2)
-  if widget.boundKeyPressCombos == nil then
+  if not widget.boundKeyPressCombos then
     return
   end
 
@@ -290,13 +303,22 @@ function g_keyboard.isInUse()
 end
 
 function g_keyboard.isCtrlPressed()
-  return bit32.band(g_window.getKeyboardModifiers(), KeyboardCtrlModifier) ~= 0
-end
-
-function g_keyboard.isAltPressed()
-  return bit32.band(g_window.getKeyboardModifiers(), KeyboardAltModifier) ~= 0
+  if g_platform.isMobile() then
+    return false
+  end
+  return bit.band(g_window.getKeyboardModifiers(), KeyboardCtrlModifier) ~= 0
 end
 
 function g_keyboard.isShiftPressed()
-  return bit32.band(g_window.getKeyboardModifiers(), KeyboardShiftModifier) ~= 0
+  if g_platform.isMobile() then
+    return false
+  end
+  return bit.band(g_window.getKeyboardModifiers(), KeyboardShiftModifier) ~= 0
+end
+
+function g_keyboard.isAltPressed()
+  if g_platform.isMobile() then
+    return false
+  end
+  return bit.band(g_window.getKeyboardModifiers(), KeyboardAltModifier) ~= 0
 end

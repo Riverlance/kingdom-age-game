@@ -1,17 +1,19 @@
-Bit = { }
+if not bit then
+  bit = { }
+end
 
-function Bit.bit(p)
+function bit.bit(p)
   return 2 ^ p
 end
 
-function Bit.hasBit(x, p)
+function bit.hasBit(x, p)
   return x % (p + p) >= p
 end
 
-function Bit.setbit(x, p)
-  return Bit.hasBit(x, p) and x or x + p
+function bit.setbit(x, p)
+  return bit.hasBit(x, p) and x or x + p
 end
 
-function Bit.clearbit(x, p)
-  return Bit.hasBit(x, p) and x - p or x
+function bit.clearbit(x, p)
+  return bit.hasBit(x, p) and x - p or x
 end

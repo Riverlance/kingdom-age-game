@@ -137,7 +137,7 @@ Panel
     margin-right: 10
 
   ComboBox
-    id: leftStickerComboBox
+    id: leftSticker
     anchors.top: prev.outsideBottom
     anchors.left: parent.left
     anchors.right: prev.right
@@ -165,7 +165,7 @@ Panel
     margin-left: 10
 
   ComboBox
-    id: rightStickerComboBox
+    id: rightSticker
     anchors.top: prev.outsideBottom
     anchors.left: prev.left
     anchors.right: parent.right

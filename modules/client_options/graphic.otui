@@ -1,45 +1,13 @@
 Panel
 
   OptionLabel
-    !text: 'Graphic engine'
+    !text: tr('Game framerate limit')
 
-  FirstOptionButtonBox
-    id: opengl1
-    text: OpenGL 1
-
-  OptionButtonBox
-    id: opengl2
-    text: OpenGL 2
-
-  OptionButtonBox
-    id: directx9
-    text: DirectX 9
-
-  OptionLabel
-    !text: 'Shader filter'
-    anchors.right: parent.horizontalCenter
-    margin-right: 10
-
-  ComboBox
-    id: shaderFilterComboBox
-    anchors.top: prev.outsideBottom
-    anchors.left: parent.left
-    anchors.right: prev.right
-    margin-top: 2
-
-  OptionLabel
-    !text: 'View mode'
-    $!first:
-      anchors.top: opengl1.outsideBottom
-    anchors.left: parent.horizontalCenter
-    margin-left: 10
-
-  ComboBox
-    id: viewModeComboBox
-    anchors.top: prev.outsideBottom
-    anchors.left: prev.left
-    anchors.right: parent.right
-    margin-top: 2
+  OptionScrollbar
+    id: backgroundFrameRate
+    minimum: 10
+    maximum: 201
+    symbol: FPS
 
   OptionLabel
     id: gameScreenSizeLabel
@@ -52,15 +20,47 @@ Panel
     maximum: 19
     symbol: SQMs
 
+  OptionLabel
+    !text: 'Shader filter'
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  ComboBox
+    id: shaderFilter
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: prev.right
+    margin-top: 2
+
+  OptionLabel
+    !text: 'View mode'
+    $!first:
+      anchors.top: gameScreenSize.outsideBottom
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  ComboBox
+    id: viewMode
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    anchors.right: parent.right
+    margin-top: 2
+
   OptionHorizontalSeparator
 
   OptionCheckBox
-    id: dontStretchShrink
-    !text: tr('Lock game screen area')
-    !tooltip: tr('You will not be able to stretch or shrink game screen. If enabled, shader filters will make no difference.\n\nNote:\nThe game screen viewport should be on minimum and hotkeybars should be disabled for this to work.')
+    id: optimizeFps
+    !text: tr('Optimize FPS')
+    !tooltip: tr('Tries to optimize when FPS (Frames Per Second) is below than 60.\nVisual issues may occur!')
     !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10
+
+  OptionCheckBox
+    id: vsync
+    !text: tr('Enable Vsync (Vertical Synchronization)')
+    !tooltip: tr('Limits FPS (Frames Per Second) based on monitor refresh rate for avoid CPU unneeded usage.')
+    !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: fullscreen
@@ -69,29 +69,24 @@ Panel
     !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
-    id: vsync
-    !text: tr('Enable Vsync (Vertical Synchronization)')
-    !tooltip: tr('Limits FPS (Frames Per Second) at 60 for avoid CPU unneeded usage.')
-    !tooltip-type: TooltipType.textBlock
-
-  OptionHorizontalSeparator
-
-  OptionLabel
-    id: backgroundFrameRateLabel
-    !text: tr('Game framerate limit')
-
-  OptionScrollbar
-    id: backgroundFrameRate
-    minimum: 10
-    maximum: 201
-    symbol: FPS
+    id: showMouseItemIcon
+    !text: tr('Show mouse item icon')
+    !tooltip: tr('Shows the dragged item when drag and drop items.')
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
 
   OptionLabel
-    id: foregroundFrameRateLabel
-    !text: tr('Interface framerate limit')
+    id: mouseItemIconOpacityLabel
+    !text: tr('Opacity')
+    $!first:
+      anchors.top: prev.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
 
   OptionScrollbar
-    id: foregroundFrameRate
-    minimum: 1
-    maximum: 61
-    symbol: FPS
+    id: mouseItemIconOpacity
+    minimum: 0
+    maximum: 100
+    symbol: %
+    anchors.left: prev.left

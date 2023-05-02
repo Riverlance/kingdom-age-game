@@ -59,7 +59,7 @@ function GameCharacter.init()
   connect(LocalPlayer, {
     onNicknameChange = GameCharacter.onNicknameChange,
 
-    onChangeOutfit = GameCharacter.onChangeOutfit,
+    onOutfitChange = GameCharacter.onOutfitChange,
 
     -- Health info
     onHealthChange       = GameCharacter.onHealthChange,
@@ -71,9 +71,6 @@ function GameCharacter.init()
     -- Inventory
     onInventoryChange = GameCharacter.onInventoryChange,
     onBlessingsChange = GameCharacter.onBlessingsChange,
-
-    -- Combat controls
-    onOutfitChange = GameCharacter.onOutfitChange
   })
 
   connect(g_game, {
@@ -166,8 +163,6 @@ function GameCharacter.init()
     onSelectionChange = GameCharacter.onSetFightMode
   })
 
-  GameInterface.setupMiniWindow(inventoryWindow, inventoryTopMenuButton)
-
   if g_game.isOnline() then
     GameCharacter.online()
   end
@@ -192,7 +187,7 @@ function GameCharacter.terminate()
   disconnect(LocalPlayer, {
     onNicknameChange = GameCharacter.onNicknameChange,
 
-    onChangeOutfit = GameCharacter.onChangeOutfit,
+    onOutfitChange = GameCharacter.onOutfitChange,
 
     -- Health info
     onHealthChange       = GameCharacter.onHealthChange,
@@ -204,9 +199,6 @@ function GameCharacter.terminate()
     -- Inventory
     onInventoryChange = GameCharacter.onInventoryChange,
     onBlessingsChange = GameCharacter.onBlessingsChange,
-
-    -- Combat controls
-    onOutfitChange = GameCharacter.onOutfitChange
   })
 
   disconnect(g_game, {
@@ -354,14 +346,6 @@ function GameCharacter.onSetSafeFight(self, checked)
   g_game.setSafeFight(false, not checked)
 end
 
-function GameCharacter.onOutfitChange(localPlayer, outfit, oldOutfit)
-  if outfit.mount == oldOutfit.mount then
-    return
-  end
-
-  mountButton:setChecked(outfit.mount ~= nil and outfit.mount > 0)
-end
-
 
 
 
@@ -397,8 +381,8 @@ function GameCharacter.onInventoryChange(player, slot, item, oldItem)
 end
 
 function GameCharacter.onBlessingsChange(player, blessings, oldBlessings)
-  local hasAdventurerBlessing = Bit.hasBit(blessings, Blessings.Adventurer)
-  if hasAdventurerBlessing ~= Bit.hasBit(oldBlessings, Blessings.Adventurer) then
+  local hasAdventurerBlessing = bit.hasBit(blessings, Blessings.Adventurer)
+  if hasAdventurerBlessing ~= bit.hasBit(oldBlessings, Blessings.Adventurer) then
     GameCharacter.toggleAdventurerStyle(hasAdventurerBlessing)
   end
 end
@@ -407,21 +391,25 @@ end
 
 
 
-function GameCharacter.updateOutfitCreatureBox(creature)
-  outfitCreatureBox:setCreature(creature)
-end
-
 function GameCharacter.onNicknameChange(creature, nickname)
   local player = g_game.getLocalPlayer()
-  if creature ~= player then
+  if not player or creature ~= player then
     return
   end
 
   inventoryWindow:setText(nickname ~= '' and nickname or player:getName())
 end
 
-function GameCharacter.onChangeOutfit(outfit)
-  GameCharacter.updateOutfitCreatureBox(g_game.getLocalPlayer())
+function GameCharacter.updateOutfitCreatureBox(outfit)
+  outfitCreatureBox:setOutfit(outfit)
+end
+
+function GameCharacter.onOutfitChange(localPlayer, outfit, oldOutfit)
+  GameCharacter.updateOutfitCreatureBox(outfit)
+
+  if outfit.mount ~= oldOutfit.mount then
+    mountButton:setChecked(outfit.mount ~= nil and outfit.mount > 0)
+  end
 end
 
 
@@ -470,7 +458,7 @@ end
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   experienceBar:setPercent(levelPercent)
   experienceBarValueLabel:setText(levelPercent .. '%')
-  experienceBarValueLabel:setTooltip(string.format('%s.\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
+  experienceBarValueLabel:setTooltip(string.format('%s\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
 end
 
 function GameCharacter.onFreeCapacityChange(player, freeCapacity)
@@ -482,11 +470,14 @@ end
 
 
 function GameCharacter.online()
+  local player = g_game.getLocalPlayer()
+  if not player then
+    return
+  end
+
   loginTime = g_clock.millis() + 50
 
-  GameInterface.setupMiniWindow(inventoryWindow, inventoryTopMenuButton)
-
-  local player = g_game.getLocalPlayer()
+  inventoryWindow:setup(inventoryTopMenuButton)
 
   connect(player, {
     onVocationChange = GameCharacter.onVocationChange,
@@ -494,7 +485,12 @@ function GameCharacter.online()
 
   inventoryWindow:setText(player:getName())
 
-  GameCharacter.updateOutfitCreatureBox(player)
+  addEvent(function()
+    local _player = g_game.getLocalPlayer()
+    if _player then
+      GameCharacter.updateOutfitCreatureBox(_player:getOutfit())
+    end
+  end)
 
   -- Inventory
 
@@ -505,7 +501,7 @@ function GameCharacter.online()
       GameCharacter.onInventoryChange(player, i, nil)
     end
   end
-  GameCharacter.toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
+  GameCharacter.toggleAdventurerStyle(player and bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
 
   -- Combat controls
 
@@ -552,9 +548,10 @@ function GameCharacter.offline()
     fightMode = g_game.getFightMode()
   }
 
-  if g_game.getFeature(GamePVPMode) then
-    lastCombatControls.pvpMode = g_game.getPVPMode()
-  end
+  -- KA - Removed GamePVPMode
+  -- if g_game.getFeature(GamePVPMode) then
+  --   lastCombatControls.pvpMode = g_game.getPVPMode()
+  -- end
 
   -- Save last combat control settings
   settings:setNode('lastCombatControls', lastCombatControls)

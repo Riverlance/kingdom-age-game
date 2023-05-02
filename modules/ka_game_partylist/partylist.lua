@@ -213,21 +213,18 @@ function GamePartyList.init()
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePartyList, GamePartyList.parsePartyList)
 
   connect(Creature, {
-    -- onShieldChange = GamePartyList.onShieldChange,
-    -- onSkullChange  = GamePartyList.onSkullChange,
-    onWalk         = GamePartyList.onWalk,
+    onWalk = GamePartyList.onWalk,
   })
 
   connect(g_game, {
     onGameStart = GamePartyList.online,
     onGameEnd   = GamePartyList.offline,
     onPingBack  = GamePartyList.updateLocalPlayerPing,
-    -- onFollowingCreatureChange = GamePartyList.onFollowingCreatureChange,
   })
 
-  GamePartyList.refreshList()
-
-  GameInterface.setupMiniWindow(partyWindow, partyTopMenuButton)
+  if g_game.isOnline() then
+    GamePartyList.online()
+  end
 end
 
 function GamePartyList.terminate()
@@ -237,13 +234,10 @@ function GamePartyList.terminate()
     onGameStart = GamePartyList.online,
     onGameEnd   = GamePartyList.offline,
     onPingBack  = GamePartyList.updateLocalPlayerPing,
-    -- onFollowingCreatureChange = GamePartyList.onFollowingCreatureChange,
   })
 
   disconnect(Creature, {
-    -- onShieldChange = GamePartyList.onShieldChange,
-    -- onSkullChange  = GamePartyList.onSkullChange,
-    onWalk         = GamePartyList.onWalk,
+    onWalk = GamePartyList.onWalk,
   })
 
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePartyList)
@@ -293,7 +287,8 @@ function GamePartyList.terminate()
 end
 
 function GamePartyList.online()
-  GameInterface.setupMiniWindow(partyWindow, partyTopMenuButton)
+  partyWindow:setup(partyTopMenuButton)
+  GamePartyList.refreshList()
 end
 
 function GamePartyList.offline()
@@ -397,10 +392,6 @@ function GamePartyList.add(data, isInvitee)
       widget:setVisible(false)
     end
   end
-
-  -- if button.creature == g_game.getFollowingCreature() then
-  --   GamePartyList.onFollowingCreatureChange(button)
-  -- end
 
   -- Add to invitee list
   if isInvitee then
@@ -586,7 +577,7 @@ function GamePartyList.onButtonMouseRelease(self, mousePosition, mouseButton)
   return false
 end
 
--- function GamePartyList.updateButtonStaticSquare() -- Based on GameBattleList.updateStaticSquare -- Needed?
+-- function GamePartyList.updateButtonStaticCircle() -- Based on GameBattleList.updateStaticCircle -- Needed?
 
 
 
@@ -901,17 +892,6 @@ end
 
 -- Events
 
--- function GamePartyList.onFollowingCreatureChange(data)
---   local cid      = getCid(data)
---   local creature = cid and g_map.getCreatureById(cid) or nil
---   local button   = creature and partyList[cid] or lastButtonSwitched
-
---   if button then
---     button.isFollowed = creature and true or false
---     GamePartyList.updateButton(button)
---   end
--- end
-
 function GamePartyList.tryUpdateMemberList(button, pos, oldPos)
   local posCheck = g_clock.millis()
   local diffTime = posCheck - lastUpdateCheck
@@ -980,7 +960,7 @@ local function getPartyButton(msg, button, isInvitee)
   end
 
   if not isInvitee then
-    button.position       = protocolGame:getPosition(msg)
+    button.position       = msg:getPosition()
     button.healthPercent  = msg:getU8()
     button.skullId        = msg:getU8()
 
@@ -1119,7 +1099,7 @@ serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATURESPOSITION] = function(msg)
 
   for i = 1, membersCount do
     local memberCid      = msg:getU32()
-    local memberPosition = protocolGame:getPosition(msg)
+    local memberPosition = msg:getPosition()
 
     local memberButton = partyList[memberCid]
 

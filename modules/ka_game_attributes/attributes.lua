@@ -159,8 +159,6 @@ function GameAttributes.init()
     onPlayerAttributes = GameAttributes.onPlayerAttributes
   })
 
-  GameInterface.setupMiniWindow(attributeWindow, attributeTopMenuButton)
-
   if g_game.isOnline() then
     GameAttributes.online()
   end
@@ -229,7 +227,7 @@ function GameAttributes.online()
     onVocationChange = GameAttributes.onVocationChange,
   })
 
-  GameInterface.setupMiniWindow(attributeWindow, attributeTopMenuButton)
+  attributeWindow:setup(attributeTopMenuButton)
 
   GameAttributes.clearWindow()
 
@@ -271,15 +269,15 @@ function GameAttributes.clearWindow()
   availablePointsLabel:setTooltip(string.format('Used points with cost: %d\nUsed points without cost: %d', 0, 0))
   pointsCostLabel:setTooltip(string.format('Points to increase cost: %d', 0))
 
-  attackAttributeActLabel:setColor('white')
-  defenseAttributeActLabel:setColor('white')
-  magicDefenseAttributeActLabel:setColor('white')
-  vitalityAttributeActLabel:setColor('white')
-  willPowerAttributeActLabel:setColor('white')
-  agilityAttributeActLabel:setColor('white')
-  dodgeAttributeActLabel:setColor('white')
-  walkingAttributeActLabel:setColor('white')
-  luckAttributeActLabel:setColor('white')
+  attackAttributeActLabel:setColor('#dfdfdf')
+  defenseAttributeActLabel:setColor('#dfdfdf')
+  magicDefenseAttributeActLabel:setColor('#dfdfdf')
+  vitalityAttributeActLabel:setColor('#dfdfdf')
+  willPowerAttributeActLabel:setColor('#dfdfdf')
+  agilityAttributeActLabel:setColor('#dfdfdf')
+  dodgeAttributeActLabel:setColor('#dfdfdf')
+  walkingAttributeActLabel:setColor('#dfdfdf')
+  luckAttributeActLabel:setColor('#dfdfdf')
 end
 
 function GameAttributes.onPlayerAttributes(tooltips, attributes, availablePoints, usedPoints, distributionPoints, pointsCost, pointsToCostIncrease)
@@ -299,7 +297,7 @@ function GameAttributes.onPlayerAttributes(tooltips, attributes, availablePoints
 
       attributeActLabel[id]:setText(string.format('%0.02f', attributeActLabel[id].total))
       GameAttributes.updateActLabelTooltip(id)
-      attributeActLabel[id]:setColor(attributeActLabel[id].buffPoints > 0 and 'green' or attributeActLabel[id].buffPoints < 0 and 'red' or 'white')
+      attributeActLabel[id]:setColor(attributeActLabel[id].buffPoints > 0 and 'green' or attributeActLabel[id].buffPoints < 0 and 'red' or '#dfdfdf')
     end
 
     if attributeLabel[id] then

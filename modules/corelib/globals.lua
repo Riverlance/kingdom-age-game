@@ -62,4 +62,8 @@ function isWidget(widget)
   return type(widget) == 'userdata' and type(widget.getStyleName) == 'function'
 end
 
+if not json then
+  json = require 'json'
+end
+
 -- @}

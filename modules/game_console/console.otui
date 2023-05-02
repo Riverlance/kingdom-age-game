@@ -196,11 +196,6 @@ Panel
     anchors.right: parent.right
     margin-top: 1
     margin-bottom: 1
-    background: #00060abb
-    border-width-top: 1
-    border-color-top: #101010
-    border-width-bottom: 1
-    border-color-bottom: #101010
     focusable: false
 
     // Archors are updated at modules.ka_game_emotes

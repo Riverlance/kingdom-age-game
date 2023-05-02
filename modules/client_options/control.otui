@@ -15,14 +15,6 @@ Panel
   OptionHorizontalSeparator
 
   OptionCheckBox
-    id: smoothWalk
-    !text: tr('Enable smooth walking')
-    !tooltip: tr('Schedule next walk before finishing previous step.')
-    !tooltip-type: TooltipType.textBlock
-    $!first:
-      margin-top: 10
-
-  OptionCheckBox
     id: smartWalk
     !text: tr('Enable smart walking')
     !tooltip: tr('Detect when to use diagonal step based on the keys you are pressing.')
@@ -43,24 +35,6 @@ Panel
   OptionHorizontalSeparator
 
   OptionLabel
-    !text: tr('Walking keys sensitivity')
-
-  OptionScrollbar
-    id: walkingSensitivityScrollBar
-    minimum: 1
-    maximum: 100
-    symbol: %
-
-  OptionLabel
-    !text: tr('Walking keys auto-repeat delay')
-
-  OptionScrollbar
-    id: walkingRepeatDelayScrollBar
-    minimum: 10
-    maximum: 200
-    symbol: ms
-
-  OptionLabel
     !text: tr('Auto bouncing keys interval')
 
   OptionScrollbar
@@ -73,8 +47,8 @@ Panel
     !text: tr('Cycle walk interval')
 
   OptionScrollbar
-    id: cycleWalkDelayScrollBar
-    minimum: 100
+    id: cycleWalkDelay
+    minimum: 50
     maximum: 1000
     symbol: ms
 

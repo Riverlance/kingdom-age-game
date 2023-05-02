@@ -1,7 +1,7 @@
 Panel
   id: background
   image-source: /images/ui/enter_game/client_background
-  image-smooth: true
+  image-smooth: false
   image-fixed-ratio: true
   anchors.top: topMenu.bottom
   anchors.left: parent.left
@@ -21,3 +21,9 @@ Panel
     padding: 2
     color: #ffffff
     font: verdana-11px-monochrome
+
+  //UIParticles
+    //id: particles
+    //effect: background-effect
+    //anchors.fill: parent
+    //phantom: true

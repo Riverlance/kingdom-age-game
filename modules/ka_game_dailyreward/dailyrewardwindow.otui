@@ -1,0 +1,229 @@
+RewardItem < Item
+  image-source: /images/ui/slot/item
+  anchors.top: prev.top
+  anchors.left: parent.left
+
+  UIWidget
+    id: blueLabel
+    anchors.top: parent.top
+    anchors.right: parent.right
+    image-source: /images/ui/slot/blue_label_ne
+    opacity: 0.5
+
+  Label
+    id: blueLabelText
+    anchors.top: prev.top
+    anchors.right: prev.right
+    margin-right: 3
+
+  $on:
+    image-source: /images/ui/slot/item_blessed
+
+RewardItemFrame < UIWidget
+  anchors.fill: prev
+  focusable: false
+
+RewardNextButton < NextButton
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.left: parent.left
+
+RewardProgressBar < ProgressBar
+  anchors.top: prev.outsideBottom
+  anchors.left: parent.left
+  anchors.right: parent.right
+  phases: 7
+  background-color: darkGreen
+  phases-border-color: #ffffff88
+
+  $first:
+    anchors.top: parent.top
+
+RewardIconCheck < UIWidget
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.left: parent.left
+  image-source: none
+  phantom: true
+  // Needed to update margin correctly
+  on: true
+
+  $on:
+    image-source: /images/ui/icon_check
+
+RewardIconLock < UIWidget
+  anchors.verticalCenter: prev.verticalCenter
+  anchors.left: parent.left
+  image-source: none
+  phantom: true
+  // Needed to update margin correctly
+  on: true
+
+  $on:
+    image-source: /images/ui/icon_lock
+
+DailyRewardWindow < MainWindow
+  id: dailyRewardWindow
+  !text: tr('Daily Rewards')
+  size: 500 280
+
+  @onEscape: |
+    GameDailyReward.hide()
+
+  Label
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    !text: tr('Rewards to acquire')
+
+  RewardItem
+    id: rewardItem1
+    anchors.top: prev.outsideBottom
+    margin-top: 10
+
+  RewardItemFrame
+    id: rewardItem1Frame
+
+  RewardItem
+    id: rewardItem2
+
+  RewardItemFrame
+    id: rewardItem2Frame
+
+  RewardItem
+    id: rewardItem3
+
+  RewardItemFrame
+    id: rewardItem3Frame
+
+  RewardItem
+    id: rewardItem4
+
+  RewardItemFrame
+    id: rewardItem4Frame
+
+  RewardItem
+    id: rewardItem5
+
+  RewardItemFrame
+    id: rewardItem5Frame
+
+  RewardItem
+    id: rewardItem6
+
+  RewardItemFrame
+    id: rewardItem6Frame
+
+  RewardItem
+    id: rewardItem7
+
+  RewardItemFrame
+    id: rewardItem7Frame
+
+  RewardNextButton
+    id: nextWidget1
+
+  RewardNextButton
+    id: nextWidget2
+
+  RewardNextButton
+    id: nextWidget3
+
+  RewardNextButton
+    id: nextWidget4
+
+  RewardNextButton
+    id: nextWidget5
+
+  RewardNextButton
+    id: nextWidget6
+
+  RewardProgressBar
+    id: acquirableRewardsBar
+    anchors.top: rewardItem7.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 4
+
+  RewardIconCheck
+    id: rewardIconCheck1
+
+  RewardIconCheck
+    id: rewardIconCheck2
+
+  RewardIconCheck
+    id: rewardIconCheck3
+
+  RewardIconCheck
+    id: rewardIconCheck4
+
+  RewardIconCheck
+    id: rewardIconCheck5
+
+  RewardIconCheck
+    id: rewardIconCheck6
+
+  RewardIconCheck
+    id: rewardIconCheck7
+
+  RewardIconLock
+    id: rewardIconLock2
+
+  RewardIconLock
+    id: rewardIconLock3
+
+  RewardIconLock
+    id: rewardIconLock4
+
+  RewardIconLock
+    id: rewardIconLock5
+
+  RewardIconLock
+    id: rewardIconLock6
+
+  RewardIconLock
+    id: rewardIconLock7
+
+  Label
+    id: timeLabel
+    anchors.top: acquirableRewardsBar.outsideBottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 10
+
+  Button
+    id: acquireButton
+    !text: tr('Acquire')
+    anchors.top: prev.outsideBottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 10
+    focusable: false
+
+  HorizontalSeparator
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+
+  Label
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+    !text: tr('Week Bonus')
+
+  RewardProgressBar
+    id: bonusBar
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+    background-color: #ddb31c
+    border-width: 1
+    border-color: #ddb31c
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    width: 80
+    @onClick: |
+      GameDailyReward.hide()

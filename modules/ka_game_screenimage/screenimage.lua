@@ -4,43 +4,6 @@ _G.GameScreenImage = { }
 
 screenImages = { }
 
-local SCREENPOS_CENTER = 1
-local SCREENPOS_TOP = 2
-local SCREENPOS_TOPRIGHT = 3
-local SCREENPOS_RIGHT = 4
-local SCREENPOS_BOTTOMRIGHT = 5
-local SCREENPOS_BOTTOM = 6
-local SCREENPOS_BOTTOMLEFT = 7
-local SCREENPOS_LEFT = 8
-local SCREENPOS_TOPLEFT = 9
-
-local function removeSingleImage(index, fadeOut)
-  local image = screenImages[index]
-  if image --[[and image.path == path]] and not image.destroyEvent then
-    if image.fadeEvent then
-      g_effects.cancelFade(image)
-    end
-
-    if fadeOut == 0 then
-      image:destroy()
-      table.remove(screenImages, index)
-    else
-      g_effects.fadeOut(image, fadeOut)
-      image.destroyEvent = scheduleEvent(function()
-        if image.fadeEvent then
-          g_effects.cancelFade(image)
-        end
-        for i = 1, #screenImages do
-          if image == screenImages[i] then
-            table.remove(screenImages, i)
-          end
-        end
-        image:destroy()
-      end, fadeOut)
-    end
-  end
-end
-
 
 
 function GameScreenImage.init()
@@ -58,7 +21,8 @@ function GameScreenImage.init()
 
   connect(GameInterface.getMapPanel(), {
     onGeometryChange = GameScreenImage.onGeometryChange,
-    onViewModeChange = GameScreenImage.onViewModeChange
+    onViewModeChange = GameScreenImage.onViewModeChange,
+    onZoomChange     = GameScreenImage.onZoomChange,
   })
 end
 
@@ -74,235 +38,374 @@ function GameScreenImage.terminate()
 
   disconnect(GameInterface.getMapPanel(), {
     onGeometryChange = GameScreenImage.onGeometryChange,
-    onViewModeChange = GameScreenImage.onViewModeChange
+    onViewModeChange = GameScreenImage.onViewModeChange,
+    onZoomChange     = GameScreenImage.onZoomChange,
   })
 
   _G.GameScreenImage = nil
-end
-
-function GameScreenImage.onGeometryChange(self)
-  GameScreenImage.adjustPositions()
-end
-
-function GameScreenImage.onViewModeChange(mapWidget, newMode, oldMode)
-  GameScreenImage.adjustPositions()
-end
-
-function GameScreenImage.adjustPosition(image)
-  local mapWidget = GameInterface.getMapPanel()
-
-  addEvent(function()
-    local marginVertical = math.floor((mapWidget:getHeight() - mapWidget:getPaddingTop() - mapWidget:getPaddingBottom() - mapWidget:getMapHeight()) / 2)
-    local marginHorizontal = math.floor((mapWidget:getWidth() - mapWidget:getPaddingLeft() - mapWidget:getPaddingRight() - mapWidget:getMapWidth()) / 2)
-
-    if image.stretchHorizontal then
-      image:setMarginLeft(marginHorizontal)
-      image:setMarginRight(marginHorizontal)
-    else
-      if image.position == SCREENPOS_TOPLEFT or image.position == SCREENPOS_LEFT or image.position == SCREENPOS_BOTTOMLEFT then
-        image:setMarginLeft(marginHorizontal)
-      end
-      if image.position == SCREENPOS_TOPRIGHT or image.position == SCREENPOS_RIGHT or image.position == SCREENPOS_BOTTOMRIGHT then
-        image:setMarginRight(marginHorizontal)
-      end
-      if image.position == SCREENPOS_CENTER and image.stretchVertical then
-        image:setMarginLeft(marginHorizontal)
-      end
-      if image.baseSizeOnGameScreen then
-        image:setWidth(mapWidget:getMapWidth() * image.screenResizeX)
-      end
-    end
-
-    if image.stretchVertical then
-      image:setMarginTop(marginVertical)
-      image:setMarginBottom(marginVertical)
-    else
-      if image.position == SCREENPOS_TOPLEFT or image.position == SCREENPOS_TOP or image.position == SCREENPOS_TOPRIGHT then
-        image:setMarginTop(marginVertical)
-      end
-      if image.position == SCREENPOS_BOTTOMLEFT or image.position == SCREENPOS_BOTTOM or image.position == SCREENPOS_BOTTOMRIGHT then
-        image:setMarginBottom(marginVertical)
-      end
-      if image.position == SCREENPOS_CENTER and image.stretchHorizontal then
-        image:setMarginTop(marginVertical)
-      end
-      if image.baseSizeOnGameScreen then
-        image:setHeight(mapWidget:getMapHeight() * image.screenResizeY)
-      end
-    end
-  end)
-end
-
-function GameScreenImage.adjustPositions()
-  for i = 1, #screenImages do
-    GameScreenImage.adjustPosition(screenImages[i])
-  end
-end
-
-function GameScreenImage.clearImages()
-  for i = 1, #screenImages do
-    local tmpImage = screenImages[i]
-
-    if tmpImage then
-      if tmpImage.fadeEvent then
-        g_effects.cancelFade(tmpImage)
-      end
-      if tmpImage.destroyEvent then
-        removeEvent(tmpImage.destroyEvent)
-      end
-
-      tmpImage:destroy()
-    end
-  end
-  screenImages = { }
 end
 
 function GameScreenImage.getRootPath()
   return '/screenimages/'
 end
 
-function GameScreenImage.addImage(path, fadeIn, position, resizeX, resizeY, screenBased)
-  if not path or not fadeIn or not position or not resizeX or not resizeY or not screenBased then
-    return
+function GameScreenImage.clearImages()
+  for i = 1, #screenImages do
+    local image = screenImages[i]
+
+    if image then
+      if image.fadeEvent then
+        g_effects.cancelFade(image)
+      end
+      if image.destroyEvent then
+        removeEvent(image.destroyEvent)
+      end
+
+      image:destroy()
+    end
+  end
+  screenImages = { }
+end
+
+function GameScreenImage.addImage(info) -- old: path, fadeIn, position, sizeX, sizeY, sizeBasedOnGameScreen
+  if not info or table.empty(info) then
+    return false
   end
 
-  local mapWidget = GameInterface.getMapPanel()
-  local image = g_ui.createWidget('ScreenImage', mapWidget)
-  image:setImageSource(string.format('%s%s', GameScreenImage.getRootPath(), path))
+  local image = g_ui.createWidget('ScreenImage', GameInterface.getMapPanel())
 
+  image.individualAnimation = info.individualAnimation or false
+  image:setImageIndividualAnimation(image.individualAnimation) -- Before setImageSource
+
+  image:setImageSource(string.format('%s%s', GameScreenImage.getRootPath(), info.path)) -- Before getting its width/height
+
+  image.path                  = info.path
+  image.sizeX                 = info.sizeX or 0
+  image.sizeY                 = info.sizeY or 0
+  image.sizeByFactor          = info.sizeByFactor ~= nil and info.sizeByFactor or false -- false as default
+  image.sizeBasedOnGameScreen = info.sizeBasedOnGameScreen == nil and true or info.sizeBasedOnGameScreen -- true as default
+  image.position              = info.position or ScreenImagePos.Center
+  image.scale                 = info.scale or ScreenImageScale.Inside
+  image.originalSizeX         = image:getWidth()
+  image.originalSizeY         = image:getHeight()
+
+  table.insert(screenImages, image)
+
+  local fadeIn = info.fadeIn or 0
   if fadeIn ~= 0 then
     g_effects.fadeIn(image, fadeIn)
   end
 
-  image.path                 = path
-  image.position             = position
-  image.stretchHorizontal    = resizeX == 0
-  image.stretchVertical      = resizeY == 0
-  image.baseSizeOnGameScreen = screenBased == 1
-  image.screenResizeX        = resizeX
-  image.screenResizeY        = resizeY
+  GameScreenImage.updateGeometry(image)
 
-  if image.stretchHorizontal then
-    image:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-    image:addAnchor(AnchorRight, 'parent', AnchorRight)
-  else
-    if image.position == SCREENPOS_TOPLEFT or image.position == SCREENPOS_LEFT or image.position == SCREENPOS_BOTTOMLEFT then
-      image:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-    end
-    if image.position == SCREENPOS_TOPRIGHT or image.position == SCREENPOS_RIGHT or image.position == SCREENPOS_BOTTOMRIGHT then
-      image:addAnchor(AnchorRight, 'parent', AnchorRight)
-    end
-    if (image.position == SCREENPOS_CENTER or image.position == SCREENPOS_LEFT or image.position == SCREENPOS_RIGHT) and not image.stretchVertical then
-      image:addAnchor(AnchorVerticalCenter, 'parent', AnchorVerticalCenter)
-    elseif image.position == SCREENPOS_CENTER then
-      image:addAnchor(AnchorLeft, 'parent', AnchorLeft)
-    end
-    image:setWidth((image.baseSizeOnGameScreen and mapWidget:getMapWidth() or image:getWidth()) * resizeX)
-  end
-
-  if image.stretchVertical then
-    image:addAnchor(AnchorTop, 'parent', AnchorTop)
-    image:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-  else
-    if image.position == SCREENPOS_TOPLEFT or image.position == SCREENPOS_TOP or image.position == SCREENPOS_TOPRIGHT then
-      image:addAnchor(AnchorTop, 'parent', AnchorTop)
-    end
-    if image.position == SCREENPOS_BOTTOMLEFT or image.position == SCREENPOS_BOTTOM or image.position == SCREENPOS_BOTTOMRIGHT then
-      image:addAnchor(AnchorBottom, 'parent', AnchorBottom)
-    end
-    if (image.position == SCREENPOS_CENTER or image.position == SCREENPOS_TOP or image.position == SCREENPOS_BOTTOM) and not image.stretchHorizontal then
-      image:addAnchor(AnchorHorizontalCenter, 'parent', AnchorHorizontalCenter)
-    elseif image.position == SCREENPOS_CENTER then
-      image:addAnchor(AnchorTop, 'parent', AnchorTop)
-    end
-    image:setHeight((image.baseSizeOnGameScreen and mapWidget:getMapHeight() or image:getHeight()) * resizeY)
-  end
-
-  table.insert(screenImages, image)
-  GameScreenImage.adjustPosition(image)
+  return true
 end
 
-function GameScreenImage.removeImage(path, fadeOut, mode)
-  if not path or not fadeOut or not mode then
-    return
+local function removeSingleImage(index, fadeOut)
+  local image = screenImages[index]
+  if not image --[[or image.path ~= path]] or image.destroyEvent then
+    return false
   end
 
-  if #screenImages < 1 then
-    return
+  if image.fadeEvent then
+    -- Cancel fade, if was fading already
+    g_effects.cancelFade(image)
   end
+
+  if fadeOut == 0 then
+    image:destroy()
+    table.remove(screenImages, index)
+  else
+    g_effects.fadeOut(image, fadeOut)
+
+    image.destroyEvent = scheduleEvent(function()
+      if image.fadeEvent then
+        g_effects.cancelFade(image)
+      end
+      for i = #screenImages, 1, -1 do
+        if screenImages[i] == image then
+          table.remove(screenImages, i)
+          break
+        end
+      end
+      image:destroy()
+    end, fadeOut)
+  end
+
+  return true
+end
+
+function GameScreenImage.removeImage(path, fadeOut, mode) -- (path, [fadeOut = 0 [, mode = ScreenImageRemoveMode.All]])
+  if not path or #screenImages < 1 then
+    return false
+  end
+
+  fadeOut = fadeOut or 0
+  mode    = mode or ScreenImageRemoveMode.All
 
   -- Remove last added of path
   if mode == 1 then
     local found = nil
     for i = #screenImages, 1, -1 do
-      if screenImages[i] and screenImages[i].path == path then
+      if screenImages[i].path == path then
         found = i
         break
       end
     end
     if found then
-      removeSingleImage(found, fadeOut)
+      if not removeSingleImage(found, fadeOut) then
+        return false
+      end
     end
 
   -- Remove first added of path
   elseif mode == -1 then
     local found = nil
     for i = 1, #screenImages do
-      if screenImages[i] and screenImages[i].path == path then
+      if screenImages[i].path == path then
         found = i
         break
       end
     end
     if found then
-      removeSingleImage(found, fadeOut)
+      if not removeSingleImage(found, fadeOut) then
+        return false
+      end
     end
 
   -- Remove all of path
   else
-    for i = 1, #screenImages do
-      if screenImages[i] and screenImages[i].path == path then
+    for i = #screenImages, 1, -1 do
+      if screenImages[i].path == path then
         removeSingleImage(i, fadeOut)
       end
     end
   end
+
+  return true
 end
 
-function GameScreenImage.parseScreenImage(protocolGame, opcode, msg)
-  local buffer = msg:getString()
-  local params = string.split(buffer, ':')
 
-  local state = tonumber(params[1])
-  if not state then
-    return
+
+-- Geometry
+
+function GameScreenImage.onGeometryChange(self)
+  GameScreenImage.updateGeometry()
+end
+
+function GameScreenImage.onViewModeChange(mapWidget, newMode, oldMode)
+  GameScreenImage.updateGeometry()
+end
+
+function GameScreenImage.onZoomChange(self, oldZoom, newZoom)
+  GameScreenImage.updateGeometry()
+end
+
+local function adjustPosition(image)
+  local hasMarginLeft  = false
+  local hasMarginRight = false
+
+  image:breakAnchors()
+
+  if table.contains({ ScreenImageScale.None, ScreenImageScale.Fit, ScreenImageScale.Inside }, image.scale) then
+    if image.position == ScreenImagePos.Center then
+      image:addAnchor(AnchorHorizontalCenter, 'parent', AnchorHorizontalCenter)
+      image:addAnchor(AnchorVerticalCenter, 'parent', AnchorVerticalCenter)
+
+    elseif image.position == ScreenImagePos.Top then
+      image:addAnchor(AnchorHorizontalCenter, 'parent', AnchorHorizontalCenter)
+      image:addAnchor(AnchorTop, 'parent', AnchorTop)
+
+    elseif image.position == ScreenImagePos.TopRight then
+      image:addAnchor(AnchorRight, 'parent', AnchorRight)
+      image:addAnchor(AnchorTop, 'parent', AnchorTop)
+      hasMarginRight = true
+
+    elseif image.position == ScreenImagePos.Right then
+      image:addAnchor(AnchorRight, 'parent', AnchorRight)
+      image:addAnchor(AnchorVerticalCenter, 'parent', AnchorVerticalCenter)
+      hasMarginRight = true
+
+    elseif image.position == ScreenImagePos.BottomRight then
+      image:addAnchor(AnchorRight, 'parent', AnchorRight)
+      image:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+      hasMarginRight = true
+
+    elseif image.position == ScreenImagePos.Bottom then
+      image:addAnchor(AnchorHorizontalCenter, 'parent', AnchorHorizontalCenter)
+      image:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+
+    elseif image.position == ScreenImagePos.BottomLeft then
+      image:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+      image:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+      hasMarginLeft = true
+
+    elseif image.position == ScreenImagePos.Left then
+      image:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+      image:addAnchor(AnchorVerticalCenter, 'parent', AnchorVerticalCenter)
+      hasMarginLeft = true
+
+    elseif image.position == ScreenImagePos.TopLeft then
+      image:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+      image:addAnchor(AnchorTop, 'parent', AnchorTop)
+      hasMarginLeft = true
+    end
+
+  elseif image.scale == ScreenImageScale.FitXY then
+    hasMarginLeft  = true
+    hasMarginRight = true
   end
-  state = state == 1
 
-  -- Add
-  if state then
-    for i = 2, 7 do
-      -- Params 3 to 7 are numeric
-      if i >= 3 and i <= 7 then
-        params[i] = tonumber(params[i])
-      end
-
-      if not params[i] then
-        return
-      end
+  if hasMarginLeft or hasMarginRight then
+    local mapWidget = GameInterface.getMapPanel()
+    if hasMarginLeft then
+      image:setMarginLeft(mapWidget:getMapLeftSide() - (mapWidget:getLeftSide() + mapWidget:getPaddingLeft()))
     end
-    GameScreenImage.addImage(params[2], params[3], params[4], params[5], params[6], params[7]) -- (path, fadeIn, position, resizeX, resizeY, screenBased)
-
-  -- Remove
-  else
-    for i = 2, 4 do
-      -- Params 3 to 4 are numeric
-      if i >= 3 and i <= 4 then
-        params[i] = tonumber(params[i])
-      end
-
-      if not params[i] then
-        return
-      end
+    if hasMarginRight then
+      image:setMarginRight(mapWidget:getRightSide() - (mapWidget:getMapRightSide() + mapWidget:getPaddingRight()))
     end
-    GameScreenImage.removeImage(params[2], params[3], params[4]) -- (path, fadeOut, mode)
+  end
+end
+
+local function adjustSize(image)
+  local mapWidget = GameInterface.getMapPanel()
+
+  if image.sizeX > 0 then
+    local strecthRatio = mapWidget:getStretchRatio()
+
+    if image.sizeByFactor then
+      local size = image.originalSizeX * image.sizeX
+      image:setWidth(image.sizeBasedOnGameScreen and size * strecthRatio or size)
+    else
+      image:setWidth(image.sizeBasedOnGameScreen and image.sizeX * strecthRatio or image.sizeX)
+    end
+
+  elseif image.sizeX == 0 and image:getWidth() ~= image.originalSizeX then
+    image:setWidth(image.originalSizeX)
+  end
+
+  if image.sizeY > 0 then
+    local strecthRatio = mapWidget:getStretchRatio()
+
+    if image.sizeByFactor then
+      local size = image.originalSizeY * image.sizeY
+      image:setHeight(image.sizeBasedOnGameScreen and size * strecthRatio or size)
+    else
+      image:setHeight(image.sizeBasedOnGameScreen and image.sizeY * strecthRatio or image.sizeY)
+    end
+
+  elseif image.sizeY == 0 and image:getHeight() ~= image.originalSizeY then
+    image:setHeight(image.originalSizeY)
+  end
+end
+
+local function adjustScale(image)
+  local mapWidget = GameInterface.getMapPanel()
+
+  if image.scale == ScreenImageScale.FitXY then
+    image:breakAnchors()
+
+    image:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+    image:addAnchor(AnchorRight, 'parent', AnchorRight)
+    image:addAnchor(AnchorTop, 'parent', AnchorTop)
+    image:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+
+  elseif image.scale == ScreenImageScale.Fit or image.scale == ScreenImageScale.Inside then
+    local width     = image:getWidth()
+    local height    = image:getHeight()
+    local mapWidth  = mapWidget:getMapWidth() + 2 -- 2 is map black line border
+    local mapHeight = mapWidget:getMapHeight() + 2 -- 2 is map black line border
+
+    -- Scale inside - If inside already, keep it its original size; else, decrease as ScreenImageScale.Fit
+    if image.scale == ScreenImageScale.Inside and width <= mapWidth and height <= mapHeight then
+      return
+    end
+
+    -- If fit already
+    if width == mapWidth and height <= mapHeight or height == mapHeight and width <= mapWidth then
+      return
+    end
+
+    -- Increase
+    if width < mapWidth and height < mapHeight then
+      local ratio
+      -- Width diff < height diff
+      if mapWidth - width < mapHeight - height then
+        ratio = width ~= 0 and mapWidth / width or 0
+      else
+        ratio = height ~= 0 and mapHeight / height or 0
+      end
+      image:setWidth(math.round(width * ratio))
+      image:setHeight(math.round(height * ratio))
+
+    -- Decrease
+    else
+      --[[
+        Possible cases:
+
+        width > mapWidth and height > mapHeight
+
+        width > mapWidth and height < mapHeight
+        width < mapWidth and height > mapHeight
+
+        width == mapWidth and height > mapHeight
+        width > mapWidth and height == mapHeight
+      ]]
+
+      -- Fake calculus to figure out if width is higher than mapWidth
+      -- How it works: we get a stretched/shrinked image making the height be equals to mapHeight, then we decide if width > mapWidth or not
+      local _ratio        = height ~= 0 and mapHeight / height or 0 -- height * _ratio = mapHeight --> _ratio = mapHeight / height
+      local _width        = width * _ratio -- New width in which height == mapHeight
+      local widthIsHigher = _width > mapWidth
+
+      local ratio
+      if widthIsHigher then
+        ratio = mapWidth ~= 0 and width / mapWidth or 0
+      else
+        ratio = mapHeight ~= 0 and height / mapHeight or 0
+      end
+      image:setWidth(math.round(width / ratio))
+      image:setHeight(math.round(height / ratio))
+    end
+  end
+end
+
+function GameScreenImage.updateGeometry(image) -- ([image])
+  for _, _image in ipairs(image and { image } or screenImages) do
+    addEvent(function()
+      adjustPosition(_image)
+      adjustSize(_image)
+      adjustScale(_image)
+    end)
+  end
+end
+
+
+
+-- Protocol
+
+function GameScreenImage.parseScreenImage(protocolGame, opcode, msg)
+  local action = msg:getU8()
+
+  if action == ScreenImageAction.Add then
+    local info                 = { }
+    info.path                  = msg:getString()
+    info.individualAnimation   = msg:getU8() == 1
+    info.fadeIn                = msg:getU16()
+    info.sizeX                 = msg:getU8()
+    info.sizeY                 = msg:getU8()
+    info.sizeByFactor          = msg:getU8() == 1
+    info.sizeBasedOnGameScreen = msg:getU8() == 1
+    info.position              = msg:getU8()
+    info.scale                 = msg:getU8()
+
+    GameScreenImage.addImage(info)
+
+  elseif action == ScreenImageAction.Remove then
+    local path       = msg:getString()
+    local fadeOut    = msg:getU16()
+    local removeMode = msg:getU8()
+
+    GameScreenImage.removeImage(path, fadeOut, removeMode)
   end
 end

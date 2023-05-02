@@ -20,6 +20,7 @@ ServerListButton < UIButton
 MainWindow
   id: enterGame
   size: 600 204
+  draggable: false
   image-source: /images/ui/enter_game/panel_background
   &authenticatorEnabled: false
   &authenticatorHeight: 44

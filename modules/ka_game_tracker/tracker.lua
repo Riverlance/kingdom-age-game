@@ -82,6 +82,10 @@ function GameTracker.sendTrack(trackNode)
 end
 
 function GameTracker.parseTrack(protocol, msg)
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
   local trackNode = { }
   trackNode.status = msg:getU8()
   while true do
@@ -91,9 +95,9 @@ function GameTracker.parseTrack(protocol, msg)
     elseif flag == TrackingInfo.Name then
       trackNode.name = msg:getString()
     elseif flag == TrackingInfo.Position then
-      trackNode.position = protocol:getPosition(msg)
+      trackNode.position = msg:getPosition()
     elseif flag == TrackingInfo.Outfit then
-      trackNode.outfit = protocol:getOutfit(msg)
+      trackNode.outfit = protocolGame:getOutfit(msg)
     elseif flag == TrackingInfo.Color then
       trackNode.color = msg:getColor()
     elseif flag == TrackingInfo.Auto then
@@ -136,7 +140,7 @@ function GameTracker.onTrack(trackNode)
   trackView.name = trackNode.name
   trackView.position =  trackNode.position
   trackView.outfit = trackNode.outfit
-  trackView.color = trackNode.color or '#ffc659'
+  trackView.color = trackNode.color or trackView.color or '#ffc659'
   trackView.auto = trackNode.auto
 
   if trackView.id then

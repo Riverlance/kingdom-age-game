@@ -56,6 +56,9 @@ NextButton < UIButton
   $disabled:
     image-color: #dfdfdf88
 
+  $on:
+    image-source: /images/ui/_button/arrow_horizontal_on
+
 PreviousButton < UIButton
   size: 12 21
   image-source: /images/ui/_button/arrow_horizontal
@@ -70,6 +73,9 @@ PreviousButton < UIButton
 
   $disabled:
     image-color: #dfdfdf88
+
+  $on:
+    image-source: /images/ui/_button/arrow_horizontal_on
 
 AddButton < UIButton
   size: 20 20

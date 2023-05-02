@@ -1,9 +1,13 @@
 _G.Client = { }
 
 local musicFilename = '/audios/startup'
-local musicChannel = g_sounds.getChannel(AudioChannels.Music)
-local loadingBox = nil
+local musicChannel
+local loadingBox
 local isLoaded = false
+
+if g_sounds then
+  musicChannel = g_sounds.getChannel(AudioChannels.Music)
+end
 
 playerSettingsPath = ''
 
@@ -19,7 +23,9 @@ function Client.init()
   })
 
   g_window.setMinimumSize({ width = 600, height = 480 })
-  -- g_sounds.preload(musicFilename)
+  if musicChannel then
+    g_sounds.preload(musicFilename)
+  end
 
   -- initialize in fullscreen mode on mobile devices
   if g_window.getPlatformType() == 'X11-EGL' then
@@ -51,8 +57,6 @@ function Client.init()
   -- poll resize events
   g_window.poll()
 
-  --g_keyboard.bindKeyDown('Ctrl+Shift+R', Client.reloadScripts)
-
   -- generate machine uuid, this is a security measure for storing passwords
   if not g_crypt.setMachineUUID(g_settings.get('uuid')) then
     g_settings.set('uuid', g_crypt.getMachineUUID())
@@ -79,7 +83,9 @@ end
 
 
 function Client.startup()
-  musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+  if musicChannel then
+    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+  end
 
   connect(g_updater, {
     onUpdated = Client.loadFiles
@@ -144,7 +150,9 @@ end
 
 function Client.onGameEnd()
   ClientAudio.clearAudios()
-  musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+  if musicChannel then
+    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+  end
 end
 
 function Client.loadFiles()
@@ -154,14 +162,19 @@ function Client.loadFiles()
 
   loadingBox = displaySystemBox(tr('Loading'), tr('Loading files...'))
 
+  -- Client version
   local version = 1099
   g_game.setClientVersion(version)
+
   -- New limit of sprites
   g_game.enableFeature(GameSpritesU32) -- Automatically activated on 960+ protocol
   -- Alpha channel on sprites
   g_game.enableFeature(GameSpritesAlphaChannel)
   -- New limit of effects
   g_game.enableFeature(GameMagicEffectU16)
+  g_game.enableFeature(GameDistanceEffectU16)
+  -- Vip groups (not implemented yet)
+  -- g_game.enableFeature(GameVipGroups)
 
   scheduleEvent(function()
     local  path = resolvepath('/things/Kingdom Age')
@@ -184,24 +197,6 @@ end
 
 function Client.isLoaded()
   return isLoaded
-end
-
-function Client.reloadScripts()
-  g_textures.clearCache()
-  g_modules.reloadModules()
-
-  local script = '/' .. g_app.getCompactName() .. 'rc.lua'
-  if g_resources.fileExists(script) then
-    dofile(script)
-  end
-
-  local message = tr('All modules and scripts were reloaded.')
-
-  if modules.game_textmessage then
-    GameTextMessage.displayGameMessage(message)
-  end
-
-  print(message)
 end
 
 

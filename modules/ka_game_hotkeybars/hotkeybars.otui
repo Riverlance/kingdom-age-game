@@ -44,7 +44,7 @@ HotkeyBarVertical < UIHotkeyBar
     padding: 10 0
 
   UIWidget
-    id: hotkeyList
+    id: hotkeyBarList
     phantom: true
     layout:
       type: verticalBox
@@ -79,7 +79,7 @@ HotkeyBarHorizontal < UIHotkeyBar
     padding: 0 10
 
   UIWidget
-    id: hotkeyList
+    id: hotkeyBarList
     phantom: true
     layout:
       type: horizontalBox

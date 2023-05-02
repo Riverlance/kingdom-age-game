@@ -51,6 +51,9 @@ function UIMinimap:onSetup()
   self.zoomInWidget = self:getChildById('zoomIn')
   self.zoomOutWidget = self:getChildById('zoomOut')
   self.flags = { }
+  self.fullMapView = false
+  self.zoomMinimap = 0
+  self.zoomFullmap = 0
   self.alternatives = { }
   self.alternativesVisible = true
   self.onAddAutomapFlag = function(pos, icon, description, force, temporary)
@@ -118,7 +121,8 @@ function UIMinimap:save()
       })
     end
   end
-  settings.zoom = self:getZoom()
+  settings.zoom = self.zoomMinimap
+  settings.zoomFull = self.zoomFullmap
   g_settings.setNode('Minimap', settings)
 end
 
@@ -130,7 +134,9 @@ function UIMinimap:load()
         self:addFlag(flag.position, flag.icon, flag.description)
       end
     end
-    self:setZoom(settings.zoom)
+    self.zoomMinimap = settings.zoom
+    self.zoomFullmap = settings.zoomFull or settings.zoom
+    self:setZoom(self.zoomMinimap)
   end
 end
 
@@ -148,9 +154,9 @@ function UIMinimap:move(x, y)
 end
 
 function UIMinimap:reset()
-  self:setZoom(0)
-  if self.cross then
-    self:setCameraPosition(self.cross.pos)
+  local player = g_game.getLocalPlayer()
+  if player then
+    self:setCameraPosition(player:getPosition())
   end
 end
 
@@ -227,8 +233,23 @@ function UIMinimap:addFlag(mapPos, icon, description, force, temporary)
   end
   flag:setIconClip({ width = 11, height = 11 })
   flag:setTooltip(description)
+
   flag.onMouseRelease = function(widget, _pos, button)
-    if button == MouseRightButton then
+    if button == MouseLeftButton then
+      local player = g_game.getLocalPlayer()
+      if player then
+        if Position.distance(player:getPosition(), widget.pos) > 250 then
+          modules.game_textmessage.displayStatusMessage(tr('Destination is out of range.'))
+          return false
+        end
+
+        if widget:getParent().autowalk then
+          player:autoWalk(widget.pos)
+        end
+        return true
+      end
+
+    elseif button == MouseRightButton then
       local menu = g_ui.createWidget('PopupMenu')
       menu:setGameMenu(true)
       menu:addOption(tr('Edit mark'), function() self:createEditFlagWindow(mapPos) end)
@@ -236,11 +257,17 @@ function UIMinimap:addFlag(mapPos, icon, description, force, temporary)
       menu:addSeparator()
       bindCopyPositionOption(menu, mapPos)
       menu:display(_pos)
+
       return true
     end
+
     return false
   end
-  flag.onDestroy = function() table.removevalue(self.flags, flag) end
+
+  flag.onDestroy = function()
+    table.removevalue(self.flags, flag)
+  end
+
   table.insert(self.flags, flag)
   self:centerInPosition(flag, mapPos)
 end
@@ -423,6 +450,12 @@ function UIMinimap:onCameraPositionChange(cameraPos)
 end
 
 function UIMinimap:onZoomChange(zoom) -- zoom is from maxZoom -5 (far) to minZoom 5 (near)
+  if self.fullMapView then
+    self.zoomFullmap = zoom
+  else
+    self.zoomMinimap = zoom
+  end
+
   for _,widget in pairs(self.alternatives) do
     if (not widget.minZoom or widget.minZoom >= zoom) and (widget.maxZoom or 0) <= zoom then
       widget:show()
@@ -460,11 +493,16 @@ function UIMinimap:onMouseRelease(pos, button)
 
   local mapPos = self:getTilePosition(pos)
   if not mapPos then
-    return
+    return false
   end
 
   if button == MouseLeftButton then
     local player = g_game.getLocalPlayer()
+    if Position.distance(player:getPosition(), mapPos) > 250 then
+    	GameTextMessage.displayStatusMessage(tr('Destination is out of range.'))
+    	return false
+    end
+
     if self.autowalk then
       player:autoWalk(mapPos)
     end

@@ -24,6 +24,8 @@ end
 
 function ClientServerList.terminate()
   ClientServerList.destroy()
+  serverListWindow = nil
+  serverTextList = nil
 
   g_settings.setNode('ServerList', servers)
 

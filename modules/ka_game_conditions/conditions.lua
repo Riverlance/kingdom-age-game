@@ -157,12 +157,9 @@ function GameConditions.init()
     onStatesChange = GameConditions.onStatesChange
   })
 
-  local localPlayer = g_game.getLocalPlayer()
-  if localPlayer then
-    GameConditions.onStatesChange(localPlayer, localPlayer:getStates(), 0)
+  if g_game.isOnline() then
+    GameConditions.online()
   end
-
-  GameInterface.setupMiniWindow(conditionWindow, conditionTopMenuButton)
 end
 
 function GameConditions.terminate()
@@ -281,7 +278,11 @@ end
 
 
 function GameConditions.online()
-  GameInterface.setupMiniWindow(conditionWindow, conditionTopMenuButton)
+  conditionWindow:setup(conditionTopMenuButton)
+  local localPlayer = g_game.getLocalPlayer()
+  if localPlayer then
+    GameConditions.onStatesChange(localPlayer, localPlayer:getStates(), 0)
+  end
 end
 
 function GameConditions.offline()
@@ -510,14 +511,14 @@ function GameConditions.onStatesChange(localPlayer, now, old)
     return
   end
 
-  local bitsChanged = bit32.bxor(now, old)
+  local bitsChanged = bit.bxor(now, old)
   for i = 1, 32 do
     local pow = math.pow(2, i-1)
     if pow > bitsChanged then
       break
     end
 
-    local bitChanged = bit32.band(bitsChanged, pow)
+    local bitChanged = bit.band(bitsChanged, pow)
     if bitChanged ~= 0 then
       GameConditions.toggleIcon(bitChanged)
     end

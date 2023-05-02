@@ -439,8 +439,24 @@ function GameHotkeys.onKeyUp(rootWidget, keyCode, keyboardModifiers)
   if keySettings and keySettings.powerId then
     local mapWidget = GameInterface.getMapPanel()
     local mousePosition = g_window.getMousePosition()
-    local pos = mapWidget and mapWidget:getPosition(mousePosition)
-    GamePowers.castPower(pos)
+    local pos
+
+    -- Creature button (battle list button, party list button, any UICreatureButton widget)
+    local posWidget = g_game.getWidgetByPos(mousePosition)
+    if posWidget and posWidget:getClassName() == 'UICreatureButton' then
+      local creature = posWidget.creature
+      if creature then
+        local creaturePos = creature:getPosition()
+        if creaturePos then
+          pos = creaturePos
+        end
+      end
+    -- Game screen
+    else
+      pos = mapWidget and mapWidget:getPosition(mousePosition)
+    end
+
+    GamePowers.castPower(pos or { x = 0, y = 0, z = 0 })
   end
 end
 

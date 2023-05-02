@@ -72,7 +72,7 @@ OptionHorizontalSeparator < HorizontalSeparator
 MainWindow
   id: optionsWindow
   !text: tr('Options')
-  size: 480 447
+  size: 480 600
   &save: true
 
   @onEnter: ClientOptions.hide()

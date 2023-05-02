@@ -33,7 +33,7 @@ function UIMiniWindowContainer:getEmptySpaceHeight()
 end
 
 function UIMiniWindowContainer:onDrop(widget, mousePos)
-  if widget.UIMiniWindowContainer then
+  if widget:getClassName() == 'UIMiniWindow' then
     local oldParent = widget:getParent()
     if oldParent == self then
       return true

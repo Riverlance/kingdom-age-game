@@ -58,9 +58,9 @@ MessageTypes = {
   [MessageModes.Report] = MessageSettings.consoleRed,
   [MessageModes.HotkeyUse] = MessageSettings.centerGreen,
 
-  [MessageModes.MessageGameBigTop] = MessageSettings.statusBigTop,
-  [MessageModes.MessageGameBigCenter] = MessageSettings.statusBigCenter,
-  [MessageModes.MessageGameBigBottom] = MessageSettings.statusBigBottom,
+  [MessageModes.GameBigTop] = MessageSettings.statusBigTop,
+  [MessageModes.GameBigCenter] = MessageSettings.statusBigCenter,
+  [MessageModes.GameBigBottom] = MessageSettings.statusBigBottom,
 
   [254] = MessageSettings.private
 }
@@ -109,6 +109,7 @@ function GameTextMessage.terminate()
 
   GameTextMessage.clearMessages()
   messagesPanel:destroy()
+  messagesPanel = nil
 
   _G.GameTextMessage = nil
 end

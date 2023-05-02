@@ -26,12 +26,17 @@ GameSidePanelSticker < UIWidget
   phantom: true
 
 GameBottomPanel < Panel
-  image-source: /images/ui/_background/panel_bottom
-  image-border: 2
-  image-clip: 0 0 258 102
+  $!on:
+    image-source: /images/ui/_background/default_stone_darkblue
+    image-repeated: true
 
   $on:
-    image-clip: 0 102 258 102
+    image-source: none
+    background: #00060a88
+    border-width-top: 1
+    border-color-top: #101010
+    border-width-bottom: 1
+    border-color-bottom: #101010
 
 GameMapPanel < UIGameMap
   image-source: /images/ui/_background/panel_map
@@ -68,7 +73,7 @@ UIWidget
     id: gameMapPanel
     anchors.fill: gameScreenArea
 
-  // Used for anchoring purposes
+  // Used for anchoring purposes and for lock widgets by server
   UIWidget
     id: gameScreenArea
     anchors.top: parent.top
@@ -132,6 +137,7 @@ UIWidget
     GameSideContainer
       id: gameRightThirdPanelContainer
 
+  // Used also for lock widgets by server
   GameBottomPanel
     id: gameBottomPanel
     anchors.top: bottomSplitter.top

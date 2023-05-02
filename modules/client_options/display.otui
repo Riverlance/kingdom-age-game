@@ -1,27 +1,112 @@
 Panel
 
   OptionCheckBox
-    id: showMouseItemIcon
-    !text: tr('Show mouse item icon')
-    !tooltip: tr('Shows the dragged item when drag and drop items.')
+    id: enableHighlightMouseTarget
+    !text: tr('Highlight mouse target')
 
   OptionLabel
-    id: mouseItemIconOpacityLabel
-    !text: tr('Opacity')
+    !text: tr('Crosshair')
+    $!first:
+      anchors.top: prev.outsideBottom
+      margin-top: 4
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  ComboBox
+    id: crosshair
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: prev.right
+    margin-top: 2
+
+  OptionLabel
+    !text: tr('Floor view mode')
+    $!first:
+      anchors.top: prev.outsideBottom
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  ComboBox
+    id: floorViewMode
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: prev.right
+    margin-top: 2
+
+  OptionLabel
+    !text: tr('Fading delay')
+    $!first:
+      anchors.top: crosshair.outsideBottom
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
 
   OptionScrollbar
-    id: mouseItemIconOpacity
+    id: floorFadingDelay
+    anchors.left: prev.left
+    minimum: 0
+    maximum: 1000
+    symbol: ms
+
+  OptionLabel
+    !text: tr('Floor shadowing intensity')
+    $!first:
+      anchors.top: floorViewMode.outsideBottom
+
+  OptionScrollbar
+    id: shadowFloorIntensity
     minimum: 0
     maximum: 100
     symbol: %
+
+  OptionLabel
+    !text: tr('Creature information scale')
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionScrollbar
+    id: creatureInformationScale
+    anchors.right: prev.right
+    minimum: 1
+    maximum: 9
+
+  OptionLabel
+    !text: tr('Message scale')
+    $!first:
+      anchors.top: shadowFloorIntensity.outsideBottom
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  OptionScrollbar
+    id: staticTextScale
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    minimum: 1
+    maximum: 9
+
+  OptionLabel
+    !text: tr('Animated message scale')
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionScrollbar
+    id: animatedTextScale
+    anchors.right: prev.right
+    minimum: 1
+    maximum: 9
+
+  OptionCheckBox
+    id: dontStretchShrink
+    !text: tr('Lock game screen area')
+    !tooltip: tr('You will not be able to stretch or shrink game screen. If enabled, shader filters will make no difference.\n\nNote:\nThe game screen viewport should be on minimum and hotkeybars should be disabled for this to work.')
+    !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
 
   OptionCheckBox
     id: showHotkeybars
     !text: tr('Show hotkeybars')
     !tooltip: tr('Shows 4 hotkeybars (at top, bottom, left and right) in which you can drag items / powers / hotkey rows, and drop on the bars.')
     !tooltip-type: TooltipType.textBlock
-    $!first:
-      margin-top: 10
 
   OptionCheckBox
     id: clearLootbarItemsOnEachDrop

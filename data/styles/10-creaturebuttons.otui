@@ -8,7 +8,7 @@ CreatureButtonMinimapWidget < UIWidget
   phantom: true
 
   UICreature
-    id: creature
+    id: creatureWidget
     size: 20 20
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
@@ -53,7 +53,7 @@ CreatureButton < UICreatureButton
   margin-bottom: 4
 
   UICreature
-    id: creature
+    id: creatureWidget
     size: 20 20
     anchors.top: parent.top
     anchors.left: parent.left
@@ -73,7 +73,7 @@ CreatureButton < UICreatureButton
     anchors.right: creatureType.outsideLeft
     margin-left: 2
     margin-right: 2
-    color: darkTeal
+    color: #888888AA
     phantom: true
 
   CreatureButtonIcon
@@ -95,6 +95,6 @@ CreatureButton < UICreatureButton
   CreatureButtonProgressBar
     id: healthBar
     anchors.top: label.outsideBottom
-    anchors.left: creature.outsideRight
+    anchors.left: creatureWidget.outsideRight
     anchors.right: parent.right
     background-color: #ff4444

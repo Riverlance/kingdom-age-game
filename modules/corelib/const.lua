@@ -1,5 +1,17 @@
 -- @docconsts @{
 
+OsUnknown = 0
+OsWindows = 1
+OsLinux = 2
+OsMacOS = 3
+OsAndroid = 4
+OsiOS = 5
+
+DeviceUnknown = 0
+DeviceDesktop = 1
+DeviceMobile  = 2
+DeviceConsole = 3
+
 AnchorNone = 0
 AnchorTop = 1
 AnchorBottom = 2
@@ -12,11 +24,12 @@ AnchorOutsideBottom = 8
 AnchorOutsideLeft = 9
 AnchorOutsideRight = 10
 
-LogDebug = 0
-LogInfo = 1
-LogWarning = 2
-LogError = 3
-LogFatal = 4
+LogFine = 0
+LogDebug = 1
+LogInfo = 2
+LogWarning = 3
+LogError = 4
+LogFatal = 5
 
 MouseFocusReason = 0
 KeyboardFocusReason = 1
@@ -318,9 +331,29 @@ NetworkMessageTypes = {
   Table = 8,
 }
 
+Locale = {
+  En = 1,
+  Pt = 2,
+  Es = 3,
+  De = 4,
+  Pl = 5,
+  Sv = 6,
+}
+Locale.First = Locale.En
+Locale.Last  = Locale.Sv
+
+InstalledLocales = { }
+DefaultLocaleId  = Locale.En
+
 ScreenRangeX = 12
 ScreenRangeY = 9
 ScreenRangeZ = 16
+
+AntiAliasing = {
+  disabled = 0,
+  enabled = 1,
+  smoothRetro = 2,
+}
 
 Vocations = {
   Knight   = 1,
@@ -358,6 +391,8 @@ function Creature:isSage()
   return isSage(self:getVocation())
 end
 
+-- Audio
+
 AudioChannels = {
   Music = 1,
   Ambient = 2,
@@ -367,6 +402,40 @@ AudioChannels = {
   Last = 3
 }
 
+-- ScreenImage
+
+ScreenImageAction = {
+  Remove = 0,
+  Add    = 1,
+}
+
+ScreenImagePos = {
+  Center      = 1,
+  Top         = 2,
+  TopRight    = 3,
+  Right       = 4,
+  BottomRight = 5,
+  Bottom      = 6,
+  BottomLeft  = 7,
+  Left        = 8,
+  TopLeft     = 9,
+}
+
+ScreenImageScale = {
+  None   = 0, -- Original image size, either it fitting to the canvas or not
+  FitXY  = 1, -- Stretch or shrink the image until all its sides touch all sides of the canvas
+  Fit    = 2, -- Stretch or shrink the image until both sides of an axis touch both sides of the same canvas axis
+  Inside = 3, -- If the image is smaller than the canvas in both axis, keeps its original size; else, it works like ScreenImageScale.Fit
+}
+
+ScreenImageRemoveMode = {
+  All        = 0,
+  LastAdded  = 1,
+  FirstAdded = -1,
+}
+
+-- Tooltip
+
 TooltipType = {
   default         = 1,
   textBlock       = 2,
@@ -375,6 +444,8 @@ TooltipType = {
   powerButton     = 5,
 }
 
+-- ViewModes
+
 ViewModes = {
   [0] = { id = 0, isCropped = false, isFull = false, name = 'Normal' },
   [1] = { id = 1, isCropped = true,  isFull = false, name = 'Crop' },
@@ -382,26 +453,13 @@ ViewModes = {
   [3] = { id = 3, isCropped = false, isFull = true,  name = 'Full' }, -- Default
 }
 
-local noneStickerDefaultPath = ''
+-- PanelStickers
+
 PanelStickers = {
-  [1] = { opt = 'None',      path = noneStickerDefaultPath },
+  [1] = { opt = 'None',      path = '' },
   [2] = { opt = 'Sticker 1', path = '/images/ui/sticker/sticker_1' },
   [3] = { opt = 'Sticker 2', path = '/images/ui/sticker/sticker_2' },
   [4] = { opt = 'Sticker 3', path = '/images/ui/sticker/sticker_3' },
   [5] = { opt = 'Sticker 4', path = '/images/ui/sticker/sticker_4' },
   [6] = { opt = 'Sticker 5', path = '/images/ui/sticker/sticker_5' }
 }
-
-setmetatable(PanelStickers, {
-  __index =
-  function (self, index)
-    if type(index) == 'string' then
-      for i, v in ipairs(self) do
-        if index == v.opt then
-          return v.path
-        end
-      end
-    end
-    return noneStickerDefaultPath
-  end
-})

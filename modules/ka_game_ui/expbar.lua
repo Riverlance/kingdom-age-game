@@ -103,7 +103,7 @@ function GameUIExpBar.onZoomChange(self, oldZoom, newZoom)
 end
 
 function GameUIExpBar.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
-  GameInterface.m.gameExpBar:setTooltip(string.format('%s.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
+  GameInterface.m.gameExpBar:setTooltip(getExperienceTooltipText(localPlayer, level, levelPercent), TooltipType.textBlock)
   GameUIExpBar.updateGameExpBarPercent(levelPercent)
 end
 

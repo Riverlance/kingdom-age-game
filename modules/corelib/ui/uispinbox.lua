@@ -18,8 +18,8 @@ function UISpinBox.create()
 end
 
 function UISpinBox:onSetup()
-  g_mouse.bindAutoPress(self:getChildById('up'), function() self:up() end, 300)
-  g_mouse.bindAutoPress(self:getChildById('down'), function() self:down() end, 300)
+  g_mouse.bindAutoPress(self.upButton, function() self:up() end, 300)
+  g_mouse.bindAutoPress(self.downButton, function() self:down() end, 300)
 end
 
 function UISpinBox:onMouseWheel(mousePos, direction)
@@ -98,14 +98,14 @@ function UISpinBox:onStyleApply(styleName, styleNode)
 end
 
 function UISpinBox:showButtons()
-  self:getChildById('up'):show()
-  self:getChildById('down'):show()
+  self.upButton:show()
+  self.downButton:show()
   self.displayButtons = true
 end
 
 function UISpinBox:hideButtons()
-  self:getChildById('up'):hide()
-  self:getChildById('down'):hide()
+  self.upButton:hide()
+  self.downButton:hide()
   self.displayButtons = false
 end
 
@@ -130,13 +130,11 @@ function UISpinBox:setValue(value, dontSignal)
     self:setText(value)
   end
 
-  local upButton = self:getChildById('up')
-  local downButton = self:getChildById('down')
-  if upButton then
-    upButton:setEnabled(self.maximum ~= self.minimum and self.value ~= self.maximum)
+  if self.upButton then
+    self.upButton:setEnabled(self.maximum ~= self.minimum and self.value ~= self.maximum)
   end
-  if downButton then
-    downButton:setEnabled(self.maximum ~= self.minimum and self.value ~= self.minimum)
+  if self.downButton then
+    self.downButton:setEnabled(self.maximum ~= self.minimum and self.value ~= self.minimum)
   end
 
   if not dontSignal then

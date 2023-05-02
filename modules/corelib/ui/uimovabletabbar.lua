@@ -219,9 +219,9 @@ function UIMoveableTabBar.create()
   tabbar.prevNavigation = nil
   tabbar.nextNavigation = nil
   tabbar.onGeometryChange = function()
-                              hideTabs(tabbar, true, tabbar.postTabs, 0)
-                              updateTabs(tabbar)
-                            end
+    hideTabs(tabbar, true, tabbar.postTabs, 0)
+    updateTabs(tabbar)
+  end
   return tabbar
 end
 
@@ -357,6 +357,7 @@ function UIMoveableTabBar:removeTab(tab)
   table.remove(tabTable, index)
   if tab.blinkEvent then
     removeEvent(tab.blinkEvent)
+    tab.blinkEvent = nil
   end
   tab:destroy()
   updateTabs(self)

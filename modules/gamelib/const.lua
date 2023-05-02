@@ -14,6 +14,7 @@ CreatureTypeMonster = 1
 CreatureTypeNpc = 2
 CreatureTypeSummonOwn = 3
 CreatureTypeSummonOther = 4
+CreatureTypeHidden = 5
 
 SkullNone = 0
 SkullYellow = 1
@@ -183,63 +184,94 @@ GameEnvironmentEffect = 13
 GameCreatureEmblems = 14
 GameItemAnimationPhase = 15
 GameMagicEffectU16 = 16
--- 17 free
+-- KA - Free
 GameSpritesU32 = 18
-GameChargeableItems = 19
+-- KA - Free
 GameOfflineTrainingTime = 20
-GamePurseSlot = 21
+-- KA - Free
 GameFormatCreatureName = 22
-GameSpellList = 23
+-- KA - Free
 GameClientPing = 24
--- 25 free
-GameDoubleHealth = 26
-GameDoubleSkills = 27
-GameChangeMapAwareRange = 28
-GameMapMovePosition = 29
-GameAttackSeq = 30
-GameDiagonalAnimatedText = 31
-GameLoginPending = 32
-GameNewSpeedLaw = 33
-GameForceFirstAutoWalkStep = 34
--- 35 free
-GameDoubleShopSellAmount = 36
-GameContainerPagination = 37
-GameThingMarks = 38
-GameLooktypeU16 = 39
-GamePlayerStamina = 40
-GamePlayerAddons = 41
-GameMessageStatements = 42
-GameMessageLevel = 43
-GameNewFluids = 44
-GamePlayerStateU16 = 45
-GameNewOutfitProtocol = 46
-GamePVPMode = 47
-GameWritableDate = 48
-GameAdditionalVipInfo = 49
-GameSpritesAlphaChannel = 50
-GamePremiumExpiration = 51
--- 52 free
-GameEnhancedAnimations = 53
-GameOGLInformation = 54
-GameMessageSizeCheck = 55
-GamePreviewState = 56
-GameLoginPacketEncryption = 57
-GameClientVersion = 58
-GameContentRevision = 59
-GameExperienceBonus = 60
-GameAuthenticator = 61
-GameUnjustifiedPointsPacket = 62
-GameSessionKey = 63
-GameDeathType = 64
-GameIdleAnimations = 65
-GameKeepUnawareTiles = 66
-GameIngameStore = 67
-GameIngameStoreHighlights = 68
-GameIngameStoreServiceType = 69
-GameAdditionalSkills = 70
-GameBaseSkillU16 = 71
-GameSpeechBubble = 72
-GameHideNpcNames = 73
+-- KA - Free
+-- KA - Free
+-- KA - Free
+GameDoubleHealth = 28
+GameDoubleSkills = 29
+GameChangeMapAwareRange = 30
+GameMapMovePosition = 31
+GameAttackSeq = 32
+-- KA - Free
+GameDiagonalAnimatedText = 34
+GameLoginPending = 35
+GameNewSpeedLaw = 36
+GameForceFirstAutoWalkStep = 37
+-- KA - Free
+GameDoubleShopSellAmount = 39
+GameContainerPagination = 40
+GameThingMarks = 41
+GameLooktypeU16 = 42
+GamePlayerStamina = 43
+GamePlayerAddons = 44
+GameMessageStatements = 45
+GameMessageLevel = 46
+GameNewFluids = 47
+GamePlayerStateU16 = 48
+GameNewOutfitProtocol = 49
+-- KA - Free
+GameWritableDate = 51
+GameAdditionalVipInfo = 52
+-- KA - Free
+GameSpeechBubble = 54 -- KA - Renamed from GameCreatureIcons
+-- KA - Free
+GameSpritesAlphaChannel = 56
+GamePremiumExpiration = 57
+-- KA - Free
+GameEnhancedAnimations = 59
+GameOGLInformation = 60
+GameMessageSizeCheck = 61
+GamePreviewState = 62
+GameLoginPacketEncryption = 63
+GameClientVersion = 64
+GameContentRevision = 65
+GameExperienceBonus = 66
+GameAuthenticator = 67
+GameUnjustifiedPointsPacket = 68 -- KA - Renamed from GameUnjustifiedPoints
+GameSessionKey = 69
+GameDeathType = 70
+GameIdleAnimations = 71
+GameKeepUnawareTiles = 72
+GameIngameStore = 73
+GameIngameStoreHighlights = 74
+GameIngameStoreServiceType = 75
+-- KA - Free
+GameDistanceEffectU16 = 77
+-- KA - Free
+-- KA - Free
+GameMapOldEffectRendering = 80
+GameMapDontCorrectCorpse = 81
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+GameVipGroups = 96
+-- KA - Free
+-- KA - Free
+-- KA - Free
+-- KA - Free
+GameItemShader = 101
+GameCreatureShader = 102
+GameCreatureAttachedEffect = 103
+LastGameFeature = 104
 
 TextColors = {
   red         = '#f55e5e', --'#c83200'
@@ -296,22 +328,28 @@ MessageModes = {
   HotkeyUse               = 37,
   TutorialHint            = 38,
   Thankyou                = 39,
-  --Market                  = 40, -- Deprecated
+  -- KA - Free
   Mana                    = 41,
   BeyondLast              = 42,
+
+  -- deprecated
   MonsterYell             = 43,
   MonsterSay              = 44,
   Red                     = 45,
   Blue                    = 46,
-  --RVRChannel              = 47, -- Deprecated
-  --RVRAnswer               = 48, -- Deprecated
-  --RVRContinue             = 49, -- Deprecated
+  GameBigTop              = 47, -- KA - Big font text message (Jotun)
+  GameBigCenter           = 48, -- KA - Big font text message (Jotun)
+  GameBigBottom           = 49, -- KA - Big font text message (Jotun)
   GameHighlight           = 50,
   NpcFromStartBlock       = 51,
-  Last                    = 52,
-  MessageGameBigTop       = 53,
-  MessageGameBigCenter    = 54,
-  MessageGameBigBottom    = 55,
+  -- KA - Free
+  -- KA - Free
+  -- KA - Free
+  -- KA - Free
+  -- KA - Free
+
+  Last                    = 57,
+
   Invalid                 = 255,
 }
 
@@ -420,6 +458,13 @@ ChannelEvent = {
   Exclude = 3,
 }
 
+ShadowFloor = {
+  Disabled = 0,
+  Bottom = 1,
+  Upside = 2,
+  Both = 3
+}
+
 HotkeyStatus = {
   Applied = {color = 'alpha',     focusColor = '#CCCCCC22'},
   Added   = {color = '#00FF0022', focusColor = '#00CC0022'},
@@ -432,6 +477,11 @@ HotkeyItemUseType = {
   Crosshair = 1,
   Target    = 2,
   Self      = 3
+}
+
+WidgetLockActionFlag = {
+  Unlock = 0,
+  Lock   = 1,
 }
 
 -- @}

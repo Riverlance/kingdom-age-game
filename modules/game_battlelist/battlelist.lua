@@ -19,7 +19,6 @@ filterPartyButton = nil
 battlePanel = nil
 
 mouseWidget = nil
-lastButtonSwitched = nil
 
 nextTargetShortcut = 'Space'
 
@@ -130,6 +129,7 @@ function GameBattleList.init()
     onDisappear           = GameBattleList.onDisappear,
     onPositionChange      = GameBattleList.onPositionChange,
     onTypeChange          = GameBattleList.onTypeChange,
+    onOutfitChange        = GameBattleList.onOutfitChange,
     onShieldChange        = GameBattleList.onShieldChange,
     onSkullChange         = GameBattleList.onSkullChange,
     onEmblemChange        = GameBattleList.onEmblemChange,
@@ -152,14 +152,22 @@ function GameBattleList.init()
     onUpdateTrackColor        = GameBattleList.onUpdateTrackColor
   })
 
-  GameBattleList.refreshList()
+	connect(GameInterface.getMapPanel(), {
+		onZoomChange = GameBattleList.onZoomChange
+	})
 
-  GameInterface.setupMiniWindow(battleWindow, battleTopMenuButton)
+  if g_game.isOnline() then
+    GameBattleList.online()
+  end
 end
 
 function GameBattleList.terminate()
   battleList        = { }
   battleListByIndex = { }
+
+	disconnect(GameInterface.getMapPanel(), {
+		onZoomChange = GameBattleList.onZoomChange
+	})
 
   disconnect(g_game, {
     onAttackingCreatureChange = GameBattleList.onAttackingCreatureChange,
@@ -180,6 +188,7 @@ function GameBattleList.terminate()
     onDisappear           = GameBattleList.onDisappear,
     onPositionChange      = GameBattleList.onPositionChange,
     onTypeChange          = GameBattleList.onTypeChange,
+    onOutfitChange        = GameBattleList.onOutfitChange,
     onShieldChange        = GameBattleList.onShieldChange,
     onSkullChange         = GameBattleList.onSkullChange,
     onEmblemChange        = GameBattleList.onEmblemChange,
@@ -199,7 +208,8 @@ function GameBattleList.terminate()
 end
 
 function GameBattleList.online()
-  GameInterface.setupMiniWindow(battleWindow, battleTopMenuButton)
+  battleWindow:setup(battleTopMenuButton)
+  GameBattleList.refreshList()
 end
 
 function GameBattleList.offline()
@@ -223,89 +233,86 @@ function GameBattleList.getButtonIndex(cid)
   return nil
 end
 
+function GameBattleList.getFirstVisibleButton()
+  for _, button in ipairs(battlePanel:getChildren()) do
+    if button:isOn() then
+      return button
+    end
+  end
+  return nil
+end
+
 function GameBattleList.add(creature)
-  local localPlayer = g_game.getLocalPlayer()
-  if creature == localPlayer then
+  if not g_game.getLocalPlayer() or
+     creature:isLocalPlayer() or
+     creature:isDead() -- or
+    --  not GameInterface.getMapPanel():isInRange(creature:getPosition()) -- Not working properly, I think
+  then
     return
   end
 
-  local cid = creature:getId()
+  local cid    = creature:getId()
   local button = battleList[cid]
+  if button then
+    return
+  end
 
   -- Register first time creature adding
-  if not button then
-    if creature:getHealthPercent() == 0 then
-      return
-    end
 
-    button = g_ui.createWidget('BattleButton')
-    button:setup(creature)
+  button            = g_ui.createWidget('BattleButton')
+  button.onlyOutfit = true
+  button:setup(creature)
 
-    button.onHoverChange  = GameBattleList.onBattleButtonHoverChange
-    button.onMouseRelease = GameBattleList.onBattleButtonMouseRelease
+  button.onHoverChange  = GameBattleList.onBattleButtonHoverChange
+  button.onMouseRelease = GameBattleList.onBattleButtonMouseRelease
 
-    battleList[cid] = button
-    table.insert(battleListByIndex, battleList[cid])
+  battleList[cid] = button
+  table.insert(battleListByIndex, battleList[cid])
 
-    if creature == g_game.getAttackingCreature() then
-      GameBattleList.onAttackingCreatureChange(creature)
-    end
-    if creature == g_game.getFollowingCreature() then
-      GameBattleList.onFollowingCreatureChange(creature)
-    end
-
-    battlePanel:addChild(button)
-    GameBattleList.updateList()
+  if creature == g_game.getAttackingCreature() then
+    GameBattleList.onAttackingCreatureChange(creature)
   end
+  if creature == g_game.getFollowingCreature() then
+    GameBattleList.onFollowingCreatureChange(creature)
+  end
+
+  battlePanel:addChild(button)
+  GameBattleList.updateList()
 end
 
 function GameBattleList.remove(creature)
   local cid   = creature:getId()
   local index = GameBattleList.getButtonIndex(cid)
-  if index then
-    if battleList[cid] then
-      if battleList[cid] == lastButtonSwitched then
-        lastButtonSwitched = nil
-      end
-      battleList[cid]:destroy()
-      battleList[cid] = nil
-    end
-    table.remove(battleListByIndex, index)
-  -- else
-  --   print('Trying to remove invalid battleButton')
-  end
-end
 
-function GameBattleList.updateBattleButton(self)
-  self:update()
-  if self.isTarget or self.isFollowed then
-    if lastButtonSwitched and lastButtonSwitched ~= self then
-      lastButtonSwitched.isTarget = false
-      lastButtonSwitched.isFollowed = false
-      GameBattleList.updateBattleButton(lastButtonSwitched)
-    end
-    lastButtonSwitched = self
+  if not index then
+    -- print('Trying to remove invalid battleButton')
+    return
   end
+
+  if battleList[cid] then
+    battleList[cid]:destroy()
+    battleList[cid] = nil
+  end
+  table.remove(battleListByIndex, index)
 end
 
 function GameBattleList.updateBattleButtons()
   for _, button in ipairs(battleListByIndex) do
-    GameBattleList.updateBattleButton(button)
+    button:update()
   end
 end
 
 function GameBattleList.onBattleButtonHoverChange(self, hovered)
   if self.isBattleButton then
     self.isHovered = hovered
-    GameBattleList.updateBattleButton(self)
-  end
-end
-
-function GameBattleList.selectTarget(creature)
-  if g_game.isAttacking() then
-    g_game.cancelAttack()
-  else
-    g_game.attack(creature)
+    self:update()
+    if not self.isTarget and not self.isFollowed then
+      if hovered then
+        self.creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().hovered)
+      else
+        self.creature:hideStaticCircle()
+      end
+    end
   end
 end
 
@@ -327,13 +334,13 @@ function GameBattleList.onBattleButtonMouseRelease(self, mousePosition, mouseBut
     GameInterface.createThingMenu(mousePosition, nil, nil, self.creature)
     return true
   elseif mouseButton == MouseLeftButton and not g_mouse.isPressed(MouseRightButton) then
-    GameBattleList.selectTarget(self.creature)
+    g_game.attack(self.creature)
     return true
   end
   return false
 end
 
-function GameBattleList.updateStaticSquare()
+function GameBattleList.updateStaticCircle()
   for _, button in pairs(battleList) do
     if button.isTarget then
       button:update()
@@ -374,11 +381,26 @@ end
 
 function GameBattleList.filterButtons()
   for _, _button in pairs(battleList) do
-    local on = not GameBattleList.buttonFilter(_button)
     local localPlayer = g_game.getLocalPlayer()
-    if localPlayer and localPlayer:getPosition().z ~= _button.creature:getPosition().z then
+    if not localPlayer then
+      break -- Do nothing if player is not online
+    end
+    local creature = _button.creature
+
+    local on          = not GameBattleList.buttonFilter(_button)
+    local playerPos   = localPlayer:getPosition()
+    local creaturePos = creature:getPosition()
+
+    if creature:isLocalPlayer() or
+       creature:isDead() or
+       not playerPos or
+       not creaturePos or
+       playerPos.z ~= creaturePos.z or
+       not creature:canBeSeen() -- Handles invisible state also
+    then
       on = false
     end
+
     _button:setOn(on)
   end
 end
@@ -558,13 +580,16 @@ function GameBattleList.updateList()
 end
 
 function GameBattleList.clearList()
-  lastButtonSwitched = nil
   battleList         = { }
   battleListByIndex  = { }
   battlePanel:destroyChildren()
 end
 
-function GameBattleList.refreshList()
+local refreshListEvent
+
+local function refreshList()
+  refreshListEvent = nil
+
   local localPlayer = g_game.getLocalPlayer()
   if not localPlayer then
     return
@@ -572,7 +597,7 @@ function GameBattleList.refreshList()
 
   GameBattleList.clearList()
 
-  for _, creature in pairs(g_map.getSpectators(localPlayer:getPosition(), true)) do
+  for _, creature in pairs(GameInterface.getMapPanel():getSpectators()) do
     GameBattleList.add(creature)
   end
 
@@ -585,30 +610,61 @@ function GameBattleList.refreshList()
   end
 end
 
+function GameBattleList.refreshList()
+  removeEvent(refreshListEvent)
+  refreshListEvent = scheduleEvent(refreshList, 1000)
+end
+
 
 
 -- Events
 
-function GameBattleList.onAttackingCreatureChange(creature)
-  local button = creature and battleList[creature:getId()] or lastButtonSwitched
-  if button then
-    button.isTarget = creature and true or false
-    GameBattleList.updateBattleButton(button)
+function GameBattleList.onAttackingCreatureChange(creature, prevCreature)
+  local button, prevButton
+  if battleWindow:isVisible() then
+    button = creature and battleList[creature:getId()]
+    prevButton = prevCreature and battleList[prevCreature:getId()]
   end
+
+  if button then
+    button.isTarget   = creature and true or false
+    button.isFollowed = false
+    button:update()
+  end
+
+  if prevButton then
+    prevButton.isTarget = false
+    prevButton.isFollowed = false
+    prevButton:update()
+    GameBattleList.onBattleButtonHoverChange(prevButton, prevButton.isHovered)
+  end
+
 end
 
-function GameBattleList.onFollowingCreatureChange(creature)
-  local button = creature and battleList[creature:getId()] or lastButtonSwitched
+function GameBattleList.onFollowingCreatureChange(creature, prevCreature)
+  local button, prevButton
+  if battleWindow:isVisible() then
+    button = creature and battleList[creature:getId()]
+    prevButton = prevCreature and battleList[prevCreature:getId()]
+  end
+
   if button then
     button.isFollowed = creature and true or false
-    GameBattleList.updateBattleButton(button)
+    button.isTarget   = false
+    button:update()
+  end
+
+  if prevButton then
+    prevButton.isTarget = false
+    prevButton.isFollowed = false
+    prevButton:update()
   end
 end
 
 function GameBattleList.onAppear(creature)
   if creature:isLocalPlayer() then
     addEvent(function()
-      GameBattleList.updateStaticSquare()
+      GameBattleList.updateStaticCircle()
     end)
   end
 
@@ -645,6 +701,13 @@ function GameBattleList.onTypeChange(creature, typeId, oldTypeId)
   end
 end
 
+function GameBattleList.onOutfitChange(creature, outfit, oldOutfit)
+  local button = battleList[creature:getId()]
+  if button then
+    button:updateCreature(true)
+  end
+end
+
 function GameBattleList.onShieldChange(creature, shieldId)
   local button = battleList[creature:getId()]
   if button then
@@ -673,7 +736,7 @@ function GameBattleList.onSpecialIconChange(creature, specialIconId)
   end
 end
 
-function GameBattleList.onHealthPercentChange(creature, healthPercent)
+function GameBattleList.onHealthPercentChange(creature, healthPercent, oldHealthPercent)
   local button = battleList[creature:getId()]
   if button then
     button:updateHealthPercent(healthPercent)
@@ -717,6 +780,14 @@ function GameBattleList.onTrackCreature(trackNode)
   button:updateTrackIcon(color)
 end
 
+function GameBattleList.onZoomChange(self, oldZoom, newZoom)
+  if newZoom == oldZoom then
+    return
+  end
+
+  GameBattleList.refreshList()
+end
+
 
 
 -- Select next target (see nextTargetShortcut)
@@ -726,8 +797,13 @@ function GameBattleList.selectNextTarget()
     return
   end
 
+  local button = GameBattleList.getFirstVisibleButton()
+  if not button then
+    return
+  end
+
   -- Disable chase mode (this is the price to use the select target shortcut feature)
   GameCharacter.onSetChaseMode(GameCharacter.m.chaseModeButton, false)
 
-  GameBattleList.selectTarget(battleListByIndex[1].creature)
+  g_game.attack(button.creature)
 end

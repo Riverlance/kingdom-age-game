@@ -182,21 +182,21 @@ end
 
 function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
   local powerWidget = self:getChildById('power')
-  powerWidget:setShader(g_shaders.getShader('Angular'))
+  --powerWidget:setShader('Angular')
 
-  local shader = powerWidget:getShader()
-  if shader then
-    shader:bindUniformLocation(PROGRESS_UNIFORM,"u_progress")
-    shader:setUniformF(PROGRESS_UNIFORM, 0)
-    powerWidget.endTime = g_clock.millis() + exhaustTime
-    powerWidget.onShader = function(self, shader) 
-        if not shader or not self.endTime then return end
-        local percent = 1 - (self.endTime - g_clock.millis())/exhaustTime
-        shader:setUniformF(PROGRESS_UNIFORM, percent)
-        if percent >= 1 then
-          self:setShader(nil)
-          self.endTime = nil
-        end
-      end
-  end
+  -- local shader = powerWidget:getShader()
+  -- if shader then
+  --   shader:bindUniformLocation(PROGRESS_UNIFORM,"u_progress")
+  --   shader:setUniformF(PROGRESS_UNIFORM, 0)
+  --   powerWidget.endTime = g_clock.millis() + exhaustTime
+  --   powerWidget.onShader = function(self, shader)
+  --       if not shader or not self.endTime then return end
+  --       local percent = 1 - (self.endTime - g_clock.millis())/exhaustTime
+  --       shader:setUniformF(PROGRESS_UNIFORM, percent)
+  --       if percent >= 1 then
+  --         self:setShader(nil)
+  --         self.endTime = nil
+  --       end
+  --     end
+  -- end
 end

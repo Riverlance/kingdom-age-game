@@ -3,7 +3,6 @@ UIMiniWindow = extends(UIWindow, 'UIMiniWindow')
 
 function UIMiniWindow.create()
   local miniwindow = UIMiniWindow.internalCreate()
-  miniwindow.UIMiniWindowContainer = true
   miniwindow.minimizedHeight = 32
   return miniwindow
 end
@@ -83,7 +82,7 @@ function UIMiniWindow:maximize(dontSave, ignoreHeightChangeSignal)
   self:getChildById('miniwindowScrollBar'):show()
   self:getChildById('bottomResizeBorder'):show()
   self:getChildById('minimizeButton'):setOn(false)
-  self:setHeight(self:getSettings('height') or self.maximizedHeight, false, ignoreHeightChangeSignal)
+  self:setHeight(math.max(self:getSettings('height') or self.maximizedHeight, self:getMinimumHeight()), false, ignoreHeightChangeSignal)
 
   if not dontSave then
     self:setSettings({minimized = false})
@@ -121,11 +120,7 @@ function UIMiniWindow:isLocked()
   return self:getChildById('lockButton'):isOn()
 end
 
-function UIMiniWindow:setup()
-  if self.isSettedUp then
-    return
-  end
-
+function UIMiniWindow:setup(button)
   self:getChildById('closeButton').onClick =
     function()
       if self:isLocked() then
@@ -160,7 +155,10 @@ function UIMiniWindow:setup()
 
   self:getChildById('miniwindowTopBar').onDoubleClick = minimizeButton.onClick
 
-  local oldParent    = self:getParent()
+  if button then
+    self.topMenuButton = button
+  end
+
   local isResizeable = self:isResizeable()
   local selfSettings = self:getSettings(true)
 
@@ -190,13 +188,18 @@ function UIMiniWindow:setup()
 
     if selfSettings.locked then
       self:lock(true)
+    else
+      self:unlock(true)
     end
 
     if selfSettings.closed then
       self:close(true)
+    else
+      self:open(true)
     end
   end
 
+  local oldParent = self:getParent()
   local newParent = self:getParent()
 
   self.miniLoaded = true
@@ -210,7 +213,7 @@ function UIMiniWindow:setup()
     end
   end
 
-  if isResizeable then
+  if (not selfSettings or not selfSettings.minimized) and isResizeable then
     if self.contentMinimumHeight then
       self:setContentMinimumHeight(self.contentMinimumHeight)
 
@@ -225,8 +228,6 @@ function UIMiniWindow:setup()
   end
 
   self:fitOnParent()
-
-  self.isSettedUp = true
 end
 
 function UIMiniWindow:onVisibilityChange(visible)
@@ -367,7 +368,9 @@ function UIMiniWindow:getSettings(name)
     return nil
   end
 
-  local settings = g_settings.getNode('MiniWindows')
+  local playerSettings = Client.getPlayerSettings()
+  local settings = playerSettings:getNode('MiniWindows')
+
   if settings then
     local selfSettings = settings[self:getId()]
     if selfSettings then
@@ -383,10 +386,8 @@ function UIMiniWindow:setSettings(data)
     return
   end
 
-  local settings = g_settings.getNode('MiniWindows')
-  if not settings then
-    settings = { }
-  end
+  local playerSettings = Client.getPlayerSettings()
+  local settings = playerSettings:getNode('MiniWindows') or { }
 
   local id = self:getId()
   if not settings[id] then
@@ -397,7 +398,8 @@ function UIMiniWindow:setSettings(data)
     settings[id][key] = value
   end
 
-  g_settings.setNode('MiniWindows', settings)
+  playerSettings:setNode('MiniWindows', settings)
+  playerSettings:save()
 end
 
 function UIMiniWindow:eraseSettings(data)
@@ -405,10 +407,8 @@ function UIMiniWindow:eraseSettings(data)
     return
   end
 
-  local settings = g_settings.getNode('MiniWindows')
-  if not settings then
-    settings = { }
-  end
+  local playerSettings = Client.getPlayerSettings()
+  local settings = playerSettings:getNode('MiniWindows') or { }
 
   local id = self:getId()
   if not settings[id] then
@@ -419,7 +419,8 @@ function UIMiniWindow:eraseSettings(data)
     settings[id][key] = nil
   end
 
-  g_settings.setNode('MiniWindows', settings)
+  playerSettings:setNode('MiniWindows', settings)
+  playerSettings:save()
 end
 
 function UIMiniWindow:saveParent(parent)

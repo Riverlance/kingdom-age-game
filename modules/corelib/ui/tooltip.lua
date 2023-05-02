@@ -47,7 +47,7 @@ Tooltip = {
     assert(obj.widget, '[Tooltip] Widget not defined.')
 
     -- Attach to list - List by id
-    table.insert(self.__listById, obj)
+    self.__listById[obj.type] = obj
 
     -- Hide widget
     obj.widget:hide()
@@ -529,11 +529,11 @@ end
 
 function g_tooltip.terminate()
   -- Destroy tooltip types
-  for k, _ in ipairs(Tooltip.__listById) do
-    if Tooltip.__listById[k].widget then
-      Tooltip.__listById[k].widget:destroy()
+  for i = #Tooltip.__listById, 1, -1 do
+    if Tooltip.__listById[i].widget then
+      Tooltip.__listById[i].widget:destroy()
     end
-    Tooltip.__listById[k] = nil
+    Tooltip.__listById[i] = nil
   end
 
   disconnect(UIWidget, {

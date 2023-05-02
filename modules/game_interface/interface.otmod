@@ -12,9 +12,9 @@ Module
   load-later:
     // Base
     - game_things
-    - game_shaders
     - game_textmessage
     - game_modaldialog
+    - game_attachedeffects
     - ka_game_screenimage
     - ka_game_lootbar
     - ka_game_blinkhit
@@ -33,7 +33,7 @@ Module
     - game_console
     - game_ruleviolation
 
-    // Top menu right buttons (mini windows)
+    // Top menu right buttons - mini windows
     - game_character
     - game_skills
     - ka_game_attributes
@@ -50,3 +50,4 @@ Module
     - game_hotkeys
     - ka_game_hotkeybars
     - game_questlog
+    - ka_game_dailyreward

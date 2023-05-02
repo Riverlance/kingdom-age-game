@@ -104,8 +104,6 @@ function GamePowers.init()
     onPlayerPowersList = GamePowers.onPlayerPowersList
   })
 
-  GameInterface.setupMiniWindow(powersWindow, powersTopMenuButton)
-
   if g_game.isOnline() then
     GamePowers.online()
   end
@@ -136,7 +134,7 @@ function GamePowers.terminate()
 end
 
 function GamePowers.online()
-  GameInterface.setupMiniWindow(powersWindow, powersTopMenuButton)
+  powersWindow:setup(powersTopMenuButton)
   GamePowers.refreshList()
 end
 

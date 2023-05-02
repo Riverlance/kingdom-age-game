@@ -35,8 +35,6 @@ function GameVipList.init()
     GameVipList.loadVipInfo()
   end
 
-  GameInterface.setupMiniWindow(vipWindow, vipTopMenuButton)
-
   if g_game.isOnline() then
     GameVipList.online()
   end
@@ -65,6 +63,8 @@ function GameVipList.terminate()
 
   vipWindow:destroy()
   vipTopMenuButton:destroy()
+  vipWindow = nil
+  vipTopMenuButton = nil
 
   _G.GameVipList = nil
 end
@@ -89,7 +89,7 @@ function GameVipList.clear()
 end
 
 function GameVipList.online()
-  GameInterface.setupMiniWindow(vipWindow, vipTopMenuButton)
+  vipWindow:setup(vipTopMenuButton)
 
   GameVipList.clear()
   for id,vip in pairs(g_game.getVips()) do
@@ -161,9 +161,9 @@ function GameVipList.createEditWindow(widget)
       g_game.editVip(id, description, iconId, notify)
     else
       if notify ~= false or #description > 0 or iconId > 0 then
-        vipInfo[id] = {description = description, iconId = iconId, notifyLogin = notify}
+        vipInfo[name] = {description = description, iconId = iconId, notifyLogin = notify}
       else
-        vipInfo[id] = nil
+        vipInfo[name] = nil
       end
     end
 
@@ -215,10 +215,11 @@ function GameVipList.removeVip(widgetOrName)
 
   if widget then
     local id = widget:getId():sub(4)
+    local name = widget:getText()
     g_game.removeVip(id)
     contentsPanel:removeChild(widget)
-    if vipInfo[id] and g_game.getFeature(GameAdditionalVipInfo) then
-      vipInfo[id] = nil
+    if vipInfo[name] and g_game.getFeature(GameAdditionalVipInfo) then
+      vipInfo[name] = nil
     end
   end
 end
@@ -267,7 +268,7 @@ function GameVipList.onAddVip(id, name, state, description, iconId, notify)
   end
 
   if not g_game.getFeature(GameAdditionalVipInfo) then
-    local tmpVipInfo = vipInfo[tostring(id)]
+    local tmpVipInfo = vipInfo[name]
     label.iconId = 0
     label.notifyLogin = false
     if tmpVipInfo then
