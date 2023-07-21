@@ -1,13 +1,7 @@
 _G.Client = { }
 
-local musicFilename = '/audios/startup'
-local musicChannel
 local loadingBox
 local isLoaded = false
-
-if g_sounds then
-  musicChannel = g_sounds.getChannel(AudioChannels.Music)
-end
 
 playerSettingsPath = ''
 
@@ -23,9 +17,6 @@ function Client.init()
   })
 
   g_window.setMinimumSize({ width = 600, height = 480 })
-  if musicChannel then
-    g_sounds.preload(musicFilename)
-  end
 
   -- initialize in fullscreen mode on mobile devices
   if g_window.getPlatformType() == 'X11-EGL' then
@@ -83,10 +74,6 @@ end
 
 
 function Client.startup()
-  if musicChannel then
-    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
-  end
-
   connect(g_updater, {
     onUpdated = Client.loadFiles
   })
@@ -95,11 +82,6 @@ function Client.startup()
   })
   connect(g_sprites, {
     onLoadSpr = Client.onLoadFiles
-  })
-
-  connect(g_game, {
-    onGameStart = Client.onGameStart,
-    onGameEnd   = Client.onGameEnd,
   })
 
   -- Check for startup errors
@@ -111,11 +93,6 @@ function Client.startup()
 end
 
 function Client.exit()
-  disconnect(g_game, {
-    onGameStart = Client.onGameStart,
-    onGameEnd   = Client.onGameEnd,
-  })
-
   disconnect(g_sprites, {
     onLoadSpr = Client.onLoadFiles
   })
@@ -141,17 +118,6 @@ function Client.onLoadFiles()
       loadingBox:destroy()
       loadingBox = nil
     end
-  end
-end
-
-function Client.onGameStart()
-  ClientAudio.clearAudios()
-end
-
-function Client.onGameEnd()
-  ClientAudio.clearAudios()
-  if musicChannel then
-    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
   end
 end
 

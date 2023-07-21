@@ -162,6 +162,11 @@ end
 
 
 local function onWidgetStyleApply(widget, styleName, styleNode) -- Create from .otui file
+  if widget.loct then
+    widget:updateLocale(widget.locpar)
+    return
+  end
+
   if not styleNode['tooltip'] then
     return
   end
@@ -519,6 +524,9 @@ function g_tooltip.init()
         end
         ownerLabelWidget:setVisible(isOwnerEnabled)
         ownerValueWidget:setVisible(isOwnerEnabled)
+
+        -- Update layout
+         self.widget:updateLayout()
 
         -- Set new height
         self.widget:setHeight(self.widget:getContentsSize().height + self.widget:getPaddingTop() + self.widget:getPaddingBottom())

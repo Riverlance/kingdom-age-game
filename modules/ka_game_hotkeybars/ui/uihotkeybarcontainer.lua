@@ -166,9 +166,6 @@ function UIHotkeyBarContainer:onCancelPower()
 end
 
 --[[ Power Effects ]]
-
-local PROGRESS_UNIFORM = 15
-
 function UIHotkeyBarContainer:setPowerIcon(powerId, enabled)
   local path = string.format('/images/ui/power/%d_%s', powerId, enabled and 'on' or 'off')
   self:getChildById('power'):setImageSource(path)
@@ -182,21 +179,31 @@ end
 
 function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
   local powerWidget = self:getChildById('power')
-  --powerWidget:setShader('Angular')
+  if not powerWidget then
+    print_traceback("UIHotkeyBarContainer:setPowerProgressShader - Power widget not found")
+    return
+  end
 
-  -- local shader = powerWidget:getShader()
-  -- if shader then
-  --   shader:bindUniformLocation(PROGRESS_UNIFORM,"u_progress")
-  --   shader:setUniformF(PROGRESS_UNIFORM, 0)
-  --   powerWidget.endTime = g_clock.millis() + exhaustTime
-  --   powerWidget.onShader = function(self, shader)
-  --       if not shader or not self.endTime then return end
-  --       local percent = 1 - (self.endTime - g_clock.millis())/exhaustTime
-  --       shader:setUniformF(PROGRESS_UNIFORM, percent)
-  --       if percent >= 1 then
-  --         self:setShader(nil)
-  --         self.endTime = nil
-  --       end
-  --     end
-  -- end
+  powerWidget:setShader('Widget - Angular')
+  powerWidget:setShaderUniform(ShaderUniforms.Progress, 0)
+
+  powerWidget.endTime = g_clock.millis() + exhaustTime
+
+  local function updateShader()
+    local widget = self:getChildById('power')
+    if not widget then
+      return
+    end
+
+    local percent = 1 - (widget.endTime - g_clock.millis()) / exhaustTime
+    widget:setShaderUniform(ShaderUniforms.Progress, percent)
+    if percent >= 1 then
+      widget:setShader('Widget - None')
+      widget.endTime = nil
+    else
+      scheduleEvent(function() updateShader() end, 50)
+    end
+  end
+
+  scheduleEvent(function() updateShader() end, 50)
 end

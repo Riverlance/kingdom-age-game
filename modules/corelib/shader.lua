@@ -1,3 +1,7 @@
+ShaderUniforms = {
+  Progress = 20
+}
+
 MapShaders = {
   -- Filters
 
@@ -9,7 +13,6 @@ MapShaders = {
 
   -- Shaders
 
-  { name = 'Angular', frag = 'shader/fragment/angular.frag' },
   { name = 'Bloom', frag = 'shader/fragment/bloom.frag' },
   { name = 'Fog', frag = 'shader/fragment/fog.frag', tex1 = 'shader/images/clouds' },
   { name = 'Grayscale', frag = 'shader/fragment/grayscale.frag' },
@@ -33,7 +36,6 @@ MapShaders = {
 
 OutfitShaders = {
   { name = 'None' }, -- No fragment
-  { name = 'Angular', frag = 'shader/fragment/angular.frag' },
   { name = 'Bloom', frag = 'shader/fragment/bloom.frag' },
   { name = 'Bloom Grayscale', frag = 'shader/fragment/bloom.frag', drawColor = false },
   { name = 'Heat', frag = 'shader/fragment/heat.frag' },
@@ -48,7 +50,6 @@ OutfitShaders = {
 
 MountShaders = {
   { name = 'None' }, -- No fragment
-  { name = 'Angular', frag = 'shader/fragment/angular.frag' },
   { name = 'Bloom', frag = 'shader/fragment/bloom.frag' },
   { name = 'Negative Grayscale', frag = 'shader/fragment/negative-grayscale.frag' },
   { name = 'Noise', frag = 'shader/fragment/noise.frag' },
@@ -58,11 +59,15 @@ MountShaders = {
 
 ItemShaders = {
   { name = 'None' }, -- No fragment
-  { name = 'Angular', frag = 'shader/fragment/angular.frag' },
   { name = 'Bloom', frag = 'shader/fragment/bloom.frag' },
   { name = 'Negative Grayscale', frag = 'shader/fragment/negative-grayscale.frag' },
   { name = 'Party', frag = 'shader/fragment/party.frag' },
   { name = 'Radial Blur', frag = 'shader/fragment/radialblur.frag' },
+}
+
+WidgetShaders = {
+  { name = 'None' }, -- No fragment
+  { name = 'Angular', frag = 'shader/fragment/angular.frag', uniforms = { [ShaderUniforms.Progress] = 'u_progress' } },
 }
 
 local function registerShader(shaderData, namePrefix, setupCallback)
@@ -71,23 +76,17 @@ local function registerShader(shaderData, namePrefix, setupCallback)
 
   if fragmentShaderPath then
     local name = namePrefix .. ' - ' .. shaderData.name
-
-    --  local shader = g_shaders.createShader()
-    -- local shader = g_shaders.createFragmentShader(namePrefix .. ' - ' .. shaderData.name, shaderData.frag)
     g_shaders.createFragmentShader(name, shaderData.frag)
 
     -- Add as many textures you want
     local textureId = 1
     while shaderData['tex' .. textureId] do
-      -- shader:addMultiTexture(resolvepath(shaderData['tex' .. textureId]))
       g_shaders.addMultiTexture(name, resolvepath(shaderData['tex' .. textureId]))
       textureId = textureId + 1
     end
 
     -- Setup proper uniforms
-    -- g_shaders.registerShader(namePrefix .. ' - ' .. shaderData.name, shader)
-    -- g_shaders[setupCallback](shader)
-    g_shaders[setupCallback](name)
+    g_shaders[setupCallback](name, shaderData.uniforms or { })
   end
 end
 
@@ -109,4 +108,9 @@ end
 -- Item
 for _, shaderData in ipairs(ItemShaders) do
   registerShader(shaderData, 'Item', 'setupItemShader')
+end
+
+-- Widget
+for _, shaderData in ipairs(WidgetShaders) do
+  registerShader(shaderData, 'Widget', 'setupWidgetShader')
 end

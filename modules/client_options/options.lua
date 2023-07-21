@@ -381,7 +381,9 @@ function ClientOptions.setOption(key, value, force)
     g_window.setFullscreen(value)
 
   elseif key == 'shaderFilter' then
-    ClientShaders.setMapShaderById(value)
+    if g_game.isOnline() then
+      ClientShaders.setMapShaderById(value)
+    end
 
   elseif key == 'viewMode' then
     if modules.game_interface then
@@ -540,7 +542,7 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.getChatButton():setOn(value)
 
   elseif modules.game_interface and key == 'gameScreenSize' then
-    GameInterface.getMapPanel():setZoom( value % 2 == 0 and value + 1 or value )
+    GameInterface.getMapPanel():setZoom(value)
 
   elseif key == 'backgroundFrameRate' then
     g_app.setMaxFps(value > 0 and value < 201 and value or 0)

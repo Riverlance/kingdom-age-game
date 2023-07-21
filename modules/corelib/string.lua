@@ -162,3 +162,38 @@ function string:comma()
   local left, num, right = string.match(self, '^([^%d]*%d)(%d*)(.-)$')
   return left .. num:reverse():gsub('(%d%d%d)', '%1,'):reverse() .. right
 end
+
+function string:eval(params)
+  local result, occurrences = self:gsub('${(%w+)}', params)
+  if occurrences == 0 then
+    return result
+  else
+    return result:eval(params)
+  end
+end
+
+function string:var()
+  return string.format('${%s}', self)
+end
+
+function string:getArticle()
+  return self:find('[AaEeIiOoUuYy]') == 1 and 'an' or 'a'
+end
+
+function string:getMonthDayEnding() -- You can use as string.getMonthDayEnding(1) too
+  local number = tonumber(self)
+  if number then
+    if number == 1 or number == 21 or number == 31 then
+      return 'st'
+    elseif number == 2 or number == 22 then
+      return 'nd'
+    elseif number == 3 or number == 23 then
+      return 'rd'
+    end
+  end
+  return 'th'
+end
+
+function string:getMonthString() -- You can use as string.getMonthString(1) too
+  return os.date('%B', os.time{year = 1970, month = self, day = 1})
+end

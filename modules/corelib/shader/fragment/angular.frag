@@ -1,7 +1,5 @@
 #define PI 3.141592653589
 
-
-uniform float u_Time;
 uniform sampler2D u_Tex0;
 varying vec2 v_TexCoord;
 

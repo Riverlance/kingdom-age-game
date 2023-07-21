@@ -1,29 +1,34 @@
 BattleTabButton < TabButton
   size: 20 20
   icon-source: /images/ui/battle_list/filter
+  &loct: '${FilterShow}'
+  @locpar: return { FilterType = self.FilterType }
+  $on:
+    &loct: '${FilterHide}'
 
 MiniWindow
   id: battleWindow
-  !text: tr('Battle List')
+  &loc: '${BattleWindowTitle}'
   icon: /images/ui/top_menu/battle_list
   &save: true
   &contentMinimumHeight: 31
 
   ArrowMenuButton
-    !tooltip: tr('Show options')
+    &loct: '${ShowFilters}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
     @onClick: GameBattleList.onClickArrowMenuButton(self)
 
     $on:
-      !tooltip: tr('Hide options')
+      &loct: '${HideFilters}'
 
   BallMenuButton
     id: sortMenuButton
     @onClick: GameBattleList.createSortMenu()
 
   InfoMenuButton
-    !tooltip: tr('Once chat mode is disabled, you are able to use the shortcut (Space) to select the next target from this window.\n\nNote: On select the next target with this shortchut, the Chase Mode will be deactivated.')
+    &loct: '${BattleAutoTargetTooltip}'
+    @locpar: return { NextTargetActionKey = NextTargetActionKey }
     !tooltip-type: TooltipType.textBlock
     anchors.verticalCenter: sortMenuButton.verticalCenter
     anchors.right: sortMenuButton.outsideLeft
@@ -45,72 +50,65 @@ MiniWindow
 
       BattleTabButton
         id: filterPlayers
-        !tooltip: tr('Show players')
+        &FilterType: '${FilterPlayers}'
         icon-clip: 0 0 20 20
         @onClick: GameBattleList.onClickFilterPlayers(self)
 
         $on:
-          !tooltip: tr('Hide players')
           icon-clip: 0 20 20 20
 
       BattleTabButton
         id: filterNPCs
-        !tooltip: tr('Show npcs')
+        &FilterType: '${FilterNPC}'
         icon-clip: 20 0 20 20
         @onClick: GameBattleList.onClickFilterNPCs(self)
 
         $on:
-          !tooltip: tr('Hide npcs')
           icon-clip: 20 20 20 20
 
       BattleTabButton
         id: filterMonsters
-        !tooltip: tr('Show monsters')
+        &FilterType: '${FilterMonsters}'
         icon-clip: 40 0 20 20
         @onClick: GameBattleList.onClickFilterMonsters(self)
 
         $on:
-          !tooltip: tr('Hide monsters')
           icon-clip: 40 20 20 20
 
       BattleTabButton
         id: filterOwnSummons
-        !tooltip: tr('Show own summons')
+        &FilterType: '${FilterOwnSummons}'
         icon-clip: 60 0 20 20
         @onClick: GameBattleList.onClickFilterOwnSummons(self)
 
         $on:
-          !tooltip: tr('Hide own summons')
           icon-clip: 60 20 20 20
 
       BattleTabButton
         id: filterOtherSummons
-        !tooltip: tr('Show other summons')
+        &FilterType: '${FilterOtherSummons}'
         icon-clip: 80 0 20 20
         @onClick: GameBattleList.onClickFilterOtherSummons(self)
 
         $on:
-          !tooltip: tr('Hide other summons')
           icon-clip: 80 20 20 20
 
       BattleTabButton
-        id: filterSkulls
-        !tooltip: tr('Show safe players')
+        id: filterNeutral
+        &FilterType: '${FilterNeutralPlayers}'
         icon-clip: 100 0 20 20
-        @onClick: GameBattleList.onClickFilterSkulls(self)
+        @onClick: GameBattleList.onClickFilterNeutral(self)
 
         $on:
-          !tooltip: tr('Hide safe players')
           icon-clip: 100 20 20 20
 
       BattleTabButton
         id: filterParty
-        !tooltip: tr('Show party members')
+        &FilterType: '${FilterPartyMembers}'
         icon-clip: 120 0 20 20
         @onClick: GameBattleList.onClickFilterParty(self)
 
         $on:
-          !tooltip: tr('Hide party members')
           icon-clip: 120 20 20 20
 
   MiniWindowContents

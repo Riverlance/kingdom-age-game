@@ -33,7 +33,13 @@ local function addButton(id, description, icon, callback, panel, toggle, front)
     end
   end
   button:setId(id)
-  button:setTooltip(description)
+  if type(description) == 'table' then --workaround
+    button.loct = description.loct
+    button.locpar = description.locpar
+    button:updateLocale(button.locpar)
+  else
+    button:setTooltip(description)
+  end
   button:setIcon(resolvepath(icon, 3))
   button.onMouseRelease = function(widget, mousePos, mouseButton)
     if widget:containsPoint(mousePos) and mouseButton ~= MouseMidButton then

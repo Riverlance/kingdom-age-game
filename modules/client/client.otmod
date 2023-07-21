@@ -20,4 +20,3 @@ Module
     - client_terminal
     - client_autoreload
     - client_serverlist
-    - ka_client_audio

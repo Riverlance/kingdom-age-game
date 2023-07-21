@@ -15,7 +15,6 @@ Panel
 
   OptionScrollbar
     id: gameScreenSize
-    step: 2
     minimum: 11
     maximum: 19
     symbol: SQMs

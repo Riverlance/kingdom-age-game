@@ -8,6 +8,14 @@ local debugInfo = false
 
 local currentLocaleId = DefaultLocaleId
 
+Locales = {
+  [1] = 'en',
+  [2] = 'pt',
+  [3] = 'es',
+  [4] = 'de',
+  [5] = 'pl',
+  [6] = 'sv',
+}
 
 
 localesWindow = nil
@@ -114,8 +122,10 @@ function ClientLocales.setLocale(id)
     return
   end
 
+  local prevLocaleId = currentLocaleId
   currentLocaleId = id
   g_settings.set('locale', id)
+  rootWidget:onLocaleChange(id, prevLocaleId)
 
   ClientLocales.sendLocale()
 
@@ -143,7 +153,6 @@ function ClientLocales.createWindow()
     widget.onClick = function()
       ClientLocales.destroyWindow()
       ClientLocales.setLocale(id)
-      g_modules.reloadModules()
     end
 
     count = count + 1
@@ -237,4 +246,27 @@ function ClientLocales.sendLocale()
   protocolGame:send(msg)
 
   return true
+end
+
+ClientLocales.translationList = { }
+
+function ClientLocales.getTranslation(id)
+  local lang = Locales[currentLocaleId]
+  local tr = ClientLocales.translationList[id]
+  local selected = tr and (tr[lang] or tr['en']) or nil-- default: English
+  if type(selected) == 'table' then
+    return selected[math.random(#selected)]
+  else
+    return selected
+  end
+end
+
+function ClientLocales.addTranslations(tr) -- { id = { [lang] = text, ... }, ...}
+  for id, trList in pairs(tr) do
+    ClientLocales.translationList[id] = trList
+  end
+end
+
+function _G.loc(str, params)
+  return tostring(str):eval(function(s) return loc(ClientLocales.getTranslation(s) or (params and params[s]) or _G.s, params) end)
 end

@@ -4,7 +4,7 @@ Module
   author: andrefaramir, BeniS
   website: https://github.com/edubart/otclient
   sandboxed: true
-  scripts: [ battlelist ]
+  scripts: [ loc, battlelist ]
   dependencies: [ client_topmenu, game_interface ]
   @onLoad: GameBattleList.init()
   @onUnload: GameBattleList.terminate()

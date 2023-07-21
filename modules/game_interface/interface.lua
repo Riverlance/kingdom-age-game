@@ -1625,7 +1625,7 @@ function GameInterface.setupViewMode(mode)
     return
   end
 
-  g_game.changeMapAwareRange(18, 14)
+  g_game.changeMapAwareRange(25, 19) -- Max viewport x & y
 
   local viewMode = ViewModes[mode]
 

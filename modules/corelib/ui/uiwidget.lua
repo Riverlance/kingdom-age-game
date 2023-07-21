@@ -20,6 +20,20 @@ function UIWidget:onSetup()
 
     miniwindowScrollBar:addAnchor(AnchorRight, 'parent', AnchorRight)
   end
+  self:updateLocale(self.locpar)
+end
+
+function UIWidget:updateLocale(params)
+  local par = type(params) == 'function' and params(self) or params
+  if self.loc then self:setText(loc(self.loc, par), false) end
+  if self.loct then self:setTooltip(loc(self.loct, par)) end
+end
+
+function UIWidget:onLocaleChange(localeId, prevLocaleId)
+  self:updateLocale()
+  for _, child in ipairs(self:getChildren() or { }) do
+    child:onLocaleChange(localeId, prevLocaleId)
+  end
 end
 
 function UIWidget:setMargin(...)

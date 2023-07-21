@@ -40,7 +40,7 @@ function GameModalDialog.destroyDialog()
   end
 end
 
-function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons, enterButton, escapeButton, choices, priority) -- priority parameter is unused, not sure what its use is.
+function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons, enterButton, escapeButton, choices, fields, priority) -- priority parameter is unused, not sure what its use is.
   if modalDialog then
     return
   end
@@ -51,6 +51,7 @@ function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons,
   local choiceList      = modalDialog:getChildById('choiceList')
   local choiceScrollbar = modalDialog:getChildById('choiceScrollBar')
   local buttonsPanel    = modalDialog:getChildById('buttonsPanel')
+  local fieldList       = { }
 
   modalDialog:lock()
   modalDialog:setText(title)
@@ -94,7 +95,11 @@ function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons,
         choiceKey = focusedChoice.choiceKey
       end
 
-      g_game.answerModalDialog(id, buttonId, buttons[i] and buttons[i][2] or '', choice, choices[choiceKey] and choices[choiceKey][2] or '', spectatorId)
+      for i = 1, #fields do
+        fieldList[i] = fieldList[i]:getText()
+      end
+
+      g_game.answerModalDialog(id, buttonId, buttons[i] and buttons[i][2] or '', choice, choices[choiceKey] and choices[choiceKey][2] or '', fieldList, spectatorId)
       GameModalDialog.destroyDialog()
     end
 
@@ -117,6 +122,13 @@ function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons,
   messageLabel:setWidth(math.min(modalDialog.maximumWidth, math.max(buttonsWidth, messageLabel:getWidth(), modalDialog.minimumWidth)) - horizontalPadding)
   modalDialog:setHeight(modalDialog:getHeight() + additionalHeight + messageLabel:getHeight() - 8)
 
+  for i = 1, #fields do
+    local label = g_ui.createWidget('Label', modalDialog)
+    label:setText(fields[i][2])
+    local field = g_ui.createWidget('TextEdit', modalDialog)
+    fieldList[i] = field
+  end
+
   local enterFunc = function()
     local focusedChoice = choiceList:getFocusedChild()
 
@@ -135,7 +147,11 @@ function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons,
       end
     end
 
-    g_game.answerModalDialog(id, enterButton, buttonTxT, choice, choices[choiceKey] and choices[choiceKey][2] or '', spectatorId)
+    for i = 1, #fields do
+      fieldList[i] = fieldList[i]:getText()
+    end
+
+    g_game.answerModalDialog(id, enterButton, buttonTxT, choice, choices[choiceKey] and choices[choiceKey][2] or '', fieldList, spectatorId)
     GameModalDialog.destroyDialog()
   end
 
@@ -157,7 +173,11 @@ function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons,
       end
     end
 
-    g_game.answerModalDialog(id, escapeButton, buttonTxT, choice, choices[choiceKey] and choices[choiceKey][2] or '', spectatorId)
+    for i = 1, #fields do
+      fieldList[i] = fieldList[i]:getText()
+    end
+
+    g_game.answerModalDialog(id, escapeButton, buttonTxT, choice, choices[choiceKey] and choices[choiceKey][2] or '', fieldList, spectatorId)
     GameModalDialog.destroyDialog()
   end
 

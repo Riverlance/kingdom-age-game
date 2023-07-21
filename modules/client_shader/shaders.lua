@@ -42,15 +42,26 @@ end
 function ClientShaders.init()
   -- Alias
   ClientShaders.m = modules.client_shader
+
+  connect(g_game, {
+    onGameStart = ClientShaders.onGameStart,
+  })
 end
 
 function ClientShaders.terminate()
+  disconnect(g_game, {
+    onGameStart = ClientShaders.onGameStart,
+  })
   _G.ClientShaders = nil
 end
 
 
 
 -- Kingdom Age
+
+function ClientShaders.onGameStart()
+  addEvent(function()  ClientShaders.setMapShaderById(ClientOptions.getOption('shaderFilter')) end)
+end
 
 function ClientShaders.setMapShaderById(id)
   local shaderData = MapShaders[id]

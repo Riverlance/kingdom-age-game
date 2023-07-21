@@ -6,6 +6,14 @@ local background
 -- local particles
 local clientVersionLabel
 
+local musicFilename = '/audios/startup'
+local musicChannel
+
+if g_sounds then
+  musicChannel = g_sounds.getChannel(AudioChannels.Music)
+  g_sounds.preload(musicFilename)
+end
+
 function ClientBackground.init()
   -- Alias
   ClientBackground.m = modules.client_background
@@ -21,6 +29,10 @@ function ClientBackground.init()
   --                            'Rev  ' .. g_app.getBuildRevision() .. ' (' .. g_app.getBuildCommit() .. ')\n' ..
   --                            'Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch() .. '\n' ..
   --                            g_app.getBuildCompiler())
+
+  if musicChannel then
+    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+  end
 
   if not g_game.isOnline() then
     addEvent(function()
@@ -54,9 +66,14 @@ end
 
 function ClientBackground.onGameStart()
   ClientBackground.hide()
+  ClientAudio.clearAudios()
 end
 
 function ClientBackground.onGameEnd()
+  ClientAudio.clearAudios()
+  if musicChannel then
+    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+  end
   ClientBackground.show()
 end
 

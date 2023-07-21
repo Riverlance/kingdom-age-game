@@ -175,7 +175,8 @@ ServerExtOpcodes = {
   ServerExtOpcodeRuleViolation     = 10,
   ServerExtOpcodeDailyReward       = 11,
   ServerExtOpcodeWidgetLock        = 12,
-  -- Free                            13 to 65535
+  ServerExtOpcodePowerList         = 13,
+  -- Free                            14 to 65535
 }
 
 -- Client to Server - Opcodes

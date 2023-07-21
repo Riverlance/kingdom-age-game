@@ -34,7 +34,7 @@ float rainLayer(vec2 uv, float scale, float ttime)
 void main(void)
 {
   vec4 Game = texture2D(u_Tex0, v_TexCoord);
-  vec2 uv = ((gl_FragCoord.xy) * 2.5) / 200. + vec2(u_WalkOffset.x, u_WalkOffset.y);
+  vec2 uv = ((gl_FragCoord.xy) * 2.5) / 200. + abs(vec2(u_WalkOffset.x, u_WalkOffset.y));
 
   float ttime = mod(u_Time * 1.0, 1000.);
 

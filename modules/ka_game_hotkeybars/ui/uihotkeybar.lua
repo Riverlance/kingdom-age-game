@@ -33,7 +33,9 @@ end
 function UIHotkeyBar:unload()
   self.hotkeyList = { }
   self.tempContainer = nil
-  self:getHotkeyList():destroyChildren()
+  local hotkeyList = self:getHotkeyList()
+  hotkeyList:destroyChildren()
+  hotkeyList:updateLayout()
 end
 
 function UIHotkeyBar:load(settings)

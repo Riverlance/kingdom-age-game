@@ -333,13 +333,13 @@ function GameNpcTrade.getSellQuantity(item)
 end
 
 function GameNpcTrade.canTradeItem(item)
-  if townTrustLevel < item.tradeTrustLevel then
-    return TradeErrorNoEnoughTrust
-  end
-
   local tradeType = GameNpcTrade.getCurrentTradeType()
 
   if tradeType == BUY then
+    if townTrustLevel < item.tradeTrustLevel then
+      return TradeErrorNoEnoughTrust
+    end
+
     local items, backpacks, price = GameNpcTrade.getBuyAmount(item, 1)
     local isIgnoreCapacityChecked = ignoreCapacity:isChecked()
 

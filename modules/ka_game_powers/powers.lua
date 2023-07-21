@@ -61,6 +61,7 @@ function GamePowers.init()
 
   powersList = { }
   powerListByIndex = { }
+  powerInfo = { }
 
   g_ui.importStyle('powersbutton')
   g_keyboard.bindKeyDown('Ctrl+Shift+P', GamePowers.toggle)
@@ -108,6 +109,7 @@ function GamePowers.init()
     GamePowers.online()
   end
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePowerCast, GamePowers.parsePower)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodePowerList, GamePowers.parsePowerList)
 end
 
 function GamePowers.terminate()
@@ -119,6 +121,8 @@ function GamePowers.terminate()
   end
 
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePowerCast)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodePowerList)
+
   disconnect(g_game, {
     onGameStart        = GamePowers.online,
     onGameEnd          = GamePowers.offline,
@@ -475,11 +479,17 @@ function GamePowers.getPower(id)
 end
 
 function GamePowers.getPowerInfo(powerId)
-  local power = GamePowers.getPower(powerId)
-  local ret = { }
-  if power then
-    ret.name = power.name or "Unknown Power"
-    ret.level = power.level or "?"
+  return powerInfo[powerId]
+end
+
+function GamePowers.parsePowerList(protocolGame, opcode, msg)
+  local totalPowers = msg:getU8()
+  for id = 1, totalPowers do
+    local id = msg:getU8()
+    powerInfo[id] = {
+      name  = msg:getString(),
+      level = msg:getU16()
+    }
   end
-  return ret
+  signalcall(GamePowers.onUpdatePowerList)
 end
