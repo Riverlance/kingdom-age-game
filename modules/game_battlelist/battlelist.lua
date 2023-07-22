@@ -836,9 +836,9 @@ function GameBattleList.selectNextTarget()
 
   -- Found a new button to target
   if selectedButton and selectedButton ~= oldSelectedButton then
-    g_game.attack(selectedButton.creature)
-
     -- Disable chase mode (this is the price to use the select target shortcut feature)
     GameCharacter.onSetChaseMode(GameCharacter.m.chaseModeButton, false)
+
+    g_game.attack(selectedButton.creature)
   end
 end
