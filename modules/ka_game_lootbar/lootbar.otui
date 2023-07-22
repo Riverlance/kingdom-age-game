@@ -36,4 +36,4 @@ ItemBoxContainer < UIWidget
     virtual: true
     phantom: true
     anchors.centerIn: parent
-    item-id: 100
+
