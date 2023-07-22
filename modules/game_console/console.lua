@@ -283,6 +283,7 @@ function GameConsole.enableChat()
   -- Disable next target shortcut
   if GameBattleList then
     g_keyboard.unbindKeyDown(GameBattleList.m.NextTargetActionKey)
+    g_keyboard.unbindKeyDown(GameBattleList.m.PrevTargetActionKey)
   end
 
   consoleTextEdit:setVisible(true)
@@ -336,6 +337,7 @@ function GameConsole.disableChat()
   -- Enable next target shortcut
   if GameBattleList.m then
     g_keyboard.bindKeyDown(GameBattleList.m.NextTargetActionKey, GameBattleList.selectNextTarget)
+    g_keyboard.bindKeyDown(GameBattleList.m.PrevTargetActionKey, GameBattleList.selectNextTarget)
   end
 end
 

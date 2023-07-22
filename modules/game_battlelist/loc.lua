@@ -11,8 +11,8 @@ ClientLocales.addTranslations{
   BattleButtonTopMenu = BattleWindowTitle,
 
   BattleAutoTargetTooltip = {
-    en = 'Whenever the chat mode is disabled, you are able to use the ${NextTargetActionKey} to select the next target from the list.\n\nNote: On select the next target with this shortcut, the Chase Mode will be deactivated.',
-    pt = 'Quando o modo de conversa estiver desativado, você pode usar ${NextTargetActionKey} para selecionar o próximo alvo da lista.\n\nNota: Ao selecionar o próximo alvo com este atalho, o Modo de Perseguição será desativado.',
+    en = 'Whenever the chat mode is disabled, you are able to use the (${NextTargetActionKey}) to select the next target monster from the list (hold (${PrevTargetActionKey}) for reverse order).\n\nNote: On select the next target monster with this shortcut, the Chase Mode will be deactivated.',
+    pt = 'Quando o modo de conversa estiver desativado, você pode usar (${NextTargetActionKey}) para selecionar o próximo alvo monstro da lista (segure (${PrevTargetActionKey}) para ordem reversa).\n\nNota: Ao selecionar o próximo alvo monstro com este atalho, o Modo de Perseguição será desativado.',
   },
 
   BattleCurrentSorting = {
