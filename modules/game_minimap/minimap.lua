@@ -154,6 +154,7 @@ function GameMinimap.offline()
   if minimapWidget.fullMapView then
     GameMinimap.toggleFullMap()
   end
+  currentMapFilename = ''
 end
 
 function GameMinimap.loadMap(clean)
@@ -164,6 +165,7 @@ function GameMinimap.loadMap(clean)
   local minimapFile = '/minimap.otmm'
   if string.exists(currentMapFilename) then
     minimapFile = tr('/%s.otmm', currentMapFilename)
+    preloaded = false
   end
 
   if g_resources.fileExists(minimapFile) then
