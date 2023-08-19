@@ -208,6 +208,7 @@ function GameConditions.removeCondition(condition)
   if index then
     if conditionList[index] then
       conditionList[index].button:destroy()
+      conditionList[index] = nil
     end
     table.remove(conditionList, index)
     GameConditions.updateConditionList()
@@ -232,7 +233,7 @@ function GameConditions.parseConditions(protocol, msg)
   local action = msg:getU8()
 
   local condition = { }
-  condition.id    = msg:getU8()
+  condition.id    = msg:getU16()
   condition.subId = msg:getU8()
 
   -- Insert / Update

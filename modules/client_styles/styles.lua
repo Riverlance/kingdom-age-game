@@ -18,6 +18,7 @@ function ClientStyles.init()
   ClientStyles.importResources('particles', 'otps', device)
 
   g_mouse.loadCursors('/cursors/cursors')
+  g_gameConfig.loadFonts()
 end
 
 function ClientStyles.terminate()
@@ -25,9 +26,9 @@ function ClientStyles.terminate()
 end
 
 function ClientStyles.importResources(dir, type, device)
-  local path = '/'..dir..'/'
+  local path = '/' .. dir .. '/'
   local files = g_resources.listDirectoryFiles(path)
-  for _,file in pairs(files) do
+  for _, file in pairs(files) do
     if g_resources.isFileType(file, type) then
       resourceLoaders[type](path .. file)
     end
@@ -37,11 +38,11 @@ function ClientStyles.importResources(dir, type, device)
   if device then
     local devicePath = g_platform.getDeviceShortName(device.type)
     if devicePath ~= '' then
-      table.insertall(files, ClientStyles.importResources(dir..'/'..devicePath, type))
+      table.insertall(files, ClientStyles.importResources(dir .. '/' .. devicePath, type))
     end
     local osPath = g_platform.getOsShortName(device.os)
     if osPath ~= '' then
-      table.insertall(files, ClientStyles.importResources(dir..'/'..osPath, type))
+      table.insertall(files, ClientStyles.importResources(dir .. '/' .. osPath, type))
     end
     return
   end

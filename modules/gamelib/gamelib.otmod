@@ -4,7 +4,6 @@ Module
   author: OTClient team
   reloadable: false
   website: https://github.com/edubart/otclient
-  dependencies: [ game_things ]
 
   @onLoad: |
     dofile 'const'

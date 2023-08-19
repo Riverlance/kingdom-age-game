@@ -3,11 +3,6 @@
 -- set true so that modules are reloaded when modified. (Note: Use only dev mod)
 AUTO_RELOAD_MODULE = false
 
--- WALKING SYSTEM
--- Set true if using Nostalrius 7.2, Nekiro TFS-1.5-Downgrades-7.72
--- or any protocol below 860 that the walking system is stuttering.
-g_game.setForceNewWalkingFormula(true)
-
 -- How to create a new version
 -- Version *.x.x : Major Release - Significant New Systems
 -- Version x.*.x : Minor Release - Improvements
@@ -16,9 +11,6 @@ CLIENT_VERSION = '1.0.1' -- [CLIENT VERSION] Here is just the Version Name
 
 -- Sets a seed for the pseudo-random generator
 math.randomseed(os.time())
-
--- set latest supported version
-g_game.setLastSupportedVersion(1099)
 
 -- setup logger
 g_logger.setLogFile(g_resources.getWorkDir() .. g_app.getCompactName() .. '.log')

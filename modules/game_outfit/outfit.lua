@@ -62,10 +62,6 @@ function GameOutfit.updateMount()
 end
 
 function GameOutfit.create(creatureOutfit, outfitList, creatureMount, mountList)
-  if outfitWindow and not outfitWindow:isHidden() then
-    return
-  end
-
   outfitCreature = creatureOutfit
   mountCreature = creatureMount
   outfits = outfitList
@@ -161,16 +157,20 @@ function GameOutfit.create(creatureOutfit, outfitList, creatureMount, mountList)
 end
 
 function GameOutfit.destroy()
-  if outfitWindow then
-    outfitWindow:destroy()
-    outfitWindow = nil
-    outfitCreature = nil
-    mountCreature = nil
-    currentColorBox = nil
-    currentClotheButtonBox = nil
-    colorBoxes = { }
-    addons = { }
+  if not outfitWindow then
+    return
   end
+
+  outfitWindow:destroy()
+
+  outfitWindow = nil
+  outfitCreature = nil
+  mountCreature = nil
+  currentColorBox = nil
+  currentClotheButtonBox = nil
+
+  colorBoxes = { }
+  addons = { }
 end
 
 function GameOutfit.randomize()

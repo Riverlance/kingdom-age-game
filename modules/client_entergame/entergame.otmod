@@ -4,7 +4,10 @@ Module
   author: edubart
   website: https://github.com/edubart/otclient
   scripts: [ entergame, characterlist ]
-  dependencies: [ game_things, client_topmenu ]
+
+  load-later:
+    - game_features
+    - game_things
 
   @onLoad: |
     ClientEnterGame.init()
