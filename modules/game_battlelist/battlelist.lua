@@ -63,13 +63,12 @@ local defaultValues = {
 }
 
 -- Position checking
-lastPosCheck   = g_clock.millis()
+lastPosCheck = g_clock.millis()
 posUpdateDelay = 200
 
 -- Action Keys
-BattleActionKey     = 'Ctrl+B'
+BattleActionKey = 'Ctrl+B'
 NextTargetActionKey = 'Space'
-PrevTargetActionKey = 'Ctrl+Space'
 
 
 function GameBattleList.init()
@@ -235,7 +234,7 @@ end
 -- Button
 
 function GameBattleList.getButtonIndex(cid)
-  for k, button in ipairs(battleListByIndex) do
+  for k, button in pairs(battleListByIndex) do
     if cid == button.creature:getId() then
       return k
     end
@@ -244,17 +243,7 @@ function GameBattleList.getButtonIndex(cid)
 end
 
 function GameBattleList.getFirstVisibleButton()
-  for _, button in ipairs(battleListByIndex) do
-    if button:isOn() then
-      return button
-    end
-  end
-  return nil
-end
-
-function GameBattleList.getLastVisibleButton()
-  for i = #battleListByIndex, 1, -1 do
-    local button = battleListByIndex[i]
+  for _, button in ipairs(battlePanel:getChildren()) do
     if button:isOn() then
       return button
     end
@@ -798,47 +787,20 @@ end
 
 
 
--- Select next target (see NextTargetActionKey/PrevTargetActionKey)
+-- Select next target (see NextTargetActionKey)
 
 function GameBattleList.selectNextTarget()
   if not GameCharacter.m or table.empty(battleListByIndex) then
     return
   end
 
-  local isReverseOrder = g_keyboard.isCtrlPressed()
-
-  local oldSelectedButton
-  local selectedButton
-
-  -- Try find target. If found, try select next target.
-  for i = isReverseOrder and #battleListByIndex or 1, isReverseOrder and 1 or #battleListByIndex, isReverseOrder and -1 or 1 do
-    local button = battleListByIndex[i]
-    if button:isOn() and button.creature:isMonster() and button.isTarget then
-      oldSelectedButton = button
-
-      -- Target found, then try to select next of list
-      for j = isReverseOrder and i - 1 or i + 1, isReverseOrder and 1 or #battleListByIndex, isReverseOrder and -1 or 1 do
-        local _button = battleListByIndex[j]
-        if _button:isOn() and _button.creature:isMonster() then
-          selectedButton = _button
-          break
-        end
-      end
-
-      break
-    end
+  local button = GameBattleList.getFirstVisibleButton()
+  if not button then
+    return
   end
 
-  -- Could not find any target, then try select first
-  if not selectedButton then
-    selectedButton = isReverseOrder and GameBattleList.getLastVisibleButton() or GameBattleList.getFirstVisibleButton()
-  end
+  -- Disable chase mode (this is the price to use the select target shortcut feature)
+  GameCharacter.onSetChaseMode(GameCharacter.m.chaseModeButton, false)
 
-  -- Found a new button to target
-  if selectedButton and selectedButton ~= oldSelectedButton then
-    -- Disable chase mode (this is the price to use the select target shortcut feature)
-    GameCharacter.onSetChaseMode(GameCharacter.m.chaseModeButton, false)
-
-    g_game.attack(selectedButton.creature)
-  end
+  g_game.attack(button.creature)
 end

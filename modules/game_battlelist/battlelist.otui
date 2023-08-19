@@ -28,7 +28,7 @@ MiniWindow
 
   InfoMenuButton
     &loct: '${BattleAutoTargetTooltip}'
-    @locpar: return { NextTargetActionKey = NextTargetActionKey, PrevTargetActionKey = PrevTargetActionKey }
+    @locpar: return { NextTargetActionKey = NextTargetActionKey }
     !tooltip-type: TooltipType.textBlock
     anchors.verticalCenter: sortMenuButton.verticalCenter
     anchors.right: sortMenuButton.outsideLeft
