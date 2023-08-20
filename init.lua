@@ -1,13 +1,16 @@
 -- this is the first file executed when the application starts
--- we have to load the first modules form here
--- set true so that modules are reloaded when modified. (Note: Use only dev mod)
-AUTO_RELOAD_MODULE = false
+-- we have to load the first modules from here
 
 -- How to create a new version
 -- Version *.x.x : Major Release - Significant New Systems
 -- Version x.*.x : Minor Release - Improvements
 -- Version x.x.* : Revision Release - Bug/Issue Fixes
 CLIENT_VERSION = '1.0.1' -- [CLIENT VERSION] Here is just the Version Name
+
+-- Setup application name
+g_app.setName("Kingdom Age Online")
+g_app.setCompactName("kingdomage")
+g_app.setOrganizationName("Vision Games Entertainment")
 
 -- Sets a seed for the pseudo-random generator
 math.randomseed(os.time())
@@ -69,3 +72,6 @@ local script = '/' .. g_app.getCompactName() .. 'rc.lua'
 if g_resources.fileExists(script) then
   dofile(script)
 end
+
+-- uncomment the line below so that modules are reloaded when modified. (Note: Use only mod dev) -- KA - todo: move it to dev module
+-- g_modules.enableAutoReload()

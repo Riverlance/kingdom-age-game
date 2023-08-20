@@ -1,8 +1,8 @@
 --[[Config]]
 
 local powerBoostScreenImage = {
-  fadeIn                = 400,
-  fadeOut               = 200,
+  fadeIn                = 200,
+  fadeOut               = 100,
   sizeX                 = 0.5,
   sizeY                 = 0.5,
   sizeByFactor          = true,

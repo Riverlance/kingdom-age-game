@@ -96,6 +96,20 @@ function displayCancelBox(title, message)
   return messageBox
 end
 
+function displayOkBox(title, message, okCallback)
+  local messageBox
+
+  local _okCallback = function()
+    messageBox:ok()
+    if okCallback then
+      okCallback(messageBox)
+    end
+  end
+
+  messageBox = UIMessageBox.display(title, message, {{text=tr('Ok'), callback=_okCallback}}, _okCallback, _okCallback)
+  return messageBox
+end
+
 function displayOkCancelBox(title, message, okCallback, onCancelCallback)
   local messageBox
 

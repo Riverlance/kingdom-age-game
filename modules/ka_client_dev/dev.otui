@@ -1,0 +1,200 @@
+// Note: Check commands.lua of modules.client_terminal
+
+DevCheckBox < CheckBox
+  anchors.top: prev.outsideBottom
+  anchors.left: prev.left
+  anchors.right: parent.right
+  margin-top: 2
+
+DevLightButton < LightButton
+  size: 80 21
+  anchors.top: prev.outsideBottom
+  anchors.left: parent.left
+  margin-top: 4
+
+InfoTitleLabel < Label
+  color: darkTeal
+  font: verdana-8px-antialised
+
+InfoLabel < Label
+  font: verdana-8px-antialised
+  margin-left: 8
+  margin-right: 8
+
+
+
+
+
+MainWindow
+  id: developmentWindow
+  !text: tr('Development')
+  // See also showDebugInfo() and hideDebugInfo()
+  size: 275 550
+  focusable: false
+
+  DevLightButton
+    id: terminalButton
+    !text: tr('Terminal')
+    !tooltip: tr('Show terminal')
+    anchors.top: parent.top
+    margin-top: 0
+    @onClick: |
+      ClientTerminal.toggle()
+      ClientTerminal.popWindow(false)
+
+  DevLightButton
+    !text: tr('Ping')
+    !tooltip: tr('Start ping test at terminal')
+    @onClick: |
+      if not ClientTerminal.isVisible() then
+        ClientTerminal.show()
+        ClientTerminal.popWindow(false)
+      end
+      ping()
+
+  DevCheckBox
+    id: localCheckBox
+    !text: tr('Local Server')
+    !tooltip: tr('Log on server from local host')
+    anchors.top: parent.top
+    anchors.left: terminalButton.outsideRight
+    margin-top: 0
+    margin-left: 10
+    color: #c9bdab
+
+  DevCheckBox
+    id: devCheckBox
+    !text: tr('Dev Server (ports)')
+    !tooltip: tr('Log on server from development host')
+    color: #c9bdab
+
+  DevCheckBox
+    id: drawBoxesCheckBox
+    !text: tr('Draw Boxes')
+    !tooltip: tr('Draw debug boxes')
+    color: green
+
+  DevCheckBox
+    id: hideMapCheckBox
+    !text: tr('Hide Map')
+    !tooltip: tr('Hide game map panel')
+    color: darkRed
+
+  DevCheckBox
+    id: showDebugInfoCheckBox
+    !text: tr('Show Debug Info')
+    !tooltip: tr('Show primary and widget informations')
+    color: darkTeal
+
+  HorizontalSeparator
+    id: debugInfoHorizontalSeparator
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+
+  Label
+    id: debugInfoLabel
+    !text: tr('Debug Info')
+    color: #c9bdab
+    text-align: center
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 4
+
+  Panel
+    id: debugInfoPanel
+    focusable: false
+    anchors.top: prev.outsideBottom
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 4
+    layout:
+      type: verticalBox
+    color: #c9bdab
+    image-source: /images/ui/_background/window_headless
+    image-border: 5
+    padding: 9
+
+    InfoTitleLabel
+      !text: tr('Primary')
+
+    InfoLabel
+      id: positionLabel
+
+    InfoLabel
+      id: relativePositionLabel
+
+    InfoLabel
+      id: sizeLabel
+
+    InfoTitleLabel
+      !text: tr('Main Widget')
+      margin-top: 4
+
+    InfoLabel
+      id: widgetIdLabel
+
+    InfoLabel
+      id: widgetClassNameLabel
+
+    InfoLabel
+      id: widgetStyleNameLabel
+
+    InfoLabel
+      id: parentWidgetIdLabel
+      margin-top: 4
+
+    InfoLabel
+      id: parentWidgetClassNameLabel
+
+    InfoLabel
+      id: parentWidgetStyleNameLabel
+
+    InfoTitleLabel
+      !text: tr('Phantom Widget')
+      margin-top: 4
+
+    InfoLabel
+      id: phantomWidgetIdLabel
+
+    InfoLabel
+      id: phantomWidgetClassNameLabel
+
+    InfoLabel
+      id: phantomWidgetStyleNameLabel
+
+    InfoLabel
+      id: phantomParentWidgetIdLabel
+      margin-top: 4
+
+    InfoLabel
+      id: phantomParentWidgetClassNameLabel
+
+    InfoLabel
+      id: phantomParentWidgetStyleNameLabel
+
+    InfoTitleLabel
+      !text: tr('Focused Widget')
+      margin-top: 4
+
+    InfoLabel
+      id: focusedWidgetIdLabel
+
+    InfoLabel
+      id: focusedWidgetClassNameLabel
+
+    InfoLabel
+      id: focusedWidgetStyleNameLabel
+
+    InfoLabel
+      id: focusedParentWidgetIdLabel
+      margin-top: 4
+
+    InfoLabel
+      id: focusedParentWidgetClassNameLabel
+
+    InfoLabel
+      id: focusedParentWidgetStyleNameLabel
