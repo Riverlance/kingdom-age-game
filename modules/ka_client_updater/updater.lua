@@ -56,7 +56,8 @@ end
 
 function ClientUpdater.onUpdateEnd()
     local callback = function()
-        g_app.restart()
+        g_platform.spawnProcess('Kingdom Age Online.exe', { })
+        exit()
     end
     displayOkBox(tr('Update'), tr('Your client has been updated. Click Ok to restart the client.'), callback)
 end
