@@ -12,12 +12,13 @@ healthBarPrevious = nil
 healthBar = nil
 manaBar = nil
 vigorBar = nil
+capacityBar = nil
 experienceBar = nil
 healthBarValueLabel = nil
 manaBarValueLabel = nil
 vigorBarValueLabel = nil
+capacityBarValueLabel = nil
 experienceBarValueLabel = nil
-capLabel = nil
 
 
 
@@ -37,7 +38,6 @@ InventorySlotStyles = {
 inventoryTopMenuButton = nil
 inventoryWindow = nil
 inventoryHeader = nil
-inventoryFooter = nil
 
 
 
@@ -93,7 +93,6 @@ function GameCharacter.init()
 
   inventoryWindow = g_ui.loadUI('character')
   inventoryHeader = inventoryWindow:getChildById('miniWindowHeader')
-  inventoryFooter = inventoryWindow:getChildById('miniWindowFooter')
   inventoryTopMenuButton = ClientTopMenu.addRightGameToggleButton('inventoryTopMenuButton', tr('Character') .. ' (Ctrl+I)', '/images/ui/top_menu/healthinfo', GameCharacter.toggle)
 
   inventoryWindow.topMenuButton = inventoryTopMenuButton
@@ -119,12 +118,13 @@ function GameCharacter.init()
   healthBar               = inventoryHeader:getChildById('healthBar')
   manaBar                 = inventoryHeader:getChildById('manaBar')
   vigorBar                = inventoryHeader:getChildById('vigorBar')
+  capacityBar             = inventoryHeader:getChildById('capacityBar')
   experienceBar           = inventoryHeader:getChildById('experienceBar')
   healthBarValueLabel     = inventoryHeader:getChildById('healthBarValueLabel')
   manaBarValueLabel       = inventoryHeader:getChildById('manaBarValueLabel')
   vigorBarValueLabel      = inventoryHeader:getChildById('vigorBarValueLabel')
+  capacityBarValueLabel   = inventoryHeader:getChildById('capacityBarValueLabel')
   experienceBarValueLabel = inventoryHeader:getChildById('experienceBarValueLabel')
-  capLabel                = inventoryFooter:getChildById('capLabel')
 
   local localPlayer = g_game.getLocalPlayer()
   if localPlayer then
@@ -242,29 +242,29 @@ function GameCharacter.terminate()
   healthBar:destroy()
   manaBar:destroy()
   vigorBar:destroy()
+  capacityBar:destroy()
   experienceBar:destroy()
   healthBarValueLabel:destroy()
   manaBarValueLabel:destroy()
   vigorBarValueLabel:destroy()
+  capacityBarValueLabel:destroy()
   experienceBarValueLabel:destroy()
-  capLabel:destroy()
   healthBarPrevious = nil
   healthBar = nil
   manaBar = nil
   vigorBar = nil
+  capacityBar = nil
   experienceBar = nil
   healthBarValueLabel = nil
   manaBarValueLabel = nil
   vigorBarValueLabel = nil
+  capacityBarValueLabel = nil
   experienceBarValueLabel = nil
-  capLabel = nil
 
   inventoryTopMenuButton:destroy()
   inventoryTopMenuButton = nil
   inventoryWindow:destroy()
   inventoryWindow = nil
-
-  inventoryFooter = nil
 
   _G.GameCharacter = nil
 end
@@ -461,8 +461,17 @@ function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel,
   experienceBarValueLabel:setTooltip(string.format('%s\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
 end
 
-function GameCharacter.onFreeCapacityChange(player, freeCapacity)
-  capLabel:setText(string.format('%s: %.2f oz', tr('Cap'), freeCapacity))
+function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity)
+  local totalCapacity = localPlayer:getTotalCapacity()
+
+  if isLogin() then
+    capacityBar:setValue(freeCapacity, 0, totalCapacity)
+  else
+    capacityBar:setValueDelayed(freeCapacity, 0, totalCapacity, 200, 25, 0, true, false)
+  end
+
+  capacityBarValueLabel:setText(freeCapacity .. ' oz / ' .. totalCapacity .. ' oz')
+  capacityBarValueLabel:setTooltip(tr('Your character free capacity is %d oz out of %d oz.', freeCapacity, totalCapacity), TooltipType.textBlock)
 end
 
 
@@ -622,7 +631,7 @@ end
 
 function GameCharacter.getHeaderHeight()
   local localPlayer = g_game.getLocalPlayer()
-  return 111 - (localPlayer and localPlayer:isWarrior() and 17 or 0)
+  return 114 - (localPlayer and localPlayer:isWarrior() and 17 or 0)
 end
 
 function GameCharacter.getInventoryHeight()
@@ -638,8 +647,7 @@ function GameCharacter.updateHeaderSize()
   local isWarrior = player and player:isWarrior()
 
   manaBar:setOn(not isWarrior)
-  -- 52 and 69 = 16 for each bar + 1 of top margin between + 2 of top and bottom header border
-  inventoryHeader:setHeight(isWarrior and 52 or 69)
+  inventoryHeader:setHeight(isWarrior and 69 or 86) -- 16 for each bar + 1 of top margin between + 2 of top and bottom header border
 end
 
 function GameCharacter.updateMiniWindowSize()

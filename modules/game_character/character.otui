@@ -214,11 +214,22 @@ MiniWindow
       @onClick: ClientOptions.toggleOption('showVigor')
 
     CharacterProgressBar
-      id: experienceBar
-      background-color: #b6e866
+      id: capacityBar
+      background-color: #4facff
 
       $!first:
         anchors.top: vigorBar.outsideBottom
+
+    CharacterProgressBarValue
+      id: capacityBarValueLabel
+      @onClick: ClientOptions.toggleOption('showCapacity')
+
+    CharacterProgressBar
+      id: experienceBar
+      background-color: #8be866
+
+      $!first:
+        anchors.top: capacityBar.outsideBottom
 
     CharacterProgressBarValue
       id: experienceBarValueLabel
@@ -341,16 +352,3 @@ MiniWindow
       MountButton
         id: mountButton
         !tooltip: tr('Mounting')
-
-  MiniWindowFooter
-    height: 14
-
-    Label
-      id: capLabel
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.left: parent.left
-      anchors.right: parent.right
-      padding: 2
-      font: verdana-11px-rounded
-      text-offset: 4 1
-      text-align: center

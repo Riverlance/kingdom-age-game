@@ -73,9 +73,8 @@ townTrustExperience       = 0
 townTrustExpOfActualLevel = 0
 townTrustExpToNextLevel   = 0
 
-local howToTownTrust = [[Equipments can be bought if you have enough money and trust.
-Extra missions can be made if you have enough trust.
-Higher trust levels unlocks access to buy or sell new items.
+local howToTownTrust = [[Some items, like equipments, can be bought if you have enough money and trust.
+Higher trust levels unlocks access to buy new items.
 Your trust of each city increases individually by selling some items and decreases over time.]] -- See achievements on server
 
 local function getTownStr()

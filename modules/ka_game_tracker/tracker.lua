@@ -207,8 +207,12 @@ end
 function GameTracker.stopTrackPosition(position)
   local trackNode = GameTracker.getTrackedPosition(position)
   if trackNode then
-    trackNode.status = TrackingInfo.Stop
-    GameTracker.sendTrack(trackNode)
+    if trackNode.auto then
+      trackNode.status = TrackingInfo.Stop
+      GameTracker.sendTrack(trackNode)
+    else
+      GameTracker.onTrackEnd(trackNode)
+    end
   end
 end
 

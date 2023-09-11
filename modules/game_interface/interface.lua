@@ -1774,7 +1774,7 @@ function updateTrackArrow(trackNode)
   end
 
   local distance = Position.distance(playerPos, trackPos)
-  if not trackNode.id then
+  if not trackNode.id and not trackNode.auto then
     if distance == 0 then
       GameTracker.stopTrackPosition(trackNode.position)
       return
