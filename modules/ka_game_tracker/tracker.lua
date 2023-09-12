@@ -33,7 +33,7 @@ function GameTracker.terminate()
     onGameEnd = GameTracker.onGameEnd,
     onClickStartTrackPosition = GameTracker.startTrackPosition
   })
-  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.parseTrack)
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeTracking)
   _G.GameTracker = nil
 end
 

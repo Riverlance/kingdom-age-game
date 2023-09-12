@@ -57,6 +57,7 @@ attributeActLabel = nil
 
 local attribute_flag_updateList = -1
 
+local _pointsPerLevel  = 0
 local _availablePoints = 0
 
 
@@ -156,8 +157,9 @@ function GameAttributes.init()
   connect(g_game, {
     onGameStart        = GameAttributes.online,
     onGameEnd          = GameAttributes.offline,
-    onPlayerAttributes = GameAttributes.onPlayerAttributes
   })
+
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeAttributesList, GameAttributes.parseAttribute)
 
   if g_game.isOnline() then
     GameAttributes.online()
@@ -165,10 +167,11 @@ function GameAttributes.init()
 end
 
 function GameAttributes.terminate()
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeAttributesList)
+
   disconnect(g_game, {
     onGameStart        = GameAttributes.online,
     onGameEnd          = GameAttributes.offline,
-    onPlayerAttributes = GameAttributes.onPlayerAttributes
   })
 
   attributeTopMenuButton:destroy()
@@ -280,36 +283,78 @@ function GameAttributes.clearWindow()
   luckAttributeActLabel:setColor('#dfdfdf')
 end
 
-function GameAttributes.onPlayerAttributes(tooltips, attributes, availablePoints, usedPoints, distributionPoints, pointsCost, pointsToCostIncrease)
+function GameAttributes.parseAttribute(protocol, msg)
+  local attributes = { }
+
+  local first = msg:getU8()
+  local last  = msg:getU8()
+
+  local singleAttr   = first == 0
+  local singleAttrId = last
+
+  for attrId = singleAttr and singleAttrId or first, singleAttr and singleAttrId or last do
+    local distributionPoints      = msg:getU32()
+    local alignmentPoints         = msg:getDouble()
+    local alignmentMaxPoints      = msg:getDouble()
+    local buffPoints              = msg:getDouble()
+    local total                   = msg:getDouble()
+
+    local alignmentPointsPerLevel = 0
+    local tooltip
+    if not singleAttr then
+      alignmentPointsPerLevel = msg:getU8() / 100
+      tooltip                 = msg:getString()
+    end
+
+    attributes[singleAttr and 1 or attrId] = {
+      attrId                  = attrId,
+      distributionPoints      = distributionPoints,
+      alignmentPoints         = alignmentPoints,
+      alignmentMaxPoints      = alignmentMaxPoints,
+      alignmentPointsPerLevel = alignmentPointsPerLevel,
+      buffPoints              = buffPoints,
+      total                   = total,
+      tooltip                 = tooltip, -- Optional
+    }
+  end
+
+  if not singleAttr then
+    _pointsPerLevel = msg:getU8()
+  end
+
+  _availablePoints           = msg:getU32()
+  local usedPoints           = msg:getU32()
+  local distributionPoints   = msg:getU32()
+  local pointsCost           = msg:getU16()
+  local pointsToCostIncrease = msg:getU32()
+
   if not attributeLabel or not attributeActLabel then
     return
   end
 
   for _, attribute in ipairs(attributes) do
-    local id = attribute[1]
+    local id = attribute.attrId
 
     if attributeActLabel[id] then
-      attributeActLabel[id].distributionPoints = attribute[2]
-      attributeActLabel[id].alignmentPoints    = attribute[3]
-      attributeActLabel[id].alignmentMaxPoints = attribute[4]
-      attributeActLabel[id].buffPoints         = attribute[5]
-      attributeActLabel[id].total              = attribute[6]
+      attributeActLabel[id].distributionPoints      = attribute.distributionPoints
+      attributeActLabel[id].alignmentPoints         = attribute.alignmentPoints
+      attributeActLabel[id].alignmentMaxPoints      = attribute.alignmentMaxPoints
+      attributeActLabel[id].alignmentPointsPerLevel = attribute.alignmentPointsPerLevel
+      attributeActLabel[id].buffPoints              = attribute.buffPoints
+      attributeActLabel[id].total                   = attribute.total
 
       attributeActLabel[id]:setText(string.format('%0.02f', attributeActLabel[id].total))
       GameAttributes.updateActLabelTooltip(id)
       attributeActLabel[id]:setColor(attributeActLabel[id].buffPoints > 0 and 'green' or attributeActLabel[id].buffPoints < 0 and 'red' or '#dfdfdf')
     end
 
-    if attributeLabel[id] then
-      if table.size(tooltips) > 1 then
-        attributeLabel[id]:setTooltip(tooltips[id], TooltipType.textBlock)
-      end
+    if attribute.tooltip and attributeLabel[id] then
+      attributeLabel[id]:setTooltip(attribute.tooltip, TooltipType.textBlock)
     end
   end
 
-  _availablePoints = availablePoints
-  availablePointsLabel:setText(string.format('Pts to use: %d', availablePoints))
-  availablePointsLabel:setTooltip(string.format('Used points with cost: %d\nUsed points without cost: %d', usedPoints, distributionPoints))
+  availablePointsLabel:setText(string.format('Pts to use: %d', _availablePoints))
+  availablePointsLabel:setTooltip(string.format('Used points with cost: %d\nUsed points without cost: %d\nPoints earned per level: %d', usedPoints, distributionPoints, _pointsPerLevel))
   pointsCostLabel:setText(string.format('Cost: %d', pointsCost))
   pointsCostLabel:setTooltip(string.format('Points to increase cost: %d', pointsToCostIncrease))
 end
@@ -332,12 +377,14 @@ function GameAttributes.updateActLabelTooltip(attrId)
     return
   end
 
-  local widget                 = attributeActLabel[attrId]
-  local distributionPointsText = widget.distributionPoints ~= 0 and string.format('Distribution: %d\n', widget.distributionPoints) or ''
-  local alignmentPointsText    = widget.alignmentPoints ~= 0 and string.format('Alignment: %.2f%s\n', widget.alignmentPoints, (attrId ~= ATTRIBUTE_VITALITY or not localPlayer or not localPlayer:isWarrior()) and string.format(' of %.2f', widget.alignmentMaxPoints) or '') or ''
-  local buffPointsText         = widget.buffPoints ~= 0 and string.format('Buff/Debuff: %s%.2f\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
-  local moreThanMaximum        = (widget.distributionPoints + widget.alignmentPoints + widget.buffPoints) > widget.total
-  local totalPointsText        = widget.total ~= 0 and string.format('Total: %.2f%s', widget.total, moreThanMaximum and '\n(exceed the maximum value)' or '') or ''
+  local widget                      = attributeActLabel[attrId]
+  local distributionPointsText      = widget.distributionPoints ~= 0 and string.format('Distribution: %d\n', widget.distributionPoints) or ''
+  local alignmentMaxPointsText      = (attrId ~= ATTRIBUTE_VITALITY or not localPlayer or not localPlayer:isWarrior()) and string.format(' of %.2f', widget.alignmentMaxPoints) or ''
+  local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and string.format(' (%.2f per level)', widget.alignmentPointsPerLevel) or ''
+  local alignmentPointsText         = widget.alignmentPoints ~= 0 and string.format('Alignment: %.2f%s%s\n', widget.alignmentPoints, alignmentMaxPointsText, alignmentPointsPerLevelText) or ''
+  local buffPointsText              = widget.buffPoints ~= 0 and string.format('Buff/Debuff: %s%.2f\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
+  local moreThanMaximum             = (widget.distributionPoints + widget.alignmentPoints + widget.buffPoints) > widget.total
+  local totalPointsText             = widget.total ~= 0 and string.format('Total: %.2f%s', widget.total, moreThanMaximum and '\n(exceed the maximum value)' or '') or ''
 
   widget:setTooltip(string.format('%s%s%s%s', distributionPointsText, alignmentPointsText, buffPointsText, totalPointsText))
 end
