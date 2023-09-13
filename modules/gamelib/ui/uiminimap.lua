@@ -239,7 +239,7 @@ function UIMinimap:addFlag(mapPos, icon, description, force, temporary)
       local player = g_game.getLocalPlayer()
       if player then
         if Position.distance(player:getPosition(), widget.pos) > 250 then
-          modules.game_textmessage.displayStatusMessage(tr('Destination is out of range.'))
+          GameTextMessage.displayStatusMessage(tr('Destination is out of range.'))
           return false
         end
 

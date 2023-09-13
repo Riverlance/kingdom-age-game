@@ -217,7 +217,7 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
   if row.experience >= 1 then
     rewardExperienceLabel:setVisible(true)
     rewardExperienceValueLabel:setVisible(true)
-    rewardExperienceValueLabel:setText(tr('%d XP', row.experience))
+    rewardExperienceValueLabel:setText(tr(row.experience) .. ' ' .. tr('XP'))
   else
     rewardExperienceLabel:setVisible(false)
     rewardExperienceValueLabel:setVisible(false)
@@ -226,7 +226,7 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
   if row.money >= 1 then
     rewardMoneyLabel:setVisible(true)
     rewardMoneyValueLabel:setVisible(true)
-    rewardMoneyValueLabel:setText(tr('%d GPs', row.money))
+    rewardMoneyValueLabel:setText(tr(row.money) .. ' ' .. tr('GPs'))
   else
     rewardMoneyLabel:setVisible(false)
     rewardMoneyValueLabel:setVisible(false)

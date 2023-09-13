@@ -372,6 +372,7 @@ end
 function GameMinimap.onTrackPositionEnd(posNode)
   if posNode.minimapWidget then
     posNode.minimapWidget:destroy()
+    posNode.minimapWidget = nil
   end
 end
 

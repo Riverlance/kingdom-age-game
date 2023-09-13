@@ -1733,7 +1733,7 @@ function GameInterface.onTrackPosition(posNode, remove)
     g_game.sendMagicEffect(g_game.getLocalPlayer():getPosition(), 347)
   end
 
-  updateTrackArrow(posNode)
+  addEvent(function() updateTrackArrow(posNode) end, 1)
 end
 
 function GameInterface.onTrackPositionEnd(posNode)
@@ -1746,6 +1746,7 @@ function GameInterface.onTrackPositionEnd(posNode)
   end
   g_game.sendMagicEffect(posNode.position, 348)
   posNode.widget:destroy()
+  posNode.widget = nil
 end
 
 function updateTrackArrow(trackNode)
@@ -1760,7 +1761,7 @@ function updateTrackArrow(trackNode)
   trackNode.widget:setVisible(not isInRange)
 
   if not trackNode.id then -- only on track position
-    if isInRange then
+    if isInRange and playerPos.z == trackPos.z then
       if not trackNode.cycleEvent then
         g_game.sendMagicEffect(trackPos, 346)
         trackNode.cycleEvent = cycleEvent(function()
@@ -1775,7 +1776,7 @@ function updateTrackArrow(trackNode)
 
   local distance = Position.distance(playerPos, trackPos)
   if not trackNode.id and not trackNode.auto then
-    if distance == 0 then
+    if distance == 0  and trackPos.z == playerPos.z then
       GameTracker.stopTrackPosition(trackNode.position)
       return
     end
