@@ -65,8 +65,8 @@ function GameCharacter.init()
     onHealthChange       = GameCharacter.onHealthChange,
     onManaChange         = GameCharacter.onManaChange,
     onVigorChange        = GameCharacter.onVigorChange,
-    onLevelChange        = GameCharacter.onLevelChange,
     onFreeCapacityChange = GameCharacter.onFreeCapacityChange,
+    onLevelChange        = GameCharacter.onLevelChange,
 
     -- Inventory
     onInventoryChange = GameCharacter.onInventoryChange,
@@ -131,8 +131,8 @@ function GameCharacter.init()
     GameCharacter.onHealthChange(localPlayer, localPlayer:getHealth(), localPlayer:getMaxHealth())
     GameCharacter.onManaChange(localPlayer, localPlayer:getMana(), localPlayer:getMaxMana())
     GameCharacter.onVigorChange(localPlayer, localPlayer:getVigor(), localPlayer:getMaxVigor())
-    GameCharacter.onLevelChange(localPlayer, localPlayer:getLevel(), localPlayer:getLevelPercent())
     GameCharacter.onFreeCapacityChange(localPlayer, localPlayer:getFreeCapacity())
+    GameCharacter.onLevelChange(localPlayer, localPlayer:getLevel(), localPlayer:getLevelPercent())
   end
 
   local combatControls = contentsPanel:getChildById('combatControls')
@@ -193,8 +193,8 @@ function GameCharacter.terminate()
     onHealthChange       = GameCharacter.onHealthChange,
     onManaChange         = GameCharacter.onManaChange,
     onVigorChange        = GameCharacter.onVigorChange,
-    onLevelChange        = GameCharacter.onLevelChange,
     onFreeCapacityChange = GameCharacter.onFreeCapacityChange,
+    onLevelChange        = GameCharacter.onLevelChange,
 
     -- Inventory
     onInventoryChange = GameCharacter.onInventoryChange,
@@ -455,12 +455,6 @@ function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
   vigorBarValueLabel:setTooltip(tr('Your character vigor is %d out of %d.\nClick to show player vigor bar.', vigor, maxVigor), TooltipType.textBlock)
 end
 
-function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
-  experienceBar:setPercent(levelPercent)
-  experienceBarValueLabel:setText(levelPercent .. '%')
-  experienceBarValueLabel:setTooltip(string.format('%s\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
-end
-
 function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity)
   local totalCapacity = localPlayer:getTotalCapacity()
 
@@ -470,8 +464,14 @@ function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity)
     capacityBar:setValueDelayed(freeCapacity, 0, totalCapacity, 200, 25, 0, true, false)
   end
 
-  capacityBarValueLabel:setText(string.format('%d / %d oz', freeCapacity, totalCapacity))
+  capacityBarValueLabel:setText(string.format('%d / %d CAP', freeCapacity, totalCapacity))
   capacityBarValueLabel:setTooltip(tr('Your character free capacity is %d oz out of %d oz.', freeCapacity, totalCapacity), TooltipType.textBlock)
+end
+
+function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
+  experienceBar:setPercent(levelPercent)
+  experienceBarValueLabel:setText(levelPercent .. '% XP')
+  experienceBarValueLabel:setTooltip(string.format('%s\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
 end
 
 
