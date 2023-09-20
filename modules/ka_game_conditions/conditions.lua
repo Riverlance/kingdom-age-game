@@ -208,7 +208,7 @@ function GameConditions.removeCondition(condition)
   if index then
     if conditionList[index] then
       conditionList[index].button:destroy()
-      conditionList[index] = nil
+      conditionList[index].button = nil
     end
     table.remove(conditionList, index)
     GameConditions.updateConditionList()
