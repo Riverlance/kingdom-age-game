@@ -414,25 +414,21 @@ function GameConditions.sortConditions()
   if sortOrder == CONDITION_ORDER_ASCENDING then
     if sortType == CONDITION_SORT_APPEAR then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return a.startTime < b.startTime
       end
 
     elseif sortType == CONDITION_SORT_NAME then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return a.name < b.name
       end
 
     elseif sortType == CONDITION_SORT_PERCENTAGE then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return (a.button.clock and a.button.clock:getPercent() or 0) < (b.button.clock and b.button.clock:getPercent() or 0)
       end
 
     elseif sortType == CONDITION_SORT_REMAININGTIME then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return (a.button.clock and a.button.clock:getRemainingTime() or 0) < (b.button.clock and b.button.clock:getRemainingTime() or 0)
       end
     end
@@ -440,25 +436,21 @@ function GameConditions.sortConditions()
   elseif sortOrder == CONDITION_ORDER_DESCENDING then
     if sortType == CONDITION_SORT_APPEAR then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return a.startTime > b.startTime
       end
 
     elseif sortType == CONDITION_SORT_NAME then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return a.name > b.name
       end
 
     elseif sortType == CONDITION_SORT_PERCENTAGE then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return (a.button.clock and a.button.clock:getPercent() or 0) > (b.button.clock and b.button.clock:getPercent() or 0)
       end
 
     elseif sortType == CONDITION_SORT_REMAININGTIME then
       sortFunction = function(a,b)
-        if not a or not b then print('---- Ganuuk') print_r(a) print_r(b) print_r(conditionList) end
         return (a.button.clock and a.button.clock:getRemainingTime() or 0) > (b.button.clock and b.button.clock:getRemainingTime() or 0)
       end
     end
