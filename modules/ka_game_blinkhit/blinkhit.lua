@@ -1,6 +1,6 @@
 _G.GameBlinkHit = { }
 
-local blinkTime = 250
+local blinkTime = 200
 
 function GameBlinkHit.init()
   -- Alias
