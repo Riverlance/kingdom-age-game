@@ -296,6 +296,8 @@ function GameAttributes.parseAttribute(protocol, msg)
     local distributionPoints      = msg:getU32()
     local alignmentPoints         = msg:getDouble()
     local alignmentMaxPoints      = msg:getDouble()
+    local questPoints             = msg:getDouble()
+    local questMaxPoints          = msg:getDouble()
     local buffPoints              = msg:getDouble()
     local total                   = msg:getDouble()
 
@@ -312,6 +314,8 @@ function GameAttributes.parseAttribute(protocol, msg)
       alignmentPoints         = alignmentPoints,
       alignmentMaxPoints      = alignmentMaxPoints,
       alignmentPointsPerLevel = alignmentPointsPerLevel,
+      questPoints             = questPoints,
+      questMaxPoints          = questMaxPoints,
       buffPoints              = buffPoints,
       total                   = total,
       tooltip                 = tooltip, -- Optional
@@ -340,6 +344,8 @@ function GameAttributes.parseAttribute(protocol, msg)
       attributeActLabel[id].alignmentPoints         = attribute.alignmentPoints
       attributeActLabel[id].alignmentMaxPoints      = attribute.alignmentMaxPoints
       attributeActLabel[id].alignmentPointsPerLevel = attribute.alignmentPointsPerLevel
+      attributeActLabel[id].questPoints             = attribute.questPoints
+      attributeActLabel[id].questMaxPoints          = attribute.questMaxPoints
       attributeActLabel[id].buffPoints              = attribute.buffPoints
       attributeActLabel[id].total                   = attribute.total
 
@@ -382,11 +388,12 @@ function GameAttributes.updateActLabelTooltip(attrId)
   local alignmentMaxPointsText      = (attrId ~= ATTRIBUTE_VITALITY or not localPlayer or not localPlayer:isWarrior()) and string.format(' of %.2f', widget.alignmentMaxPoints) or ''
   local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and string.format(' (%.2f per level)', widget.alignmentPointsPerLevel) or ''
   local alignmentPointsText         = widget.alignmentPoints ~= 0 and string.format('Alignment: %.2f%s%s\n', widget.alignmentPoints, alignmentMaxPointsText, alignmentPointsPerLevelText) or ''
+  local questPointsText             = widget.questMaxPoints ~= 0 and string.format('Quest: %.2f of %.2f\n', widget.questPoints, widget.questMaxPoints) or ''
   local buffPointsText              = widget.buffPoints ~= 0 and string.format('Buff/Debuff: %s%.2f\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
   local moreThanMaximum             = (widget.distributionPoints + widget.alignmentPoints + widget.buffPoints) > widget.total
   local totalPointsText             = widget.total ~= 0 and string.format('Total: %.2f%s', widget.total, moreThanMaximum and '\n(exceed the maximum value)' or '') or ''
 
-  widget:setTooltip(string.format('%s%s%s%s', distributionPointsText, alignmentPointsText, buffPointsText, totalPointsText))
+  widget:setTooltip(string.format('%s%s%s%s%s', distributionPointsText, alignmentPointsText, questPointsText, buffPointsText, totalPointsText))
 end
 
 function GameAttributes.onVocationChange(creature, vocation, oldVocation)

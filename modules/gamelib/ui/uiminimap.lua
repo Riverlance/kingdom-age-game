@@ -17,7 +17,7 @@ local regionLabels = {
   { pos = { x = 3165, y = 2790, z = 7 }, text = 'Mavigic Valley' },
   { pos = { x = 3140, y = 2855, z = 7 }, text = 'Mavigic Forest' },
   { pos = { x = 3232, y = 2853, z = 7 }, text = 'Mavigic Citadel' },
-  { pos = { x = 2992, y = 2867, z = 7 }, text = 'Anvhian Mines' },
+  { pos = { x = 2992, y = 2867, z = 7 }, text = "Anvhian's Mines" },
   { pos = { x = 2830, y = 2865, z = 7 }, text = 'Holkagan Desert' },
   { pos = { x = 3077, y = 2920, z = 7 }, text = 'Cyclops Tunnel' },
   { pos = { x = 3100, y = 2990, z = 7 }, text = 'Elven Camp' },

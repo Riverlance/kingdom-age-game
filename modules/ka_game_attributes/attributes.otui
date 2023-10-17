@@ -35,7 +35,7 @@ MiniWindow
   &save: true
 
   InfoMenuButton
-    !tooltip: tr("1. 'Distribution' are points that you distributed manually.\n\n2. 'Alignment' are recommended points that were distributed automatically due to your vocation.\n\n3. 'Buff/Debuff' are points that were increased or decreased temporarily due to Powers.")
+    !tooltip: tr("1. 'Distribution' are points that you distributed manually.\n\n2. 'Alignment' are recommended points that were distributed automatically due to your vocation.\n\n3. 'Quest' are points that you can acquire on quests (golden statue, stray faeries, capsules).\n\n4. 'Buff/Debuff' are points that were increased or decreased temporarily due to Powers.")
     !tooltip-type: TooltipType.textBlock
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
