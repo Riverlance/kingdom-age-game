@@ -383,15 +383,16 @@ function GameAttributes.updateActLabelTooltip(attrId)
     return
   end
 
+  local isWarrior                   = localPlayer and localPlayer:isWarrior()
   local widget                      = attributeActLabel[attrId]
   local distributionPointsText      = widget.distributionPoints ~= 0 and string.format('Distribution: %d\n', widget.distributionPoints) or ''
-  local alignmentMaxPointsText      = (attrId ~= ATTRIBUTE_VITALITY or not localPlayer or not localPlayer:isWarrior()) and string.format(' of %.2f', widget.alignmentMaxPoints) or ''
-  local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and string.format(' (%.2f per level)', widget.alignmentPointsPerLevel) or ''
-  local alignmentPointsText         = widget.alignmentPoints ~= 0 and string.format('Alignment: %.2f%s%s\n', widget.alignmentPoints, alignmentMaxPointsText, alignmentPointsPerLevelText) or ''
-  local questPointsText             = widget.questMaxPoints ~= 0 and string.format('Quest: %.2f of %.2f\n', widget.questPoints, widget.questMaxPoints) or ''
-  local buffPointsText              = widget.buffPoints ~= 0 and string.format('Buff/Debuff: %s%.2f\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
+  local alignmentMaxPointsText      = (attrId ~= ATTRIBUTE_VITALITY or not isWarrior) and string.format(' of %s', widget.alignmentMaxPoints) or ''
+  local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and string.format('\n(%s per level%s)', widget.alignmentPointsPerLevel, (attrId ~= ATTRIBUTE_VITALITY or not isWarrior) and '; until level 100' or '') or ''
+  local alignmentPointsText         = widget.alignmentPoints ~= 0 and string.format('Alignment: %s%s%s\n', widget.alignmentPoints, alignmentMaxPointsText, alignmentPointsPerLevelText) or ''
+  local questPointsText             = widget.questMaxPoints ~= 0 and string.format('Quest: %s of %s\n', widget.questPoints, widget.questMaxPoints) or ''
+  local buffPointsText              = widget.buffPoints ~= 0 and string.format('Buff/Debuff: %s%s\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
   local moreThanMaximum             = (widget.distributionPoints + widget.alignmentPoints + widget.buffPoints) > widget.total
-  local totalPointsText             = widget.total ~= 0 and string.format('Total: %.2f%s', widget.total, moreThanMaximum and '\n(exceed the maximum value)' or '') or ''
+  local totalPointsText             = widget.total ~= 0 and string.format('Total: %s%s', widget.total, moreThanMaximum and '\n(exceed the maximum value)' or '') or ''
 
   widget:setTooltip(string.format('%s%s%s%s%s', distributionPointsText, alignmentPointsText, questPointsText, buffPointsText, totalPointsText))
 end
