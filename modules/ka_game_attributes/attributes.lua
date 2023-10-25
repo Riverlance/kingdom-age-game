@@ -386,8 +386,9 @@ function GameAttributes.updateActLabelTooltip(attrId)
   local isWarrior                   = localPlayer and localPlayer:isWarrior()
   local widget                      = attributeActLabel[attrId]
   local distributionPointsText      = widget.distributionPoints ~= 0 and string.format('Distribution: %d\n', widget.distributionPoints) or ''
-  local alignmentMaxPointsText      = (attrId ~= ATTRIBUTE_VITALITY or not isWarrior) and string.format(' of %s', widget.alignmentMaxPoints) or ''
-  local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and string.format('\n(%s per level%s)', widget.alignmentPointsPerLevel, (attrId ~= ATTRIBUTE_VITALITY or not isWarrior) and '; until level 100' or '') or ''
+  local alignmentLimit              = attrId == ATTRIBUTE_VITALITY and not isWarrior
+  local alignmentMaxPointsText      = alignmentLimit and '' or string.format(' of %s', widget.alignmentMaxPoints)
+  local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and string.format('\n(%s per level%s)', widget.alignmentPointsPerLevel, alignmentLimit and '; until level 100' or '') or ''
   local alignmentPointsText         = widget.alignmentPoints ~= 0 and string.format('Alignment: %s%s%s\n', widget.alignmentPoints, alignmentMaxPointsText, alignmentPointsPerLevelText) or ''
   local questPointsText             = widget.questMaxPoints ~= 0 and string.format('Quest: %s of %s\n', widget.questPoints, widget.questMaxPoints) or ''
   local buffPointsText              = widget.buffPoints ~= 0 and string.format('Buff/Debuff: %s%s\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
