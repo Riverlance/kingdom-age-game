@@ -429,7 +429,7 @@ function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
 
   healthBar:setValue(health, 0, maxHealth)
 
-  healthBarValueLabel:setText(string.format('%d / %d HP', health, maxHealth))
+  healthBarValueLabel:setText(f('%d / %d HP', health, maxHealth))
   healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d.\nClick to show creature health bar.', health, maxHealth), TooltipType.textBlock)
 end
 
@@ -440,7 +440,7 @@ function GameCharacter.onManaChange(localPlayer, mana, maxMana)
     manaBar:setValueDelayed(mana, 0, maxMana, 200, 25, 0, true, false)
   end
 
-  manaBarValueLabel:setText(string.format('%d / %d MP', mana, maxMana))
+  manaBarValueLabel:setText(f('%d / %d MP', mana, maxMana))
   manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d.\nClick to show player mana bar.', mana, maxMana), TooltipType.textBlock)
 end
 
@@ -451,7 +451,7 @@ function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
     vigorBar:setValueDelayed(vigor, 0, maxVigor, 200, 25, 0, true, false)
   end
 
-  vigorBarValueLabel:setText(string.format('%d / %d VP', vigor, maxVigor))
+  vigorBarValueLabel:setText(f('%d / %d VP', vigor, maxVigor))
   vigorBarValueLabel:setTooltip(tr('Your character vigor is %d out of %d.\nClick to show player vigor bar.', vigor, maxVigor), TooltipType.textBlock)
 end
 
@@ -464,14 +464,14 @@ function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity)
     capacityBar:setValueDelayed(freeCapacity, 0, totalCapacity, 200, 25, 0, true, false)
   end
 
-  capacityBarValueLabel:setText(string.format('%d / %d CAP', freeCapacity, totalCapacity))
+  capacityBarValueLabel:setText(f('%d / %d CAP', freeCapacity, totalCapacity))
   capacityBarValueLabel:setTooltip(tr('Your character free capacity is %d oz out of %d oz.', freeCapacity, totalCapacity), TooltipType.textBlock)
 end
 
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   experienceBar:setPercent(levelPercent)
   experienceBarValueLabel:setText(levelPercent .. '% XP')
-  experienceBarValueLabel:setTooltip(string.format('%s\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
+  experienceBarValueLabel:setTooltip(f('%s\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
 end
 
 

@@ -6,6 +6,8 @@ Module
   reloadable: false
 
   @onLoad: |
+    dofile 'global'
+
     dofile 'class'
     dofile 'math'
     dofile 'string'
@@ -15,7 +17,6 @@ Module
 
     dofile 'const'
     dofile 'util'
-    dofile 'globals'
     dofile 'config'
     dofile 'settings'
     dofile 'keyboard'
@@ -30,5 +31,4 @@ Module
     dofile 'timer'
     dofile 'shader'
 
-    dofile 'json'
     dofile 'http'

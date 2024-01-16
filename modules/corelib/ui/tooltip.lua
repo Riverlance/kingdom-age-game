@@ -17,7 +17,7 @@ g_tooltip = { }
 
 
 
-Tooltip = {
+Tooltip = createClass({
   widget = nil,
   type   = TooltipType.default,
 
@@ -33,8 +33,6 @@ Tooltip = {
   __listById = { },
 
 
-
-  __className = 'Tooltip',
 
   __onCall = function(self, value)
     -- Get object by id
@@ -52,9 +50,7 @@ Tooltip = {
     -- Hide widget
     obj.widget:hide()
   end,
-}
-
-setClass(Tooltip)
+})
 
 
 
@@ -163,6 +159,7 @@ end
 
 local function onWidgetStyleApply(widget, styleName, styleNode) -- Create from .otui file
   if widget.loct then
+    widget['tooltip-type'] = styleNode['tooltip-type'] or widget:getTooltipType()
     widget:updateLocale(widget.locpar)
     return
   end
@@ -273,7 +270,7 @@ function g_tooltip.init()
 
         -- Icon
         local iconWidget = self.widget:getChildById('icon')
-        iconWidget:setImageSource(string.format('/images/ui/power/%d_off', power.id))
+        iconWidget:setImageSource(f('/images/ui/power/%d_off', power.id))
 
         -- Name
         local nameLabel = self.widget:getChildById('name')
@@ -281,7 +278,7 @@ function g_tooltip.init()
 
         -- Class icon
         local classIconWidget = self.widget:getChildById('classIcon')
-        classIconWidget:setImageSource(string.format('/images/game/creature/power/type_%s', power.aggressive and 'aggressive' or 'non_aggressive'))
+        classIconWidget:setImageSource(f('/images/game/creature/power/type_%s', power.aggressive and 'aggressive' or 'non_aggressive'))
 
         -- Class name
         classValueWidget:setTextAlign(AlignRight)
@@ -320,7 +317,7 @@ function g_tooltip.init()
         -- Cooldown
         cooldownValueWidget:setTextAlign(AlignRight)
         cooldownValueWidget:setTextWrap(true)
-        cooldownValueWidget:setText(string.format('%s second%s', exhaustTime, exhaustTime > 1 and 's' or ''))
+        cooldownValueWidget:setText(f('%s second%s', exhaustTime, exhaustTime > 1 and 's' or ''))
         cooldownValueWidget:resizeToText()
 
         -- Premium
@@ -410,7 +407,7 @@ function g_tooltip.init()
 
         -- Name
         local nameLabel = self.widget:getChildById('name')
-        nameLabel:setText((not c.powerName or c.name == c.powerName) and c.name or string.format('%s\n(%s)', c.name, c.powerName))
+        nameLabel:setText((not c.powerName or c.name == c.powerName) and c.name or f('%s\n(%s)', c.name, c.powerName))
 
         -- Item Icon
         if c.itemId then
@@ -424,7 +421,7 @@ function g_tooltip.init()
 
         -- Power Icon
         if c.powerId then
-          powerIconWidget:setImageSource(string.format('/images/ui/power/%d_off', c.powerId))
+          powerIconWidget:setImageSource(f('/images/ui/power/%d_off', c.powerId))
           powerIconWidget:setWidth(32)
           powerIconWidget:show()
 
@@ -442,7 +439,7 @@ function g_tooltip.init()
 
         -- Combat icon
         local combatIconWidget = self.widget:getChildById('combatIcon')
-        combatIconWidget:setImageSource(string.format('/images/game/creature/condition/type_%s', c.aggressive and 'aggressive' or 'non_aggressive'))
+        combatIconWidget:setImageSource(f('/images/game/creature/condition/type_%s', c.aggressive and 'aggressive' or 'non_aggressive'))
 
         -- Combat value
         local combatValueWidget = self.widget:getChildById('combatValue')
@@ -456,7 +453,7 @@ function g_tooltip.init()
           boostLabelWidget:setHeight(14)
 
           if UIConditionButton.boostNames then
-            boostValueWidget:setText(string.format('%d (%s)', c.boost, UIConditionButton.boostNames[c.boost]:lower()))
+            boostValueWidget:setText(f('%d (%s)', c.boost, UIConditionButton.boostNames[c.boost]:lower()))
             boostValueWidget:resizeToText()
           end
           if UIConditionButton.boostColors then
@@ -479,12 +476,12 @@ function g_tooltip.init()
 
           local attrStr = ''
           if tonumber(c.offset) > 0 then
-            attrStr = string.format('%s +%s', attrStr, c.offset)
+            attrStr = f('%s +%s', attrStr, c.offset)
           end
           if tonumber(c.factor) ~= 1 then
-            attrStr = string.format('%s x%s', attrStr, c.factor)
+            attrStr = f('%s x%s', attrStr, c.factor)
           end
-          attributeValueWidget:setText(string.format('%s%s', ATTRIBUTE_NAMES[c.attribute], attrStr))
+          attributeValueWidget:setText(f('%s%s', ATTRIBUTE_NAMES[c.attribute], attrStr))
           attributeValueWidget:resizeToText()
         else
           attributeLabelWidget:setHeight(0)

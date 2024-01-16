@@ -77,7 +77,7 @@ function ClientAudio.updateAudios()
   end
 
   local position = g_game.getLocalPlayer():getPosition()
-  for channelId, _channel in ipairs(channels) do
+  for _, _channel in ipairs(channels) do
     local channel = _channel.channel
     if channel then
       channel:setThingPosition(position.x, position.y)
@@ -87,7 +87,7 @@ end
 
 function ClientAudio.clearAudios()
   g_sounds.stopAll()
-  for channelId, _channel in ipairs(channels) do
+  for _, _channel in ipairs(channels) do
     local channel = _channel.channel
     if channel then
       channel:clear()
@@ -125,7 +125,7 @@ function ClientAudio.parseAudioRequest(protocolGame, opcode, msg)
       return
     end
 
-    path = string.format('%s%s', ClientAudio.getRootPath(), path)
+    path = f('%s%s', ClientAudio.getRootPath(), path)
     local audio = channel:play(path, gain, repetitions, fadeInTime)
     if audio and x ~= 0 and y ~= 0 then
       audio:setPosition(x, y)
@@ -186,7 +186,7 @@ function ClientAudio.parseAudioRequest(protocolGame, opcode, msg)
       return
     end
 
-    path = string.format('%s%s', ClientAudio.getRootPath(), path)
+    path = f('%s%s', ClientAudio.getRootPath(), path)
     channel:stopAudioGroup(path, fadeOutTime)
 
  elseif action == ACTION_CHANNEL_AUDIOSSETGAIN then
@@ -202,7 +202,7 @@ function ClientAudio.parseAudioRequest(protocolGame, opcode, msg)
       return
     end
 
-    path = string.format('%s%s', ClientAudio.getRootPath(), path)
+    path = f('%s%s', ClientAudio.getRootPath(), path)
     channel:setAudioGroupGain(path, gain)
   end
 end

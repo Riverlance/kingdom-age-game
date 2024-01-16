@@ -77,6 +77,10 @@ function UIComboBox:setCurrentIndex(index)
 end
 
 function UIComboBox:getCurrentOption()
+  if not self.options then
+    return
+  end
+
   if table.haskey(self.options, self.currentIndex) then
     return self.options[self.currentIndex]
   end

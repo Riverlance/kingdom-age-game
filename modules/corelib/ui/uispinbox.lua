@@ -43,7 +43,7 @@ function UISpinBox:onKeyPress()
 end
 
 function UISpinBox:onTextChange(text, oldText)
-  if text:len() == 0 then
+  if #text == 0 then
     self:setValue(self.minimum)
     return
   end
@@ -71,7 +71,7 @@ end
 
 function UISpinBox:onFocusChange(focused)
   if not focused then
-    if self:getText():len() == 0 then
+    if #self:getText() == 0 then
       self:setText(self.minimum)
     end
   end
@@ -126,7 +126,7 @@ function UISpinBox:setValue(value, dontSignal)
   end
 
   self.value = value
-  if self:getText():len() > 0 then
+  if #self:getText() > 0 then
     self:setText(value)
   end
 

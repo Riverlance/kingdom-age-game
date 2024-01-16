@@ -47,13 +47,13 @@ function UIPowerButton.create()
 end
 
 function UIPowerButton:setup(power)
-  self:setId(string.format('PowerButton_id%d', power.id))
+  self:setId(f('PowerButton_id%d', power.id))
   self:updateData(power)
 end
 
 function UIPowerButton:onDragEnter(mousePos)
   g_mouse.pushCursor('target')
-  g_mouseicon.display(string.format('/images/ui/power/%d_off', self.power.id))
+  g_mouseicon.display(f('/images/ui/power/%d_off', self.power.id))
   return true
 end
 
@@ -77,7 +77,7 @@ end
 function UIPowerButton:setIcon(id)
   if id then
     local powerWidget = self:getChildById('power')
-    powerWidget:setIcon(string.format('/images/ui/power/%d_off', id))
+    powerWidget:setIcon(f('/images/ui/power/%d_off', id))
     powerWidget:setIconSize({ width = 32, height = 32 })
     return
   end

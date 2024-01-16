@@ -16,10 +16,10 @@ local powerExtraBoostScreenImage  = { }
 
 for i = PowerBoostFirst, PowerBoostLast do
   powerNormalBoostScreenImage[i]      = table.copy(powerBoostScreenImage)
-  powerNormalBoostScreenImage[i].path = string.format('system/power_boost/normal_%d.png', i)
+  powerNormalBoostScreenImage[i].path = f('system/power_boost/normal_%d.png', i)
 
   powerExtraBoostScreenImage[i]      = table.copy(powerBoostScreenImage)
-  powerExtraBoostScreenImage[i].path = string.format('system/power_boost/extra_%d.png', i)
+  powerExtraBoostScreenImage[i].path = f('system/power_boost/extra_%d.png', i)
 end
 
 PowerBoostColorSpeed = 200

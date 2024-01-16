@@ -211,9 +211,9 @@ function ClientOptions.init()
 
   g_keyboard.bindKeyDown('Ctrl+Shift+F', function() ClientOptions.toggleOption('fullscreen') end)
 
-  optionsButton = ClientTopMenu.addLeftButton('optionsButton', tr('Options') .. string.format(' (%s)', optionsShortcut), '/images/ui/top_menu/options', ClientOptions.toggle)
+  optionsButton = ClientTopMenu.addLeftButton('optionsButton', tr('Options') .. f(' (%s)', optionsShortcut), '/images/ui/top_menu/options', ClientOptions.toggle)
   g_keyboard.bindKeyDown(optionsShortcut, ClientOptions.toggle)
-  audioButton = ClientTopMenu.addLeftButton('audioButton', tr('Audio') .. string.format(' (%s)', audioShortcut), '/images/ui/top_menu/audio', function() ClientOptions.toggleOption('enableAudio') end)
+  audioButton = ClientTopMenu.addLeftButton('audioButton', tr('Audio') .. f(' (%s)', audioShortcut), '/images/ui/top_menu/audio', function() ClientOptions.toggleOption('enableAudio') end)
   g_keyboard.bindKeyDown(audioShortcut, function() ClientOptions.toggleOption('enableAudio') end)
 
   -- Mouse item icon example
@@ -592,7 +592,7 @@ function ClientOptions.setOption(key, value, force)
     end
 
     local _value = math.ceil(value * 2.55)
-    local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
+    local alpha  = f('%s%x', _value < 16 and '0' or '', _value)
     leftStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
 
   elseif modules.game_interface and key == 'rightStickerOpacityScrollbar' then
@@ -602,7 +602,7 @@ function ClientOptions.setOption(key, value, force)
     end
 
     local _value = math.ceil(value * 2.55)
-    local alpha  = string.format('%s%x', _value < 16 and '0' or '', _value)
+    local alpha  = f('%s%x', _value < 16 and '0' or '', _value)
     rightStickerWidget:setImageColor(tocolor('#FFFFFF' .. alpha))
 
   elseif key == 'leftSticker' then

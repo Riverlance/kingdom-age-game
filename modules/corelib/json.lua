@@ -47,7 +47,7 @@ end
 
 
 local function escape_char(c)
-  return "\\" .. (escape_char_map[c] or string.format("u%04x", c:byte()))
+  return "\\" .. (escape_char_map[c] or f("u%04x", c:byte()))
 end
 
 
@@ -78,7 +78,7 @@ local function encode_table(val, stack)
       error("invalid table: sparse array")
     end
     -- Encode
-    for i, v in ipairs(val) do
+    for _, v in ipairs(val) do
       table.insert(res, encode(v, stack))
     end
     stack[val] = nil
@@ -108,7 +108,7 @@ local function encode_number(val)
   if val ~= val or val <= -math.huge or val >= math.huge then
     error("unexpected number value '" .. tostring(val) .. "'")
   end
-  return string.format("%.14g", val)
+  return f("%.14g", val)
 end
 
 
@@ -182,7 +182,7 @@ local function decode_error(str, idx, msg)
       col_count = 1
     end
   end
-  error( string.format("%s at line %d col %d", msg, line_count, col_count) )
+  error( f("%s at line %d col %d", msg, line_count, col_count) )
 end
 
 
@@ -199,7 +199,7 @@ local function codepoint_to_utf8(n)
     return string.char(f(n / 262144) + 240, f(n % 262144 / 4096) + 128,
                        f(n % 4096 / 64) + 128, n % 64 + 128)
   end
-  error( string.format("invalid unicode codepoint '%x'", n) )
+  error( f("invalid unicode codepoint '%x'", n) )
 end
 
 

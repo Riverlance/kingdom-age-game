@@ -591,8 +591,15 @@ function GameBattleList.sortList()
   end
 
   if modules.ka_game_tracker then
-    local highlightTracked = function (a,b) return GameTracker.isTracked(a.creature) and not GameTracker.isTracked(b.creature) end
-    table.sort(battleListByIndex, highlightTracked)
+    local indexList = { }
+    for i = #battleListByIndex, -1, 1 do
+      local creature = battleListByIndex[i]
+      if GameTracker.isTracked(creature) then
+        table.insert(indexList, 1, creature)
+      else
+        table.insert(indexList, creature)
+      end
+    end
   end
 end
 

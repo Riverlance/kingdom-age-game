@@ -262,9 +262,9 @@ function GameSkills.onStaminaChange(localPlayer, stamina)
   local percent = math.floor(100 * stamina / (42 * 60)) -- max is 42 hours
   local text    = tr('Remaining %s%% (%s hours and %s minutes).', percent, hours, minutes)
   if stamina <= 840 and stamina > 0 then -- red phase
-    text = string.format('%s\n%s', text, tr('You are receiving only 50%% of experience and you may not receive loot from monsters.'))
+    text = f('%s\n%s', text, tr('You are receiving only 50%% of experience and you may not receive loot from monsters.'))
   elseif stamina == 0 then
-    text = string.format('%s\n%s', text, tr('You may not receive experience and loot from monsters.'))
+    text = f('%s\n%s', text, tr('You may not receive experience and loot from monsters.'))
   end
   GameSkills.setSkillPercent('stamina', percent, text)
 end

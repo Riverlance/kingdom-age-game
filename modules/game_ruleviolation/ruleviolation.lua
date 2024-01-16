@@ -37,7 +37,7 @@ local function sendNewReport(_type, targetName, reasonId, comment, statement, tr
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
-  msg:addString(string.format('%d:%d:%s:%d:%s:%s:%s', REPORT_MODE_NEWREPORT, _type, targetName, reasonId, comment:trim(), statement:trim(), translation:trim()))
+  msg:addString(f('%d:%d:%s:%d:%s:%s:%s', REPORT_MODE_NEWREPORT, _type, targetName, reasonId, comment:trim(), statement:trim(), translation:trim()))
   protocolGame:send(msg)
 end
 
@@ -50,7 +50,7 @@ local function sendUpdateSearch(_type, reasonId, page, rowsPerPage, state)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
-  msg:addString(string.format('%d:%d:%d:%d:%d:%d', REPORT_MODE_UPDATESEARCH, _type, reasonId, page, rowsPerPage, state))
+  msg:addString(f('%d:%d:%d:%d:%d:%d', REPORT_MODE_UPDATESEARCH, _type, reasonId, page, rowsPerPage, state))
   protocolGame:send(msg)
 end
 
@@ -63,7 +63,7 @@ local function sendUpdateState(row, state) -- (row[, state])
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
-  msg:addString(string.format('%d:%d:%d', REPORT_MODE_UPDATESTATE, state or row.state, row.id))
+  msg:addString(f('%d:%d:%d', REPORT_MODE_UPDATESTATE, state or row.state, row.id))
   protocolGame:send(msg)
 end
 
@@ -76,7 +76,7 @@ local function sendRemoveRow(row)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
-  msg:addString(string.format('%d:%d', REPORT_MODE_REMOVEROW, row.id))
+  msg:addString(f('%d:%d', REPORT_MODE_REMOVEROW, row.id))
   protocolGame:send(msg)
 end
 
@@ -93,7 +93,7 @@ local function sendAddAction(_type, targetName, reasonId, comment, actionId, day
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeRuleViolation)
-  msg:addString(string.format('%d:%d:%s:%d:%s:%d:%d:%d', REPORT_MODE_ACTION, _type, targetName, reasonId, comment:trim(), actionId, days, row and row.id or 0))
+  msg:addString(f('%d:%d:%s:%d:%s:%d:%d:%d', REPORT_MODE_ACTION, _type, targetName, reasonId, comment:trim(), actionId, days, row and row.id or 0))
   protocolGame:send(msg)
 end
 
@@ -626,7 +626,7 @@ function GameRuleViolation.openRow(row)
 
     rvWindow:lock()
 
-    rvLabel:setText(string.format('%s\n- Time: %s\n- Player name: %s', row:getText(), os.date('%Y %b %d %H:%M:%S', row.time), row.playerName))
+    rvLabel:setText(f('%s\n- Time: %s\n- Player name: %s', row:getText(), os.date('%Y %b %d %H:%M:%S', row.time), row.playerName))
 
     typeComboBox:setOption(reasons[row.type][row.reasonId].title)
     typeComboBox:setEnabled(false)
@@ -836,12 +836,12 @@ function GameRuleViolation.parseRuleViolationsReports(protocolGame, opcode, msg)
     row.time        = tonumber(data[3])
     row.type        = tonumber(data[4])
     row.playerId    = tonumber(data[5])
-    row.targetName  = string.format('%s', data[6])
-    row.statement   = string.format('%s', data[7])
-    row.translation = string.format('%s', data[8])
+    row.targetName  = f('%s', data[6])
+    row.statement   = f('%s', data[7])
+    row.translation = f('%s', data[8])
     row.reasonId    = tonumber(data[9])
-    row.comment     = string.format('%s', data[10])
-    row.playerName  = string.format('%s', data[11])
+    row.comment     = f('%s', data[10])
+    row.playerName  = f('%s', data[11])
     updateReportRowTitle(row)
     row.onDoubleClick = GameRuleViolation.openRow
   end

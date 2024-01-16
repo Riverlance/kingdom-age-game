@@ -64,7 +64,7 @@ function GamePowers.parsePower(protocol, msg)
   elseif flag == PowerFlags.Cancel then
     GamePowers.onCancelPower()
   else
-    print_traceback(string.format('[Warning - ServerPowerCast] Unknown flag [id: %d]', flag))
+    print_traceback(f('[Warning - ServerPowerCast] Unknown flag [id: %d]', flag))
   end
 end
 

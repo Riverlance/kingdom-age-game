@@ -77,7 +77,7 @@ function GameScreenImage.addImage(info) -- old: path, fadeIn, position, sizeX, s
   image.individualAnimation = info.individualAnimation or false
   image:setImageIndividualAnimation(image.individualAnimation) -- Before setImageSource
 
-  image:setImageSource(string.format('%s%s', GameScreenImage.getRootPath(), info.path)) -- Before getting its width/height
+  image:setImageSource(f('%s%s', GameScreenImage.getRootPath(), info.path)) -- Before getting its width/height
 
   image.path                  = info.path
   image.sizeX                 = info.sizeX or 0

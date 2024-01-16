@@ -57,7 +57,7 @@ function GameMinimap.init()
   fullMapButton = compassWidget:getChildById('fullMapButton')
 
   for i = 1, lastMinimapMarkId do
-    g_textures.preload(string.format('/images/ui/minimap/flag%d', i))
+    g_textures.preload(f('/images/ui/minimap/flag%d', i))
   end
 
   local gameRootPanel = GameInterface.getRootPanel()
@@ -196,7 +196,7 @@ function GameMinimap.updateCameraPosition()
   end
 
   if localPlayer:getInstanceId() < 1 then
-    local text = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
+    local text = f('%d, %d, %d', pos.x, pos.y, pos.z)
 
     positionLabel:setText(text)
     positionLabel:setTooltip(text)
@@ -331,7 +331,7 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
     else
       local pos = localPlayer:getPosition()
       if pos then
-        minimapLabelText = string.format('%d, %d, %d', pos.x, pos.y, pos.z)
+        minimapLabelText = f('%d, %d, %d', pos.x, pos.y, pos.z)
       end
     end
 

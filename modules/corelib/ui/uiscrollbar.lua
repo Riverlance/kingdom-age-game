@@ -59,9 +59,9 @@ local function updateValueDisplay(widget)
   if widget:getShowValue() then
     local value  = widget:getValue()
     local symbol = widget:getSymbol()
-    local minMax = value >= widget:getMaximum() and string.format(' (%s)', tr('max')) or value <= widget:getMinimum() and string.format(' (%s)', tr('min')) or ''
+    local minMax = value >= widget:getMaximum() and f(' (%s)', tr('max')) or value <= widget:getMinimum() and f(' (%s)', tr('min')) or ''
 
-    widget:setText(string.format('%d%s%s', value, symbol and string.format('%s%s', symbol:find('[%w]') and ' ' or '', symbol) or '', minMax))
+    widget:setText(f('%d%s%s', value, symbol and f('%s%s', symbol:find('[%w]') and ' ' or '', symbol) or '', minMax))
   end
 end
 

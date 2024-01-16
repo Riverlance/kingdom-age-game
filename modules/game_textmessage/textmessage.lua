@@ -74,7 +74,7 @@ function GameTextMessage.init()
   -- Alias
   GameTextMessage.m = modules.game_textmessage
 
-  for messageMode, _ in pairs(MessageTypes) do
+  for messageMode in pairs(MessageTypes) do
     registerMessageMode(messageMode, GameTextMessage.displayMessage)
   end
 
@@ -93,7 +93,7 @@ function GameTextMessage.init()
 end
 
 function GameTextMessage.terminate()
-  for messageMode, _ in pairs(MessageTypes) do
+  for messageMode in pairs(MessageTypes) do
     unregisterMessageMode(messageMode, GameTextMessage.displayMessage)
   end
 

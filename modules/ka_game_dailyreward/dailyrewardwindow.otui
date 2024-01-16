@@ -1,31 +1,40 @@
-RewardItem < Item
-  image-source: /images/ui/slot/item
+RewardItem < UIWidget
   anchors.top: prev.top
   anchors.left: parent.left
+  image-source: /images/ui/slot/item
+
+  UIWidget
+    id: arrow
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.right: parent.left
+    size: 12 21
+    image-source: /images/ui/_button/arrow_horizontal
+    image-clip: 12 0 12 21
+    image-color: #ffffff
+
+  Item
+    id: item
+    virtual: true
+
+    $on:
+      image-source: /images/ui/slot/item_blessed
 
   UIWidget
     id: blueLabel
-    anchors.top: parent.top
-    anchors.right: parent.right
     image-source: /images/ui/slot/blue_label_ne
     opacity: 0.5
+    padding-right: 5
+    text-align: topRight
 
-  Label
-    id: blueLabelText
-    anchors.top: prev.top
-    anchors.right: prev.right
-    margin-right: 3
+  UIWidget
+    id: icon
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
+    phantom: true
+    image-source: /images/ui/icon_lock
 
-  $on:
-    image-source: /images/ui/slot/item_blessed
-
-RewardItemFrame < UIWidget
-  anchors.fill: prev
-  focusable: false
-
-RewardNextButton < NextButton
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.left: parent.left
+    $on:
+      image-source: /images/ui/icon_check
 
 RewardProgressBar < ProgressBar
   anchors.top: prev.outsideBottom
@@ -38,32 +47,11 @@ RewardProgressBar < ProgressBar
   $first:
     anchors.top: parent.top
 
-RewardIconCheck < UIWidget
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.left: parent.left
-  image-source: none
-  phantom: true
-  // Needed to update margin correctly
-  on: true
-
-  $on:
-    image-source: /images/ui/icon_check
-
-RewardIconLock < UIWidget
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.left: parent.left
-  image-source: none
-  phantom: true
-  // Needed to update margin correctly
-  on: true
-
-  $on:
-    image-source: /images/ui/icon_lock
-
 DailyRewardWindow < MainWindow
   id: dailyRewardWindow
   !text: tr('Daily Rewards')
   size: 500 280
+  focusable: false
 
   @onEscape: |
     GameDailyReward.hide()
@@ -72,129 +60,52 @@ DailyRewardWindow < MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    !text: tr('Rewards to acquire')
+    !text: tr('Rewards to claim')
 
   RewardItem
     id: rewardItem1
     anchors.top: prev.outsideBottom
     margin-top: 10
 
-  RewardItemFrame
-    id: rewardItem1Frame
-
   RewardItem
     id: rewardItem2
-
-  RewardItemFrame
-    id: rewardItem2Frame
 
   RewardItem
     id: rewardItem3
 
-  RewardItemFrame
-    id: rewardItem3Frame
-
   RewardItem
     id: rewardItem4
-
-  RewardItemFrame
-    id: rewardItem4Frame
 
   RewardItem
     id: rewardItem5
 
-  RewardItemFrame
-    id: rewardItem5Frame
-
   RewardItem
     id: rewardItem6
-
-  RewardItemFrame
-    id: rewardItem6Frame
 
   RewardItem
     id: rewardItem7
 
-  RewardItemFrame
-    id: rewardItem7Frame
-
-  RewardNextButton
-    id: nextWidget1
-
-  RewardNextButton
-    id: nextWidget2
-
-  RewardNextButton
-    id: nextWidget3
-
-  RewardNextButton
-    id: nextWidget4
-
-  RewardNextButton
-    id: nextWidget5
-
-  RewardNextButton
-    id: nextWidget6
-
   RewardProgressBar
-    id: acquirableRewardsBar
+    id: claimRewardsBar
     anchors.top: rewardItem7.outsideBottom
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 4
 
-  RewardIconCheck
-    id: rewardIconCheck1
-
-  RewardIconCheck
-    id: rewardIconCheck2
-
-  RewardIconCheck
-    id: rewardIconCheck3
-
-  RewardIconCheck
-    id: rewardIconCheck4
-
-  RewardIconCheck
-    id: rewardIconCheck5
-
-  RewardIconCheck
-    id: rewardIconCheck6
-
-  RewardIconCheck
-    id: rewardIconCheck7
-
-  RewardIconLock
-    id: rewardIconLock2
-
-  RewardIconLock
-    id: rewardIconLock3
-
-  RewardIconLock
-    id: rewardIconLock4
-
-  RewardIconLock
-    id: rewardIconLock5
-
-  RewardIconLock
-    id: rewardIconLock6
-
-  RewardIconLock
-    id: rewardIconLock7
-
   Label
     id: timeLabel
-    anchors.top: acquirableRewardsBar.outsideBottom
+    anchors.top: claimRewardsBar.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 10
 
+
   Button
-    id: acquireButton
-    !text: tr('Acquire')
+    id: claimButton
     anchors.top: prev.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 10
     focusable: false
+    !text: tr('Claim')
 
   HorizontalSeparator
     anchors.top: prev.outsideBottom
@@ -218,6 +129,11 @@ DailyRewardWindow < MainWindow
     background-color: #ddb31c
     border-width: 1
     border-color: #ddb31c
+
+  Label
+    id: streakDays
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
 
   Button
     id: closeButton

@@ -36,7 +36,7 @@ local regionLabels = {
 }
 
 local function bindCopyPositionOption(menu, pos)
-  menu:addOption(tr('Copy position'), function() g_window.setClipboardText(string.format('Position(%d, %d, %d)', pos.x, pos.y, pos.z)) end)
+  menu:addOption(tr('Copy position'), function() g_window.setClipboardText(f('Position(%d, %d, %d)', pos.x, pos.y, pos.z)) end)
 end
 
 function UIMinimap:onCreate()
@@ -70,7 +70,7 @@ function UIMinimap:onSetup()
       end
     end
 
-    for k, widget in pairs(self.alternatives) do
+    for _, widget in pairs(self.alternatives) do
       if widget.temporary then
         widget:destroy() -- Removed from list with onDestroy
       end
@@ -353,7 +353,7 @@ function UIMinimap:createAddFlagWindow(mapPos)
     flagRadioGroup:addWidget(checkbox)
   end
 
-  positionLabel:setText(string.format('%i, %i, %i', mapPos.x, mapPos.y, mapPos.z))
+  positionLabel:setText(f('%i, %i, %i', mapPos.x, mapPos.y, mapPos.z))
   flagRadioGroup:selectWidget(flagRadioGroup:getFirstWidget())
 
   local successFunc = function()
@@ -405,7 +405,7 @@ function UIMinimap:createEditFlagWindow(mapPos)
     flagRadioGroup:addWidget(checkbox)
   end
 
-  positionLabel:setText(string.format('%i, %i, %i', mapPos.x, mapPos.y, mapPos.z))
+  positionLabel:setText(f('%i, %i, %i', mapPos.x, mapPos.y, mapPos.z))
   description:setText(flag.description)
   flagRadioGroup:selectWidget(flagRadioGroup.widgets[flag.icon + 1])
 

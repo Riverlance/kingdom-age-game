@@ -366,7 +366,7 @@ function UICreatureButton:updateCreatureMinimapWidgetTooltip(creatureMinimapWidg
     return false
   end
 
-  local minimapWidgetTooltip = string.format('%s\n%d, %d, %d', minimapWidgetTitleLabel:getText(), creatureMinimapWidget.pos.x, creatureMinimapWidget.pos.y, creatureMinimapWidget.pos.z)
+  local minimapWidgetTooltip = f('%s\n%d, %d, %d', minimapWidgetTitleLabel:getText(), creatureMinimapWidget.pos.x, creatureMinimapWidget.pos.y, creatureMinimapWidget.pos.z)
   minimapWidgetCreature:setTooltip(minimapWidgetTooltip)
   minimapWidgetCreature:setPhantom(false)
 
@@ -478,7 +478,7 @@ function UICreatureButton:updatePosition(position)
     end
   end
 
-  positionLabelWidget:setText(string.format('%d, %d, %d', position.x, position.y, position.z))
+  positionLabelWidget:setText(f('%d, %d, %d', position.x, position.y, position.z))
   positionLabelWidget:setColor(color)
 
   self:updateInfoIcon()
@@ -507,7 +507,7 @@ function UICreatureButton:updatePing(ping) -- See ClientTopMenu.updatePing
 
   -- Known
   else
-    text = string.format('%d ms', ping)
+    text = f('%d ms', ping)
 
     if ping >= 500 then
       color = 'red'
@@ -635,7 +635,7 @@ function UICreatureButton:updateInfoIcon()
   local hierarchyStr = tr('Hierarchy: %s', self.creatureTypeId == CreatureTypePlayer and ShieldStr[self.shieldId] or table.contains({ CreatureTypeSummonOwn, CreatureTypeSummonOther }, self.creatureTypeId) and tr('Summon') or tr('Unknown'))
   local distanceStr  = tr('Distance: %d SQM%s', distance, distance > 1 and 's' or '')
 
-  infoIconWidget:setTooltip(string.format('%s\n%s', hierarchyStr, distanceStr))
+  infoIconWidget:setTooltip(f('%s\n%s', hierarchyStr, distanceStr))
 end
 
 

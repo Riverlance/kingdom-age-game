@@ -72,6 +72,3 @@ local script = '/' .. g_app.getCompactName() .. 'rc.lua'
 if g_resources.fileExists(script) then
   dofile(script)
 end
-
--- uncomment the line below so that modules are reloaded when modified. (Note: Use only mod dev) -- KA - todo: move it to dev module
--- g_modules.enableAutoReload()

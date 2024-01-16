@@ -2,7 +2,6 @@ HotkeyAssignWindow < MainWindow
   id: assignWindow
   !text: tr('Button Assign')
   size: 360 150
-  @onEscape: self:destroy()
 
   Label
     !text: tr('Press the key you wish to add onto your hotkeys manager')

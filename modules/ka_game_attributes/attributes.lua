@@ -234,7 +234,7 @@ function GameAttributes.online()
 
   GameAttributes.clearWindow()
 
-  g_game.sendAttributeBuffer(string.format('%d', attribute_flag_updateList))
+  g_game.sendAttributeBuffer(f('%d', attribute_flag_updateList))
 end
 
 function GameAttributes.offline()
@@ -246,18 +246,18 @@ function GameAttributes.offline()
 end
 
 function GameAttributes.clearWindow()
-  attackAttributeActLabel:setText(string.format('%.2f', 0))
-  defenseAttributeActLabel:setText(string.format('%.2f', 0))
-  magicDefenseAttributeActLabel:setText(string.format('%.2f', 0))
-  vitalityAttributeActLabel:setText(string.format('%.2f', 0))
-  willPowerAttributeActLabel:setText(string.format('%.2f', 0))
-  agilityAttributeActLabel:setText(string.format('%.2f', 0))
-  dodgeAttributeActLabel:setText(string.format('%.2f', 0))
-  walkingAttributeActLabel:setText(string.format('%.2f', 0))
-  luckAttributeActLabel:setText(string.format('%.2f', 0))
+  attackAttributeActLabel:setText(f('%.2f', 0))
+  defenseAttributeActLabel:setText(f('%.2f', 0))
+  magicDefenseAttributeActLabel:setText(f('%.2f', 0))
+  vitalityAttributeActLabel:setText(f('%.2f', 0))
+  willPowerAttributeActLabel:setText(f('%.2f', 0))
+  agilityAttributeActLabel:setText(f('%.2f', 0))
+  dodgeAttributeActLabel:setText(f('%.2f', 0))
+  walkingAttributeActLabel:setText(f('%.2f', 0))
+  luckAttributeActLabel:setText(f('%.2f', 0))
 
-  availablePointsLabel:setText(string.format('Pts to use: %d', 0))
-  pointsCostLabel:setText(string.format('Cost: %d', 0))
+  availablePointsLabel:setText(f('Pts to use: %d', 0))
+  pointsCostLabel:setText(f('Cost: %d', 0))
 
   attackAttributeActLabel:removeTooltip()
   defenseAttributeActLabel:removeTooltip()
@@ -269,8 +269,8 @@ function GameAttributes.clearWindow()
   walkingAttributeActLabel:removeTooltip()
   luckAttributeActLabel:removeTooltip()
 
-  availablePointsLabel:setTooltip(string.format('Used points with cost: %d\nUsed points without cost: %d', 0, 0))
-  pointsCostLabel:setTooltip(string.format('Points to increase cost: %d', 0))
+  availablePointsLabel:setTooltip(f('Used points with cost: %d\nUsed points without cost: %d', 0, 0))
+  pointsCostLabel:setTooltip(f('Points to increase cost: %d', 0))
 
   attackAttributeActLabel:setColor('#dfdfdf')
   defenseAttributeActLabel:setColor('#dfdfdf')
@@ -349,7 +349,7 @@ function GameAttributes.parseAttribute(protocol, msg)
       attributeActLabel[id].buffPoints              = attribute.buffPoints
       attributeActLabel[id].total                   = attribute.total
 
-      attributeActLabel[id]:setText(string.format('%0.02f', attributeActLabel[id].total))
+      attributeActLabel[id]:setText(f('%0.02f', attributeActLabel[id].total))
       GameAttributes.updateActLabelTooltip(id)
       attributeActLabel[id]:setColor(attributeActLabel[id].buffPoints > 0 and 'green' or attributeActLabel[id].buffPoints < 0 and 'red' or '#dfdfdf')
     end
@@ -359,14 +359,14 @@ function GameAttributes.parseAttribute(protocol, msg)
     end
   end
 
-  availablePointsLabel:setText(string.format('Pts to use: %d', _availablePoints))
-  availablePointsLabel:setTooltip(string.format('Used points with cost: %d\nUsed points without cost: %d\nPoints earned per level: %d', usedPoints, distributionPoints, _pointsPerLevel))
-  pointsCostLabel:setText(string.format('Cost: %d', pointsCost))
-  pointsCostLabel:setTooltip(string.format('Points to increase cost: %d', pointsToCostIncrease))
+  availablePointsLabel:setText(f('Pts to use: %d', _availablePoints))
+  availablePointsLabel:setTooltip(f('Used points with cost: %d\nUsed points without cost: %d\nPoints earned per level: %d', usedPoints, distributionPoints, _pointsPerLevel))
+  pointsCostLabel:setText(f('Cost: %d', pointsCost))
+  pointsCostLabel:setTooltip(f('Points to increase cost: %d', pointsToCostIncrease))
 end
 
 function GameAttributes.sendAdd(attributeId)
-  g_game.sendAttributeBuffer(string.format('%d', attributeId))
+  g_game.sendAttributeBuffer(f('%d', attributeId))
 end
 
 function GameAttributes.onClickAddButton(widget)
@@ -385,17 +385,17 @@ function GameAttributes.updateActLabelTooltip(attrId)
 
   local isWarrior                   = localPlayer and localPlayer:isWarrior()
   local widget                      = attributeActLabel[attrId]
-  local distributionPointsText      = widget.distributionPoints ~= 0 and string.format('Distribution: %d\n', widget.distributionPoints) or ''
+  local distributionPointsText      = widget.distributionPoints ~= 0 and f('Distribution: %d\n', widget.distributionPoints) or ''
   local alignmentLimit              = attrId == ATTRIBUTE_VITALITY and not isWarrior
-  local alignmentMaxPointsText      = alignmentLimit and '' or string.format(' of %s', widget.alignmentMaxPoints)
-  local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and string.format('\n(%s per level%s)', widget.alignmentPointsPerLevel, alignmentLimit and '; until level 100' or '') or ''
-  local alignmentPointsText         = widget.alignmentPoints ~= 0 and string.format('Alignment: %s%s%s\n', widget.alignmentPoints, alignmentMaxPointsText, alignmentPointsPerLevelText) or ''
-  local questPointsText             = widget.questMaxPoints ~= 0 and string.format('Quest: %s of %s\n', widget.questPoints, widget.questMaxPoints) or ''
-  local buffPointsText              = widget.buffPoints ~= 0 and string.format('Buff/Debuff: %s%s\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
+  local alignmentMaxPointsText      = alignmentLimit and '' or f(' of %s', widget.alignmentMaxPoints)
+  local alignmentPointsPerLevelText = widget.alignmentPointsPerLevel ~= 0 and f('\n(%s per level%s)', widget.alignmentPointsPerLevel, alignmentLimit and '; until level 100' or '') or ''
+  local alignmentPointsText         = widget.alignmentPoints ~= 0 and f('Alignment: %s%s%s\n', widget.alignmentPoints, alignmentMaxPointsText, alignmentPointsPerLevelText) or ''
+  local questPointsText             = widget.questMaxPoints ~= 0 and f('Quest: %s of %s\n', widget.questPoints, widget.questMaxPoints) or ''
+  local buffPointsText              = widget.buffPoints ~= 0 and f('Buff/Debuff: %s%s\n', widget.buffPoints > 0 and '+' or '', widget.buffPoints) or ''
   local moreThanMaximum             = (widget.distributionPoints + widget.alignmentPoints + widget.buffPoints) > widget.total
-  local totalPointsText             = widget.total ~= 0 and string.format('Total: %s%s', widget.total, moreThanMaximum and '\n(exceed the maximum value)' or '') or ''
+  local totalPointsText             = widget.total ~= 0 and f('Total: %s%s', widget.total, moreThanMaximum and '\n(exceed the maximum value)' or '') or ''
 
-  widget:setTooltip(string.format('%s%s%s%s%s', distributionPointsText, alignmentPointsText, questPointsText, buffPointsText, totalPointsText))
+  widget:setTooltip(f('%s%s%s%s%s', distributionPointsText, alignmentPointsText, questPointsText, buffPointsText, totalPointsText))
 end
 
 function GameAttributes.onVocationChange(creature, vocation, oldVocation)

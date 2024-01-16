@@ -326,7 +326,7 @@ function GameVipList.onAddVip(id, name, state, description, iconId, notify)
         or (label.iconId == child.iconId and GameVipList.getSortedBy() == 'type') or GameVipList.getSortedBy() == 'name' then
 
       local childText = child:getText():lower()
-      local length = math.min(childText:len(), nameLower:len())
+      local length = math.min(#childText, #nameLower)
 
       for j=1,length do
         if nameLower:byte(j) < childText:byte(j) then
@@ -334,7 +334,7 @@ function GameVipList.onAddVip(id, name, state, description, iconId, notify)
           return
         elseif nameLower:byte(j) > childText:byte(j) then
           break
-        elseif j == nameLower:len() then -- We are at the end of nameLower, and its shorter than childText, thus insert before
+        elseif j == #nameLower then -- We are at the end of nameLower, and its shorter than childText, thus insert before
           contentsPanel:insertChild(i, label)
           return
         end

@@ -28,7 +28,7 @@ function UIConditionButton.create()
 end
 
 function UIConditionButton:setup(condition)
-  self:setId(string.format('ConditionButton(%d,%d)', condition.id, condition.subId))
+  self:setId(f('ConditionButton(%d,%d)', condition.id, condition.subId))
 
   local conditionBarWidget = self:getChildById('conditionBar')
   conditionBarWidget:setPhases(condition.turns or 0)
@@ -37,7 +37,7 @@ function UIConditionButton:setup(condition)
 
   if type(condition.remainingTime) == 'number' and condition.remainingTime > 0 then
     local timer = { }
-    self.clock = Timer.new(timer, condition.remainingTime)
+    self.clock = Timer.new(timer, condition.remainingTime, '!%M:%S')
     self.clock.updateTicks = 0.1
     self.clock.onUpdate = function() self:updateConditionClock() end
   else
@@ -59,18 +59,18 @@ function UIConditionButton:updateData(condition)
 
   local conditionPowerIconWidget = self:getChildById('conditionPowerIcon')
   if condition.powerId then
-    conditionPowerIconWidget:setIcon(string.format('/images/ui/power/%d_off', condition.powerId))
+    conditionPowerIconWidget:setIcon(f('/images/ui/power/%d_off', condition.powerId))
     conditionPowerIconWidget:setBackgroundColor(UIConditionButton.boostColors[condition.boost])
   else
   -- For debug
-    -- conditionIconWidget:setText(string.format('%d,%d', condition.id, condition.subId))
+    -- conditionIconWidget:setText(f('%d,%d', condition.id, condition.subId))
   -- Else, remove the icon
     conditionPowerIconWidget:setWidth(0) -- Comment this line if you want the debug above to work
   end
 
   if condition.name then
     local conditionAuxiliarWidget = self:getChildById('conditionAuxiliar')
-    conditionAuxiliarWidget:setText(string.format('%s', condition.name))
+    conditionAuxiliarWidget:setText(f('%s', condition.name))
   end
 
   -- Setup aggressive type

@@ -53,7 +53,7 @@ function GameUnjustifiedPoints.init()
   unjustifiedPointsWindow        = g_ui.loadUI('unjustifiedpoints')
   unjustifiedPointsHeader        = unjustifiedPointsWindow:getChildById('miniWindowHeader')
   unjustifiedPointsFooter        = unjustifiedPointsWindow:getChildById('miniWindowFooter')
-  unjustifiedPointsTopMenuButton = ClientTopMenu.addRightGameToggleButton('unjustifiedPointsTopMenuButton', string.format('%s (%s)', tr('Frags'), shortcut), '/images/ui/top_menu/unjustifiedpoints', GameUnjustifiedPoints.toggle)
+  unjustifiedPointsTopMenuButton = ClientTopMenu.addRightGameToggleButton('unjustifiedPointsTopMenuButton', f('%s (%s)', tr('Frags'), shortcut), '/images/ui/top_menu/unjustifiedpoints', GameUnjustifiedPoints.toggle)
 
   unjustifiedPointsWindow.topMenuButton = unjustifiedPointsTopMenuButton
   unjustifiedPointsWindow:disableResize()
@@ -163,10 +163,10 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
   blackSkullProgressBar:setPhases(fragsToBlackSkull)
 
   local nextFragRemainingTime = remainingTime % timeToRemoveFrag
-  skullTimeLabel:setText(string.format('%.2d:%.2d (frags: %d)', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, fragsCount))
+  skullTimeLabel:setText(f('%.2d:%.2d (frags: %d)', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, fragsCount))
 
-  local nextFragRemainingTimeTooltip = string.format('Next frag will be lost in: %.2d:%.2d:%.2d', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, nextFragRemainingTime % 60)
-  skullTimeLabel:setTooltip(string.format('Total frags: %d\n%s\nAll frags will be lost in: %.2d:%.2d:%.2d', fragsCount, nextFragRemainingTimeTooltip, math.floor(remainingTime / (60 * 60)), math.floor(remainingTime / 60) % 60, remainingTime % 60))
+  local nextFragRemainingTimeTooltip = f('Next frag will be lost in: %.2d:%.2d:%.2d', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, nextFragRemainingTime % 60)
+  skullTimeLabel:setTooltip(f('Total frags: %d\n%s\nAll frags will be lost in: %.2d:%.2d:%.2d', fragsCount, nextFragRemainingTimeTooltip, math.floor(remainingTime / (60 * 60)), math.floor(remainingTime / 60) % 60, remainingTime % 60))
 
   skullTimeLabel.data = {
     remainingTime         = remainingTime,
@@ -203,7 +203,7 @@ end
 
 function GameUnjustifiedPoints.parseUnjustifiedPoints(protocolGame, opcode, msg)
   local buffer = msg:getString()
-  local params = buffer:split(':')
+  local params = buffer / ':'
 
   local remainingTime     = tonumber(params[1])
   local fragsToRedSkull   = tonumber(params[2])

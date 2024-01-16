@@ -84,7 +84,7 @@ function Player:isPartySharedExperienceActive()
 end
 
 function Player:hasVip(creatureName)
-  for id, vip in pairs(g_game.getVips()) do
+  for _, vip in pairs(g_game.getVips()) do
     if (vip[1] == creatureName) then
       return true
     end
@@ -130,8 +130,8 @@ function Player:getItems(itemId, subType)
     end
   end
 
-  for i, container in pairs(g_game.getContainers()) do
-    for j, item in pairs(container:getItems()) do
+  for _, container in pairs(g_game.getContainers()) do
+    for _, item in pairs(container:getItems()) do
       if item:getId() == itemId and (subType == -1 or item:getSubType() == subType) then
         item.container = container
         table.insert(items, item)
@@ -155,7 +155,7 @@ function Player:hasState(state, states)
   end
 
   for i = 1, 32 do
-    local pow = math.pow(2, i-1)
+    local pow = math.pow(2, i - 1)
     if pow > states then
       break
     end

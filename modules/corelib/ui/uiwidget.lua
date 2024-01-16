@@ -26,7 +26,7 @@ end
 function UIWidget:updateLocale(params)
   local par = type(params) == 'function' and params(self) or params
   if self.loc then self:setText(loc(self.loc, par), false) end
-  if self.loct then self:setTooltip(loc(self.loct, par)) end
+  if self.loct then self:setTooltip(loc(self.loct, par), self:getTooltipType()) end
 end
 
 function UIWidget:onLocaleChange(localeId, prevLocaleId)

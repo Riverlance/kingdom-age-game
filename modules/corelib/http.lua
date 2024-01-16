@@ -132,17 +132,17 @@ function HTTP.onGet(operationId, url, err, data)
   if operation == nil then
     return
   end
-  if err and err:len() == 0 then
+  if err and #err == 0 then
     err = nil
   end
   if not err and operation.json then
-    if data:len() == 0 then
+    if #data == 0 then
       data = "null"
     end
     local status, result = pcall(function() return json.decode(data) end)
     if not status then
       err = "JSON ERROR: " .. result
-      if data and data:len() > 0 then
+      if data and #data > 0 then
         err = err .. " (" .. data:sub(1, 100) .. ")"
       end
     end
@@ -166,17 +166,17 @@ function HTTP.onPost(operationId, url, err, data)
   if operation == nil then
     return
   end
-  if err and err:len() == 0 then
+  if err and #err == 0 then
     err = nil
   end
   if not err and operation.json then
-    if data:len() == 0 then
+    if #data == 0 then
       data = "null"
     end
     local status, result = pcall(function() return json.decode(data) end)
     if not status then
       err = "JSON ERROR: " .. result
-      if data and data:len() > 0 then
+      if data and #data > 0 then
         err = err .. " (" .. data:sub(1, 100) .. ")"
       end
     end
@@ -199,7 +199,7 @@ function HTTP.onDownload(operationId, url, err, path, checksum)
   if operation == nil then
     return
   end
-  if err and err:len() == 0 then
+  if err and #err == 0 then
     err = nil
   end
   if operation.callback then
@@ -241,14 +241,14 @@ function HTTP.onWsMessage(operationId, message)
   end
   if operation.callbacks.onMessage then
     if operation.json then
-      if message:len() == 0 then
+      if #message == 0 then
         message = "null"
       end
       local status, result = pcall(function() return json.decode(message) end)
       local err = nil
       if not status then
         err = "JSON ERROR: " .. result
-        if message and message:len() > 0 then
+        if message and #message > 0 then
           err = err .. " (" .. message:sub(1, 100) .. ")"
         end
       end

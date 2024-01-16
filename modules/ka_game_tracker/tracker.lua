@@ -45,13 +45,13 @@ end
 --[[ Client Events ]]
 
 function GameTracker.onGameEnd()
-  for id, trackNode in pairs(trackList) do
+  for _, trackNode in pairs(trackList) do
     GameTracker.onTrackEnd(trackNode)
   end
 end
 
 function GameTracker.onLocalPlayerPositionChange()
-  for id, trackNode in pairs(trackList) do
+  for _, trackNode in pairs(trackList) do
     if trackNode.id then
       signalcall(g_game.onTrackCreature, trackNode)
     else

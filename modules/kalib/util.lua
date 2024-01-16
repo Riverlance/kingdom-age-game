@@ -1,31 +1,32 @@
 function dumpvar(data)
-  local tablecache = { }
+  local padder = '  '
+
+  local cache  = { }
   local buffer = ''
-  local padder = '    '
 
   local function _dumpvar(d, depth)
-    local t = type(d)
+    local t   = type(d)
     local str = tostring(d)
     if t == 'table' then
-      if tablecache[str] then
-        -- Table already dumped before, so we dont
-        -- Dump it again, just mention it
-        buffer = buffer .. '<' .. str .. '>\n'
+      if cache[str] then
+        buffer = f('%s<%s>\n', buffer, str) -- Table dumped already: don't dump it again, mention it instead
       else
-        tablecache[str] = (tablecache[str] or 0) + 1
-        buffer = buffer .. '\n' .. string.rep(padder, depth) .. '(' .. str .. ')\n' .. string.rep(padder, depth) .. '{\n'
+        cache[str] = true
+        buffer = f('%s(%s)\n%s{\n', buffer, str, padder * depth)
         for k, v in pairs(d) do
-          buffer = buffer .. string.rep(padder, depth + 1) .. '[' .. (type(k) == 'string' and '\"' .. k .. '\"' or k) .. '] = '
+          buffer = f('%s%s[%s] = ', buffer, padder * (depth + 1), type(k) == 'string' and f('"%s"', k) or tostring(k))
           _dumpvar(v, depth + 1)
         end
-        buffer = buffer .. string.rep(padder, depth) .. '}\n'
+        buffer = f('%s%s}\n', buffer, padder * depth)
       end
     elseif t == 'number' then
-      buffer = buffer .. '(' .. t .. ') ' .. str .. '\n'
+      buffer = f('%s%s (%s)\n', buffer, str, t)
+    elseif t == 'userdata' or t == 'function' or t == 'thread' then
+      buffer = f('%s(%s)\n', buffer, str)
     elseif t == 'nil' then
-      buffer = buffer .. '(' .. t .. ') ' .. 'nil' .. '\n'
+      buffer = f('%s(%s)\n', buffer, t)
     else
-      buffer = buffer .. '(' .. t .. ') \"' .. str .. '\"\n'
+      buffer = f('%s"%s" (%s)\n', buffer, str, t)
     end
   end
 
@@ -33,20 +34,9 @@ function dumpvar(data)
   return buffer
 end
 
--- Is NOT possible to print a nil value inside a table
--- If you want to know if a value is nil, use it as the first param
-function print_r(...)
-  if ... == nil then
-    print(dumpvar())
-    return true
-  end
-
-  local args = {...}
-  if type(args) ~= 'table' or table.empty(args) then
-    return false
-  end
-  for _,arg in pairs(args) do
-    g_logger.info(dumpvar(arg))
+function print_r(...) -- Supports nil parameters
+  for i = 1, select('#', ...) do
+    print(dumpvar((select(i, ...))))
   end
   return true
 end
@@ -57,5 +47,5 @@ function print_widget(widget)
     return
   end
 
-  print(string.format('Id: %s | Class: %s | Style: %s', widget:getId(), widget:getClassName(), widget:getStyleName()))
+  print(f('Id: %s | Class: %s | Style: %s', widget:getId(), widget:getClassName(), widget:getStyleName()))
 end

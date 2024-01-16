@@ -470,8 +470,8 @@ function GameConsole.removeTab(tab)
 
   if tab.channelId then
     -- notificate the server that we are leaving the channel
-    for k, v in pairs(channels) do
-      if (k == tab.channelId) then
+    for k in pairs(channels) do
+      if k == tab.channelId then
         channels[k] = nil
       end
     end
@@ -574,7 +574,7 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
   local m         = lightHour % 60
 
   if ClientOptions.getOption('showTimestampsInConsole') then
-    text = string.format('%.2d:%.2d %s', h, m, text)
+    text = f('%.2d:%.2d %s', h, m, text)
   end
 
   local panel = clone and cloneTabBar:getTabPanel(tab) or consoleTabBar:getTabPanel(tab)
@@ -598,12 +598,12 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
 
       -- Remove the curly braces
       for i = 1, #highlightData / 3 do
-        local dataBlock = { _start = highlightData[(i-1)*3+1], _end = highlightData[(i-1)*3+2], words = highlightData[(i-1)*3+3] }
+        local dataBlock = { _start = highlightData[(i - 1) * 3 + 1], _end = highlightData[(i - 1) * 3 + 2], words = highlightData[(i - 1) * 3 + 3] }
         text = text:gsub('%{(.-)%}', dataBlock.words, 1)
 
         -- Recalculate positions as braces are removed
-        highlightData[(i-1)*3+1] = dataBlock._start - ((i-1) * 2)
-        highlightData[(i-1)*3+2] = dataBlock._end - (1 + (i-1) * 2)
+        highlightData[(i - 1) * 3 + 1] = dataBlock._start - ((i - 1) * 2)
+        highlightData[(i - 1) * 3 + 2] = dataBlock._end - (1 + (i - 1) * 2)
       end
       label:setText(text)
 
@@ -611,10 +611,10 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
       local drawText = label:getDrawText()
       local tmpText = ''
       for i = 1, #highlightData / 3 do
-        local dataBlock = { _start = highlightData[(i-1)*3+1], _end = highlightData[(i-1)*3+2], words = highlightData[(i-1)*3+3] }
-        local lastBlockEnd = (highlightData[(i-2)*3+2] or 1)
+        local dataBlock = { _start = highlightData[(i - 1) * 3 + 1], _end = highlightData[(i - 1) * 3 + 2], words = highlightData[(i - 1) * 3 + 3] }
+        local lastBlockEnd = (highlightData[(i - 2) * 3 + 2] or 1)
 
-        for letter = lastBlockEnd, dataBlock._start-1 do
+        for letter = lastBlockEnd, dataBlock._start - 1 do
           local tmpChar = string.byte(drawText:sub(letter, letter))
           local fillChar = (tmpChar == 10 or tmpChar == 32) and string.char(tmpChar) or string.char(127)
 
@@ -624,15 +624,15 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
       end
 
       -- Fill the highlight label to the same size as default label
-      local finalBlockEnd = (highlightData[(#highlightData/3-1)*3+2] or 1)
-      for letter = finalBlockEnd, drawText:len() do
+      local finalBlockEnd = (highlightData[(#highlightData / 3 - 1) * 3 + 2] or 1)
+      for letter = finalBlockEnd, #drawText do
           local tmpChar = string.byte(drawText:sub(letter, letter))
           local fillChar = (tmpChar == 10 or tmpChar == 32) and string.char(tmpChar) or string.char(127)
 
           tmpText = tmpText .. string.rep(fillChar, letterWidth[tmpChar])
       end
       for i = 1, #highlightData, 3 do
-        table.insert(label.highlightWords, { start = highlightData[i], last = highlightData[i+1], word = highlightData[i+2] } )
+        table.insert(label.highlightWords, { start = highlightData[i], last = highlightData[i + 1], word = highlightData[i + 2] } )
       end
       labelHighlight:setText(tmpText)
     end
@@ -1222,7 +1222,7 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
       local highlightData = GameConsole.getHighlightedText(staticMessage)
       if #highlightData > 0 then
         for i = 1, #highlightData / 3 do
-          local dataBlock = { _start = highlightData[(i-1)*3+1], _end = highlightData[(i-1)*3+2], words = highlightData[(i-1)*3+3] }
+          local dataBlock = { _start = highlightData[(i - 1) * 3 + 1], _end = highlightData[(i - 1) * 3 + 2], words = highlightData[(i - 1) * 3 + 3] }
           staticMessage = staticMessage:gsub('{'..dataBlock.words..'}', dataBlock.words)
         end
       end
@@ -1294,7 +1294,7 @@ function GameConsole.onCloseChannel(channelId)
     local tab = GameConsole.getTab(channel)
     if tab then
       consoleTabBar:removeTab(tab)
-      for k, v in pairs(channels) do
+      for k, _ in pairs(channels) do
         if (k == tab.channelId) then
           channels[k] = nil
         end
@@ -1609,7 +1609,7 @@ function GameConsole.online()
 
   -- Open last channels
   local settings = Client.getPlayerSettings()
-  for channelName, channelId in pairs(settings:getNode('lastChannelsOpen') or { }) do
+  for _, channelId in pairs(settings:getNode('lastChannelsOpen') or { }) do
     channelId = tonumber(channelId)
     if channelId ~= -1 and not table.find(channels, channelId) then
       g_game.joinChannel(channelId)
@@ -1632,7 +1632,7 @@ end
 function GameConsole.onChannelEvent(channelId, name, type)
   local fmt = ChannelEventFormats[type]
   if not fmt then
-    print(('Unknown channel event type (%d).'):format(type))
+    print(f('Unknown channel event type (%d).', type))
     return
   end
 
@@ -1640,7 +1640,7 @@ function GameConsole.onChannelEvent(channelId, name, type)
   if channel then
     local tab = GameConsole.getTab(channel)
     if tab then
-      GameConsole.addTabText(fmt:format(name), SpeakTypesSettings.channelOrange, tab)
+      GameConsole.addTabText(f(fmt, name), SpeakTypesSettings.channelOrange, tab)
     end
   end
 end

@@ -198,7 +198,7 @@ function GameHotkeys.apply(hotkeyLabel, save, sort)
 end
 
 function GameHotkeys.applyChanges()
-  for index, hotkeyLabel in ipairs(currentHotkeys:getChildren()) do
+  for _, hotkeyLabel in ipairs(currentHotkeys:getChildren()) do
     if hotkeyLabel.status ~= HotkeyStatus.Applied then
       GameHotkeys.apply(hotkeyLabel, false, false)
     end
@@ -225,7 +225,7 @@ function GameHotkeys.resetHotkey(hotkeyLabel)
 end
 
 function GameHotkeys.discardChanges()
-  for index, hotkey in ipairs(currentHotkeys:getChildren()) do
+  for _, hotkey in ipairs(currentHotkeys:getChildren()) do
     GameHotkeys.resetHotkey(hotkey)
   end
 end
@@ -233,9 +233,9 @@ end
 function GameHotkeys.sort()
   local hotkeys = currentHotkeys:getChildren()
   table.sort(hotkeys, function(a,b)
-    if a:getId():len() < b:getId():len() then
+    if #a:getId() < #b:getId() then
       return true
-    elseif a:getId():len() == b:getId():len() then
+    elseif #a:getId() == #b:getId() then
       return a:getId() < b:getId()
     else
       return false
@@ -341,7 +341,7 @@ function GameHotkeys.loadDefaultComboKeys()
       GameHotkeys.addKeyCombo({keyCombo = 'Ctrl+F' .. i})
     end
   else
-    for keyCombo, keySettings in pairs(defaultComboKeys) do
+    for _, keySettings in pairs(defaultComboKeys) do
       GameHotkeys.addKeyCombo(keySettings)
     end
   end
@@ -408,12 +408,16 @@ function GameHotkeys.assignHotkey(keySettings)
     assignWindow = nil
   end
 
-  local cancelButton = assignWindow:getChildById('cancelButton')
-  cancelButton.onClick = function (widget, mousePos)
+  local destroyFunc = function (widget, mousePos)
     signalcall(GameHotkeys.onAssignHotkey, keySettings, false)
     assignWindow:destroy()
     assignWindow = nil
   end
+
+  assignWindow.onEscape = destroyFunc
+
+  local cancelButton = assignWindow:getChildById('cancelButton')
+  cancelButton.onClick = destroyFunc
 end
 
 function GameHotkeys.canUseHotkey(keySettings)
@@ -660,6 +664,7 @@ function GameHotkeys.updateHotkeyForm(reset)
       currentItemPreview:setIcon('/images/ui/power/' .. keySettings.powerId .. '_off')
     else
       enableText()
+      hotkeyText:clearText()
       switchItemPreview(true)
     end
   else
@@ -772,7 +777,7 @@ function GameHotkeys.dragEnterItemPreview(self, mousePos)
   if item then
     g_mouseicon.displayItem(item)
   elseif tonumber(keySettings.powerId) then
-    g_mouseicon.display(string.format('/images/ui/power/%d_off', keySettings.powerId))
+    g_mouseicon.display(f('/images/ui/power/%d_off', keySettings.powerId))
   end
   return true
 end

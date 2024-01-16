@@ -3,7 +3,7 @@ local messageModeCallbacks = { }
 function g_game.onTextMessage(messageMode, message)
   local callbacks = messageModeCallbacks[messageMode]
   if not callbacks or #callbacks == 0 then
-    perror(string.format('Unhandled onTextMessage message mode %i: %s', messageMode, message))
+    perror(f('Unhandled onTextMessage message mode %i: %s', messageMode, message))
     return
   end
 

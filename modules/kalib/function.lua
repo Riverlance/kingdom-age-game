@@ -20,7 +20,7 @@ function getExperienceTooltipText(localPlayer, value, percent)
       local xpNextLevel = expForLevel(localPlayer:getLevel() + 1)
       local hoursLeft   = (xpNextLevel - localPlayer:getExperience()) / xpPerHour
       local minutesLeft = math.floor((hoursLeft - math.floor(hoursLeft)) * 60)
-      ret = string.format('%s\n%s\n%s', ret, tr('%s XP per hour.', tostring(xpPerHour):comma()), tr('Next level in %d hours and %d minutes.', math.floor(hoursLeft), minutesLeft))
+      ret = f('%s\n%s\n%s', ret, tr('%s XP per hour.', tostring(xpPerHour):comma()), tr('Next level in %d hours and %d minutes.', math.floor(hoursLeft), minutesLeft))
     end
   end
   return ret

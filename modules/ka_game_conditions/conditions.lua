@@ -316,7 +316,7 @@ function GameConditions.conditionButtonFilter(condition)
 end
 
 function GameConditions.filterConditionButtons()
-  for i, condition in pairs(conditionList) do
+  for _, condition in pairs(conditionList) do
     condition.button:setOn(not GameConditions.conditionButtonFilter(condition))
   end
 end
@@ -514,7 +514,7 @@ function GameConditions.onStatesChange(localPlayer, now, old)
 
   local bitsChanged = bit.bxor(now, old)
   for i = 1, 32 do
-    local pow = math.pow(2, i-1)
+    local pow = math.pow(2, i - 1)
     if pow > bitsChanged then
       break
     end

@@ -1,54 +1,157 @@
--- @docclass string
+#
+
+-- Methods
+
+local stringMetatable = getmetatable('')
+
+-- local helloString = 'Hello'
+
+--[[
+  local dateString = '03/15/94'
+  print(dateString()) --> nil
+  print(dateString('(%d+)/(%d+)/(%d+)')) --> 03 15 94
+  local weirdString = 'A 789 C A 789 A'
+  print(weirdString('(%d+)')) --> 789 (same as weirdString:match('(%d+)'); match first '789')
+  print(weirdString('(%d+)', 4)) --> 89 (same as weirdString:match('(%d+)', 4); match sliced '789' from pos 4)
+  print(weirdString('(%d+)', 6)) --> 89 (same as weirdString:match('(%d+)', 6); match complete '789' from pos 6)
+]]
+local stringMetamethodCall = stringMetatable.__call
+stringMetatable.__call = function(self, ...)
+  local args = {...}
+  if #args > 0 and type(args[1]) == 'string' then
+    return self:match(...)
+  end
+  if stringMetamethodCall then
+    return stringMetamethodCall(self, ...)
+  end
+  return nil
+end
+
+--[[
+  print(helloString[1]) --> H
+  print(helloString[2]) --> e
+  print(helloString[{1,2}]) --> He
+  print(('Hello, world!')[{'world', 'Lua'}]) --> Hello, Lua!
+  print(('A B C A B A')[{'A', '_', 2}]) --> _ B C _ B A
+]]
+local stringMetamethodIndex = stringMetatable.__index
+stringMetatable.__index = function(self, v)
+  if type(v) == 'table' then
+    if type(v[1]) == 'number' then
+      return self:sub(v[1], v[2])
+    elseif type(v[1]) == 'string' then
+      return self:gsub(unpack(v))
+    end
+  elseif type(v) == 'number' then
+    return self:sub(v, v)
+  end
+  return stringMetamethodIndex[v]
+end
+
+--[[
+  print(helloString + ', world!') --> Hello, world!
+  print(helloString + 7) --> Hello7
+  print(helloString + true) --> Hellotrue
+]]
+stringMetatable.__add = function(self, value)
+  return f('%s%s', self, tostring(value))
+end
+
+-- print(helloString - 3) --> He
+stringMetatable.__sub = function(self, value)
+  local size = #self - value
+  return size > 0 and self:sub(1, size) or ''
+end
+
+--[[
+  print(helloString * 3) --> HelloHelloHello
+  print(helloString * -1) --> olleH
+  print(helloString * -3) --> olleHolleHolleH
+]]
+stringMetatable.__mul = function(self, value)
+  return (value < 0 and self:reverse() or self):rep(math.abs(value))
+end
+
+-- print_r('Have a nice day' / ' ') --> { 'Have', 'a', 'nice', 'day' }
+stringMetatable.__div = function(self, value)
+  return self:split(value)
+end
+
+--[[
+  print('Have a nice day' % 'Have') --> true
+  print('Have a nice day' % 'Has') --> false
+  print('Have a nice day' % {'Has', 'Have'}) --> true
+  print('Have a nice day' % {}) --> false
+  print('Have a nice day' % nil) --> false
+]]
+stringMetatable.__mod = function(self, value)
+  if type(value) == 'table' then
+    return self:contains(unpack(value or { }))
+  end
+  return self:contains(value)
+end
+
+--[[
+  print('abc' == 'abc') --> true
+  print('abc' < 'def') --> true
+  print('abc' > 'def') --> false
+]]
+
+
+
+-- Special functions
+
+-- f(formatString, ...)
+-- Inspired by 'f-string' of Python
+-- e.g, f('My %s value is %.2f.', 'foo', 7.8) --> My foo value is 7.80.
+f = string.format
+
+-- r-string
+-- Use your string between [[]]
+-- e.g, [[Hello, world.\nThis is my literal string.]]
+
+---
+---Returns a table of a binary version of a string.
+---
+---IMPORTANT: This idiom only works for strings somewhat shorter than 1MB.
+---
+---Inspired by `b-string` of Python.
+---
+---e.g, b'Hello!' --> { 72, 101, 108, 108, 111, 33 }
+---
+---@param str string
+---@return table
+function b(str)
+  return { str:byte(1, -1) }
+end
+
+
+
+-- Base
+
+function string.exists(self)
+  return self and self ~= ''
+end
 
 function string:split(delim)
   local start = 1
   local results = { }
   while true do
-    local pos = string.find(self, delim, start, true)
+    local pos = self:find(delim, start, true)
     if not pos then
       break
     end
-    table.insert(results, string.sub(self, start, pos-1))
-    start = pos + string.len(delim)
+    table.insert(results, self:sub(start, pos-1))
+    start = pos + #delim
   end
-  table.insert(results, string.sub(self, start))
+  table.insert(results, self:sub(start))
   table.removevalue(results, '', true)
   return results
 end
 
-function string:starts(start)
-  return string.sub(self, 1, #start) == start
-end
 
-function string:ends(test)
-   return test =='' or string.sub(self,-string.len(test)) == test
-end
 
-function string:trim()
-  return string.match(self, '^%s*(.*%S)') or ''
-end
-
-function string:explode(sep, limit)
-  if type(sep) ~= 'string' or tostring(self):len() == 0 or sep:len() == 0 then
-    return { }
-  end
-
-  local i, pos, tmp, t = 0, 1, '', { }
-  for s, e in function() return string.find(self, sep, pos) end do
-    tmp = self:sub(pos, s - 1):trim()
-    table.insert(t, tmp)
-    pos = e + 1
-
-    i = i + 1
-    if limit ~= nil and i == limit then
-      break
-    end
-  end
-
-  tmp = self:sub(pos):trim()
-  table.insert(t, tmp)
-  return t
-end
+-- Find
 
 function string:contains(...)
   for _, keyword in ipairs({ ... }) do
@@ -59,6 +162,92 @@ function string:contains(...)
   -- return message:find(keyword) and not message:find('(%w+)' .. keyword)
   return false
 end
+
+function string:starts(start)
+  return self:sub(1, #start) == start
+end
+
+function string:ends(test)
+  return test == '' or self:sub(-#test) == test
+end
+
+
+
+-- Format
+
+function string:trim()
+  return self:match('^%s*(.*%S)') or ''
+end
+
+function string:getCompactPath() -- path/file.ext to path/file
+  return self:match('(.+)%..-$')
+end
+
+function string:removeBorders(begin, final) -- ([begin], [final])
+  return self:match((begin or '') .. '(.+)' .. (final or ''))
+end
+
+function string:comma()
+  local left, num, right = self:match('^([^%d]*%d)(%d*)(.-)$')
+  return left .. num:reverse():gsub('(%d%d%d)', '%1,'):reverse() .. right
+end
+
+function string:getArticle()
+  return self:find('[AaEeIiOoUuYy]') == 1 and 'an' or 'a'
+end
+
+function string:getMonthDayEnding() -- You can use as string.getMonthDayEnding(1) too
+  local number = tonumber(self)
+  if number then
+    if number == 1 or number == 21 or number == 31 then
+      return 'st'
+    elseif number == 2 or number == 22 then
+      return 'nd'
+    elseif number == 3 or number == 23 then
+      return 'rd'
+    end
+  end
+  return 'th'
+end
+
+function string:getMonthString() -- You can use as string.getMonthString(1) too
+  return os.date('%B', os.time{year = 1970, month = self, day = 1})
+end
+
+function string:eval(params)
+  local result, occurrences = self:gsub('${(%w+)}', params)
+  if occurrences == 0 then
+    return result
+  end
+  return result:eval(params)
+end
+
+
+
+-- Iterator
+
+---
+---Traverses all words of a string.
+---
+---e.g, for w in ('Lorem ipsum dolor sit amet.'):words() do print(w) end --> Lorem; ipsum; dolor; sit; amet
+---
+---@param startPos number
+---@return function
+function string:words(startPos)
+  local pos = startPos or 1 -- Current position in the string
+  return function() -- Iterator function
+    local word, _pos = self:match('(%w+)()', pos) -- '()' returns the position after the word
+    if word then
+      pos = _pos -- Next position is after this word
+      return word
+    end
+    return nil
+  end
+end
+
+
+
+-- Randomize / shuffle
 
 local function getFatorial(n)
   return n == 0 and 1 or n * getFatorial(n - 1)
@@ -85,13 +274,13 @@ local function randomizeTable(_table, begin, final) -- (_table[, begin[, final]]
 
   -- Copy table
   local cache = { }
-  for i=1, #_table do
+  for i = 1, #_table do
     cache[i] = _table[i]
   end
 
-  for k1,v1 in pairs(_table) do
-    for k2,v2 in pairs(sequence) do
-      if k1 == k2+(begin and begin-1 or 0) then
+  for k1, _ in pairs(_table) do
+    for k2, v2 in pairs(sequence) do
+      if k1 == k2 + (begin and begin - 1 or 0) then
         _table[k1] = cache[v2]
       end
     end
@@ -103,9 +292,9 @@ function string:getCombinations(begin, final, size, result) -- ([begin[, final[,
   result = result or 1
   local letters, combinations = { }, { }
 
-  local string_length = self:len()
-  for i = 1, string_length do
-    table.insert(letters, string.sub(self, i, i))
+  local length = #self
+  for i = 1, length do
+    table.insert(letters, self:sub(i, i))
   end
 
   local _result = 0
@@ -121,7 +310,7 @@ function string:getCombinations(begin, final, size, result) -- ([begin[, final[,
     if not table.contains(combinations, str) then
       table.insert(combinations, str)
     end
-    if #combinations == getFatorial(string_length) then
+    if #combinations == getFatorial(length) then
       break
     end
 
@@ -136,64 +325,12 @@ function string:getCombinations(begin, final, size, result) -- ([begin[, final[,
 end
 
 function string:mix(lockBorders, decrease)
-  local words = string.explode(self, ' ')
-  local ret = ''
-  for k,v in pairs(words) do
+  local words = self / ' '
+  local ret   = ''
+  for k, v in pairs(words) do
     local begin  = lockBorders and (#v >= 4 and 2 or -1) or 1
     local final  = lockBorders and (#v >= 4 and #v-1 or -1) or #v
     ret = ret .. v:getCombinations(begin, final, decrease and math.random(#v) or #v)[1] .. (k ~= #words and ' ' or '')
   end
   return ret
-end
-
-function string:removeBorders(begin, final) -- ([begin], [final])
-  return self:match((begin or '') .. '(.+)' .. (final or ''))
-end
-
-function string:getCompactPath() -- path/file.ext to path/file
-  return self:match('(.+)%..-$')
-end
-
-function string.exists(self)
-  return self and self ~= ''
-end
-
-function string:comma()
-  local left, num, right = string.match(self, '^([^%d]*%d)(%d*)(.-)$')
-  return left .. num:reverse():gsub('(%d%d%d)', '%1,'):reverse() .. right
-end
-
-function string:eval(params)
-  local result, occurrences = self:gsub('${(%w+)}', params)
-  if occurrences == 0 then
-    return result
-  else
-    return result:eval(params)
-  end
-end
-
-function string:var()
-  return string.format('${%s}', self)
-end
-
-function string:getArticle()
-  return self:find('[AaEeIiOoUuYy]') == 1 and 'an' or 'a'
-end
-
-function string:getMonthDayEnding() -- You can use as string.getMonthDayEnding(1) too
-  local number = tonumber(self)
-  if number then
-    if number == 1 or number == 21 or number == 31 then
-      return 'st'
-    elseif number == 2 or number == 22 then
-      return 'nd'
-    elseif number == 3 or number == 23 then
-      return 'rd'
-    end
-  end
-  return 'th'
-end
-
-function string:getMonthString() -- You can use as string.getMonthString(1) too
-  return os.date('%B', os.time{year = 1970, month = self, day = 1})
 end

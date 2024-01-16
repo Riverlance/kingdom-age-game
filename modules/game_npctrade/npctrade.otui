@@ -241,7 +241,7 @@ MainWindow
       phantom: false
       id: trustDesc
       !text: tr('Trust') .. ':'
-      !tooltip: tr('Your trust on this city')
+      !tooltip: tr('Your trust in this city')
       anchors.left: parent.left
       anchors.top: prev.bottom
       margin-top: 3

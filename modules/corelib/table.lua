@@ -1,117 +1,144 @@
--- @docclass table
+#
 
-function pack(...) -- supports nil parameters
-  local newArgs = { }
-  local args    = {...}
-  for i = 1, select('#', ...) do
-    newArgs[i] = select(i, ...)
-  end
-  return newArgs
+function pack(...)
+  return {...}
 end
 
-function table.dump(t, depth)
-  if not depth then
-    depth = 0
+function argsize(...)
+  return select('#', ...)
+end
+
+
+
+---
+---Traverses a table in order, based on keys.
+---
+---```lua
+---local t = { coconut = 8, apple = 7, banana = 9 }
+--- -- or local t = { ['coconut'] = 8, ['apple'] = 7, ['banana'] = 9 }
+---
+---for k, v in sortedpairs(t) do
+---  print(k, v) --> apple 7; banana 9; coconut 8
+---end
+---
+--- for k, v in sortedpairs(t, function(a, b) return a > b end) do
+---   print(k, v) --> coconut 8; banana 9; apple 7
+--- end
+---```
+---
+---@param t table
+---@param sortCallback function
+---@return function
+function sortedpairs(t, sortCallback)
+  local mt = getmetatable(t)
+  if mt and mt.__sortedpairs then
+    return mt.__sortedpairs(t, sortCallback)
   end
 
-  for k,v in pairs(t) do
-    str = (' '):rep(depth * 2) .. k .. ': '
-    if type(v) ~= 'table' then
-      print(str .. tostring(v))
-    else
-      print(str)
-      table.dump(v, depth+1)
-    end
+  local keys = { }
+  for k in pairs(t) do
+    keys[#keys + 1] = k
   end
+
+  table.sort(keys, sortCallback)
+
+  local i = 0
+  return function()
+    i = i + 1
+    return keys[i], t[keys[i]] -- key, value
+  end
+end
+
+
+
+-- Base
+
+---
+---Gets a value from a zipped table.
+---
+---Worst way: `local zip = company and company.director and company.director.address and company.director.address.zipcode`
+---
+---Best way: `local zip = table.get(company, 'director', 'address', 'zipcode')`
+---
+---@param t   table
+---@param ... string
+---@return any
+function table.get(t, ...)
+  local args         = {...}
+  local __emptyTable = { }
+  for i = 1, #args do
+    t = (t or __emptyTable)[args[i]]
+  end
+  return t
+end
+
+function table.size(t)
+  local size = 0
+  for _ in pairs(t) do
+    size = size + 1
+  end
+  return size
+end
+
+function table.empty(t)
+  if t and type(t) == 'table' then
+    return next(t) == nil
+  end
+  return true
 end
 
 function table.clear(t)
-  for k,v in pairs(t) do
+  for k in pairs(t) do
     t[k] = nil
   end
 end
 
-function table.copy(t)
+function table.copy(t, keys) -- (t[, keys])
   local ret = { }
-  for k,v in pairs(t) do
-    if type(v) ~= 'table' then
-      ret[k] = v
-    else
-      ret[k] = table.copy(v)
+
+  if keys then
+    for _, k in ipairs(keys) do
+      local v = t[k]
+      if type(v) == 'table' then
+        ret[k] = table.copy(v)
+      else
+        ret[k] = v
+      end
+    end
+  else
+    for k, v in pairs(t) do
+      if type(v) == 'table' then
+        ret[k] = table.copy(v)
+      else
+        ret[k] = v
+      end
     end
   end
+
   local metaTable = getmetatable(t)
   if metaTable then
     setmetatable(ret, metaTable)
   end
+
   return ret
 end
 
-function table.selectivecopy(t, keys)
-  local res = { }
-  for i,v in ipairs(keys) do
-    res[v] = t[v]
-  end
-  return res
-end
 
-function table.addKeys(t, keys)
-  for _, key in ipairs(keys) do
-    if type(key) == 'table' then
-      for _key = key.from, key.to do
-        t[_key] = true
-      end
-    else
-      t[key] = true
-    end
-  end
-end
 
-function table.merge(t, src, overwrite)
-  if overwrite then
-    for k,v in pairs(src) do
-      t[k] = v
+-- Find
+
+function table.contains(t, value)
+  for _, targetColumn in pairs(t) do
+    if targetColumn == value then
+      return true
     end
-    return t
   end
 
-  local _t = table.copy(t)
-  for k,v in pairs(src) do
-    table.insert(_t, v)
-  end
-  return _t
-end
-
-function table.keysAsValues(t, valueAsKey)
-  local ret = { }
-  if valueAsKey then
-    for key, v in pairs(t) do
-      ret[v] = key
-    end
-  else
-    for key, _ in pairs(t) do
-      table.insert(ret, key)
-    end
-  end
-  return ret
-end
-
-function table.valuesAsKeys(t, keyAsValue)
-  local ret = { }
-  if keyAsValue then
-    for k, value in pairs(t) do
-      ret[value] = k
-    end
-  else
-    for _, value in pairs(t) do
-      ret[value] = true
-    end
-  end
-  return ret
+  return false
 end
 
 function table.find(t, value, lowercase)
-  for k,v in pairs(t) do
+  for k, v in pairs(t) do
     if lowercase and type(value) == 'string' and type(v) == 'string' then
       if v:lower() == value:lower() then
         return k
@@ -125,7 +152,7 @@ function table.find(t, value, lowercase)
 end
 
 function table.findbykey(t, key, lowercase)
-  for k,v in pairs(t) do
+  for k, v in pairs(t) do
     if lowercase and type(key) == 'string' and type(k) == 'string' then
       if k:lower() == key:lower() then
         return v
@@ -138,136 +165,43 @@ function table.findbykey(t, key, lowercase)
   end
 end
 
-function table.contains(t, value)
-  for _, targetColumn in pairs(t) do
-    if targetColumn == value then
-      return true
+function table.findbyfield(t, fieldname, fieldvalue)
+  for _, subTable in pairs(t) do
+    if subTable[fieldname] == fieldvalue then
+      return subTable
     end
   end
-
-  return false
+  return nil
 end
 
 function table.findkey(t, key)
-  if t and type(t) == 'table' then
-    for k,v in pairs(t) do
-      if k == key then
-        return k
-      end
+  for k in pairs(t) do
+    if k == key then
+      return k
     end
   end
 end
 
-function table.haskey(t, key)
-  return table.findkey(t, key) ~= nil
+function table.haskey(...)
+  return table.findkey(...) ~= nil
 end
 
-function table.removevalue(t, value, all, force)
-  for k,v in pairs(t) do
-    if v == value then
-      if force then
-        t[k] = nil
-      else
-        table.remove(t, k)
-        if not all then
-          return true
-        end
-      end
-    end
-  end
 
-  if not force and all then
-    return true
-  end
-  return false
-end
 
-function table.popvalue(value)
-  local index = nil
-  for k,v in pairs(t) do
-    if v == value or not value then
-      index = k
-    end
-  end
-  if index then
-    table.remove(t, index)
-    return true
-  end
-  return false
-end
+-- Comparing
 
-function table.compare(t, other)
-  if #t ~= #other then
-    return false
-  end
-
-  for k,v in pairs(t) do
-    if v ~= other[k] then
+function table.equals(t, otherTable)
+  for k, v in pairs(t) do
+    if v ~= otherTable[k] then
       return false
     end
   end
   return true
 end
 
-function table.empty(t)
-  if t and type(t) == 'table' then
-    return next(t) == nil
-  end
-  return true
-end
 
-function table.findbyfield(t, fieldname, fieldvalue)
-  for _i,subt in pairs(t) do
-    if subt[fieldname] == fieldvalue then
-      return subt
-    end
-  end
-  return nil
-end
 
-function table.size(t)
-  local size = 0
-  for _, _ in pairs(t) do
-    size = size + 1
-  end
-  return size
-end
-
-function table.list(t)
-  local stringRet = table.concat(t, ', '):gsub(', ([^,]+)$', ' and %1') -- Returns like '1, 2 and 3'
-  return stringRet -- Return only first return parameter of table.concat
-end
-
-function table.collect(t, func)
-  local res = { }
-  for k,v in pairs(t) do
-    local a,b = func(k,v)
-    if a and b then
-      res[a] = b
-    elseif a ~= nil then
-      table.insert(res,a)
-    end
-  end
-  return res
-end
-
-function table.insertall(t, s)
-  for k,v in pairs(s) do
-    table.insert(t,v)
-  end
-  return res
-end
-
-function table.equals(t, comp)
-  if type(t) == 'table' and type(comp) == 'table' then
-    for k,v in pairs(t) do
-      if v ~= comp[k] then
-        return false
-      end
-    end
-  end
-  return true
-end
+-- Random / shuffle
 
 function table.random(t)
   if table.empty(t) then
@@ -318,33 +252,64 @@ function table.getRatedValue(t) -- Table value needs to be a table which contain
   return nil
 end
 
-function table.serialize(_table, recursive) -- (table) -- Do not use the recursive param
-  local _type = type(_table)
-  recursive = recursive or { }
 
-  if _type == 'nil' or _type == 'number' or _type == 'boolean' then
-    return tostring(_table)
-  elseif _type == 'string' then
-    return string.format('%q', _table)
-  elseif getmetatable(_table) then
-    error('Was not possible to serialize a table that has a metatable associated with it.')
-  elseif _type == 'table' then
-    if table.find(recursive, _table) then
-      error('Was not possible to serialize recursive tables.')
-    end
-    table.insert(recursive, _table)
 
-    local s = '{'
-    for k, v in pairs(_table) do
-      s = string.format('%s[%s]=%s, ', s, table.serialize(k, recursive), table.serialize(v, recursive))
+-- Insert / remove
+
+function table.addKeys(t, keys)
+  for _, k in ipairs(keys) do
+    if type(k) == 'table' then
+      for _k = k.from, k.to do
+        t[_k] = true
+      end
+    else
+      t[k] = true
     end
-    return string.format('%s}', s:sub(0, s:len() - 2))
   end
-  error(string.format("Was not possible to serialize the value of type '%s'", _type))
 end
 
-function table.unserialize(str)
-  return loadstring('return ' .. str)()
+function table.addValues(t, values)
+  for _, v in ipairs(values) do
+    if type(v) == 'table' then
+      for _v = v.from, v.to do
+        table.insert(t, _v)
+      end
+    else
+      table.insert(t, v)
+    end
+  end
+end
+
+function table.keysAsValues(t, valueAsKey)
+  local ret = { }
+
+  if valueAsKey then
+    for k, v in pairs(t) do
+      ret[v] = k
+    end
+  else
+    for k in pairs(t) do
+      table.insert(ret, k)
+    end
+  end
+
+  return ret
+end
+
+function table.valuesAsKeys(t, keyAsValue)
+  local ret = { }
+
+  if keyAsValue then
+    for k, v in pairs(t) do
+      ret[v] = k
+    end
+  else
+    for _, v in pairs(t) do
+      ret[v] = true
+    end
+  end
+
+  return ret
 end
 
 function table.insertChild(t, index, value)
@@ -359,7 +324,31 @@ function table.insertChild(t, index, value)
     value._parent = t
     value._id = index
   end
+
   return index
+end
+
+function table.insertall(t, otherTable)
+  for _, v in pairs(otherTable) do
+    table.insert(t, v)
+  end
+
+  return res
+end
+
+function table.collect(t, func)
+  local res = { }
+
+  for k, v in pairs(t) do
+    local _k, _v = func(k, v)
+    if _k and _v then
+      res[_k] = _v
+    elseif _k ~= nil then
+      table.insert(res, _k)
+    end
+  end
+
+  return res
 end
 
 function table.removeChild(t, index, recursive)
@@ -376,26 +365,124 @@ function table.removeChild(t, index, recursive)
       break
     end
   until not t or not recursive
+
   return t
 end
 
-function table.get(t, ...)
-  --[[
-    -- Worst way
-    local zip = company and company.director and company.director.address and company.director.address.zipcode
-
-    -- Best way
-    local zip = table.get(company, 'director', 'address', 'zipcode')
-  ]]
-  local args = {...}
-
-  for i = 1, #args do
-    if type(t) ~= 'table' then
-      return nil
+function table.removevalue(t, value, all, force)
+  for k, v in pairs(t) do
+    if v == value then
+      if force then
+        t[k] = nil
+      else
+        table.remove(t, k)
+        if not all then
+          return true
+        end
+      end
     end
-
-    t = t[args[i]]
   end
 
-  return t
+  if not force and all then
+    return true
+  end
+  return false
+end
+
+function table.popvalue(value)
+  local index
+
+  for k, v in pairs(t) do
+    if v == value or not value then
+      index = k
+    end
+  end
+
+  if index then
+    table.remove(t, index)
+    return true
+  end
+
+  return false
+end
+
+function table.merge(t, sourceTable, overwrite) -- (t, sourceTable[, overwrite])
+  if overwrite then
+    for k, v in pairs(sourceTable) do
+      t[k] = v
+    end
+    return t
+  end
+
+  local _t = table.copy(t)
+  for k, v in pairs(sourceTable) do
+    table.insert(_t, v)
+  end
+
+  return _t
+end
+
+
+
+-- Serialize
+
+do
+  local serializationCallbacks = { -- [type] = callback
+    ['nil'] = function(t, __recursive)
+      return tostring(t)
+    end,
+
+    ['boolean'] = function(t, __recursive)
+      return tostring(t)
+    end,
+
+    ['number'] = function(t, __recursive)
+      local function isInteger(num)
+        return type(num) == 'number' and num == math.floor(num)
+      end
+      return f(isInteger(t) and '%d' or '%a', t)
+    end,
+
+    ['string'] = function(t, __recursive)
+      return f('%q', t)
+    end,
+
+    ['table'] = function(t, __recursive)
+      if getmetatable(t) then
+        error('Was not possible to serialize a table that has a metatable associated with it.')
+      elseif table.find(__recursive, t) then -- Cannot have any table referenced twice or more
+        error('Was not possible to serialize recursive tables.')
+      end
+      table.insert(__recursive, t)
+
+      local s = '{ '
+      for k, v in pairs(t) do
+        s = f('%s[%s] = %s, ', s, table.serialize(k, __recursive), table.serialize(v, __recursive))
+      end
+      return f('%s}', s)
+    end,
+  }
+
+  function table.serialize(t, __recursive) -- (table) -- Do not use the recursive param
+    local _type = type(t)
+    __recursive = __recursive or { }
+
+    if serializationCallbacks[_type] then
+      return serializationCallbacks[_type](t, __recursive)
+    end
+
+    error(f("Was not possible to serialize the value of type '%s'", _type))
+  end
+end
+
+function table.unserialize(str)
+  return loadstring(f('return %s', str))()
+end
+
+
+
+-- Format
+
+function table.list(t)
+  return (table.concat(t, ', '):gsub(', ([^,]+)$', ' and %1')) -- Return only first return parameter of table.concat (like '1, 2 and 3')
 end

@@ -1783,7 +1783,7 @@ function updateTrackArrow(trackNode)
   end
 
   local trackerLabel = trackNode.widget:getChildById('distance')
-  trackerLabel:setText(string.format('%d m', math.floor(distance)))
+  trackerLabel:setText(f('%d m', math.floor(distance)))
 
   local orientation = math.atan2(trackPos.y - playerPos.y, trackPos.x - playerPos.x)
   local trackerArrow = trackNode.widget:getChildById('arrow')

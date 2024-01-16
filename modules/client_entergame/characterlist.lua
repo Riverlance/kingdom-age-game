@@ -55,7 +55,7 @@ local function updateWait(timeStart, timeEnd)
     local time = g_clock.seconds()
     if time <= timeEnd then
       local percent = ((time - timeStart) / (timeEnd - timeStart)) * 100
-      local timeStr = string.format('%.0f', timeEnd - time)
+      local timeStr = f('%.0f', timeEnd - time)
 
       local progressBar = waitingWindow:getChildById('progressBar')
       progressBar:setPercent(percent)
@@ -256,7 +256,7 @@ function ClientCharacterList.create(characters, account, otui)
           if subWidget.baseText and subWidget.baseTranslate then
             text = tr(subWidget.baseText, text)
           elseif subWidget.baseText then
-            text = string.format(subWidget.baseText, text)
+            text = f(subWidget.baseText, text)
           end
           subWidget:setText(text)
         end

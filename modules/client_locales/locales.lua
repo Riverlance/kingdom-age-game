@@ -83,9 +83,9 @@ function ClientLocales.installLocale(locale)
     end
 
     if #updatesNamesMissing > 0 then
-      pdebug(string.format('Locale \'%d\' is missing %d translations.', locale.id, #updatesNamesMissing))
+      pdebug(f('Locale \'%d\' is missing %d translations.', locale.id, #updatesNamesMissing))
       for _, name in pairs(updatesNamesMissing) do
-        pdebug(string.format('Missing translation:\t"%s"', name))
+        pdebug(f('Missing translation:\t"%s"', name))
       end
     end
   end
@@ -115,7 +115,7 @@ function ClientLocales.setLocale(id)
   local locale = InstalledLocales[id]
 
   if not locale then
-    error(string.format('Locale %d does not exist.', id))
+    error(f('Locale %d does not exist.', id))
 
   elseif locale == ClientLocales.getLocale() then
     g_settings.set('locale', id)
@@ -130,7 +130,7 @@ function ClientLocales.setLocale(id)
   ClientLocales.sendLocale()
 
   if debugInfo then
-    pdebug(string.format('Using configured locale: %d', id))
+    pdebug(f('Using configured locale: %d', id))
   end
 end
 
@@ -147,7 +147,7 @@ function ClientLocales.createWindow()
   for id, locale in ipairs(InstalledLocales) do
     local widget = g_ui.createWidget('LocalesButton', localesPanel)
 
-    widget:setImageSource(string.format('/images/ui/flags/%s', locale.name))
+    widget:setImageSource(f('/images/ui/flags/%s', locale.name))
     widget:setText(locale.languageName)
 
     widget.onClick = function()
@@ -187,7 +187,7 @@ function _G.tr(text, ...)
 
   -- Number
   if tonumber(text) and locale.formatNumbers then
-    local number        = tostring(text):split('.')
+    local number        = tostring(text) / '.'
     local reverseNumber = number[1]:reverse()
     local out           = ''
 
@@ -216,7 +216,7 @@ function _G.tr(text, ...)
       translation = text
     end
 
-    return string.format(translation, ...)
+    return f(translation, ...)
   end
 
   return text
@@ -229,7 +229,7 @@ end
 function ClientLocales.sendLocale()
   if not ClientLocales.getLocale() then
     if debugInfo then
-      pdebug(string.format('Current locale %d is unknown.', currentLocaleId))
+      pdebug(f('Current locale %d is unknown.', currentLocaleId))
     end
     return
   end

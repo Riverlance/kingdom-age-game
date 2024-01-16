@@ -5,7 +5,7 @@ function Struct.pack(format, ...)
   local vars = {...}
   local endianness = true
 
-  for i = 1, format:len() do
+  for i = 1, #format do
     local opt = format:sub(i, i)
 
     if opt == '>' then
@@ -19,7 +19,7 @@ function Struct.pack(format, ...)
       end
 
       local bytes = { }
-      for j = 1, n do
+      for _ = 1, n do
         table.insert(bytes, string.char(val % (2 ^ 8)))
         val = math.floor(val / (2 ^ 8))
       end
@@ -50,7 +50,7 @@ function Struct.pack(format, ...)
       local bytes = { }
       if opt == 'd' then
         val = mantissa
-        for i = 1, 6 do
+        for _ = 1, 6 do
           table.insert(bytes, string.char(math.floor(val) % (2 ^ 8)))
           val = math.floor(val / (2 ^ 8))
         end
@@ -80,12 +80,12 @@ function Struct.pack(format, ...)
 
       if length > 0 then
         local str = tostring(table.remove(vars, 1))
-        if length - str:len() > 0 then
-          str = str .. string.rep(' ', length - str:len())
+        if length - #str > 0 then
+          str = str .. string.rep(' ', length - #str)
         end
         table.insert(stream, str:sub(1, length))
       end
-      i = i + n:len()
+      i = i + #n
     end
   end
 
@@ -97,7 +97,7 @@ function Struct.unpack(format, stream)
   local iterator = 1
   local endianness = true
 
-  for i = 1, format:len() do
+  for i = 1, #format do
     local opt = format:sub(i, i)
 
     if opt == '>' then
@@ -150,7 +150,7 @@ function Struct.unpack(format, stream)
       end
     elseif opt == 's' then
       local bytes = { }
-      for j = iterator, stream:len() do
+      for j = iterator, #stream do
         if stream:sub(j, j) == string.char(0) then
           break
         end
@@ -159,13 +159,13 @@ function Struct.unpack(format, stream)
       end
 
       local str = table.concat(bytes)
-      iterator = iterator + str:len() + 1
+      iterator = iterator + #str + 1
       table.insert(vars, str)
     elseif opt == 'c' then
       local n = format:sub(i + 1):match('%d+')
       table.insert(vars, stream:sub(iterator, iterator + tonumber(n)))
       iterator = iterator + tonumber(n)
-      i = i + n:len()
+      i = i + #n
     end
   end
 

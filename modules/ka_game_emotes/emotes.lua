@@ -111,7 +111,7 @@ function GameEmotes.offline()
 end
 
 function GameEmotes.updateConsoleEmoteButtonIcon()
-  consoleEmoteButton:setIcon(string.format('/images/game/emote/%d', math.random(FirstEmote, LastEmote)))
+  consoleEmoteButton:setIcon(f('/images/game/emote/%d', math.random(FirstEmote, LastEmote)))
   consoleEmoteButton:setIconSize({ width = 16, height = 16 })
   consoleEmoteButton:setIconOffset({ x = 3, y = 4 })
 end
@@ -178,8 +178,8 @@ end
 function GameEmotes.setupEmotes()
   for id = FirstEmote, LastEmote do
     local emote = g_ui.createWidget('EmoteButton', emoteWindow)
-    emote:setId(string.format('EmoteButton_%d', id))
-    emote:setIcon(string.format('/images/game/emote/%d', id))
+    emote:setId(f('EmoteButton_%d', id))
+    emote:setIcon(f('/images/game/emote/%d', id))
     emote:setTooltip(emotes[id].name)
     emote.id = id
     emote.timesUsed = 0
@@ -223,7 +223,7 @@ function GameEmotes.loadSettings()
   local settings      = Client.getPlayerSettings()
   local emoteSettings = settings:getNode('emotes') or { }
 
-  for id, emote in pairs(emoteSettings) do
+  for id, _ in pairs(emoteSettings) do
     local emoteId = tonumber(id)
     if emoteList[emoteId] then
       emoteList[emoteId].timesUsed = emoteSettings[id].timesUsed
@@ -278,7 +278,7 @@ end
 
 function GameEmotes.parseEmote(protocol, msg)
   local total = msg:getU8()
-  for i = 1, total do
+  for _ = 1, total do
     local emoteId = msg:getU8()
     local action  = msg:getU8()
     if action == EmoteEnable then

@@ -76,7 +76,7 @@ function ProtocolLogin:sendLoginPacket()
 
   local paddingBytes = g_crypt.rsaGetSize() - (msg:getMessageSize() - offset)
   assert(paddingBytes >= 0)
-  for i = 1, paddingBytes do
+  for _ = 1, paddingBytes do
     msg:addU8(math.random(0, 0xff))
   end
 
@@ -89,7 +89,7 @@ function ProtocolLogin:sendLoginPacket()
     msg:addU8(1) --unknown
 
     if g_game.getClientVersion() >= 1072 then
-      msg:addString(string.format('%s %s', g_graphics.getVendor(), g_graphics.getRenderer()))
+      msg:addString(f('%s %s', g_graphics.getVendor(), g_graphics.getRenderer()))
     else
       msg:addString(g_graphics.getRenderer())
     end
@@ -110,7 +110,7 @@ function ProtocolLogin:sendLoginPacket()
 
     paddingBytes = g_crypt.rsaGetSize() - (msg:getMessageSize() - offset)
     assert(paddingBytes >= 0)
-    for i = 1, paddingBytes do
+    for _ = 1, paddingBytes do
       msg:addU8(math.random(0, 0xff))
     end
 
@@ -191,7 +191,7 @@ function ProtocolLogin:parseCharacterList(msg)
     local worlds = { }
 
     local worldsCount = msg:getU8()
-    for i=1, worldsCount do
+    for _ = 1, worldsCount do
       local world = { }
       local worldId = msg:getU8()
       world.worldName = msg:getString()
@@ -202,7 +202,7 @@ function ProtocolLogin:parseCharacterList(msg)
     end
 
     local charactersCount = msg:getU8()
-    for i=1, charactersCount do
+    for i = 1, charactersCount do
       local character = { }
       local worldId = msg:getU8()
       character.name = msg:getString()

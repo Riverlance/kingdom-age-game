@@ -104,7 +104,7 @@ function UIHotkeyBarContainer:onDragEnter(mousePos)
   if tonumber(keySettings.itemId) then
     g_mouseicon.displayItem(Item.create(keySettings.itemId))
   elseif tonumber(keySettings.powerId) then
-    g_mouseicon.display(string.format('/images/ui/power/%d_off', keySettings.powerId))
+    g_mouseicon.display(f('/images/ui/power/%d_off', keySettings.powerId))
   end
   return true
 end
@@ -167,13 +167,13 @@ end
 
 --[[ Power Effects ]]
 function UIHotkeyBarContainer:setPowerIcon(powerId, enabled)
-  local path = string.format('/images/ui/power/%d_%s', powerId, enabled and 'on' or 'off')
+  local path = f('/images/ui/power/%d_%s', powerId, enabled and 'on' or 'off')
   self:getChildById('power'):setImageSource(path)
 end
 
 function UIHotkeyBarContainer:setPowerEffect(boostLevel)
   local powerWidget = self:getChildById('power')
-  local particle    = g_ui.createWidget(string.format('PowerSendingParticlesBoost%d', boostLevel), powerWidget)
+  local particle    = g_ui.createWidget(f('PowerSendingParticlesBoost%d', boostLevel), powerWidget)
   scheduleEvent(function() particle:destroy() end, 1000)
 end
 
@@ -197,9 +197,8 @@ function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
 
     local percent = 1 - (widget.endTime - g_clock.millis()) / exhaustTime
     widget:setShaderUniform(ShaderUniforms.Progress, percent)
-    if percent >= 1 then
+    if percent > 1 then
       widget:setShader('Widget - None')
-      widget.endTime = nil
     else
       scheduleEvent(function() updateShader() end, 50)
     end

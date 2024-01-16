@@ -9,7 +9,7 @@ function UIHotkeyLabel:onDragEnter(mousePos)
   g_mouse.pushCursor('target')
   local keySettings = self.settings
   if tonumber(keySettings.powerId) then
-    g_mouseicon.display(string.format('/images/ui/power/%d_off', keySettings.powerId))
+    g_mouseicon.display(f('/images/ui/power/%d_off', keySettings.powerId))
   elseif tonumber(keySettings.itemId) then
     g_mouseicon.display(keySettings.itemId, nil, nil, keySettings.subType)
   elseif string.exists(keySettings.text) then

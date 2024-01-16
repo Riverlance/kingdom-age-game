@@ -1097,7 +1097,7 @@ serverSignals[PARTYLIST_SERVERSIGNAL_SENDCREATURESPOSITION] = function(msg)
   local membersCount = msg:getU8()
   local sortType     = GamePartyList.getSortType()
 
-  for i = 1, membersCount do
+  for _ = 1, membersCount do
     local memberCid      = msg:getU32()
     local memberPosition = msg:getPosition()
 
@@ -1169,7 +1169,7 @@ end
 serverSignals[PARTYLIST_SERVERSIGNAL_SENDPLAYERSPING] = function(msg)
   local membersCount = msg:getU8()
 
-  for i = 1, membersCount do
+  for _ = 1, membersCount do
     local memberCid  = msg:getU32()
     local memberPing = msg:getU64()
 
@@ -1217,7 +1217,7 @@ function GamePartyList.parsePartyList(protocol, msg)
   local serverSignal   = serverSignals[serverSignalId]
 
   if not serverSignal then
-    print_traceback(string.format('GamePartyList.parsePartyList - attempt to call an unknown server signal of id %d', serverSignalId))
+    print_traceback(f('GamePartyList.parsePartyList - attempt to call an unknown server signal of id %d', serverSignalId))
     return
   end
 
@@ -1250,7 +1250,7 @@ function GamePartyList.sendPartyList(clientSignalId, params)
   local clientSignal = clientSignals[clientSignalId]
 
   if not clientSignal then
-    print_traceback(string.format('GamePartyList.sendPartyList - attempt to call an unknown client signal of id %d', clientSignalId))
+    print_traceback(f('GamePartyList.sendPartyList - attempt to call an unknown client signal of id %d', clientSignalId))
     return
   end
 

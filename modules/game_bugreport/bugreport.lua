@@ -50,7 +50,7 @@ local function sendNewReport(category, comment, position)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format('%d;%d;%s;%d;%d;%d', REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
+  msg:addString(f('%d;%d;%s;%d;%d;%d', REPORT_MODE_NEWREPORT, category, comment:trim(), position.x, position.y, position.z))
   protocolGame:send(msg)
 end
 
@@ -63,7 +63,7 @@ local function sendUpdateSearch(category, page, rowsPerPage, state)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format('%d;%d;%d;%d;%d', REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
+  msg:addString(f('%d;%d;%d;%d;%d', REPORT_MODE_UPDATESEARCH, category, page, rowsPerPage, state))
   protocolGame:send(msg)
 end
 
@@ -76,7 +76,7 @@ local function sendUpdateState(row)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format('%d;%d;%d', REPORT_MODE_UPDATESTATE, row.state, row.id))
+  msg:addString(f('%d;%d;%d', REPORT_MODE_UPDATESTATE, row.state, row.id))
   protocolGame:send(msg)
 end
 
@@ -89,7 +89,7 @@ local function sendRemoveRow(row)
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeBugReport)
-  msg:addString(string.format('%d;%d', REPORT_MODE_REMOVEROW, row.id))
+  msg:addString(f('%d;%d', REPORT_MODE_REMOVEROW, row.id))
   protocolGame:send(msg)
 end
 
@@ -455,7 +455,7 @@ function GameBugReport.openRow(row)
     bugReportWindow:lock()
     clearBugReportViewWindow(row)
 
-    bugLabel:setText(string.format('%s\n- Time: %s\n- Player name: %s\n- Player pos: [ X: %d | Y: %d | Z: %d ]', row:getText(), os.date('%Y %b %d %H:%M:%S', row.time), row.playername, row.playerposx, row.playerposy, row.playerposz))
+    bugLabel:setText(f('%s\n- Time: %s\n- Player name: %s\n- Player pos: [ X: %d | Y: %d | Z: %d ]', row:getText(), os.date('%Y %b %d %H:%M:%S', row.time), row.playername, row.playerposx, row.playerposy, row.playerposz))
 
     if categories[row.category] then
       bugCategoryComboBox:setOption(categories[row.category])
@@ -587,7 +587,7 @@ function GameBugReport.parseBugReports(protocolGame, opcode, msg)
     row.playerposx = tonumber(data[9])
     row.playerposy = tonumber(data[10])
     row.playerposz = tonumber(data[11])
-    row.comment    = string.format('%s', data[12])
+    row.comment    = f('%s', data[12])
     updateReportRowTitle(row)
     row.onDoubleClick = GameBugReport.openRow
   end

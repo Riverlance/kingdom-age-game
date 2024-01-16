@@ -345,7 +345,7 @@ function signalcall(param, ...)
 end
 
 function tr(s, ...)
-  return string.format(s, ...)
+  return f(s, ...)
 end
 
 function getOppositeAnchor(anchor)

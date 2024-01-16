@@ -200,7 +200,7 @@ end
 
 function GameLootbar.onLoot(protocolGame, opcode, msg)
   local buffer = msg:getString()
-  local params = buffer:split(':')
+  local params = buffer / ':'
 
   if ClientOptions.getOption('clearLootbarItemsOnEachDrop') then
     GameLootbar.clearLoot()
@@ -213,7 +213,7 @@ function GameLootbar.onLoot(protocolGame, opcode, msg)
 
   for i = 4, #params do
     -- Item params
-    local itemParams = params[i]:split(';')
+    local itemParams = params[i] / ';'
     for j = 1, 3 do
       -- Params 1 to 2 are numeric
       if j >= 1 and j <= 2 then

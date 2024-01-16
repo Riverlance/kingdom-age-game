@@ -1,23 +1,34 @@
 Timer = { --minute:second countdown timer
     spentTime = 0,
     updateTicks = 1,
-    onUpdate = nil
+    onUpdate = nil,
+    forward = false,
 }
 
-function Timer:new(duration)
+function Timer:new(duration, format)
     local timer = { }
+    timer.startTime = os.time()
     timer.duration = math.floor(duration / 1000)
-    timer.minutes = math.floor(timer.duration / 60)
-    timer.seconds = timer.duration % 60
-    timer.durationString = string.format('%.2d:%.2d', timer.minutes, timer.seconds)
+    timer.endTime = timer.startTime + timer.duration
+    timer.format = format or '!%X'
     return setmetatable(timer, { __index = Timer })
 end
 
-function Timer:getString()
-    return string.format('%.2d:%.2d', self.minutes, math.floor(self.seconds))
+function Timer:getString(format)
+    if self.forward then
+        return os.date(format or self.format, os.difftime(os.time(), self.startTime))
+    end
+    return os.date(format or self.format, os.difftime(self.endTime, os.time()))
+end
+
+function Timer:getDurationString(format)
+    return os.date(format or self.format, os.difftime(self.endTime, self.startTime))
 end
 
 function Timer:getPercent()
+    if self.forward then
+        return 100 * self.spentTime / self.duration
+    end
     return 100 - 100 * self.spentTime / self.duration
 end
 
@@ -43,16 +54,9 @@ function Timer:update()
 
 --countdown
     if self.spentTime > self.duration then
-        self.minutes = 0
-        self.seconds = 0
         self:stop()
         return
     end
-
-    if self.seconds < self.updateTicks then
-        self.minutes = self.minutes - 1
-    end
-    self.seconds = (self.seconds - self.updateTicks) % 60
 
     if self.onUpdate then
         self:onUpdate()

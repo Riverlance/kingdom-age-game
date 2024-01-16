@@ -38,7 +38,7 @@ local function retranslateKeyComboDesc(keyComboDesc)
   end
 
   local keyCombo = { }
-  for i,currentKeyDesc in ipairs(keyComboDesc:split('+')) do
+  for i,currentKeyDesc in ipairs(keyComboDesc / '+') do
     for keyCode, keyDesc in pairs(KeyCodeDescs) do
       if keyDesc:lower() == currentKeyDesc:trim():lower() then
         table.insert(keyCombo, keyCode)
@@ -50,7 +50,7 @@ end
 
 function backtranslateKeyComboDesc(keyComboDesc)
   local keyCombo = { }
-  for _, keyCodeDesc in ipairs(keyComboDesc:split('+')) do
+  for _, keyCodeDesc in ipairs(keyComboDesc / '+') do
     for keyCode, keyDesc in pairs(KeyCodeDescs) do
       if keyDesc:lower() == keyCodeDesc:trim():lower() then
         table.insert(keyCombo, keyCode)

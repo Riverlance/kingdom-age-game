@@ -52,6 +52,12 @@ MainWindow
       end
       ping()
 
+  DevLightButton
+    !text: tr('Auto-reload')
+    !tooltip: tr('Modules are reloaded when modified\nTo disable, simply restart the client')
+    @onClick: |
+      g_modules.enableAutoReload()
+
   DevCheckBox
     id: localCheckBox
     !text: tr('Local Server')

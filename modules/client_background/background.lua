@@ -24,7 +24,7 @@ function ClientBackground.init()
   -- particles = background:getChildById('particles')
 
   clientVersionLabel = background:getChildById('clientVersionLabel')
-  clientVersionLabel:setText(string.format('%s\nVersion %s', g_app.getName(), CLIENT_VERSION))
+  clientVersionLabel:setText(f('%s\nVersion %s', g_app.getName(), CLIENT_VERSION))
   -- clientVersionLabel:setText(g_app.getName() .. ' ' .. g_app.getVersion() .. '\n' ..
   --                            'Rev  ' .. g_app.getBuildRevision() .. ' (' .. g_app.getBuildCommit() .. ')\n' ..
   --                            'Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch() .. '\n' ..

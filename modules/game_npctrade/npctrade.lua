@@ -207,7 +207,7 @@ function GameNpcTrade.onQuantityValueChange(quantity)
 
   local items, backpacks, price = GameNpcTrade.getBuyAmount(selectedItem, quantity)
   priceLabel:setText(GameNpcTrade.formatCurrency(price) .. GameNpcTrade.formatTrust(selectedItem) .. GameNpcTrade.formatTown(selectedItem))
-  weightLabel:setText(tradeType == BUY and string.format('%.2f', quantity * selectedItem.weight) .. ' ' .. WEIGHT_UNIT or '')
+  weightLabel:setText(tradeType == BUY and f('%.2f', quantity * selectedItem.weight) .. ' ' .. WEIGHT_UNIT or '')
 
   GameNpcTrade.checkTradeTooltip()
 end
@@ -378,7 +378,7 @@ function GameNpcTrade.refreshItem(item)
 
   nameLabel:setText(item.name)
   priceLabel:setText(GameNpcTrade.formatCurrency(GameNpcTrade.getCurrentTradeType() == BUY and _price ~= 0 and _price or quantity * item.price) .. GameNpcTrade.formatTrust(item) .. GameNpcTrade.formatTown(item))
-  weightLabel:setText(tradeType == BUY and string.format('%.2f', quantity * item.weight) .. ' ' .. WEIGHT_UNIT or '')
+  weightLabel:setText(tradeType == BUY and f('%.2f', quantity * item.weight) .. ' ' .. WEIGHT_UNIT or '')
   quantityScroll:setMinimum(items ~= 0 and 1 or 0)
   quantityScroll:setMaximum(items)
 
@@ -415,13 +415,13 @@ function GameNpcTrade.refreshTradeItems()
 
     local text = item.name
     text       = text .. '\n' .. GameNpcTrade.formatCurrency(item.price) .. GameNpcTrade.formatTrust(item)
-    text       = text .. '\n' .. (string.format('%.2f', item.weight) .. ' ' .. WEIGHT_UNIT)
+    text       = text .. '\n' .. (f('%.2f', item.weight) .. ' ' .. WEIGHT_UNIT)
     itemBox:setText(text)
 
     local infoWidget       = npcItemBox:getChildById('infoButton')
-    local tooltipText      = string.format('Name: %s', item.name)
+    local tooltipText      = f('Name: %s', item.name)
     tooltipText            = tooltipText .. '\n' .. 'Price' .. ': ' .. GameNpcTrade.formatCurrency(item.price) .. GameNpcTrade.formatTrust(item) .. GameNpcTrade.formatTown(item)
-    tooltipText            = tooltipText .. '\n' .. 'Weight' .. ': ' .. string.format('%.2f', item.weight) .. ' ' .. WEIGHT_UNIT
+    tooltipText            = tooltipText .. '\n' .. 'Weight' .. ': ' .. f('%.2f', item.weight) .. ' ' .. WEIGHT_UNIT
     infoWidget.tooltipText = tooltipText
     infoWidget:setTooltip(tooltipText, TooltipType.textBlock)
 
@@ -461,7 +461,7 @@ function GameNpcTrade.refreshPlayerGoods()
   GameNpcTrade.checkTradeTooltip()
   GameNpcTrade.checkSellAllTooltip()
 
-  moneyLabel:setText(string.format('%s (%s)', GameNpcTrade.formatCurrency(playerMoney), playerMoneyFromBank and 'from bank' or 'holding'))
+  moneyLabel:setText(f('%s (%s)', GameNpcTrade.formatCurrency(playerMoney), playerMoneyFromBank and 'from bank' or 'holding'))
   if CURRENCY_ISVIP then
     moneyLabel:setTooltip(tr('Your VIP money may not be displayed correctly if points were added through the website while keeping the trade window opened.'), TooltipType.textBlock)
     buyWithBackpack:setTooltip('This option is disabled on VIP Shop.', TooltipType.textBlock)
@@ -469,16 +469,16 @@ function GameNpcTrade.refreshPlayerGoods()
     moneyLabel:removeTooltip()
     buyWithBackpack:removeTooltip()
   end
-  capacityLabel:setText(string.format('%.2f', playerFreeCapacity) .. ' ' .. WEIGHT_UNIT)
-  trustLabel:setText(string.format('Level %d (%s XP)', townTrustLevel, tostring(townTrustExperience):comma()))
+  capacityLabel:setText(f('%.2f', playerFreeCapacity) .. ' ' .. WEIGHT_UNIT)
+  trustLabel:setText(f('Level %d (%s XP)', townTrustLevel, tostring(townTrustExperience):comma()))
   local trustInfoMessage = ''
   if townTrustLevel < trustMaxLevel then
     local trustExpDiff      = townTrustExpToNextLevel - townTrustExpOfActualLevel
     local trustExpToAdvance = townTrustExpToNextLevel - townTrustExperience
     local trustExpPercent   = (trustExpToAdvance / trustExpDiff) * 100
-    trustInfoMessage        = string.format('Remaining %.2f%% (about %s XP) to advance to trust level %d%s.', trustExpPercent, tostring(trustExpToAdvance):comma(), townTrustLevel + 1, getTownStr())
+    trustInfoMessage        = f('Remaining %.2f%% (about %s XP) to advance to trust level %d%s.', trustExpPercent, tostring(trustExpToAdvance):comma(), townTrustLevel + 1, getTownStr())
   else
-    trustInfoMessage = string.format('You are on the maximum trust level%s.', getTownStr())
+    trustInfoMessage = f('You are on the maximum trust level%s.', getTownStr())
   end
   trustLabel:setTooltip(trustInfoMessage .. '\n\n' .. howToTownTrust, TooltipType.textBlock)
 
@@ -648,12 +648,12 @@ function GameNpcTrade.checkTradeTooltip()
 
   local quantity                = quantityScroll:getValue()
   local items, backpacks, price = GameNpcTrade.getBuyAmount(selectedItem, quantity)
-  local tooltipText             = string.format('Name: %s', selectedItem.name)
+  local tooltipText             = f('Name: %s', selectedItem.name)
   tooltipText                   = tooltipText .. '\n\n' .. 'Price' .. ': ' .. GameNpcTrade.formatCurrency(selectedItem.price) .. GameNpcTrade.formatTrust(selectedItem) .. GameNpcTrade.formatTown(selectedItem)
-  tooltipText                   = tooltipText .. (tradeType == BUY and '\n' .. 'Weight' .. ': ' .. string.format('%.2f', selectedItem.weight) .. ' ' .. WEIGHT_UNIT or '')
+  tooltipText                   = tooltipText .. (tradeType == BUY and '\n' .. 'Weight' .. ': ' .. f('%.2f', selectedItem.weight) .. ' ' .. WEIGHT_UNIT or '')
   tooltipText                   = tooltipText .. '\n\n' .. 'Count' .. ': ' .. quantity
   tooltipText                   = tooltipText .. '\n' .. 'Total price' .. ': ' .. GameNpcTrade.formatCurrency(price) .. GameNpcTrade.formatTrust(selectedItem) .. GameNpcTrade.formatTown(selectedItem)
-  tooltipText                   = tooltipText .. (tradeType == BUY and '\n' .. 'Total weight' .. ': ' .. string.format('%.2f', selectedItem.weight * quantity) .. ' ' .. WEIGHT_UNIT or '')
+  tooltipText                   = tooltipText .. (tradeType == BUY and '\n' .. 'Total weight' .. ': ' .. f('%.2f', selectedItem.weight * quantity) .. ' ' .. WEIGHT_UNIT or '')
 
   tradeButton:setTooltip(tooltipText, TooltipType.textBlock)
 end
@@ -665,12 +665,12 @@ function GameNpcTrade.checkSellAllTooltip()
   local info = ''
   local first = true
 
-  for key, _ in pairs(playerItems) do
+  for key in pairs(playerItems) do
     local item = GameNpcTrade.getTradeItemData(key, SELL)
     if item then
       local items, price = GameNpcTrade.getSellAmount(item)
       if items > 0 then
-        info = string.format('%s%s* %dx %s: %d %s', info, (not first and '\n' or ''), items, item.name, price, tr(CURRENCY))
+        info = f('%s%s* %dx %s: %d %s', info, (not first and '\n' or ''), items, item.name, price, tr(CURRENCY))
         total = total + price
 
         if first then
@@ -680,7 +680,7 @@ function GameNpcTrade.checkSellAllTooltip()
     end
   end
   if info ~= '' then
-    info = string.format('%s\n\nTotal price: %d %s', info, total, tr(CURRENCY))
+    info = f('%s\n\nTotal price: %d %s', info, total, tr(CURRENCY))
     sellAllButton:setTooltip(info, TooltipType.textBlock)
   else
     sellAllButton:setEnabled(false)
@@ -690,7 +690,7 @@ end
 
 function GameNpcTrade.formatCurrency(amount)
   if CURRENCY_DECIMAL then
-    return string.format('%.02f', amount/100.0) .. ' ' .. (CURRENCY_ISVIP and CURRENCY_VIP or CURRENCY)
+    return f('%.02f', amount/100.0) .. ' ' .. (CURRENCY_ISVIP and CURRENCY_VIP or CURRENCY)
   else
     return amount .. ' ' .. (CURRENCY_ISVIP and CURRENCY_VIP or CURRENCY)
   end

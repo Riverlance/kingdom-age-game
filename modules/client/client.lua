@@ -143,7 +143,7 @@ function Client.loadFiles()
   -- g_game.enableFeature(GameVipGroups)
 
   scheduleEvent(function()
-    local  path = resolvepath('/things/Kingdom Age')
+    local path = resolvepath('/things/Kingdom Age')
     local errorMessage = ''
     if not g_things.loadDat(path) then
       errorMessage = errorMessage .. tr("Unable to load dat file, place a valid dat in '%s'", path) .. '\n'
@@ -152,7 +152,7 @@ function Client.loadFiles()
       errorMessage = errorMessage .. tr("Unable to load spr file, place a valid spr in '%s'", path)
     end
 
-    if errorMessage:len() > 0 then
+    if #errorMessage > 0 then
       local messageBox = displayErrorBox(tr('Error'), errorMessage)
       addEvent(function() messageBox:raise() messageBox:focus() end)
       g_game.setClientVersion(0)
@@ -169,18 +169,18 @@ end
 
 function Client.getPlayerSettings(fileName) -- ([fileName])
   if g_game.isOnline() then
-    playerSettingsPath = string.format('/%s/%s', G.host:gsub('[%W]', '_'):lower(), g_game.getCharacterName():gsub('[%W]', '_'))
+    playerSettingsPath = f('/%s/%s', G.host:gsub('[%W]', '_'):lower(), g_game.getCharacterName():gsub('[%W]', '_'))
   end
   if not g_resources.makeDir(playerSettingsPath) then
-    g_logger.error(string.format('Failed to load path \'%s\'', playerSettingsPath))
+    g_logger.error(f('Failed to load path \'%s\'', playerSettingsPath))
   end
 
-  local playerSettingsFilePath = string.format('%s/%s.otml', playerSettingsPath, fileName or 'config')
+  local playerSettingsFilePath = f('%s/%s.otml', playerSettingsPath, fileName or 'config')
 
   -- Create or load player settings file
   local file = g_configs.create(playerSettingsFilePath)
   if not file then
-    g_logger.error(string.format('Failed to load file at \'%s\'', playerSettingsFilePath))
+    g_logger.error(f('Failed to load file at \'%s\'', playerSettingsFilePath))
   end
 
   return file
