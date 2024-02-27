@@ -365,7 +365,7 @@ function GameCharacter.toggle()
   GameInterface.toggleMiniWindow(inventoryWindow)
 end
 
-function GameCharacter.onInventoryChange(player, slot, item, oldItem)
+function GameCharacter.onInventoryChange(localPlayer, slot, item, oldItem)
   if slot > InventorySlotAmmo then
     return
   end
@@ -429,8 +429,8 @@ function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
 
   healthBar:setValue(health, 0, maxHealth)
 
-  healthBarValueLabel:setText(f('%d / %d HP', health, maxHealth))
-  healthBarValueLabel:setTooltip(tr('Your character health is %d out of %d.\nClick to show creature health bar.', health, maxHealth), TooltipType.textBlock)
+  healthBarValueLabel:setText(f('%s / %s HP', tr(health), tr(maxHealth)))
+  healthBarValueLabel:setTooltip(tr('Your character health is %s out of %s.\nClick to show creature health bar.', tr(health), tr(maxHealth)), TooltipType.textBlock)
 end
 
 function GameCharacter.onManaChange(localPlayer, mana, maxMana)
@@ -440,8 +440,8 @@ function GameCharacter.onManaChange(localPlayer, mana, maxMana)
     manaBar:setValueDelayed(mana, 0, maxMana, 200, 25, 0, true, false)
   end
 
-  manaBarValueLabel:setText(f('%d / %d MP', mana, maxMana))
-  manaBarValueLabel:setTooltip(tr('Your character mana is %d out of %d.\nClick to show player mana bar.', mana, maxMana), TooltipType.textBlock)
+  manaBarValueLabel:setText(f('%s / %s MP', tr(mana), tr(maxMana)))
+  manaBarValueLabel:setTooltip(tr('Your character mana is %s out of %s.\nClick to show player mana bar.', tr(mana), tr(maxMana)), TooltipType.textBlock)
 end
 
 function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
@@ -451,11 +451,11 @@ function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
     vigorBar:setValueDelayed(vigor, 0, maxVigor, 200, 25, 0, true, false)
   end
 
-  vigorBarValueLabel:setText(f('%d / %d VP', vigor, maxVigor))
-  vigorBarValueLabel:setTooltip(tr('Your character vigor is %d out of %d.\nClick to show player vigor bar.', vigor, maxVigor), TooltipType.textBlock)
+  vigorBarValueLabel:setText(f('%s / %s VP', tr(vigor), tr(maxVigor)))
+  vigorBarValueLabel:setTooltip(tr('Your character vigor is %s out of %s.\nClick to show player vigor bar.', tr(vigor), tr(maxVigor)), TooltipType.textBlock)
 end
 
-function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity)
+function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity, oldFreeCapacity)
   local totalCapacity = localPlayer:getTotalCapacity()
 
   if isLogin() then
@@ -464,8 +464,8 @@ function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity)
     capacityBar:setValueDelayed(freeCapacity, 0, totalCapacity, 200, 25, 0, true, false)
   end
 
-  capacityBarValueLabel:setText(f('%d / %d CAP', freeCapacity, totalCapacity))
-  capacityBarValueLabel:setTooltip(tr('Your character free capacity is %d oz out of %d oz.', freeCapacity, totalCapacity), TooltipType.textBlock)
+  capacityBarValueLabel:setText(f('%s / %s CAP', tr(freeCapacity), tr(totalCapacity)))
+  capacityBarValueLabel:setTooltip(tr('Your character free capacity is %s oz out of %s oz.', tr(freeCapacity), tr(totalCapacity)), TooltipType.textBlock)
 end
 
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)

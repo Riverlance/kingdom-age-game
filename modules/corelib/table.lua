@@ -81,7 +81,7 @@ function table.size(t)
 end
 
 function table.empty(t)
-  if t and type(t) == 'table' then
+  if type(t) == 'table' then
     return next(t) == nil
   end
   return true
@@ -484,5 +484,5 @@ end
 -- Format
 
 function table.list(t)
-  return (table.concat(t, ', '):gsub(', ([^,]+)$', ' and %1')) -- Return only first return parameter of table.concat (like '1, 2 and 3')
+  return (table.concat(t, ', '):gsub(', ([^,]+)$', ' ' .. (tr and tr('and') or 'and') .. ' %1')) -- Return only first return parameter of table.concat (like '1, 2 and 3')
 end

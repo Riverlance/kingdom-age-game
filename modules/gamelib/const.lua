@@ -206,7 +206,7 @@ GameLoginPending = 35
 GameNewSpeedLaw = 36
 GameForceFirstAutoWalkStep = 37
 -- KA - Free
-GameDoubleShopSellAmount = 39
+-- KA - Free
 GameContainerPagination = 40
 GameThingMarks = 41
 GameLooktypeU16 = 42

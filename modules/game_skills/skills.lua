@@ -242,11 +242,11 @@ function GameSkills.onSkillButtonClick(button)
 end
 
 function GameSkills.onExperienceChange(localPlayer, value)
-  GameSkills.setSkillValue('experience', tostring(value):comma())
+  GameSkills.setSkillValue('experience', tr(value))
 end
 
 function GameSkills.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
-  GameSkills.setSkillValue('level', level)
+  GameSkills.setSkillValue('level', tr(level))
   GameSkills.setSkillPercent('level', levelPercent, getExperienceTooltipText(localPlayer, level, levelPercent))
 end
 
@@ -285,7 +285,7 @@ function GameSkills.onRegenerationChange(localPlayer, time)
 end
 
 function GameSkills.onSpeedChange(localPlayer, speed)
-  GameSkills.setSkillValue('speed', speed * 2)
+  GameSkills.setSkillValue('speed', tr(speed * 2))
 
   GameSkills.onBaseSpeedChange(localPlayer, localPlayer:getBaseSpeed())
 end

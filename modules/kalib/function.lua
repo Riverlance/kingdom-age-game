@@ -13,14 +13,14 @@ function expToAdvance(currentLevel, currentExp)
 end
 
 function getExperienceTooltipText(localPlayer, value, percent)
-  local ret = tr('Remaining %d%% (about %s XP) to advance to level %d.', 100 - percent, tostring(expToAdvance(localPlayer:getLevel(), localPlayer:getExperience())):comma(), value + 1)
+  local ret = tr('Remaining %d%% (about %s XP) to advance to level %d.', 100 - percent, tr(expToAdvance(localPlayer:getLevel(), localPlayer:getExperience())), value + 1)
   if type(localPlayer.expSpeed) == 'number' then
     local xpPerHour = math.floor(localPlayer.expSpeed * 3600)
     if xpPerHour > 0 then
       local xpNextLevel = expForLevel(localPlayer:getLevel() + 1)
       local hoursLeft   = (xpNextLevel - localPlayer:getExperience()) / xpPerHour
       local minutesLeft = math.floor((hoursLeft - math.floor(hoursLeft)) * 60)
-      ret = f('%s\n%s\n%s', ret, tr('%s XP per hour.', tostring(xpPerHour):comma()), tr('Next level in %d hours and %d minutes.', math.floor(hoursLeft), minutesLeft))
+      ret = f('%s\n%s\n%s', ret, tr('%s XP per hour.', tr(xpPerHour)), tr('Next level in %d hours and %d minutes.', math.floor(hoursLeft), minutesLeft))
     end
   end
   return ret

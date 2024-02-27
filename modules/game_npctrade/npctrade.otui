@@ -92,7 +92,7 @@ MainWindow
   LightFlatPanel
     id: buyOptions
     width: 200
-    height: 140
+    height: 144
     anchors.bottom: prev.top
     anchors.right: parent.right
     margin-bottom: 10
@@ -108,8 +108,8 @@ MainWindow
 
     TextEdit
       id: searchText
-      anchors.left: prev.right
       anchors.top: prev.top
+      anchors.left: prev.right
       anchors.right: parent.right
       margin-top: -2
       margin-left: 5
@@ -117,13 +117,23 @@ MainWindow
       @onTextChange: GameNpcTrade.onSearchTextChange()
 
     CheckBox
-      id: buyWithBackpack
-      !text: tr('Buy with backpack')
-      anchors.top: searchText.bottom
+      id: bankTrade
+      !text: tr('Use bank money/KAps')
+      anchors.top: prev.outsideBottom
       anchors.left: parent.left
       anchors.right: parent.right
       margin-left: 5
       margin-top: 10
+      @onCheckChange: GameNpcTrade.onBankTradeChange()
+
+    CheckBox
+      id: buyWithBackpack
+      !text: tr('Buy with backpack')
+      anchors.top: bankTrade.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-left: 5
+      margin-top: 3
       @onCheckChange: GameNpcTrade.onBuyWithBackpackChange()
 
     CheckBox
@@ -137,16 +147,16 @@ MainWindow
       @onCheckChange: GameNpcTrade.onIgnoreCapacityChange()
 
     CheckBox
-      id: ignoreEquipped
-      !text: tr('Ignore equipped')
-      anchors.top: searchText.bottom
+      id: ignoreInventory
+      !text: tr('Ignore from inventory')
+      anchors.top: bankTrade.bottom
       anchors.left: parent.left
       anchors.right: parent.right
       margin-left: 5
-      margin-top: 10
+      margin-top: 3
       visible: false
       checked: true
-      @onCheckChange: GameNpcTrade.onIgnoreEquippedChange()
+      @onCheckChange: GameNpcTrade.onIgnoreInventoryChange()
 
     CheckBox
       id: showAllItems
@@ -171,26 +181,27 @@ MainWindow
 
     Label
       phantom: false
+      id: nameDesc
       !text: tr('Name') .. ':'
       !tooltip: tr('Item name')
       anchors.left: parent.left
       anchors.top: parent.top
       margin-top: 5
       margin-left: 5
-      width: 85
+      width: 100
 
     NPCOfferLabel
       id: name
 
     Label
       phantom: false
+      id: priceDesc
       !text: tr('Price') .. ':'
       !tooltip: tr('Item price')
-      anchors.left: parent.left
       anchors.top: prev.bottom
+      anchors.left: nameDesc.left
+      anchors.right: nameDesc.right
       margin-top: 3
-      margin-left: 5
-      width: 85
 
     NPCOfferLabel
       id: price
@@ -200,24 +211,23 @@ MainWindow
       id: weightDesc
       !text: tr('Weight') .. ':'
       !tooltip: tr('Item weight')
-      anchors.left: parent.left
       anchors.top: prev.bottom
+      anchors.left: priceDesc.left
+      anchors.right: priceDesc.right
       margin-top: 3
-      margin-left: 5
-      width: 85
 
     NPCOfferLabel
       id: weight
 
     Label
       phantom: false
+      id: moneyDesc
       !text: tr('Money') .. ':'
       !tooltip: tr('Your money')
-      anchors.left: parent.left
       anchors.top: prev.bottom
+      anchors.left: weightDesc.left
+      anchors.right: weightDesc.right
       margin-top: 10
-      margin-left: 5
-      width: 85
 
     NPCOfferLabel
       id: money
@@ -225,14 +235,27 @@ MainWindow
 
     Label
       phantom: false
+      id: kapsDesc
+      !text: tr('KAps') .. ':'
+      !tooltip: tr('Your Kingdom Age points')
+      anchors.top: prev.bottom
+      anchors.left: moneyDesc.left
+      anchors.right: moneyDesc.right
+      margin-top: 3
+
+    NPCOfferLabel
+      id: kaps
+      phantom: false
+
+    Label
+      phantom: false
       id: capacityDesc
       !text: tr('Capacity') .. ':'
       !tooltip: tr('Your capacity')
-      anchors.left: parent.left
       anchors.top: prev.bottom
+      anchors.left: kapsDesc.left
+      anchors.right: kapsDesc.right
       margin-top: 3
-      margin-left: 5
-      width: 85
 
     NPCOfferLabel
       id: capacity
@@ -242,11 +265,10 @@ MainWindow
       id: trustDesc
       !text: tr('Trust') .. ':'
       !tooltip: tr('Your trust in this city')
-      anchors.left: parent.left
       anchors.top: prev.bottom
+      anchors.left: capacityDesc.left
+      anchors.right: capacityDesc.right
       margin-top: 3
-      margin-left: 5
-      width: 85
 
     NPCOfferLabel
       id: trust
@@ -289,11 +311,12 @@ MainWindow
     margin-top: 4
 
   LightFlatPanel
+    id: itemsArea
     anchors.top: prev.bottom
     anchors.bottom: setupPanel.top
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-bottom: 10
+    margin-bottom: 6
     padding-top: 4
     padding-left: 4
     padding-bottom: 4
