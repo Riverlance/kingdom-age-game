@@ -19,6 +19,8 @@ ItemMaxAmount  = 100
 ConstSlotFirst = 1 -- Server CONST_SLOT_FIRST
 ConstSlotLast  = 10 -- Server CONST_SLOT_LAST
 
+IgnoreInventory = true -- Old checkbox which now we use as a flag constant to ignore inventory when selling items
+
 
 
 TradeType = {
@@ -34,6 +36,7 @@ TradeErrorNoEnoughMoney    = 2
 TradeErrorNoEnoughCapacity = 3
 TradeErrorNoEnoughTrust    = 4
 TradeErrorItemNotFound     = 5
+TradeErrorInventoryItem    = 6
 
 TradeErrorStr = {
   [TradeNoError]               = '',
@@ -42,6 +45,7 @@ TradeErrorStr = {
   [TradeErrorNoEnoughCapacity] = 'You have no enough capacity for trade this item.',
   [TradeErrorNoEnoughTrust]    = 'You have no enough trust in this city for trade this item.',
   [TradeErrorItemNotFound]     = "You don't have this item.",
+  [TradeErrorInventoryItem]    = "You cannot sell items from your inventory.",
 }
 
 -- Widget
@@ -70,7 +74,6 @@ sellTab                 = nil
 bankTrade               = nil
 buyWithBackpack         = nil
 ignoreCapacity          = nil
-ignoreInventory         = nil
 showAllItems            = nil
 sellAllButton           = nil
 
@@ -130,7 +133,6 @@ function GameNpcTrade.init()
   bankTrade       = npcWindow.buyOptions.bankTrade
   buyWithBackpack = npcWindow.buyOptions.buyWithBackpack
   ignoreCapacity  = npcWindow.buyOptions.ignoreCapacity
-  ignoreInventory = npcWindow.buyOptions.ignoreInventory
   showAllItems    = npcWindow.buyOptions.showAllItems
 
   buyTab  = npcWindow.buyTab
@@ -304,6 +306,12 @@ function GameNpcTrade.canTradeItem(item)
     if unitPrice < 0 then
       return TradeUnknownError
     elseif itemsAmount < 1 then
+      if IgnoreInventory then
+        local inventorySellQuantity = GameNpcTrade.getInventorySellQuantity(item.ptr)
+        if inventorySellQuantity > 0 then
+          return TradeErrorInventoryItem
+        end
+      end
       return TradeErrorItemNotFound
     end
   end
@@ -460,7 +468,7 @@ do
 
       -- Update info widget text
       local infoWidget       = npcItemBox.infoButton
-      infoWidget.tooltipText = f('Name: %s\nPrice: %s%s\nWeight: %.2f %s', tradeItem.name, GameNpcTrade.formattedPrice(tradeItem), GameNpcTrade.formattedTrust(tradeItem), tradeItem.weight, WeightUnit)
+      infoWidget.tooltipText = f('%s\n\nName: %s\nPrice: %s%s\nWeight: %.2f %s', tradeItem.description, tradeItem.name, GameNpcTrade.formattedPrice(tradeItem), GameNpcTrade.formattedTrust(tradeItem), tradeItem.weight, WeightUnit)
       infoWidget:setTooltip(infoWidget.tooltipText, TooltipType.textBlock)
 
       -- Item
@@ -562,26 +570,31 @@ end
 
 -- Sell
 
+function GameNpcTrade.getInventorySellQuantity(item)
+  if not item or not playerItems[item:getId()] then
+    return 0
+  end
+
+  local amount      = 0
+  local localPlayer = g_game.getLocalPlayer()
+
+  for slot = ConstSlotFirst, ConstSlotLast do
+    local inventoryItem = localPlayer:getInventoryItem(slot)
+
+    if inventoryItem and inventoryItem:getId() == item:getId() then
+      amount = amount + inventoryItem:getCount()
+    end
+  end
+
+  return amount
+end
+
 function GameNpcTrade.getSellQuantity(item)
   if not item or not playerItems[item:getId()] then
     return 0
   end
 
-  local removeAmount = 0
-  local localPlayer  = g_game.getLocalPlayer()
-
-  -- Can NOT sell inventory items, then remove their count
-  if ignoreInventory:isChecked() then
-    for i = ConstSlotFirst, ConstSlotLast do
-      local inventoryItem = localPlayer:getInventoryItem(i)
-
-      if inventoryItem and inventoryItem:getId() == item:getId() then
-        removeAmount = removeAmount + inventoryItem:getCount()
-      end
-    end
-  end
-
-  return playerItems[item:getId()] - removeAmount
+  return playerItems[item:getId()] - (IgnoreInventory and GameNpcTrade.getInventorySellQuantity(item) or 0)
 end
 
 function GameNpcTrade.getSellAmount(item, amount) -- (item[, amount])
@@ -605,7 +618,7 @@ function GameNpcTrade.sellAll()
       if quantity > 0 then
 
         -- Sell item in specified quantity
-        g_game.sellItem(item.ptr, item.maskptr, item.maskOutfitType, item.maskOutfitMount, quantity, bankTrade:isChecked(), ignoreInventory:isChecked())
+        g_game.sellItem(item.ptr, item.maskptr, item.maskOutfitType, item.maskOutfitMount, quantity, bankTrade:isChecked(), IgnoreInventory)
       end
     end
   end
@@ -779,7 +792,6 @@ function GameNpcTrade.onTradeTypeChange(radioTabs, selected, deselected)
 
   buyWithBackpack:setVisible(currentTradeType == TradeType.Buy)
   ignoreCapacity:setVisible(currentTradeType == TradeType.Buy)
-  ignoreInventory:setVisible(currentTradeType == TradeType.Sell)
   showAllItems:setVisible(currentTradeType == TradeType.Sell)
   sellAllButton:setVisible(currentTradeType == TradeType.Sell)
 
@@ -799,7 +811,7 @@ function GameNpcTrade.onTradeClick()
   if currentTradeType == TradeType.Buy then
     g_game.buyItem(selectedItem.ptr, selectedItem.maskptr, selectedItem.maskOutfitType, selectedItem.maskOutfitMount, quantityScroll:getValue(), bankTrade:isChecked(), ignoreCapacity:isChecked(), buyWithBackpack:isChecked())
   elseif currentTradeType == TradeType.Sell then
-    g_game.sellItem(selectedItem.ptr, selectedItem.maskptr, selectedItem.maskOutfitType, selectedItem.maskOutfitMount, quantityScroll:getValue(), bankTrade:isChecked(), ignoreInventory:isChecked())
+    g_game.sellItem(selectedItem.ptr, selectedItem.maskptr, selectedItem.maskOutfitType, selectedItem.maskOutfitMount, quantityScroll:getValue(), bankTrade:isChecked(), IgnoreInventory)
   end
 end
 
@@ -840,10 +852,6 @@ function GameNpcTrade.onIgnoreCapacityChange()
   GameNpcTrade.refreshPlayerGoods()
 end
 
-function GameNpcTrade.onIgnoreInventoryChange()
-  GameNpcTrade.refreshPlayerGoods()
-end
-
 function GameNpcTrade.onShowAllItemsChange()
   GameNpcTrade.refreshPlayerGoods()
 end
@@ -858,36 +866,38 @@ function GameNpcTrade.onOpenNpcTrade(items, _townId, _trustMaxLevel, isVip)
 
   for _, item in pairs(items) do
     -- Buy
-    if item[9] > 0 then
+    if item[10] > 0 then
       table.insert(tradeItems[TradeType.Buy], {
         ptr             = item[1],
         maskptr         = item[2],
         maskOutfitType  = item[3],
         maskOutfitMount = item[4],
-        name            = item[5],
-        weight          = item[6] / 100,
-        addTrustOnSell  = item[7],
-        tradeTrustLevel = item[8],
+        description     = item[5],
+        name            = item[6],
+        weight          = item[7] / 100,
+        addTrustOnSell  = item[8],
+        tradeTrustLevel = item[9],
 
-        price       = item[9],
-        isPriceKaps = item[11],
+        price       = item[10],
+        isPriceKaps = item[12],
       })
     end
 
     -- Sell
-    if item[10] > 0 then
+    if item[11] > 0 then
       table.insert(tradeItems[TradeType.Sell], {
         ptr             = item[1],
         maskptr         = item[2],
         maskOutfitType  = item[3],
         maskOutfitMount = item[4],
-        name            = item[5],
-        weight          = item[6] / 100,
-        addTrustOnSell  = item[7],
-        tradeTrustLevel = item[8],
+        description     = item[5],
+        name            = item[6],
+        weight          = item[7] / 100,
+        addTrustOnSell  = item[8],
+        tradeTrustLevel = item[9],
 
-        price       = item[10],
-        isPriceKaps = item[11],
+        price       = item[11],
+        isPriceKaps = item[12],
       })
     end
   end

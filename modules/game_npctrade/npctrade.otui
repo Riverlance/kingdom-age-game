@@ -147,21 +147,9 @@ MainWindow
       @onCheckChange: GameNpcTrade.onIgnoreCapacityChange()
 
     CheckBox
-      id: ignoreInventory
-      !text: tr('Ignore from inventory')
-      anchors.top: bankTrade.bottom
-      anchors.left: parent.left
-      anchors.right: parent.right
-      margin-left: 5
-      margin-top: 3
-      visible: false
-      checked: true
-      @onCheckChange: GameNpcTrade.onIgnoreInventoryChange()
-
-    CheckBox
       id: showAllItems
       !text: tr('Show all items')
-      anchors.top: prev.bottom
+      anchors.top: bankTrade.bottom
       anchors.left: parent.left
       anchors.right: parent.right
       margin-left: 5
