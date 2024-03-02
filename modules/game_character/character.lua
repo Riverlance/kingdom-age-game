@@ -301,7 +301,10 @@ function GameCharacter.check()
 end
 
 function GameCharacter.onSetFightMode(self, selectedFightButton)
-  if selectedFightButton == nil then
+  if not g_app.isOnInputEvent() then --just check the option
+    return
+  end
+  if not selectedFightButton then
     return
   end
 
@@ -326,6 +329,9 @@ function GameCharacter.onSetFightMode(self, selectedFightButton)
 end
 
 function GameCharacter.onSetChaseMode(self, checked)
+  if not g_app.isOnInputEvent() then --just check the option
+    return
+  end
   local chaseMode
   if checked then
     chaseMode = ChaseOpponent
@@ -336,6 +342,9 @@ function GameCharacter.onSetChaseMode(self, checked)
 end
 
 function GameCharacter.onMountButtonClick(self, mousePos)
+  if not g_app.isOnInputEvent() then --just check the option
+    return
+  end
   local player = g_game.getLocalPlayer()
   if player then
     player:toggleMount()
@@ -343,6 +352,9 @@ function GameCharacter.onMountButtonClick(self, mousePos)
 end
 
 function GameCharacter.onSetSafeFight(self, checked)
+  if not g_app.isOnInputEvent() then --just check the option
+    return
+  end
   g_game.setSafeFight(false, not checked)
 end
 
