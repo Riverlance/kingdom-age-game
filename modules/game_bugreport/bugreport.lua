@@ -14,7 +14,7 @@ local REPORT_MODE_REMOVEROW    = 3
 
 bugReportWindow             = nil
 bugLabel                    = nil
-bugReportButton             = nil
+-- bugReportButton             = nil
 bugCommentMultilineTextEdit = nil
 bugCategoryComboBox         = nil
 bugPositionX                = nil
@@ -128,7 +128,7 @@ function GameBugReport.init()
 
   g_ui.importStyle('bugreport')
 
-  bugReportButton = ClientTopMenu.addLeftGameButton('bugReportButton', tr('Report Bug/Problem/Idea') .. ' (Ctrl+,)', '/images/ui/top_menu/bugreport', GameBugReport.toggle, true)
+  -- bugReportButton = ClientTopMenu.addLeftGameButton('bugReportButton', tr('Report Bug/Problem/Idea') .. ' (Ctrl+,)', '/images/ui/top_menu/bugreport', GameBugReport.toggle, true)
 
   bugReportWindow = g_ui.createWidget('BugReportWindow', rootWidget)
   bugReportWindow:hide()
@@ -147,13 +147,13 @@ function GameBugReport.init()
   GameBugReport.onChangeCategory(bugCategoryComboBox, 'map') -- For update the tooltip when init the window
   bugCommentMultilineTextEdit = bugReportWindow:getChildById('bugCommentMultilineTextEdit')
 
-  g_keyboard.bindKeyDown('Ctrl+,', GameBugReport.toggle)
+  -- g_keyboard.bindKeyDown('Ctrl+,', GameBugReport.toggle)
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeBugReport, GameBugReport.parseBugReports) -- View List
 end
 
 function GameBugReport.terminate()
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeBugReport) -- View List
-  g_keyboard.unbindKeyDown('Ctrl+,')
+  -- g_keyboard.unbindKeyDown('Ctrl+,')
 
   GameBugReport.destroyBugReportWindow()
   GameBugReport.destroyBugReportViewWindow()
@@ -170,7 +170,7 @@ function GameBugReport.destroyBugReportWindow()
 
   bugReportWindow             = nil
   bugLabel                    = nil
-  bugReportButton             = nil
+  -- bugReportButton             = nil
   bugCommentMultilineTextEdit = nil
   bugCategoryComboBox         = nil
   bugPositionX                = nil
@@ -189,13 +189,13 @@ function GameBugReport.showReportWindow()
   bugReportWindow:show()
   bugReportWindow:raise()
   bugReportWindow:focus()
-  bugReportButton:setOn(true)
+  -- bugReportButton:setOn(true)
 end
 
 function GameBugReport.hideReportWindow()
   clearBugReportWindow()
   bugReportWindow:hide()
-  bugReportButton:setOn(false)
+  -- bugReportButton:setOn(false)
 end
 
 function GameBugReport.toggle()

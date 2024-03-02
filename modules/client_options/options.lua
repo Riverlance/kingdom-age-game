@@ -76,6 +76,7 @@ local defaultOptions = {
   turnDelay = 50,
   hotkeyDelay = 70,
   showMinimapExtraIcons = true,
+  goldLootAutoDeposit = true,
   creatureInformationScale = 0,
   staticTextScale = 0,
   animatedTextScale = 0,
@@ -305,9 +306,17 @@ function ClientOptions.init()
       ClientOptions.setOption('floorViewMode', comboBox:getCurrentOption().data)
     end
   end)
+
+  connect(g_game, {
+    onGameStart = ClientOptions.online,
+  })
 end
 
 function ClientOptions.terminate()
+  disconnect(g_game, {
+    onGameStart = ClientOptions.online,
+  })
+
   g_keyboard.unbindKeyDown(optionsShortcut)
   g_keyboard.unbindKeyDown(audioShortcut)
   g_keyboard.unbindKeyDown('Ctrl+Shift+F')
@@ -648,6 +657,11 @@ function ClientOptions.setOption(key, value, force)
 
     GameMinimap.m.extraIconsButton:setOn(value)
 
+  elseif key == 'goldLootAutoDeposit' then
+    if localPlayer then
+      g_game.sendGoldLootAutoDepositState(value)
+    end
+
   elseif key == 'creatureInformationScale' then
     g_app.setCreatureInformationScale(math.max((value == 0 and g_window.getDisplayDensity() - 0.5 or value / 2) + 0.5, 1))
 
@@ -736,4 +750,13 @@ end
 function ClientOptions.updateStickers()
   ClientOptions.updateLeftSticker()
   ClientOptions.updateRightSticker()
+end
+
+
+
+-- Event
+
+function ClientOptions.online()
+  -- Gold loot auto deposit
+  g_game.sendGoldLootAutoDepositState(ClientOptions.getOption('goldLootAutoDeposit'))
 end

@@ -296,20 +296,21 @@ ClientOpcodes = {
 
 -- Client to Server - Extended Opcodes (onExtendedOpcode Player Event)
 ClientExtOpcodes = {
-  -- Free                            0
-  ClientExtOpcodeLocale            = 1,
-  ClientExtOpcodeAction            = 2,
-  ClientExtOpcodeAttribute         = 3,
-  ClientExtOpcodePowerList         = 4,
-  ClientExtOpcodeUnjustifiedPoints = 5,
-  ClientExtOpcodeQuestLog          = 6,
-  ClientExtOpcodeBugReport         = 7,
-  ClientExtOpcodeRuleViolation     = 8,
-  ClientExtOpcodeConditionsList    = 9,
-  ClientExtOpcodeEmote             = 10,
-  ClientExtOpcodeDailyReward       = 11,
-  ClientExtOpcodeGreetNpc          = 12,
-  -- Free                            13 to 65535
+  -- Free                              0
+  ClientExtOpcodeLocale              = 1,
+  ClientExtOpcodeAction              = 2,
+  ClientExtOpcodeAttribute           = 3,
+  ClientExtOpcodePowerList           = 4,
+  ClientExtOpcodeUnjustifiedPoints   = 5,
+  ClientExtOpcodeQuestLog            = 6,
+  ClientExtOpcodeBugReport           = 7,
+  ClientExtOpcodeRuleViolation       = 8,
+  ClientExtOpcodeConditionsList      = 9,
+  ClientExtOpcodeEmote               = 10,
+  ClientExtOpcodeDailyReward         = 11,
+  ClientExtOpcodeGreetNpc            = 12,
+  ClientExtOpcodeGoldLootAutoDeposit = 13,
+  -- Free                              14 to 65535
 }
 
 ClientActions = {
