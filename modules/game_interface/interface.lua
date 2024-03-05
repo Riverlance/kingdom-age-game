@@ -1354,7 +1354,7 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
       return true
 
     -- Look
-    elseif lookThing and keyShift and mouseLeftOrRight then
+    elseif lookThing and (keyShift and mouseLeftOrRight or mouseLeftAndRight) then
       g_game.look(lookThing)
       return true
 
