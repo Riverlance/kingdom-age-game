@@ -497,7 +497,7 @@ function g_tooltip.init()
         if isDurationEnabled then
           durationLabelWidget:setHeight(14)
 
-          durationValueWidget:setText(clock.durationString)
+          durationValueWidget:setText(clock:getDurationString())
           durationValueWidget:resizeToText()
         else
           durationLabelWidget:setHeight(0)

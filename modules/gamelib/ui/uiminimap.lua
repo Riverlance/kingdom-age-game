@@ -28,7 +28,7 @@ local regionLabels = {
   { pos = { x = 3180, y = 3120, z = 7 }, text = 'Vampire Mansion' },
   { pos = { x = 2875, y = 2975, z = 7 }, text = 'Rakkar Hills' },
   { pos = { x = 2733, y = 3028, z = 7 }, text = 'Greenest' },
-  { pos = { x = 2690, y = 3080, z = 7 }, text = 'Vast Swamp' },
+  { pos = { x = 2690, y = 3080, z = 7 }, text = 'Lusor Swamp' },
   { pos = { x = 2495, y = 3120, z = 7 }, text = 'Thartov' },
   { pos = { x = 2865, y = 3135, z = 7 }, text = 'Outlaw Village' },
   { pos = { x = 2790, y = 3240, z = 7 }, text = 'Wealth Island' },

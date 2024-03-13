@@ -405,6 +405,9 @@ function GamePowers.onPlayerPowersList(powers, updateNonConstantPower, ignoreMes
 
     power.onTooltipHoverChange =
     function(widget, hovered)
+      if not g_app.isOnInputEvent() then
+        return hovered
+      end
       if hovered then
         local power = widget.power
         if power and not power.constant then

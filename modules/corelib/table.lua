@@ -483,6 +483,6 @@ end
 
 -- Format
 
-function table.list(t)
-  return (table.concat(t, ', '):gsub(', ([^,]+)$', ' ' .. (tr and tr('and') or 'and') .. ' %1')) -- Return only first return parameter of table.concat (like '1, 2 and 3')
+function table.list(t, sep)
+  return (table.concat(t, sep or ', '):gsub(', ([^,]+)$', ' ' .. (tr and tr('and') or 'and') .. ' %1')) -- Return only first return parameter of table.concat (like '1, 2 and 3')
 end
