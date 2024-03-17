@@ -225,12 +225,12 @@ function g_tooltip.init()
         -- Enable updates
         layout:enableUpdates()
 
-        -- Update layout
-        layout:update()
-
         -- Update parent height according to child size, then anchor text bottom to parent bottom
         self.widget:setHeight(label:getHeight() + label:getMarginTop() + label:getMarginBottom())
         label:addAnchor(AnchorBottom, 'parent', AnchorBottom)
+
+        -- Update layout
+        layout:update()
       end
     }
 
@@ -391,11 +391,11 @@ function g_tooltip.init()
         -- Enable updates
         layout:enableUpdates()
 
-        -- Update layout
-        layout:update()
-
         -- Set new height
         self.widget:setHeight(self.widget:getContentsSize().height + self.widget:getPaddingTop() + self.widget:getPaddingBottom())
+
+        -- Update layout
+        layout:update()
       end
     }
 
@@ -546,11 +546,11 @@ function g_tooltip.init()
         -- Enable updates
         layout:enableUpdates()
 
-        -- Update layout
-        layout:update()
-
         -- Set new height
         self.widget:setHeight(self.widget:getContentsSize().height + self.widget:getPaddingTop() + self.widget:getPaddingBottom())
+
+        -- Update layout
+        layout:update()
       end
     }
   end)
