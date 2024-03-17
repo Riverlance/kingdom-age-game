@@ -213,10 +213,20 @@ function g_tooltip.init()
       widget = g_ui.createWidget('TooltipTextBlock', rootWidget),
 
       onTooltipShow = function(self, hoveredWidget)
-        local label = self.widget:getChildById('label')
+        local layout = self.widget:getLayout()
+        local label  = self.widget:getChildById('label')
+
+        -- Disable updates
+        layout:disableUpdates()
 
         -- Update value
         label:setText(hoveredWidget['tooltip'])
+
+        -- Enable updates
+        layout:enableUpdates()
+
+        -- Update layout
+        layout:update()
 
         -- Update parent height according to child size, then anchor text bottom to parent bottom
         self.widget:setHeight(label:getHeight() + label:getMarginTop() + label:getMarginBottom())
@@ -256,6 +266,7 @@ function g_tooltip.init()
         local vocations   = hoveredWidget:getVocations()
         local manaCost    = hoveredWidget:getMana()
 
+        local layout                     = self.widget:getLayout()
         local classValueWidget           = self.widget:getChildById('classValue')
         local vocationsValueWidget       = self.widget:getChildById('vocationsValue')
         local levelValueWidget           = self.widget:getChildById('levelValue')
@@ -267,6 +278,9 @@ function g_tooltip.init()
         local boostNoneDescriptionWidget = self.widget:getChildById('boostNoneDescriptionLabel')
         local boostLowDescriptionWidget  = self.widget:getChildById('boostLowDescriptionLabel')
         local boostHighDescriptionWidget = self.widget:getChildById('boostHighDescriptionLabel')
+
+        -- Disable updates
+        layout:disableUpdates()
 
         -- Icon
         local iconWidget = self.widget:getChildById('icon')
@@ -374,8 +388,11 @@ function g_tooltip.init()
         end
         boostHighDescriptionWidget:setVisible(isBoostHighDescriptionEnabled)
 
+        -- Enable updates
+        layout:enableUpdates()
+
         -- Update layout
-        self.widget:updateLayout()
+        layout:update()
 
         -- Set new height
         self.widget:setHeight(self.widget:getContentsSize().height + self.widget:getPaddingTop() + self.widget:getPaddingBottom())
@@ -391,6 +408,7 @@ function g_tooltip.init()
         local c     = hoveredWidget.condition
         local clock = hoveredWidget.clock
 
+        local layout               = self.widget:getLayout()
         local itemIconWidget       = self.widget:getChildById('conditionItemIcon')
         local powerIconWidget      = self.widget:getChildById('conditionPowerIcon')
         local boostBarWidget       = self.widget:getChildById('boostBar')
@@ -404,6 +422,9 @@ function g_tooltip.init()
         local ownerValueWidget     = self.widget:getChildById('ownerValue')
 
         local isBoostEnabled = c.boost and true or false
+
+        -- Disable updates
+        layout:disableUpdates()
 
         -- Name
         local nameLabel = self.widget:getChildById('name')
@@ -522,8 +543,11 @@ function g_tooltip.init()
         ownerLabelWidget:setVisible(isOwnerEnabled)
         ownerValueWidget:setVisible(isOwnerEnabled)
 
+        -- Enable updates
+        layout:enableUpdates()
+
         -- Update layout
-         self.widget:updateLayout()
+        layout:update()
 
         -- Set new height
         self.widget:setHeight(self.widget:getContentsSize().height + self.widget:getPaddingTop() + self.widget:getPaddingBottom())

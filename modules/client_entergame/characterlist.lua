@@ -166,12 +166,14 @@ function ClientCharacterList.init()
     onLoginnameChange = ClientCharacterList.updateLoginname
   })
 
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeAccountInfo, ClientCharacterList.parseCharacterList)
   if G.characters then
     ClientCharacterList.create(G.characters, G.characterAccount)
   end
 end
 
 function ClientCharacterList.terminate()
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeAccountInfo, ClientCharacterList.parseCharacterList)
   disconnect(g_game, {
     onLoginError = onGameLoginError,
     onLoginToken = onGameLoginToken,
@@ -276,7 +278,7 @@ function ClientCharacterList.create(characters, account, otui)
       end
     })
 
-    if i == 1 or (g_settings.get('last-used-character') == widget.characterName and g_settings.get('last-used-world') == widget.worldName) then
+    if i == 1 or (g_settings.get('last-used-character') == widget.characterName) then
       focusLabel = widget
     end
   end
@@ -411,4 +413,36 @@ function ClientCharacterList.updateLoginname(name, currentLoginname, newLoginnam
       end
     end
   end
+end
+
+function ClientCharacterList.parseCharacterList(protocolGame, opcode, msg)
+  local characters = { }
+  local worlds = { }
+  local worldsCount = msg:getU8()
+  for _ = 1, worldsCount do
+    local world = { }
+    local worldId = msg:getU8()
+    world.worldName = msg:getString()
+    world.worldIp = msg:getString()
+    world.worldPort = msg:getU16()
+    world.previewState = msg:getU8()
+    worlds[worldId] = world
+  end
+
+  local charactersCount = msg:getU8()
+  for i = 1, charactersCount do
+    local character = { }
+    local worldId = msg:getU8()
+    character.name = msg:getString()
+    character.loginname = msg:getString()
+    character.worldName = worlds[worldId].worldName
+    character.worldIp = worlds[worldId].worldIp
+    character.worldPort = worlds[worldId].worldPort
+    character.previewState = worlds[worldId].previewState
+    characters[i] = character
+  end
+
+  local account = { }
+  account.premDays = msg:getU16()
+  ClientCharacterList.create(characters, account)
 end

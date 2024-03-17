@@ -163,7 +163,7 @@ ServerOpcodes = {
 -- Server to Client - Extended Opcodes
 ServerExtOpcodes = {
   ServerExtOpcodeOtclientSignal    = 0, -- From Server ProtocolGame::onRecvFirstMessage
-  -- Free                            1
+  ServerExtOpcodeAccountInfo       = 1,
   ServerExtOpcodeInstanceInfo      = 2,
   ServerExtOpcodeBlinkHit          = 3,
   ServerExtOpcodeLootWindow        = 4,
