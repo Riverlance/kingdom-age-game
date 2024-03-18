@@ -700,6 +700,11 @@ function GameBattleList.onDisappear(creature)
 end
 
 function GameBattleList.onPositionChange(creature, pos, oldPos)
+  local button = battleList[creature:getId()]
+  if button then
+    button:setOn(GameInterface.getMapPanel():isInRange(pos))
+  end
+
   local posCheck = g_clock.millis()
   local diffTime = posCheck - lastPosCheck
 
