@@ -1,4 +1,6 @@
-Timer = { --minute:second countdown timer
+local day = 24 * 60 * 60
+
+Timer = {
     spentTime = 0,
     updateTicks = 1,
     onUpdate = nil,
@@ -16,13 +18,17 @@ end
 
 function Timer:getString(format)
     if self.forward then
-        return os.date(format or self.format, os.difftime(os.time(), self.startTime))
+        local time = os.difftime(os.time(), self.startTime)
+        return f('%s%s', time < day and '' or f('%dd ', time / day), os.date(format or self.format, time))
     end
-    return os.date(format or self.format, os.difftime(self.endTime, os.time()))
+
+    local time = os.difftime(self.endTime, os.time())
+    return f('%s%s', time < day and '' or f('%dd ', time / day), os.date(format or self.format, time))
 end
 
 function Timer:getDurationString(format)
-    return os.date(format or self.format, os.difftime(self.endTime, self.startTime))
+    local time = os.difftime(self.endTime, self.startTime)
+    return f('%s%s', time < day and '' or f('%dd ', time / day), os.date(format or self.format, time))
 end
 
 function Timer:getPercent()
