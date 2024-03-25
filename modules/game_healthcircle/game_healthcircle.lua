@@ -1,11 +1,10 @@
 imageSizeBroad = 0
 imageSizeThin  = 0
 
-mapPanel = GameInterface.getMapPanel()
-
--- gameRootPanel = GameInterface.getBottomPanel()
+-- mapPanel = modules.game_interface.getMapPanel()
+-- gameRootPanel = modules.game_interface.gameBottomPanel
 -- gameLeftPanel = modules.game_interface.getLeftPanel()
--- gameTopMenu   = modules.client_topmenu.getTopMenu()
+-- gameTopMenu = modules.client_topmenu.getTopMenu()
 
 function currentViewMode()
   return modules.game_interface.currentViewMode
@@ -117,6 +116,8 @@ function terminate()
   })
 end
 
+
+
 function initOnHpAndMpChange()
   connect(LocalPlayer, {
     onHealthChange     = whenHealthChange,
@@ -163,6 +164,7 @@ end
 
 function whenHealthChange()
   if g_game.isOnline() then
+    -- local healthPercent = math.floor(g_game.getLocalPlayer():getHealth() / g_game.getLocalPlayer():getMaxHealth() * 100)
     local healthPercent = math.floor(g_game.getLocalPlayer():getHealthPercent())
 
     local yhppc     = math.floor(imageSizeBroad * (1 - (healthPercent / 100)))
@@ -381,6 +383,8 @@ function whenMapResizeChange()
   end
 end
 
+
+
 -- Controls
 
 function setHealthCircle(value)
@@ -402,6 +406,7 @@ end
 function setManaCircle(value)
   value        = toboolean(value)
   isManaCircle = value
+
   if value then
     manaCircle:setVisible(true)
     manaCircleFront:setVisible(true)
@@ -479,6 +484,8 @@ function setCircleOpacity(value)
   g_settings.set('healthcircle_opacity', value)
 end
 
+
+
 -- Option Settings
 
 optionPanel          = nil
@@ -552,6 +559,6 @@ function destroyOptionsModule()
   opacityLabel         = nil
   opacityScrollbar     = nil
 
-  -- modules.client_options.removeTab(('HP/MP Circle')) -- removeTab(tab)
+  -- modules.client_options.removeTab('HP/MP Circle')
   optionPanel = nil
 end
