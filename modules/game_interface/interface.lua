@@ -877,14 +877,8 @@ function GameInterface.setRightPanels(on)
   end
 
   gameRightFirstPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightFirstPanel))
-  ClientOptions.updateOption('rightFirstPanelWidth')
-
   gameRightSecondPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightSecondPanel))
-  ClientOptions.updateOption('rightSecondPanelWidth')
-
   gameRightThirdPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightThirdPanel))
-  ClientOptions.updateOption('rightThirdPanelWidth')
-
   rightPanelButton:setOn(on)
 end
 
@@ -894,14 +888,8 @@ function GameInterface.setLeftPanels(on)
   end
 
   gameLeftFirstPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftFirstPanel))
-  ClientOptions.updateOption('leftFirstPanelWidth')
-
   gameLeftSecondPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftSecondPanel))
-  ClientOptions.updateOption('leftSecondPanelWidth')
-
   gameLeftThirdPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftThirdPanel))
-  ClientOptions.updateOption('leftThirdPanelWidth')
-
   leftPanelButton:setOn(on)
 end
 

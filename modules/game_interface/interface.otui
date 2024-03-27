@@ -4,7 +4,6 @@ GameSidePanel < Panel
   anchors.bottom: parent.bottom
   image-source: /images/ui/_background/panel_side
   image-border: 7
-  width: 189
   focusable: false
   phantom: true
 
