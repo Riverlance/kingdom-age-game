@@ -54,33 +54,11 @@ function GameUIExpBar.updateGameExpBarPercent(percent)
     return
   end
 
-  percent = percent or localPlayer:getLevelPercent()
-
-  local emptyGameExpBar = GameInterface.m.gameExpBar:getChildById('empty')
-  local fullGameExpBar  = GameInterface.m.gameExpBar:getChildById('full')
-  fullGameExpBar:setWidth(emptyGameExpBar:getWidth() * (percent / 100))
-end
-
-function GameUIExpBar.updateGameExpBarPos()
-  if not GameInterface.m.gameExpBar:isOn() then
-    return
-  end
-
-  local horizontalMargin = 0
-
-  if GameInterface.isViewModeFull() or not GameInterface.getSplitter():isVisible() then
-    horizontalMargin = 4
-  end
-
-  GameInterface.m.gameExpBar:setMarginLeft(horizontalMargin)
-  GameInterface.m.gameExpBar:setMarginRight(horizontalMargin)
-
-  GameUIExpBar.updateGameExpBarPercent()
+  GameInterface.m.gameExpBar.bar:setPercent(percent or localPlayer:getLevelPercent())
 end
 
 function GameUIExpBar.updateExpBar()
   GameUIExpBar.updateGameExpBarPercent()
-  GameUIExpBar.updateGameExpBarPos()
 end
 
 function GameUIExpBar.onGeometryChange()
@@ -103,8 +81,8 @@ function GameUIExpBar.onZoomChange(self, oldZoom, newZoom)
 end
 
 function GameUIExpBar.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
-  GameInterface.m.gameExpBar:setTooltip(getExperienceTooltipText(localPlayer, level, levelPercent), TooltipType.textBlock)
   GameUIExpBar.updateGameExpBarPercent(levelPercent)
+  GameInterface.m.gameExpBar:setTooltip(getExperienceTooltipText(localPlayer, level, levelPercent), TooltipType.textBlock)
 end
 
 function GameUIExpBar.setExpBar(enable)
@@ -114,6 +92,7 @@ function GameUIExpBar.setExpBar(enable)
   if not isOn and enable then
     GameInterface.m.gameExpBar:setOn(true)
     GameUIExpBar.updateExpBar()
+
   -- Disable bar
   elseif isOn and not enable then
     GameInterface.m.gameExpBar:setOn(false)

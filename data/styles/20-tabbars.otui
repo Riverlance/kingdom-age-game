@@ -8,7 +8,7 @@ MoveableTabBarButton < UIButton
   image-clip: 0 0 260 102
   image-border: 3
   icon-color: white
-  color: #aaaaaa
+  color: #c8bcaa
   anchors.top: parent.top
   anchors.left: parent.left
   padding: 5
@@ -25,7 +25,7 @@ MoveableTabBarButton < UIButton
     color: #f2af4e
 
   $on !checked:
-    color: #c83200
+    color: #c9340b
 
 TabBar < UITabBar
   size: 80 20

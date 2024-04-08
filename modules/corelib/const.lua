@@ -453,6 +453,11 @@ ViewModes = {
   [3] = { id = 3, isCropped = false, isFull = true,  name = 'Full' }, -- Default
 }
 
+-- Panel
+
+GameSidePanelWidthFactor = 34 -- Width per slot
+GameSidePanelWidthOffset = 19 -- Minimum width
+
 -- PanelStickers
 
 PanelStickers = {

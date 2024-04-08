@@ -344,13 +344,9 @@ function GameInterface.onGameStart()
   g_window.setTitle(g_app.getName() .. (localPlayer and ' - ' .. localPlayer:getName() or ''))
   GameInterface.show()
 
-  -- Panels width
-  ClientOptions.updateOption('rightFirstPanelWidth')
-  ClientOptions.updateOption('rightSecondPanelWidth')
-  ClientOptions.updateOption('rightThirdPanelWidth')
-  ClientOptions.updateOption('leftFirstPanelWidth')
-  ClientOptions.updateOption('leftSecondPanelWidth')
-  ClientOptions.updateOption('leftThirdPanelWidth')
+  -- Update panels
+  GameInterface.setLeftPanels()
+  GameInterface.setRightPanels()
 
   g_game.enableFeature(GameForceFirstAutoWalkStep)
 
@@ -876,9 +872,27 @@ function GameInterface.setRightPanels(on)
     on = ClientOptions.getOption('showRightPanel')
   end
 
-  gameRightFirstPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightFirstPanel))
-  gameRightSecondPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightSecondPanel))
-  gameRightThirdPanel:setVisible(on and GameInterface.isPanelEnabled(gameRightThirdPanel))
+  if on and GameInterface.isPanelEnabled(gameRightFirstPanel) then
+    gameRightFirstPanel:setVisible(true)
+    gameRightFirstPanel:setWidth(ClientOptions.getOption('rightFirstPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+  else
+    gameRightFirstPanel:setVisible(false)
+  end
+
+  if on and GameInterface.isPanelEnabled(gameRightSecondPanel) then
+    gameRightSecondPanel:setVisible(true)
+    gameRightSecondPanel:setWidth(ClientOptions.getOption('rightSecondPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+  else
+    gameRightSecondPanel:setVisible(false)
+  end
+
+  if on and GameInterface.isPanelEnabled(gameRightThirdPanel) then
+    gameRightThirdPanel:setVisible(true)
+    gameRightThirdPanel:setWidth(ClientOptions.getOption('rightThirdPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+  else
+    gameRightThirdPanel:setVisible(false)
+  end
+
   rightPanelButton:setOn(on)
 end
 
@@ -887,9 +901,27 @@ function GameInterface.setLeftPanels(on)
     on = ClientOptions.getOption('showLeftPanel')
   end
 
-  gameLeftFirstPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftFirstPanel))
-  gameLeftSecondPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftSecondPanel))
-  gameLeftThirdPanel:setVisible(on and GameInterface.isPanelEnabled(gameLeftThirdPanel))
+  if on and GameInterface.isPanelEnabled(gameLeftFirstPanel) then
+    gameLeftFirstPanel:setVisible(true)
+    gameLeftFirstPanel:setWidth(ClientOptions.getOption('leftFirstPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+  else
+    gameLeftFirstPanel:setVisible(false)
+  end
+
+  if on and GameInterface.isPanelEnabled(gameLeftSecondPanel) then
+    gameLeftSecondPanel:setVisible(true)
+    gameLeftSecondPanel:setWidth(ClientOptions.getOption('leftSecondPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+  else
+    gameLeftSecondPanel:setVisible(false)
+  end
+
+  if on and GameInterface.isPanelEnabled(gameLeftThirdPanel) then
+    gameLeftThirdPanel:setVisible(true)
+    gameLeftThirdPanel:setWidth(ClientOptions.getOption('leftThirdPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+  else
+    gameLeftThirdPanel:setVisible(false)
+  end
+
   leftPanelButton:setOn(on)
 end
 
@@ -1669,14 +1701,17 @@ function GameInterface.onVocationChange(creature, vocation, oldVocation)
   GameInterface.updateManaBar()
 end
 
-function GameInterface.updateManaBar()
+function GameInterface.updateManaBar(on)
   local localPlayer = g_game.getLocalPlayer()
 
-  if localPlayer and localPlayer:isWarrior() then -- Disable mana for Warrior
-    gameMapPanel:setDrawManaBar(false)
-  else -- Keep client showMana option
-    ClientOptions.updateOption('showMana')
+  if on == nil then
+    on = ClientOptions.getOption('showMana')
   end
+  if localPlayer and localPlayer:isWarrior() then -- Disable mana for Warrior
+    on = false
+  end
+
+  gameMapPanel:setDrawManaBar(on)
 end
 
 function GameInterface.onTrackCreature(trackNode)

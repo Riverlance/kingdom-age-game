@@ -453,7 +453,7 @@ function ClientOptions.setOption(key, value, force)
 
       GameInterface.setLeftPanels()
       if hasEnabled then -- Force left panel to appear
-        ClientOptions.updateOption('showLeftPanel')
+        GameInterface.setLeftPanels()
       end
       GameInterface.moveHiddenPanelMiniWindows()
 
@@ -481,7 +481,7 @@ function ClientOptions.setOption(key, value, force)
 
       GameInterface.setRightPanels()
       if hasEnabled then -- Force right panel to appear
-        ClientOptions.updateOption('showRightPanel')
+        GameInterface.setRightPanels()
       end
       GameInterface.moveHiddenPanelMiniWindows()
 
@@ -509,21 +509,13 @@ function ClientOptions.setOption(key, value, force)
     end)
 
   elseif modules.game_interface and key == 'showLeftPanel' then
-    local enabledLeftPanels = ClientOptions.getOption('enabledLeftPanels')
-    if enabledLeftPanels < 1 then
-      return
-    end
     GameInterface.setLeftPanels(value)
 
   elseif modules.game_interface and key == 'showRightPanel' then
-    local enabledRightPanels = ClientOptions.getOption('enabledRightPanels')
-    if enabledRightPanels < 1 then
-      return
-    end
     GameInterface.setRightPanels(value)
 
   elseif modules.game_interface and table.contains({ 'leftFirstPanelWidth', 'rightFirstPanelWidth', 'leftSecondPanelWidth', 'rightSecondPanelWidth', 'leftThirdPanelWidth', 'rightThirdPanelWidth' }, key) then
-    local width = value * 34 + 19 -- Slots width * slot size + minimum width
+    local width = value * GameSidePanelWidthFactor + GameSidePanelWidthOffset
 
     if key == 'leftFirstPanelWidth' and GameInterface.m.gameLeftFirstPanel:isVisible() then
       GameInterface.m.gameLeftFirstPanel:setWidth(width)
@@ -569,9 +561,7 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.getMapPanel():setDrawHealthBars(value)
 
   elseif modules.game_interface and key == 'showMana' then
-    if localPlayer and not localPlayer:isWarrior() then
-      GameInterface.getMapPanel():setDrawManaBar(value)
-    end
+    GameInterface.updateManaBar(value)
 
   elseif modules.game_interface and key == 'showVigor' then
     GameInterface.getMapPanel():setDrawVigorBar(value)

@@ -281,7 +281,7 @@ Panel
     Button
       id: toggleChat
       size: 22 22
-      !tooltip: tr('Disable chat mode (activates shortcuts to walk with WASD and others)')
+      !tooltip: tr('Disable chat (activates shortcuts to walk with WASD and others)')
       icon: /images/ui/console/chat
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right

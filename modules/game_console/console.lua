@@ -307,7 +307,7 @@ function GameConsole.enableChat()
 
   g_keyboard.bindKeyDown('Ctrl+W', GameConsole.removeCurrentTab)
 
-  consoleToggleChat:setTooltip(tr('Disable chat mode (activates shortcuts to walk with WASD and others)'))
+  consoleToggleChat:setTooltip(tr('Disable chat (activates shortcuts to walk with WASD and others)'))
 end
 
 function GameConsole.disableChat()
@@ -332,7 +332,7 @@ function GameConsole.disableChat()
   GameInterface.bindTurnKey('Ctrl+S', South, true)
   GameInterface.bindTurnKey('Ctrl+D', East, true)
 
-  consoleToggleChat:setTooltip(tr('Enable chat mode'))
+  consoleToggleChat:setTooltip(tr('Enable chat'))
 
   -- Enable next target shortcut
   if GameBattleList.m then

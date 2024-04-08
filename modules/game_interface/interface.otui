@@ -173,7 +173,7 @@ UIWidget
 
   UIWidget
     id: gameExpBar
-    height: 8
+    height: 6
     anchors.bottom: gameScreenArea.bottom
     anchors.left: gameScreenArea.left
     anchors.right: gameScreenArea.right
@@ -185,21 +185,15 @@ UIWidget
       height: 0
       visible: false
 
-    UIWidget
-      id: empty
-      image-source: /images/ui/experience/bar_empty
+    ProgressBar
+      id: bar
+      height: 6
+      background-color: #467433
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: parent.right
-      margin-left: 8
-      margin-right: 8
-      phantom: true
-
-    UIWidget
-      id: full
-      image-source: /images/ui/experience/bar_full
-      anchors.bottom: parent.bottom
-      anchors.left: parent.left
+      margin-top: 0
+      margin-bottom: 0
       margin-left: 8
       margin-right: 8
       phantom: true
