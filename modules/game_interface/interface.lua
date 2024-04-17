@@ -1714,7 +1714,7 @@ function GameInterface.updateManaBar(on)
   gameMapPanel:setDrawManaBar(on)
 end
 
-function GameInterface.onTrackCreature(trackNode)
+function GameInterface.onTrackCreature(trackNode) -- todo: review function, since trackNode.id can be nil -- attempt to concatenate field 'id' (a nil value)
   local TrackingInfo = GameTracker.m.TrackingInfo
 
   local mapCreature = g_map.getCreatureById(trackNode.id)

@@ -43,9 +43,17 @@ function ClientAudio.init()
   connect(LocalPlayer, {
     onPositionChange = ClientAudio.onPositionChange
   })
+
+  connect(g_game, {
+    onAddMagicEffect = ClientAudio.onAddMagicEffect
+  })
 end
 
 function ClientAudio.terminate()
+  disconnect(g_game, {
+    onAddMagicEffect = ClientAudio.onAddMagicEffect
+  })
+
   disconnect(LocalPlayer, {
     onPositionChange = ClientAudio.onPositionChange
   })
@@ -55,10 +63,6 @@ function ClientAudio.terminate()
   ClientAudio.clearAudios()
 
   _G.ClientAudio = nil
-end
-
-function ClientAudio.onPositionChange(creature, newPos, oldPos)
-  ClientAudio.updateAudios()
 end
 
 function ClientAudio.setMusicVolume(volume)
@@ -204,5 +208,63 @@ function ClientAudio.parseAudioRequest(protocolGame, opcode, msg)
 
     path = f('%s%s', ClientAudio.getRootPath(), path)
     channel:setAudioGroupGain(path, gain)
+  end
+end
+
+
+
+
+
+function ClientAudio.onPositionChange(creature, newPos, oldPos)
+  ClientAudio.updateAudios()
+end
+
+do
+  local effects = {
+    -- Rain effects
+    [309] = { channelId = AudioChannels.Ambient, path = '/audios/soundambient/rain/rain.ogg', gain = 1, repetitions = 0, fadeInTime = 0 },
+    [310] = { channelId = AudioChannels.Ambient, path = '/audios/soundambient/rain/rain.ogg', gain = 1, repetitions = 0, fadeInTime = 0 },
+    -- [39]
+    [77] = { channelId = AudioChannels.Ambient, path = '/audios/soundambient/rain/thunder.ogg', gain = 1, repetitions = 0, fadeInTime = 0 },
+  }
+
+  local exhaustions = {
+    ['/audios/soundambient/rain/rain.ogg'] = { singlePerTime = .1 },
+    ['/audios/soundambient/rain/thunder.ogg'] = { singlePerTime = .1 },
+  }
+
+  function ClientAudio.onAddMagicEffect(effectId, pos)
+    local effect = effects[effectId]
+    if not effect then
+      return
+    end
+    effect.onPos = effect.onPos == nil and true or effect.onPos
+
+    local exhaustion = exhaustions[effect.path]
+    if exhaustion and exhaustion.singlePerTime and os.clock() - (exhaustion.lastExecution or 0) < exhaustion.singlePerTime then
+      return
+    end
+
+    local localPlayer = g_game.getLocalPlayer()
+    if not localPlayer then
+      return
+    end
+
+    -- Is at different region: Audio is above and player is below or audio is below and player is above
+    local audioIsAbove  = pos.z <= 7
+    local playerIsAbove = localPlayer:getPosition().z <= 7
+    if bit.bxor(audioIsAbove and 1 or 0, playerIsAbove and 1 or 0) == 1 then
+      return
+    end
+
+    local channel = channels[effect.channelId] or channels[AudioChannels.Effect]
+    local audio   = channel.channel:play(effect.path, effect.gain or 1, effect.repetitions or 0, effect.fadeInTime or 0)
+    if audio and effect.onPos then
+      audio:setPosition(pos.x, pos.y)
+    end
+
+    if exhaustion then
+      exhaustion.lastExecution = os.clock()
+    end
   end
 end

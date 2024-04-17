@@ -27,7 +27,6 @@ MapShaders = {
   { name = 'Party', frag = 'shader/fragment/party.frag' },
   { name = 'Pulse', frag = 'shader/fragment/pulse.frag', drawViewportEdge = true },
   { name = 'Radial Blur', frag = 'shader/fragment/radialblur.frag', drawViewportEdge = true },
-  { name = 'Rain', frag = 'shader/fragment/rain.frag' },
   { name = 'Sepia', frag = 'shader/fragment/sepia.frag' },
   { name = 'Snow', frag = 'shader/fragment/snow.frag', tex1 = 'shader/images/snow' },
   { name = 'Water', frag = 'shader/fragment/water.frag' },
