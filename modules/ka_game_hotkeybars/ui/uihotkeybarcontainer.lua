@@ -151,7 +151,7 @@ function UIHotkeyBarContainer:onCastPower(powerId, exhaustTime, boostLevel)
   end
   self:setPowerIcon(powerId, false)
   if boostLevel ~= 0 then
-    self:setPowerEffect(boostLevel)
+    --self:setPowerEffect(boostLevel)
   end
   if exhaustTime ~= 0 then
     self:setPowerProgressShader(exhaustTime)
