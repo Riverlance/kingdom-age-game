@@ -36,6 +36,7 @@ MiniWindow < UIMiniWindow
     !tooltip: tr('Close')
     anchors.verticalCenter: miniwindowTopBar.verticalCenter
     anchors.right: parent.right
+    margin-top: -1
     margin-right: 2
 
   MinimizeMenuButton

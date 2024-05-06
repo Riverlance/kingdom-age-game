@@ -19,6 +19,8 @@ Panel
     !text: tr('Enable smart walking')
     !tooltip: tr('Detect when to use diagonal step based on the keys you are pressing.')
     !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
 
   OptionCheckBox
     id: bouncingKeys

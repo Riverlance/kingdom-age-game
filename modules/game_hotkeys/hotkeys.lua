@@ -1,11 +1,11 @@
 _G.GameHotkeys = { }
 
 HotkeyColors = {
-  Text = '#333B43',
-  TextAutoSend = '#FFFFFF',
-  ItemUse = '#AEF2FF',
-  ItemUseWith = '#F8E127',
-  Power = '#CD4EFF'
+  Text = '#ffffff44',
+  TextAutoSend = '#ffffff',
+  ItemUse = '#aef2ff',
+  ItemUseWith = '#f8e127',
+  Power = '#cd4eff',
 }
 
 hotkeysManagerLoaded = false

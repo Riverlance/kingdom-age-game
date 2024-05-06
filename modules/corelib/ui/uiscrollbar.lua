@@ -90,6 +90,10 @@ local function updateSlider(self)
 end
 
 local function parseSliderPos(self, slider, pos, move)
+  if not self.pixelsScroll then
+    return
+  end
+
   local delta, hotDistance
   if self.orientation == 'vertical' then
     delta = move.y
@@ -155,9 +159,9 @@ function UIScrollBar:onStyleApply(styleName, styleNode)
     elseif name == 'value' then
       self:setValue(value)
     elseif name == 'pixels-scroll' then
-      self.pixelsScroll = true
+      self.pixelsScroll = value
     elseif name == 'show-value' then
-      self.showValue = true
+      self.showValue = value
     elseif name == 'symbol' then
       self.symbol = value
     elseif name == 'mouse-scroll' then

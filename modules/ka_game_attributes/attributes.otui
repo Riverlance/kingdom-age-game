@@ -1,5 +1,5 @@
 AttributeAddButton < UIButton
-  !tooltip: tr('Add an effective point')
+  !tooltip: tr('Add a distribution point')
   anchors.top: parent.top
   anchors.horizontalCenter: parent.horizontalCenter
   margin-top: 4

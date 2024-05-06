@@ -466,10 +466,10 @@ ShadowFloor = {
 }
 
 HotkeyStatus = {
-  Applied = {color = 'alpha',     focusColor = '#CCCCCC22'},
-  Added   = {color = '#00FF0022', focusColor = '#00CC0022'},
-  Edited  = {color = '#FFFF0022', focusColor = '#CCCC0022'},
-  Deleted = {color = '#FF000022', focusColor = '#CC000022'},
+  Applied = {color = 'alpha',     focusColor = '#CCCCCC44'},
+  Added   = {color = '#00FF0044', focusColor = '#00CC0044'},
+  Edited  = {color = '#FFFF0044', focusColor = '#CCCC0044'},
+  Deleted = {color = '#FF000044', focusColor = '#CC000044'},
 }
 
 HotkeyItemUseType = {

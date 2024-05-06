@@ -89,7 +89,7 @@ function GameHotkeyBars.onToggleHotkeyWindow(widget, visible)
   GameHotkeyBars.updateDraggable(visible)
   local screen = rootWidget:recursiveGetChildById('textMessageArea')
   if screen then
-    screen:setBackgroundColor(visible and "#000000cc" or "#ffffff00")
+    screen:setBackgroundColor(visible and "#000000cc" or "alpha")
   end
   GameHotkeyBars.setHighlight(visible)
 end
@@ -128,7 +128,7 @@ end
 function GameHotkeyBars.loadHotkeyBars()
   local settings = Client.getPlayerSettings()
   local hotkeyBars = settings:getNode('hotkeybars')
-  if hotkeyBars then 
+  if hotkeyBars then
     settings:remove('hotkeybars') --remove old config
   end
 

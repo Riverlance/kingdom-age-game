@@ -1,72 +1,196 @@
-ChoiceListLabel < Label
+// Choices
+ModalChoice < Label
   font: verdana-11px-monochrome
   background-color: alpha
   text-offset: 2 0
   focusable: true
+  border-width: 1
+  border-color: alpha
 
   $focus:
-    background-color: #00000055
     color: #ffffff
+    border-color: #98885e
+    background-color: #cccccc44
 
-ChoiceList < TextList
-  id: choiceList
-  vertical-scrollbar: choiceScrollBar
-  anchors.fill: parent
-  anchors.top: prev.bottom
-  anchors.bottom: next.top
-  margin-top: 4
-  margin-bottom: 10
-  focusable: false
-  visible: false
+  InfoMenuButton
+    anchors.right: parent.right
+    !tooltip-type: TooltipType.textBlock
 
-ChoiceScrollBar < VerticalScrollBar
-  id: choiceScrollBar
-  anchors.top: choiceList.top
-  anchors.bottom: choiceList.bottom
-  anchors.right: choiceList.right
-  step: 14
-  pixels-scroll: true
-  visible: false
+// CheckBoxes
+ModalCheckBox < CheckBox
 
+  InfoMenuButton
+    anchors.right: parent.right
+    !tooltip-type: TooltipType.textBlock
+
+// Fields
+ModalField < TextEdit
+  focusable: true
+
+  InfoMenuButton
+    anchors.right: parent.right
+    !tooltip-type: TooltipType.textBlock
+
+// Buttons
 ModalButton < Button
   text-auto-resize: true
-  margin-top: 2
-  margin-bottom: 2
-  margin-left: 2
 
   $pressed:
     text-offset: 0 0
 
+
+
 ModalDialog < MainWindow
   id: modalDialog
-  size: 280 97
-  &minimumWidth: 300
-  &maximumWidth: 600
-  &minimumChoices: 4
-  &maximumChoices: 10
+  size: 200 150
+
+  UIWidget
+    id: guideLine0
+    height: 1
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    focusable: false
+    visible: false
+    //background: green
 
   Label
     id: messageLabel
-    anchors.top: parent.top
-    anchors.left: parent.left
-    text-align: left
-    text-auto-resize: true
-    text-wrap: true
-
-  ChoiceList
-
-  HorizontalSeparator
+    anchors.top: prev.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: next.top
+    text-align: left
+    //background: green
+
+    $hidden:
+      height: 1
+
+  UIWidget
+    id: guideLine1
+    height: 1
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 8
+    focusable: false
+    //background: green
+
+    $hidden:
+      margin-top: 0
+
+  VerticalScrollBar
+    id: choiceScrollBar
+    anchors.top: prev.bottom
+    anchors.right: parent.right
+    step: 14
+    pixels-scroll: false
+    visible: false
+
+    $hidden:
+      width: 0
+
+  TextList
+    id: choiceList
+    vertical-scrollbar: choiceScrollBar
+    anchors.top: prev.top
+    anchors.bottom: prev.bottom
+    anchors.left: parent.left
+    anchors.right: prev.outsideLeft
+    visible: false
+
+  UIWidget
+    id: guideLine2
+    height: 1
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 8
+    focusable: false
+    //background: green
+
+    $hidden:
+      margin-top: 0
+
+  VerticalScrollBar
+    id: checkBoxScrollBar
+    anchors.top: prev.bottom
+    anchors.right: parent.right
+    step: 14
+    pixels-scroll: false
+    visible: false
+
+    $hidden:
+      width: 0
+
+  VerticalList
+    id: checkBoxList
+    vertical-scrollbar: checkBoxScrollBar
+    anchors.top: prev.top
+    anchors.bottom: prev.bottom
+    anchors.left: parent.left
+    anchors.right: prev.outsideLeft
+    visible: false
+
+    // Based on values used on TextList
+    auto-focus: none
+    padding: 1
+
+  UIWidget
+    id: guideLine3
+    height: 1
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 8
+    focusable: false
+    //background: green
+
+    $hidden:
+      margin-top: 0
+
+  VerticalScrollBar
+    id: fieldScrollBar
+    anchors.top: prev.bottom
+    anchors.right: parent.right
+    step: 22
+    pixels-scroll: false
+    visible: false
+
+    $hidden:
+      width: 0
+
+  VerticalList
+    id: fieldList
+    vertical-scrollbar: fieldScrollBar
+    anchors.top: prev.top
+    anchors.bottom: prev.bottom
+    anchors.left: parent.left
+    anchors.right: prev.outsideLeft
+    visible: false
+
+    // Based on values used on TextList
+    auto-focus: none
+    padding: 1
+
+
+
+  HorizontalSeparator
+    id: bottomSeparator
+    anchors.bottom: next.outsideTop
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-bottom: 8
 
   Panel
     id: buttonsPanel
-    anchors.left: parent.left
-    anchors.right: parent.right
+
+    // Button height
+    height: 23
+
     anchors.bottom: parent.bottom
-    height: 24
+    anchors.right: parent.right
     layout: horizontalBox
       align-right: true
 
-  ChoiceScrollBar
+    $hidden:
+      width: 1

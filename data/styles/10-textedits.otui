@@ -13,6 +13,15 @@ TextEdit < UITextEdit
     color: #333b43ff
     opacity: 0.5
 
+  Label
+    id: placeholder
+    color: #c9bdab
+    opacity: 0.5
+    anchors.fill: parent
+    text-align: topleft
+    text-wrap: true
+    phantom: true
+
 PasswordTextEdit < TextEdit
   text-hidden: true
 

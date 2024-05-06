@@ -1,8 +1,6 @@
 Module
   name: game_modaldialog
   description: Show and process modal dialogs
-  author: Summ
-  website: https://github.com/edubart/otclient
   sandboxed: true
   scripts: [ modaldialog ]
   dependencies: [ game_interface ]
