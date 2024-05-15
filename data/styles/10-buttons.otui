@@ -129,7 +129,7 @@ InfoMenuButton < UIButton
   text-align: center
   size: 14 14
   font: verdana-11px-antialised
-  color: #e6db74dd
+  color: #cdc46c
   anchors.verticalCenter: prev.verticalCenter
   anchors.right: prev.outsideLeft
   image-source: /images/ui/_button/mini_window

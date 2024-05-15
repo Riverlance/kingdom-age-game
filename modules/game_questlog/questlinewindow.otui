@@ -4,15 +4,18 @@ MissionLabel < Label
   text-auto-resize: true
   text-offset: 2 0
   focusable: true
-  color: #333b43
+  border-width: 1
+  border-color: alpha
+  color: #c9bdab
 
   $on:
     color: #007700
   $!on:
-    color: #333b43
+    color: #c9bdab
 
   $focus:
-    background-color: #333b43
+    border-color: #98885e
+    background-color: #cccccc44
 
   $on focus:
     color: #00ff00

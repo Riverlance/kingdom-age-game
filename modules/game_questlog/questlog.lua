@@ -169,7 +169,7 @@ function GameQuestLog.onRowUpdate(child)
     if not child.isComplete and not child.canDo then
       child:setBackgroundColor('#ff000020')
     end
-    child.mainDataLabel:setColor(child:isFocused() and '#ffffff' or '#333b43')
+    child.mainDataLabel:setColor(child:isFocused() and '#ffffff' or '#e6db74')
   end
 end
 

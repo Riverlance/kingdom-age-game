@@ -1,14 +1,4 @@
 
---[[
-  todo:
-
-  - checkbox list
-  - values view list
-  - default values
-]]
-
-
-
 _G.GameModalDialog = { }
 
 
@@ -40,27 +30,16 @@ do
   -- ModalDialog
 
   do
-    -- Values to keep after reload
-    local __listById
-    if ModalDialog then -- Previous object on reload
-      -- Copy old data
-      __listById = ModalDialog.__listById
-    end
-
-
-
     ModalDialog = createClass{
-      id          = 0,
+      id = 0,
+
       spectatorId = 0,
 
       title   = '',
       message = '',
 
-      width  = 0,
-      height = 0,
-
-      enterButton  = 0,
-      escapeButton = 0,
+      width  = 0, -- Optional
+      height = 0, -- Optional
 
       priority = false,
 
@@ -69,15 +48,19 @@ do
       fields     = { },
       buttons    = { },
 
+      enterButton  = 1,
+      escapeButton = 1,
+
 
 
       -- Data
       widget = nil,
+      data   = { },
 
 
 
       -- List with all dialogs
-      __listById = __listById or { },
+      __listById = { },
     }
 
 
@@ -198,12 +181,17 @@ do
 
         local choicesWidth = 0
         for _, choice in ipairs(choiceList:getChildren()) do
-          choicesWidth = math.max(choice:getTextSize().width + choice:getTextOffset().x * 2 + (string.exists(choice.choiceTooltip) and choice.infoButton:getWidth() or 0), choicesWidth)
+          local valueWidth      = choice:getTextSize().width + choice:getTextOffset().x * 2
+          local infoButtonWidth = choice.infoButton:isVisible() and choice.infoButton:getWidth() or 0
+          local infoLabelWidth  = choice.infoLabel:isVisible() and choice.infoLabel:getTextSize().width + choice.infoLabel:getTextOffset().x * 2 or 0
+          choicesWidth = math.max(valueWidth + infoButtonWidth + infoLabelWidth, choicesWidth)
         end
 
         local checkBoxesWidth = 0
         for _, checkBox in ipairs(checkBoxList:getChildren()) do
-          checkBoxesWidth = math.max(checkBox:getTextSize().width + checkBox:getTextOffset().x + (string.exists(checkBox.checkBoxTooltip) and checkBox.infoButton:getWidth() or 0), checkBoxesWidth)
+          local valueWidth      = checkBox:getTextSize().width + checkBox:getTextOffset().x
+          local infoButtonWidth = checkBox.infoButton:isVisible() and checkBox.infoButton:getWidth() or 0
+          checkBoxesWidth = math.max(valueWidth + infoButtonWidth, checkBoxesWidth)
         end
 
         return math.min(math.max(minWidth, math.max(widget:getTextSize().width, choiceList:getPaddingLeft() + choicesWidth + choiceList:getPaddingRight() + choiceScrollBar:getWidth(), checkBoxList:getPaddingLeft() + checkBoxesWidth + checkBoxList:getPaddingRight() + checkBoxScrollBar:getWidth(), buttonsPanel:getWidth()) + 20), maxWidth)
@@ -214,27 +202,18 @@ do
           return self.height
         end
 
-        local widget            = self.widget
-        local messageLabel      = widget.messageLabel
-        local guideLine1        = widget.guideLine1
-        local choiceScrollBar   = widget.choiceScrollBar
-        local guideLine2        = widget.guideLine2
-        local checkBoxScrollBar = widget.checkBoxScrollBar
-        local guideLine3        = widget.guideLine3
-        local fieldScrollBar    = widget.fieldScrollBar
-        local bottomSeparator   = widget.bottomSeparator
-        local buttonsPanel      = widget.buttonsPanel
+        local widget = self.widget
 
         return widget:getPaddingTop() +
-               messageLabel:getHeight() +
-               guideLine1:getMarginTop() +
-               choiceScrollBar:getHeight() +
-               guideLine2:getMarginTop() +
-               checkBoxScrollBar:getHeight() +
-               guideLine3:getMarginTop() +
-               fieldScrollBar:getHeight() +
-               10 + bottomSeparator:getHeight() + bottomSeparator:getMarginBottom() +
-               buttonsPanel:getHeight() +
+               widget.messageLabel:getHeight() +
+               widget.guideLine1:getMarginTop() +
+               widget.choiceScrollBar:getHeight() +
+               widget.guideLine2:getMarginTop() +
+               widget.checkBoxScrollBar:getHeight() +
+               widget.guideLine3:getMarginTop() +
+               widget.fieldScrollBar:getHeight() +
+               10 + widget.bottomSeparator:getHeight() + widget.bottomSeparator:getMarginBottom() +
+               widget.buttonsPanel:getHeight() +
                widget:getPaddingBottom()
       end
     end
@@ -272,27 +251,44 @@ do
         local choiceList      = widget.choiceList
         local choiceScrollBar = widget.choiceScrollBar
 
-        for i = 1, #choices do
-          local choiceId      = choices[i][1]
-          local choiceText    = choices[i][2]
-          local choiceTooltip = choices[i][3]
+        for choiceId = 1, #choices do
+          local label           = g_ui.createWidget('ModalChoice', choiceList)
+          label.choiceId        = choiceId
+          label.choiceText      = choices[choiceId].name or ''
+          label.choiceTooltip   = choices[choiceId].tooltip or ''
+          label.choiceInfo      = choices[choiceId].info or ''
+          label.choiceInfoColor = choices[choiceId].infoColor or ''
 
-          local label         = g_ui.createWidget('ModalChoice', choiceList)
-          label.choiceId      = choiceId
-          label.choiceText    = choiceText
-          label.choiceTooltip = choiceTooltip
-
-          label:setText(choiceText)
+          label:setText(label.choiceText)
           label:setPhantom(false)
 
           -- Tooltip
-          if string.exists(choiceTooltip) then
-            local text = f("%s\n%s", choiceText, choiceTooltip)
+          if string.exists(label.choiceTooltip) then
+            local text = f("%s%s\n%s", label.choiceText, string.exists(label.choiceInfo) and f(" - %s", label.choiceInfo) or '', label.choiceTooltip)
             label.infoButton:setTooltip(text, TooltipType.textBlock)
             label.infoButton:show()
           else
             label.infoButton:removeTooltip()
             label.infoButton:hide()
+          end
+
+          -- Info label
+          if string.exists(label.choiceInfo) then
+            label.infoLabel:setText(label.choiceInfo)
+            label.infoLabel:resizeToText()
+
+            if string.exists(label.choiceInfoColor) then
+              label.infoLabel:setColor(label.choiceInfoColor)
+            end
+          end
+
+          -- Initial value
+          if choices[choiceId].selected then
+            addEvent(function()
+              if self.widget and self.widget.choiceList then
+                self.widget.choiceList:focusChild(label)
+              end
+            end)
           end
         end
 
@@ -313,8 +309,16 @@ do
         end
 
         -- Keys
-        g_keyboard.bindKeyPress('Up', function() choiceList:focusPreviousChild(KeyboardFocusReason) end, widget)
-        g_keyboard.bindKeyPress('Down', function() choiceList:focusNextChild(KeyboardFocusReason) end, widget)
+        g_keyboard.bindKeyPress('Up', function(widget)
+          if widget.choiceList then
+            widget.choiceList:focusPreviousChild(KeyboardFocusReason)
+          end
+        end, widget)
+        g_keyboard.bindKeyPress('Down', function(widget)
+          if widget.choiceList then
+            widget.choiceList:focusNextChild(KeyboardFocusReason)
+          end
+        end, widget)
 
         -- Update layout
         if updateLayout then
@@ -332,26 +336,26 @@ do
         local checkBoxList      = widget.checkBoxList
         local checkBoxScrollBar = widget.checkBoxScrollBar
 
-        for i = 1, #checkBoxes do
-          local checkBoxId      = checkBoxes[i][1]
-          local checkBoxText    = checkBoxes[i][2]
-          local checkBoxTooltip = checkBoxes[i][3]
-
+        for checkBoxId = 1, #checkBoxes do
           local checkBox           = g_ui.createWidget('ModalCheckBox', checkBoxList)
-          checkBox.checkBoxId      = checkBoxId
-          checkBox.checkBoxText    = checkBoxText
-          checkBox.checkBoxTooltip = checkBoxTooltip
+          checkBox.checkBoxText    = checkBoxes[checkBoxId].name or ''
+          checkBox.checkBoxTooltip = checkBoxes[checkBoxId].tooltip or ''
 
-          checkBox:setText(checkBoxText)
+          checkBox:setText(checkBox.checkBoxText)
 
           -- Tooltip
-          if string.exists(checkBoxTooltip) then
-            local text = f("%s\n%s", checkBoxText, checkBoxTooltip)
+          if string.exists(checkBox.checkBoxTooltip) then
+            local text = f("%s\n%s", checkBox.checkBoxText, checkBox.checkBoxTooltip)
             checkBox.infoButton:setTooltip(text, TooltipType.textBlock)
             checkBox.infoButton:show()
           else
             checkBox.infoButton:removeTooltip()
             checkBox.infoButton:hide()
+          end
+
+          -- Initial value
+          if checkBoxes[checkBoxId].value then
+            addEvent(function() checkBox:setChecked(true) end)
           end
         end
 
@@ -386,41 +390,40 @@ do
         local fieldList      = widget.fieldList
         local fieldScrollBar = widget.fieldScrollBar
 
-        for i = 1, #fields do
-          local fieldId       = fields[i][1]
-          local fieldName     = fields[i][2]
-          local fieldTooltip  = fields[i][3]
-          local fieldRegex    = fields[i][4]
-          local fieldMinChars = fields[i][5]
-          local fieldMaxChars = fields[i][6]
-          local fieldHidden   = fields[i][7]
-
+        for fieldId = 1, #fields do
           local field         = g_ui.createWidget('ModalField', fieldList)
           field.fieldId       = fieldId
-          field.fieldName     = fieldName
-          field.fieldTooltip  = fieldTooltip
-          field.fieldRegex    = fieldRegex
-          field.fieldMinChars = fieldMinChars
-          field.fieldMaxChars = fieldMaxChars
-          field.maxChars      = fieldMaxChars -- TextField typing
-          field.fieldHidden   = fieldHidden
+          field.fieldName     = fields[fieldId].name or ''
+          field.fieldTooltip  = fields[fieldId].tooltip or ''
+          field.fieldRegex    = fields[fieldId].regex or ''
+          field.fieldMinChars = fields[fieldId].minChars or 0
+          field.fieldMaxChars = fields[fieldId].maxChars or 0
+          field.fieldHidden   = fields[fieldId].hidden or false
 
-          field.regex = fieldRegex
-          field:setTextHidden(fieldHidden)
-          field:setPlaceholderText(fieldName)
+          field.maxChars = field.fieldMaxChars -- TextField typing
+          field.regex    = field.fieldRegex
+          field:setTextHidden(field.fieldHidden)
+          field:setPlaceholderText(field.fieldName)
           field:setPhantom(true)
 
           -- Tooltip
-          if string.exists(fieldTooltip) then
-            local hasMinMaxLimit = fieldMinChars > 0 and fieldMaxChars > 0
-            local higherAmount   = fieldMaxChars > 0 and fieldMaxChars or fieldMinChars > 0 and fieldMinChars or 0
-            local charsLimitText = (fieldMinChars > 0 or fieldMaxChars > 0) and f("\nLimit: %s%s%s character%s.", fieldMinChars > 0 and f("%d%s", fieldMinChars, not hasMinMaxLimit and " (minimum)" or '') or '', hasMinMaxLimit and ' ~ ' or '', fieldMaxChars > 0 and f("%d%s", fieldMaxChars, not hasMinMaxLimit and " (maximum)" or '') or '', higherAmount > 1 and 's' or '') or ''
-            local text           = f("%s%s\n%s", fieldName, charsLimitText, fieldTooltip)
+          if string.exists(field.fieldTooltip) then
+            local min            = field.fieldMinChars
+            local max            = field.fieldMaxChars
+            local hasMinMaxLimit = min > 0 and max > 0
+            local higherAmount   = max > 0 and max or min > 0 and min or 0
+            local charsLimitText = (min > 0 or max > 0) and f("\nLimit: %s%s%s character%s.", min > 0 and f("%d%s", min, not hasMinMaxLimit and " (minimum)" or '') or '', hasMinMaxLimit and ' ~ ' or '', max > 0 and f("%d%s", max, not hasMinMaxLimit and " (maximum)" or '') or '', higherAmount > 1 and 's' or '') or ''
+            local text           = f("%s%s\n%s", field.fieldName, charsLimitText, field.fieldTooltip)
             field.infoButton:setTooltip(text, TooltipType.textBlock)
             field.infoButton:show()
           else
             field.infoButton:removeTooltip()
             field.infoButton:hide()
+          end
+
+          -- Initial value
+          if string.exists(fields[fieldId].value) then
+            addEvent(function() field:setText(fields[fieldId].value) end)
           end
         end
 
@@ -457,22 +460,18 @@ do
         local buttonsPanel = widget.buttonsPanel
 
         local buttonsWidth = 0
-        for i = 1, #buttons do
-          local buttonId      = buttons[i][1]
-          local buttonText    = buttons[i][2]
-          local buttonTooltip = buttons[i][3]
-
+        for buttonId = 1, #buttons do
           local button         = g_ui.createWidget('ModalButton', buttonsPanel)
           button.buttonId      = buttonId
-          button.buttonText    = buttonText
-          button.buttonTooltip = buttonTooltip
+          button.buttonText    = buttons[buttonId].name or ''
+          button.buttonTooltip = buttons[buttonId].tooltip or ''
 
-          button:setText(buttonText)
+          button:setText(button.buttonText)
           button:setMarginLeft(buttonSpacing)
 
           -- Tooltip
-          if string.exists(buttonTooltip) then
-            button:setTooltip(buttonTooltip, TooltipType.textBlock)
+          if string.exists(button.buttonTooltip) then
+            button:setTooltip(button.buttonTooltip, TooltipType.textBlock)
           else
             button:removeTooltip()
           end
@@ -574,7 +573,7 @@ do
         end
 
         -- Send answer to server
-        g_game.answerModalDialog(self.id, buttonId, self:getButtonText(buttonId), choiceId, choiceText, self:getCheckBoxValues(), self:getFieldsText(), self.spectatorId)
+        GameModalDialog.sendAnswer(self.id, self.spectatorId, buttonId, self:getButtonText(buttonId), choiceId, choiceText, self:getCheckBoxValues(), self:getFieldsText(), self.data)
 
         -- Destroy window
         self:destroy()
@@ -669,11 +668,15 @@ do
 
     g_ui.importStyle('modaldialog')
 
-    connect(g_game, {
-      onModalDialog       = GameModalDialog.onModalDialog,
-      onModalDialogCancel = GameModalDialog.onModalDialogCancel,
-      onGameEnd           = GameModalDialog.onGameEnd,
+    connect(LocalPlayer, {
+      onPositionChange = GameModalDialog.onPositionChange
     })
+
+    connect(g_game, {
+      onGameEnd = GameModalDialog.onGameEnd,
+    })
+
+    ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeModalDialog, GameModalDialog.parse)
 
     if debugging then
       ModalDialog.destroy() -- Destroy all dialogs
@@ -682,45 +685,50 @@ do
         spectatorId = 0,
 
         title   = 'Lorem ipsum dolor',
-        -- message = '',--'Lorem ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet.',
         message = 'Lorem ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet.',
 
-        width  = 0, -- Optional
-        height = 0, -- Optional
-
-        enterButton  = 1, -- Button 'Ok'
-        escapeButton = 2, -- Button 'Escape'
+        width  = 0,
+        height = 0,
 
         priority = false,
 
         choices = {
-          { 1, "Option 1", "Tooltip of option 1." },
-          { 2, "Option 2", "" },
-          { 3, "Option 3", "" },
+          { name = "Choice 1", tooltip = "Tooltip of 'Choice 1'." },
+          { name = "Choice 2", info = "Extra info.", selected = true },
+          { name = "Choice 3", info = "Additional information.", infoColor = '#e6db74', tooltip = "Tooltip of 'Choice 3'." },
         },
+
         checkBoxes = {
-          { 1, "CheckBox 1", "Tooltip of 'CheckBox 1'."},
-          { 2, "CheckBox 2", "."},
-          { 3, "CheckBox 3", "'."},
+          { name = "CheckBox 1", tooltip = "Tooltip of 'CheckBox 1'.", value = true },
+          { name = "CheckBox 2" },
+          { name = "CheckBox 3", value = true },
         },
+
         fields = {
-          { 1, "Name", "Letters and spaces only.", "^[%a ]+$", 4, 10, false },
-          { 2, "Text", "", "", 0, 0, false },
-          { 3, "Password", "Numbers only.", "^[0-9]+$", 0, 20, true },
+          { name = "Name", tooltip = "Letters and spaces only.", regex = "^[%a ]+$", minChars = 4, maxChars = 10, value = "Lorem" },
+          { name = "Text" },
+          { name = "Password", tooltip = "Numbers only.", regex = "^[0-9]+$", maxChars = 20, hidden = true },
         },
+
         buttons = {
-          { 1, "Ok", "Tooltip of 'Ok' button." },
-          { 2, "Escape", "" },
+          { name = "Cancel" },
+          { name = "Ok", tooltip = "Tooltip of 'Ok' button." },
         },
+        enterButton  = 2, -- Button 'Ok'
+        escapeButton = 1, -- Button 'Cancel'
       }
     end
   end
 
   function GameModalDialog.terminate()
+    ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeModalDialog)
+
     disconnect(g_game, {
-      onModalDialog       = GameModalDialog.onModalDialog,
-      onModalDialogCancel = GameModalDialog.onModalDialogCancel,
-      onGameEnd           = GameModalDialog.onGameEnd,
+      onGameEnd = GameModalDialog.onGameEnd,
+    })
+
+    disconnect(LocalPlayer, {
+      onPositionChange = GameModalDialog.onPositionChange
     })
 
     ModalDialog.destroy() -- Destroy all dialogs
@@ -734,7 +742,85 @@ end
 -- Event
 
 do
-  function GameModalDialog.onModalDialog(id, title, message, spectatorId, buttons, enterButton, escapeButton, choices, checkBoxes, fields, priority, width, height)
+  function GameModalDialog.parse(protocol, msg)
+    local action = msg:getU8()
+
+    if action == 1 then
+      local id = msg:getU32()
+
+      local dialog = ModalDialog(id)
+      if dialog then
+        dialog:destroy()
+      end
+
+      return
+
+    elseif action ~= 0 then
+      return
+    end
+
+    local id          = msg:getU32()
+    local spectatorId = msg:getU32()
+    local title       = msg:getString()
+    local message     = msg:getString()
+    local width       = msg:getU8()
+    local height      = msg:getU8()
+    local priority    = msg:getU8() == 1
+
+    -- Choice
+    local choices           = { }
+    local choicesSizeAmount = msg:getU8()
+    for id = 1, choicesSizeAmount do
+      choices[id]           = { }
+      choices[id].id        = id
+      choices[id].name      = msg:getString()
+      choices[id].tooltip   = msg:getString()
+      choices[id].info      = msg:getString()
+      choices[id].infoColor = msg:getString()
+      choices[id].selected  = msg:getU8() == 1
+    end
+
+    -- CheckBox
+    local checkBoxes           = { }
+    local checkBoxesSizeAmount = msg:getU8()
+    for id = 1, checkBoxesSizeAmount do
+      checkBoxes[id]         = { }
+      checkBoxes[id].id      = id
+      checkBoxes[id].name    = msg:getString()
+      checkBoxes[id].tooltip = msg:getString()
+      checkBoxes[id].value   = msg:getU8() == 1
+    end
+
+    -- Field
+    local fields           = { }
+    local fieldsSizeAmount = msg:getU8()
+    for id = 1, fieldsSizeAmount do
+      fields[id]          = { }
+      fields[id].id       = id
+      fields[id].name     = msg:getString()
+      fields[id].tooltip  = msg:getString()
+      fields[id].regex    = msg:getString()
+      fields[id].minChars = msg:getU16()
+      fields[id].maxChars = msg:getU16()
+      fields[id].hidden   = msg:getU8() == 1
+      fields[id].value    = msg:getString()
+    end
+
+    -- Button
+    local buttons           = { }
+    local buttonsSizeAmount = msg:getU8()
+    for id = 1, buttonsSizeAmount do
+      buttons[id]         = { }
+      buttons[id].id      = id
+      buttons[id].name    = msg:getString()
+      buttons[id].tooltip = msg:getString()
+    end
+
+    local enterButton  = msg:getU8()
+    local escapeButton = msg:getU8()
+
+    local data = table.unserialize(msg:getString())
+
     ModalDialog:new{
       id          = id,
       spectatorId = spectatorId,
@@ -745,23 +831,58 @@ do
       width  = width,
       height = height,
 
-      enterButton  = enterButton,
-      escapeButton = escapeButton,
-
       priority = priority,
 
       choices    = choices,
       checkBoxes = checkBoxes,
       fields     = fields,
       buttons    = buttons,
+
+      enterButton  = enterButton,
+      escapeButton = escapeButton,
+
+      data = data,
     }
   end
 
-  function GameModalDialog.onModalDialogCancel(id)
-    local dialog = ModalDialog(id)
-    if dialog then
-      dialog:destroy()
+  function GameModalDialog.sendAnswer(id, spectatorId, buttonId, buttonText, choiceId, choiceText, checkBoxes, fields, data)
+    if not g_game.canPerformGameAction() then
+      return
     end
+
+    local msg = OutputMessage.create()
+    msg:addU8(ClientOpcodes.ClientOpcodeAnswerModalDialog)
+
+    msg:addU32(id)
+    msg:addU32(spectatorId)
+
+    -- Button
+    msg:addU8(buttonId)
+    msg:addString(buttonText)
+
+    -- Choice
+    msg:addU8(choiceId)
+    msg:addString(choiceText)
+
+    -- CheckBoxes
+    msg:addU8(#checkBoxes)
+    for id = 1, #checkBoxes do
+      msg:addU8(checkBoxes[id] and 1 or 0)
+    end
+
+    -- Fields
+    msg:addU8(#fields)
+    for id = 1, #fields do
+      msg:addString(fields[id])
+    end
+
+    msg:addString(table.serialize(data))
+
+    g_game.getProtocolGame():send(msg)
+  end
+
+  function GameModalDialog.onPositionChange(creature, pos, oldPos)
+    ModalDialog.destroy() -- Destroy all dialogs
   end
 
   function GameModalDialog.onGameEnd()

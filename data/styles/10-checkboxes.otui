@@ -1,8 +1,8 @@
 CheckBox < UICheckBox
   size: 14 14
   text-align: left
-  text-offset: 18 0
-  color: #dfdfdf
+  text-offset: 16 0
+  color: #c9bdab
   image-color: #dfdfdfff
   image-rect: 0 0 14 14
   image-source: /images/ui/check_box

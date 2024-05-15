@@ -6,6 +6,7 @@ ModalChoice < Label
   focusable: true
   border-width: 1
   border-color: alpha
+  color: #c9bdab
 
   $focus:
     color: #ffffff
@@ -15,6 +16,24 @@ ModalChoice < Label
   InfoMenuButton
     anchors.right: parent.right
     !tooltip-type: TooltipType.textBlock
+
+    $hidden:
+      size: 0 0
+
+  Label
+    id: infoLabel
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: prev.outsideLeft
+    font: verdana-11px-monochrome
+    background-color: alpha
+    text-offset: 2 0
+    color: #c9bdab
+    focusable: false
+    phantom: true
+
+    $hidden:
+      width: 0
 
 // CheckBoxes
 ModalCheckBox < CheckBox
