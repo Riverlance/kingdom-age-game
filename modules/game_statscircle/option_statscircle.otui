@@ -1,0 +1,177 @@
+Panel
+
+  OptionLabel
+    id: leftArcLabel
+    !text: tr('Left')
+    !tooltip: tr('Choose the stat to show on the left arc.')
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  ComboBox
+    id: leftArcComboBox
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    anchors.right: prev.right
+    margin-top: 2
+    @onTextChange: |
+      local option = self:getCurrentOption()
+      if option then
+        GameStatsCircle.setArcStatsType(GameStatsCircle.m.leftArc, option.data)
+      end
+
+
+
+  OptionLabel
+    id: rightArcLabel
+    !text: tr('Right')
+    !tooltip: tr('Choose the stat to show on the right arc.')
+    $!first:
+      anchors.top: leftArcLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  ComboBox
+    id: rightArcComboBox
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    anchors.right: prev.right
+    margin-top: 2
+    @onTextChange: |
+      local option = self:getCurrentOption()
+      if option then
+        GameStatsCircle.setArcStatsType(GameStatsCircle.m.rightArc, option.data)
+      end
+
+
+
+  OptionLabel
+    id: topArcLabel
+    !text: tr('Top')
+    !tooltip: tr('Choose the stat to show on the top arc.')
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  ComboBox
+    id: topArcComboBox
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    anchors.right: prev.right
+    margin-top: 2
+    @onTextChange: |
+      local option = self:getCurrentOption()
+      if option then
+        GameStatsCircle.setArcStatsType(GameStatsCircle.m.topArc, option.data)
+      end
+
+
+
+  OptionLabel
+    id: bottomArcLabel
+    !text: tr('Bottom')
+    !tooltip: tr('Choose the stat to show on the bottom arc.')
+    $!first:
+      anchors.top: topArcLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  ComboBox
+    id: bottomArcComboBox
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    anchors.right: prev.right
+    margin-top: 2
+    @onTextChange: |
+      local option = self:getCurrentOption()
+      if option then
+        GameStatsCircle.setArcStatsType(GameStatsCircle.m.bottomArc, option.data)
+      end
+
+
+
+  OptionLabel
+    id: sizeLabel
+    !text: tr('Size')
+    !tooltip: tr('Set arcs size.')
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionScrollbar
+    id: sizeScrollbar
+    anchors.left: prev.left
+    anchors.right: prev.right
+    minimum: 1
+    maximum: 100
+    symbol: %
+    @onValueChange: GameStatsCircle.setSize(self:getValue())
+
+
+
+  OptionLabel
+    id: distFromCenLabel
+    !text: tr('Distance')
+    !tooltip: tr('Set arcs distance from center.')
+    $!first:
+      anchors.top: sizeLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  OptionScrollbar
+    id: distFromCenScrollbar
+    anchors.left: prev.left
+    anchors.right: prev.right
+    minimum: 0
+    maximum: 100
+    symbol: %
+    @onValueChange: GameStatsCircle.setDistanceFromCenter(self:getValue())
+
+
+
+  OptionLabel
+    id: fillOpacityLabel
+    !text: tr('Fill opacity')
+    !tooltip: tr('Set fill opacity.')
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionScrollbar
+    id: fillOpacityScrollbar
+    anchors.left: prev.left
+    anchors.right: prev.right
+    minimum: 0
+    maximum: 100
+    symbol: %
+    @onValueChange: GameStatsCircle.setCircleFillOpacity(self:getValue() / 100)
+
+
+
+  OptionLabel
+    id: bgOpacityLabel
+    !text: tr('Background opacity')
+    !tooltip: tr('Set background opacity.')
+    $!first:
+      anchors.top: fillOpacityLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  OptionScrollbar
+    id: bgOpacityScrollbar
+    anchors.left: prev.left
+    anchors.right: prev.right
+    minimum: 0
+    maximum: 100
+    symbol: %
+    @onValueChange: GameStatsCircle.setCircleBackgroundOpacity(self:getValue() / 100)
+
+
+
+  OptionCheckBox
+    id: gameScreenBasedCheckBox
+    !text: tr('Game screen based')
+    !tooltip: tr('Set arcs size based on game screen.')
+    $!first:
+      margin-top: 10
+    @onCheckChange: GameStatsCircle.setGameScreenBased(self:isChecked())

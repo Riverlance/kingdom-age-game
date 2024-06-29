@@ -142,7 +142,7 @@ ServerOpcodes = {
   -- Free                               213 to 219
   ServerOpcodeTutorialHint            = 220,
   ServerOpcodeAutomapFlag             = 221,
-  -- Free                               222
+  ServerOpcodeMapShaders              = 222,
   ServerOpcodeCoinBalance             = 223, -- 1080
   ServerOpcodeStoreError              = 224, -- 1080
   ServerOpcodeRequestPurchaseData     = 225, -- 1080

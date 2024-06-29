@@ -4,7 +4,6 @@ Panel
     !text: tr('Side panels priority')
     !tooltip: tr('Side panels priority for the new mini windows to appear, including containers.')
     !tooltip-type: TooltipType.textBlock
-    phantom: false
 
   FirstOptionButtonBox
     id: panelsPriorityLeftSide

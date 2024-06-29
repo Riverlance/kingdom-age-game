@@ -63,6 +63,7 @@ local defaultOptions = {
   mouseItemIconOpacity = 50,
   dontStretchShrink = false,
   shaderFilter = 1,
+  showClouds = true,
   viewMode = 3,
   leftSticker = 1,
   rightSticker = 1,
@@ -393,6 +394,9 @@ function ClientOptions.setOption(key, value, force)
     if g_game.isOnline() then
       ClientShaders.setMapShaderById(value)
     end
+
+  elseif key == 'showClouds' then
+    GameInterface.getMapPanel():setCloudsVisible(value)
 
   elseif key == 'viewMode' then
     if modules.game_interface then

@@ -46,22 +46,21 @@ function ClientShaders.init()
   connect(g_game, {
     onGameStart = ClientShaders.onGameStart,
   })
+
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeMapShaders, ClientShaders.parse)
 end
 
 function ClientShaders.terminate()
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeMapShaders)
+
   disconnect(g_game, {
     onGameStart = ClientShaders.onGameStart,
   })
+
   _G.ClientShaders = nil
 end
 
 
-
--- Kingdom Age
-
-function ClientShaders.onGameStart()
-  addEvent(function()  ClientShaders.setMapShaderById(ClientOptions.getOption('shaderFilter')) end)
-end
 
 function ClientShaders.setMapShaderById(id)
   local shaderData = MapShaders[id]
@@ -74,10 +73,21 @@ function ClientShaders.setMapShaderById(id)
     return false
   end
 
+  -- Disable all filters
+  for _, shaderData in ipairs(MapShaders) do
+    if shaderData.onEnable then
+      shaderData.onEnable(map, false) -- Disable shader
+    end
+  end
+  -- Enable actual filter (if has a filter to be enabled)
+  if shaderData.onEnable then
+    shaderData.onEnable(map, true) -- Enable shader
+  end
+
   map:setAntiAliasingMode(shaderData.antiAliasing or AntiAliasing.smoothRetro)
   map:setShader('Map - ' .. shaderData.name)
 
-  map:setDrawViewportEdge(shaderData.drawViewportEdge == true)
+  map:setDrawViewportEdge(true) -- Needed for Heat, Pulse, Radial Blur and Zomg
 
   return true
 end
@@ -114,4 +124,45 @@ function ClientShaders.setItemShaderById(item, id)
   item:setShader('Item - ' .. shaderData.name)
 
   return true
+end
+
+
+
+-- Events
+
+function ClientShaders.parse(protocol, msg)
+  local coordEffects       = { }
+  local coordEffectsAmount = msg:getU8()
+  for i = 1, coordEffectsAmount do
+    local id         = msg:getU32()
+    local state      = msg:getU8() == 1
+    coordEffects[id] = state
+  end
+
+  local effects       = { }
+  local effectsAmount = msg:getU8()
+  for i = 1, effectsAmount do
+    local id    = msg:getU32()
+    local state = msg:getU8() == 1
+    effects[id] = state
+  end
+
+  local map = GameInterface and GameInterface.getMapPanel()
+  if not map then
+    return
+  end
+
+  -- Update coordEffects
+  for id, state in pairs(coordEffects) do
+    map:setDrawCoordEffectShaders(id, state)
+  end
+
+  -- Update effects
+  for id, state in pairs(effects) do
+    map:setDrawEffectShaders(id, state)
+  end
+end
+
+function ClientShaders.onGameStart()
+  addEvent(function() ClientShaders.setMapShaderById(ClientOptions.getOption('shaderFilter')) end)
 end

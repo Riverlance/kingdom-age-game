@@ -45,6 +45,12 @@ Panel
     anchors.right: parent.right
     margin-top: 2
 
+  OptionCheckBox
+    id: showClouds
+    !text: tr('Show clouds')
+    $!first:
+      margin-top: 10
+
   OptionHorizontalSeparator
 
   OptionCheckBox

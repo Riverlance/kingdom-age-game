@@ -5,14 +5,14 @@
 #define COMPAT_TEXTURE texture2D
 
 #ifdef GL_ES
-    #ifdef GL_FRAGMENT_PRECISION_HIGH
-        precision highp float;
-    #else
-        precision mediump float;
-    #endif
-    #define COMPAT_PRECISION mediump
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+  #else
+    precision mediump float;
+  #endif
+  #define COMPAT_PRECISION mediump
 #else
-    #define COMPAT_PRECISION
+  #define COMPAT_PRECISION
 #endif
 
 // uniform COMPAT_PRECISION int FrameDirection; // Not in use
@@ -36,10 +36,10 @@ uniform vec2 u_Resolution;
 
 vec3 gamma(vec3 v)
 {
-   return v * v;
+  return v * v;
 }
 
 void main()
 {
-   FragColor = vec4(gamma(COMPAT_TEXTURE(Source, v_TexCoord).rgb), 1.0);
+  FragColor = vec4(gamma(COMPAT_TEXTURE(Source, v_TexCoord).rgb), 1.0);
 }
