@@ -97,6 +97,7 @@ DailyRewardWindow < MainWindow
     anchors.top: claimRewardsBar.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 10
+    text-auto-resize: true
 
 
   Button

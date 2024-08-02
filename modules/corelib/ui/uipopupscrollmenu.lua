@@ -56,6 +56,7 @@ function UIPopupScrollMenu:display(pos)
   rootWidget:addChild(self)
   self:setPosition(pos)
   self:grabMouse()
+  self:focus()
   currentMenu = self
 end
 

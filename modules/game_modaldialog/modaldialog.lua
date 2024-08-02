@@ -43,19 +43,19 @@ do
 
       priority = false,
 
-      choices    = { },
-      checkBoxes = { },
-      fields     = { },
-      buttons    = { },
+      choices    = { }, -- { [id] = { name = '', tooltip = '', info = '', infoColor = '', selected = false } }
+      checkBoxes = { }, -- { [id] = { name = '', tooltip = '', value = false } }
+      fields     = { }, -- { [id] = { name = '', tooltip = '', regex = '', minChars = 0, maxChars = 0, hidden = false, value = '' } }
+      buttons    = { }, -- { [id] = { name = '', tooltip = '' } }
 
-      enterButton  = 1,
-      escapeButton = 1,
+      enterButton  = true,
+      escapeButton = true,
 
 
 
-      -- Data
-      widget = nil,
-      data   = { },
+      -- Virtual
+      widget     = nil,
+      playerData = { },
 
 
 
@@ -111,6 +111,20 @@ do
             return dialog
           end
         end
+      end
+
+      function ModalDialog:getEnterButton()
+        if self.enterButton == true then
+          return #self.buttons > 0 and #self.buttons or 0
+        end
+        return self.enterButton
+      end
+
+      function ModalDialog:getEscapeButton()
+        if self.escapeButton == true then
+          return #self.buttons and 1 or 0
+        end
+        return self.escapeButton
       end
     end
 
@@ -254,8 +268,8 @@ do
         for choiceId = 1, #choices do
           local label           = g_ui.createWidget('ModalChoice', choiceList)
           label.choiceId        = choiceId
-          label.choiceText      = choices[choiceId].name or ''
-          label.choiceTooltip   = choices[choiceId].tooltip or ''
+          label.choiceText      = choices[choiceId].name and tr(choices[choiceId].name) or ''
+          label.choiceTooltip   = choices[choiceId].tooltip and tr(choices[choiceId].tooltip) or ''
           label.choiceInfo      = choices[choiceId].info or ''
           label.choiceInfoColor = choices[choiceId].infoColor or ''
 
@@ -338,8 +352,8 @@ do
 
         for checkBoxId = 1, #checkBoxes do
           local checkBox           = g_ui.createWidget('ModalCheckBox', checkBoxList)
-          checkBox.checkBoxText    = checkBoxes[checkBoxId].name or ''
-          checkBox.checkBoxTooltip = checkBoxes[checkBoxId].tooltip or ''
+          checkBox.checkBoxText    = checkBoxes[checkBoxId].name and tr(checkBoxes[checkBoxId].name) or ''
+          checkBox.checkBoxTooltip = checkBoxes[checkBoxId].tooltip and tr(checkBoxes[checkBoxId].tooltip) or ''
 
           checkBox:setText(checkBox.checkBoxText)
 
@@ -393,8 +407,8 @@ do
         for fieldId = 1, #fields do
           local field         = g_ui.createWidget('ModalField', fieldList)
           field.fieldId       = fieldId
-          field.fieldName     = fields[fieldId].name or ''
-          field.fieldTooltip  = fields[fieldId].tooltip or ''
+          field.fieldName     = fields[fieldId].name and tr(fields[fieldId].name) or ''
+          field.fieldTooltip  = fields[fieldId].tooltip and tr(fields[fieldId].tooltip) or ''
           field.fieldRegex    = fields[fieldId].regex or ''
           field.fieldMinChars = fields[fieldId].minChars or 0
           field.fieldMaxChars = fields[fieldId].maxChars or 0
@@ -463,8 +477,8 @@ do
         for buttonId = 1, #buttons do
           local button         = g_ui.createWidget('ModalButton', buttonsPanel)
           button.buttonId      = buttonId
-          button.buttonText    = buttons[buttonId].name or ''
-          button.buttonTooltip = buttons[buttonId].tooltip or ''
+          button.buttonText    = buttons[buttonId].name and tr(buttons[buttonId].name) or ''
+          button.buttonTooltip = buttons[buttonId].tooltip and tr(buttons[buttonId].tooltip) or ''
 
           button:setText(button.buttonText)
           button:setMarginLeft(buttonSpacing)
@@ -541,7 +555,9 @@ do
         if choiceList:hasChildren() then
           choiceList:focusChild(choiceList:getFirstChild())
         elseif fieldList:hasChildren() then
-          fieldList:focusChild(fieldList:getFirstChild())
+          local field = fieldList:getFirstChild()
+          fieldList:focusChild(field)
+          addEvent(function() field:selectAll() end)
         end
       end
 
@@ -553,7 +569,7 @@ do
         local choiceText = choice and choice.choiceText or ''
 
         -- Is not a cancel button
-        if buttonId ~= self.escapeButton then
+        if buttonId ~= self:getEscapeButton() then
           local fieldList = widget.fieldList
 
           for _, field in ipairs(fieldList:getChildren()) do
@@ -573,7 +589,7 @@ do
         end
 
         -- Send answer to server
-        GameModalDialog.sendAnswer(self.id, self.spectatorId, buttonId, self:getButtonText(buttonId), choiceId, choiceText, self:getCheckBoxValues(), self:getFieldsText(), self.data)
+        GameModalDialog.sendAnswer(self.id, self.spectatorId, buttonId, self:getButtonText(buttonId), choiceId, choiceText, self:getCheckBoxValues(), self:getFieldsText(), self.playerData)
 
         -- Destroy window
         self:destroy()
@@ -604,7 +620,7 @@ do
 
         local choiceList = widget.choiceList
 
-        -- Update data
+        -- Update content
         widget:setText(tr(self.title))
         self:setMessageLabel(false)
         self:setChoices(false)
@@ -618,7 +634,7 @@ do
         -- Event
 
         local function confirm()
-          dialog:answer(dialog.enterButton)
+          dialog:answer(dialog:getEnterButton())
         end
 
         -- On double click
@@ -633,7 +649,7 @@ do
 
         -- On press escape
         function widget:onEscape()
-          dialog:answer(dialog.escapeButton)
+          dialog:answer(dialog:getEscapeButton())
         end
 
         return true
@@ -714,8 +730,6 @@ do
           { name = "Cancel" },
           { name = "Ok", tooltip = "Tooltip of 'Ok' button." },
         },
-        enterButton  = 2, -- Button 'Ok'
-        escapeButton = 1, -- Button 'Cancel'
       }
     end
   end
@@ -819,7 +833,7 @@ do
     local enterButton  = msg:getU8()
     local escapeButton = msg:getU8()
 
-    local data = table.unserialize(msg:getString())
+    local playerData = table.unserialize(msg:getString())
 
     ModalDialog:new{
       id          = id,
@@ -841,11 +855,11 @@ do
       enterButton  = enterButton,
       escapeButton = escapeButton,
 
-      data = data,
+      playerData = playerData,
     }
   end
 
-  function GameModalDialog.sendAnswer(id, spectatorId, buttonId, buttonText, choiceId, choiceText, checkBoxes, fields, data)
+  function GameModalDialog.sendAnswer(id, spectatorId, buttonId, buttonText, choiceId, choiceText, checkBoxes, fields, playerData)
     if not g_game.canPerformGameAction() then
       return
     end
@@ -876,7 +890,7 @@ do
       msg:addString(fields[id])
     end
 
-    msg:addString(table.serialize(data))
+    msg:addString(table.serialize(playerData))
 
     g_game.getProtocolGame():send(msg)
   end

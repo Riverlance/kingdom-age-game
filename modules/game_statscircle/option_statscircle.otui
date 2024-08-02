@@ -104,7 +104,7 @@ Panel
     minimum: 1
     maximum: 100
     symbol: %
-    @onValueChange: GameStatsCircle.setSize(self:getValue())
+    @onValueChange: GameStatsCircle.setSize(self:getValue() / 100)
 
 
 
@@ -125,7 +125,7 @@ Panel
     minimum: 0
     maximum: 100
     symbol: %
-    @onValueChange: GameStatsCircle.setDistanceFromCenter(self:getValue())
+    @onValueChange: GameStatsCircle.setDistanceFromCenter(self:getValue() / 100)
 
 
 

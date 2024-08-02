@@ -26,6 +26,7 @@ gameLeftThirdPanelContainer = nil
 gameBottomPanel = nil
 shopButton = nil
 logoutButton = nil
+streamerModeButton = nil
 mouseGrabberWidget = nil
 countWindow = nil
 logoutWindow = nil
@@ -165,6 +166,7 @@ function GameInterface.init()
   shopButton = ClientTopMenu.addLeftButton('shopButton', tr('Visit the VIP shop on our Website'), '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
   shopButton:setOn(true)
   logoutButton = ClientTopMenu.addLeftButton('logoutButton', tr('Exit'), '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
+  streamerModeButton = ClientTopMenu.addLeftGameButton('streamerModeButton', tr('Streamer Mode'), '/images/ui/top_menu/streamer_mode', GameInterface.toggleStreamerMode)
 
   GameInterface.bindKeys()
 
@@ -329,6 +331,8 @@ function GameInterface.terminate()
 
   shopButton:destroy()
   logoutButton:destroy()
+  streamerModeButton:destroy()
+
   gameRootPanel:destroy()
 
   _G.GameInterface = nil
@@ -344,13 +348,51 @@ function GameInterface.onGameStart()
   g_window.setTitle(g_app.getName() .. (localPlayer and ' - ' .. localPlayer:getName() or ''))
   GameInterface.show()
 
-  -- Update panels
-  GameInterface.setLeftPanels()
-  GameInterface.setRightPanels()
-
   g_game.enableFeature(GameForceFirstAutoWalkStep)
 
-  GameInterface.updateManaBar()
+  -- April Fools'
+
+  local aprilFoolsEnabled = true -- todo: get flag from player on server
+  if aprilFoolsEnabled then
+    local todayDate = os.date('*t')
+    if todayDate.month == 4 and todayDate.day == 1 then
+
+      local ignoredClasses = {
+        ['UITextEdit'] = true,
+      }
+
+      local ignoredStyles = {
+        ['TerminalLabel'] = true,
+      }
+
+      local ignoredParentClasses = {
+        ['UIMoveableTabBar'] = true,
+      }
+
+      local ignoredParentStyles = {
+        ['TextList'] = true,
+      }
+
+      -- local ignoredIds = {
+      -- }
+
+      function UIWidget:getAutoText(text, oldText)
+        if ignoredClasses[self:getClassName()] or ignoredStyles[self:getStyleName()] --[[or ignoredIds[self:getId()] ]] then
+          return nil -- Do nothing
+        end
+
+        local parent = self:getParent()
+        if parent and (ignoredParentClasses[parent:getClassName()] or ignoredParentStyles[parent:getStyleName()]) then
+          return nil -- Do nothing
+        end
+
+        return string.exists(text) and text:mix(true) or text
+      end
+
+    else
+      UIWidget.getAutoText = nil
+    end
+  end
 end
 
 function GameInterface.onGameEnd()
@@ -365,15 +407,31 @@ function GameInterface.onGameEnd()
 end
 
 function GameInterface.show()
+  local localPlayer = g_game.getLocalPlayer()
+
   connect(g_app, {
     onClose = GameInterface.tryExit
   })
+
   ClientBackground.hide()
   gameRootPanel:show()
   gameRootPanel:focus()
   gameMapPanel:followCreature(g_game.getLocalPlayer())
   GameInterface.updateStretchShrink()
   logoutButton:setTooltip(tr('Logout'))
+
+  local charInfo = localPlayer:getCharacterInfo()
+  if charInfo and charInfo.worldId == WorldId.Fortuna then
+    streamerModeButton:show()
+  else
+    streamerModeButton:hide()
+  end
+
+  GameInterface.updateManaBar()
+
+  -- Update panels
+  GameInterface.setLeftPanels()
+  GameInterface.setRightPanels()
 end
 
 function GameInterface.hide()
@@ -1960,4 +2018,21 @@ function GameInterface.onFightModeChange(fightMode)
   if creature then
     creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().notHovered)
   end
+end
+
+function GameInterface.toggleStreamerMode()
+  if not g_game.canPerformGameAction() then
+    return
+  end
+
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeStreamerMode)
+
+  protocolGame:send(msg)
 end

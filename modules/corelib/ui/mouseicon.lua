@@ -72,17 +72,21 @@ function g_mouseicon.terminate()
 end
 
 function g_mouseicon.display(filePath, opacity, size, subType, text) -- (filePath[, opacity = defaultIconOpacity[, size = defaultSize[, subType = 1 [, text = '']]]])
+  --reset
+  mouseIcon:setIcon('')
   mouseIcon:setText('')
-  if tonumber(filePath) then
-    mouseIcon:setIcon('')
+  mouseIcon:setItemId(0)
+  mouseIcon:setItemSubType(0)
+
+  if tonumber(filePath) then --item
     mouseIcon:setItemId(filePath)
     mouseIcon:setItemSubType(subType or 1)
-  elseif string.exists(text) then
+  elseif string.exists(text) then --text
     mouseIcon:setText(text)
-  else
+  else --power
     mouseIcon:setIcon(resolvepath(filePath))
-    mouseIcon:clearItem()
   end
+
   mouseIcon:setSize(size or defaultSize)
   mouseIcon:setIconSize(size or defaultSize)
   mouseIcon:setOpacity(opacity or defaultIconOpacity / 100)

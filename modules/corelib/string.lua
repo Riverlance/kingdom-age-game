@@ -288,8 +288,9 @@ local function randomizeTable(_table, begin, final) -- (_table[, begin[, final]]
   return _table
 end
 
-function string:getCombinations(begin, final, size, result) -- ([begin[, final[, size[, result]])
+function string:getCombinations(begin, final, size, result) -- ([begin[, final[, size])
   result = result or 1
+
   local letters, combinations = { }, { }
 
   local length = #self
@@ -301,8 +302,8 @@ function string:getCombinations(begin, final, size, result) -- ([begin[, final[,
   while true do
     local str = table.concat(randomizeTable(letters, begin, final) or { }, '')
 
-    -- Cut
-    if size and type(size) == 'number' and size >= 1 and size < #str then
+    -- Slice
+    if type(size) == 'number' and size > 0 and size < #str then
       str = str:sub(1, size)
     end
 
@@ -319,18 +320,57 @@ function string:getCombinations(begin, final, size, result) -- ([begin[, final[,
       break
     end
   end
+
   table.sort(combinations)
-  --print(table.concat(combinations, '\n'))
+  -- print(table.concat(combinations, '\n')) -- For debugging
+
   return combinations
 end
 
 function string:mix(lockBorders, decrease)
-  local words = self / ' '
-  local ret   = ''
-  for k, v in pairs(words) do
-    local begin  = lockBorders and (#v >= 4 and 2 or -1) or 1
-    local final  = lockBorders and (#v >= 4 and #v-1 or -1) or #v
-    ret = ret .. v:getCombinations(begin, final, decrease and math.random(#v) or #v)[1] .. (k ~= #words and ' ' or '')
+  if decrease then
+    lockBorders = false
   end
-  return ret
+
+  local str = self
+  if #str < 1 then
+    return str
+  end
+
+  local cursorPos = 1
+
+  repeat
+    -- Crossed the string
+    if cursorPos > #str then
+      break
+    end
+
+    -- Search for letters to mix
+    local lettersLeftPos, lettersRightPos, letters = str:find('[^%a]*([%a]+)[^%a]*', cursorPos)
+
+    -- No letters to mix were found
+    if not lettersLeftPos then
+      break
+    end
+
+    -- Found letters to mix
+    local lettersAmount = #letters
+    local newAmount     = decrease and math.random(lettersAmount) or lettersAmount
+    if lockBorders and lettersAmount > 3 then -- We need at least 2 internal characters to mix (it means 4 characters on total)
+      str = str:gsub(letters, letters:getCombinations(2, lettersAmount - 1, newAmount)[1], 1)
+
+    elseif not lockBorders and lettersAmount > 1 then
+      str = str:gsub(letters, letters:getCombinations(1, lettersAmount, newAmount)[1], 1)
+    end
+
+    -- Update lettersRightPos
+    if newAmount < lettersAmount then
+      lettersRightPos = lettersRightPos - (lettersAmount - newAmount)
+    end
+
+    -- Update cursorPos
+    cursorPos = lettersRightPos + 1
+  until false
+
+  return str
 end

@@ -1,5 +1,12 @@
 _G.GameStatsCircle = { }
 
+
+
+local baseSize       = 354
+local baseDistFactor = 1.5
+
+
+
 Stats = {
   None       = 0,
   Health     = 1,
@@ -21,11 +28,11 @@ bottomArc = nil
 arcSettings = nil
 optionPanel = nil
 
-size               = g_settings.getNumber('stats_circle_size', 1.00)
-gameScreenBased    = g_settings.getBoolean('stats_circle_gamescreenbased', false)
-distanceFromCenter = g_settings.getNumber('stats_circle_distfromcenter', 0.00)
-opacityCircleFill  = g_settings.getNumber('stats_circle_fillopacity', 1.00)
-opacityCircleBg    = g_settings.getNumber('stats_circle_bgopacity', 0.70)
+arcSizeRatio        = g_settings.getNumber('stats_circle_size', 1.)
+gameScreenBased     = g_settings.getBoolean('stats_circle_gamescreenbased', false)
+distFromCenterRatio = g_settings.getNumber('stats_circle_distfromcenter', 0.)
+opacityCircleFill   = g_settings.getNumber('stats_circle_fillopacity', 1.)
+opacityCircleBg     = g_settings.getNumber('stats_circle_bgopacity', 0.7)
 
 
 
@@ -54,6 +61,7 @@ function GameStatsCircle.init()
   baseImageSizeBroad = leftArc:getHeight()
   imageSizeThin      = baseImageSizeThin * 1.
   imageSizeBroad     = baseImageSizeBroad * 1.
+  imageMargin        = 0
 
   connect(g_game, {
     onGameStart = GameStatsCircle.onGameStart,
@@ -119,8 +127,8 @@ function GameStatsCircle.onGameStart()
   GameStatsCircle.loadPlayerSettings()
   GameStatsCircle.enableOptionsPanel()
 
-  GameStatsCircle.setSize(size)
-  GameStatsCircle.setDistanceFromCenter(distanceFromCenter)
+  GameStatsCircle.setSize(arcSizeRatio)
+  GameStatsCircle.setDistanceFromCenter(distFromCenterRatio)
   GameStatsCircle.setCircleFillOpacity(opacityCircleFill)
   GameStatsCircle.setCircleBackgroundOpacity(opacityCircleBg)
 
@@ -147,8 +155,8 @@ end
 
 function GameStatsCircle.savePlayerSettings()
   local arcSettings = { }
-  for _, arcWidget in ipairs(arcs) do
-    arcSettings[arcWidget:getId()] = { statsType = arcWidget.statsType }
+  for _, arc in ipairs(arcs) do
+    arcSettings[arc:getId()] = { statsType = arc.statsType }
   end
 
   local settings = Client.getPlayerSettings()
@@ -192,37 +200,37 @@ function GameStatsCircle.onVocationChange(creature, vocation, oldVocation)
 end
 
 function GameStatsCircle.onGeometryChange(self)
-  if g_game.isOnline() then
-    GameStatsCircle.update()
-  end
+  GameStatsCircle.update()
 end
 
 function GameStatsCircle.onViewModeChange(mapWidget, newMode, oldMode)
-  if g_game.isOnline() then
-    GameStatsCircle.update()
-  end
+  GameStatsCircle.update()
 end
 
 function GameStatsCircle.onZoomChange(self, oldZoom, newZoom)
-  if g_game.isOnline() then
-    GameStatsCircle.update()
-  end
+  GameStatsCircle.update()
 end
 
 
 
 function GameStatsCircle.update()
+  if not g_game.isOnline() then
+    return
+  end
+
   addEvent(function()
-    GameStatsCircle.setSize(sizeScrollbar:getValue())
+    GameStatsCircle.setSize(sizeScrollbar:getValue() / 100)
   end)
 end
 
 function GameStatsCircle.updateCircle(statsType, percent)
-  for _, arcWidget in pairs(arcs) do
-    if statsType == Stats.Any or arcWidget.statsType == statsType then
-      GameStatsCircle.updateArc(arcWidget, percent)
+  addEvent(function()
+    for _, arc in pairs(arcs) do
+      if statsType == Stats.Any or arc.statsType == statsType then
+        GameStatsCircle.updateArc(arc, percent)
+      end
     end
-  end
+  end)
 end
 
 function GameStatsCircle.setArcStatsType(arc, statsType)
@@ -233,95 +241,132 @@ end
 function GameStatsCircle.updateArc(arc, percent)
   arc:setVisible(arc.statsType > Stats.None)
 
+  local hasVisibleArc = false
+  for _, arc in pairs(arcs) do
+    if arc.statsType > Stats.None then
+      hasVisibleArc = true
+      break
+    end
+  end
+  statsCircle:setVisible(hasVisibleArc)
+
   if arc.statsType == Stats.None then
     return
   end
 
-  local p = g_game.getLocalPlayer()
+  local player = g_game.getLocalPlayer()
+
   if arc.statsType == Stats.Health then
-    percent = percent or p:getHealthPercent()
+    percent = percent or player:getHealthPercent()
     color = '#FF4444'
   elseif arc.statsType == Stats.Mana then
-    percent = percent or 100 * p:getMana() / p:getMaxMana()
+    percent = percent or 100 * player:getMana() / player:getMaxMana()
     color = '#AA44FF'
   elseif arc.statsType == Stats.Vigor then
-    percent = percent or 100 * p:getVigor() / p:getMaxVigor()
+    percent = percent or 100 * player:getVigor() / player:getMaxVigor()
     color = '#FFA14F'
   elseif arc.statsType == Stats.Capacity then
-    percent = percent or 100 * p:getFreeCapacity() / p:getTotalCapacity()
+    percent = percent or 100 * player:getFreeCapacity() / player:getTotalCapacity()
     color = '#4FACFF'
   elseif arc.statsType == Stats.Experience then
-    percent = percent or p:getLevelPercent()
+    percent = percent or player:getLevelPercent()
     color = '#8BE866'
   end
+  percent = percent / 100
 
+  local circleSize   = baseSize + math.floor(distFromCenterRatio * 100 * baseDistFactor)
+  local stretchRatio = gameScreenBased and GameInterface.getMapPanel():getStretchRatio() or 1
+
+  imageSizeThin  = baseImageSizeThin * arcSizeRatio * stretchRatio
+  imageSizeBroad = baseImageSizeBroad * arcSizeRatio * stretchRatio
+  imageMargin    = gameScreenBased and 0 or math.ceil((1 - arcSizeRatio) * (baseSize / 2))
+
+  -- Circle
+  statsCircle:setSize{ width = circleSize * stretchRatio * (gameScreenBased and arcSizeRatio or 1), height = circleSize * stretchRatio * (gameScreenBased and arcSizeRatio or 1) }
+
+  -- Arcs
+
+  -- Vertical
   if arc.isVertical then
-    arc.bg:setSize({ width = imageSizeThin, height = imageSizeBroad })
-    arc.fill:setImageClip({
+    arc:setSize{ width = imageSizeThin, height = imageSizeBroad }
+    arc.bg:setSize{ width = imageSizeThin, height = imageSizeBroad }
+    arc.fill:setImageClip{
       x      = 0,
-      y      = (100 - percent) * baseImageSizeBroad * .01,
+      y      = (1 - percent) * baseImageSizeBroad,
       width  = baseImageSizeThin,
-      height = baseImageSizeBroad * percent * .01,
-    })
+      height = baseImageSizeBroad * percent,
+    }
     arc.fill:setWidth(imageSizeThin)
-    arc.fill:setHeight(percent * imageSizeBroad * .01)
+    arc.fill:setHeight(percent * imageSizeBroad)
 
+  -- Horizontal
   elseif arc.isHorizontal then
-    arc.bg:setSize({ width = imageSizeBroad, height = imageSizeThin })
-    arc.fill:setImageClip({
+    arc:setSize{ width = imageSizeBroad, height = imageSizeThin }
+    arc.bg:setSize{ width = imageSizeBroad, height = imageSizeThin }
+    arc.fill:setImageClip{
       x      = 0,
       y      = 0,
-      width  = percent * baseImageSizeBroad * .01,
+      width  = percent * baseImageSizeBroad,
       height = baseImageSizeThin,
-    })
-    arc.fill:setWidth(percent * imageSizeBroad * .01)
+    }
+    arc.fill:setWidth(percent * imageSizeBroad)
     arc.fill:setHeight(imageSizeThin)
   end
 
+  -- Margin
+  if arc == topArc then
+    arc:setMarginTop(imageMargin)
+  elseif arc == bottomArc then
+    arc:setMarginBottom(imageMargin)
+  elseif arc == leftArc then
+    arc:setMarginLeft(imageMargin)
+  elseif arc == rightArc then
+    arc:setMarginRight(imageMargin)
+  end
+
+  -- Color
   arc.fill:setImageColor(color)
 end
 
 function GameStatsCircle.setSize(value)
-  local ratio = gameScreenBasedCheckBox:isChecked() and GameInterface.getMapPanel():getStretchRatio() or 1
-
-  imageSizeThin  = baseImageSizeThin * (value * .01) * ratio
-  imageSizeBroad = baseImageSizeBroad * (value * .01) * ratio
+  arcSizeRatio = value
+  g_settings.set('stats_circle_size', value)
 
   GameStatsCircle.updateCircle(Stats.Any)
-
-  g_settings.set('stats_circle_size', value)
 end
 
 function GameStatsCircle.setGameScreenBased(checked)
+  gameScreenBased = checked
   g_settings.set('stats_circle_gamescreenbased', checked)
 
   GameStatsCircle.update()
 end
 
 function GameStatsCircle.setDistanceFromCenter(value)
-  local size = 354 + math.floor(value * 1.5)
-  statsCircle:setSize({ width = size, height = size })
+  distFromCenterRatio = value
   g_settings.set('stats_circle_distfromcenter', value)
 
   GameStatsCircle.update()
 end
 
 function GameStatsCircle.setCircleFillOpacity(value)
+  opacityCircleFill = value
+  g_settings.set('stats_circle_fillopacity', value)
+
   leftArc.fill:setOpacity(value)
   rightArc.fill:setOpacity(value)
   topArc.fill:setOpacity(value)
   bottomArc.fill:setOpacity(value)
-
-  g_settings.set('stats_circle_fillopacity', value)
 end
 
 function GameStatsCircle.setCircleBackgroundOpacity(value)
+  opacityCircleBg = value
+  g_settings.set('stats_circle_bgopacity', value)
+
   leftArc.bg:setOpacity(value)
   rightArc.bg:setOpacity(value)
   topArc.bg:setOpacity(value)
   bottomArc.bg:setOpacity(value)
-
-  g_settings.set('stats_circle_bgopacity', value)
 end
 
 
@@ -384,9 +429,9 @@ function GameStatsCircle.enableOptionsPanel()
 
   GameStatsCircle.updateArcsComboBox()
 
-  sizeScrollbar:setValue(size)
+  sizeScrollbar:setValue(arcSizeRatio * 100)
   gameScreenBasedCheckBox:setChecked(gameScreenBased)
-  distFromCenScrollbar:setValue(distanceFromCenter)
+  distFromCenScrollbar:setValue(distFromCenterRatio * 100)
   fillOpacityScrollbar:setValue(opacityCircleFill * 100)
   bgOpacityScrollbar:setValue(opacityCircleBg * 100)
 end

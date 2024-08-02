@@ -3,9 +3,9 @@ _G.GameNpcTrade = { }
 
 
 -- See achievements on server
-HowToTownTrustStr = [[Some items, like equipments, can be bought if you have enough money and trust.
+HowToTownTrustStr = [[Some items, like equipments, can be bought if you have enough money and trust experience.
 Higher trust levels unlocks access to buy new items.
-Your trust of each city increases individually by selling some items and decreases over time.]]
+Your trust experience of each city increases individually by selling some items or accomplishing hunting tasks, and decreases over the time.]]
 
 GpsStr     = 'gold pieces'
 KapsStr    = 'KAps'

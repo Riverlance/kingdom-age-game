@@ -355,6 +355,18 @@ AntiAliasing = {
   smoothRetro = 2,
 }
 
+WorldId = {
+  Ohana   = 1,
+  Fortuna = 2,
+  Aurora  = 3,
+}
+
+WorldName = {
+  [WorldId.Ohana]   = 'Ohana',
+  [WorldId.Fortuna] = 'Fortuna',
+  [WorldId.Aurora]  = 'Aurora',
+}
+
 Vocations = {
   Knight   = 1,
   Paladin  = 2,

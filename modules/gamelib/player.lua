@@ -42,6 +42,10 @@ InventorySlotPurse = 11
 InventorySlotFirst = 1
 InventorySlotLast = 10
 
+function Player:getCharacterInfo()
+  return ClientCharacterList.getCharacterInfoByName(self:getName())
+end
+
 function isPartyLeader(shield)
   return shield == ShieldWhiteYellow or
          shield == ShieldYellow or

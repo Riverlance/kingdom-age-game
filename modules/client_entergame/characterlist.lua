@@ -422,6 +422,7 @@ function ClientCharacterList.parseCharacterList(protocolGame, opcode, msg)
   for _ = 1, worldsCount do
     local world = { }
     local worldId = msg:getU8()
+    world.worldId = worldId
     world.worldName = msg:getString()
     world.worldIp = msg:getString()
     world.worldPort = msg:getU16()
@@ -433,6 +434,7 @@ function ClientCharacterList.parseCharacterList(protocolGame, opcode, msg)
   for i = 1, charactersCount do
     local character = { }
     local worldId = msg:getU8()
+    character.worldId = worldId
     character.name = msg:getString()
     character.loginname = msg:getString()
     character.worldName = worlds[worldId].worldName
@@ -445,4 +447,13 @@ function ClientCharacterList.parseCharacterList(protocolGame, opcode, msg)
   local account = { }
   account.premDays = msg:getU16()
   ClientCharacterList.create(characters, account)
+end
+
+function ClientCharacterList.getCharacterInfoByName(name)
+  for _, char in ipairs(G.characters) do
+    if char.name == name then
+      return char
+    end
+  end
+  return nil
 end

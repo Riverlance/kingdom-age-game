@@ -576,7 +576,12 @@ function g_tooltip.terminate()
 end
 
 function g_tooltip.onWidgetMouseRelease(widget, mousePos, mouseButton)
-  onWidgetUpdateHover(widget, true)
+  addEvent(function()
+    local newWidget = g_game.getWidgetByPos(mousePos)
+    if newWidget then
+      onWidgetUpdateHover(newWidget, true)
+    end
+  end)
 end
 
 function g_tooltip.onWidgetDestroy(widget)
