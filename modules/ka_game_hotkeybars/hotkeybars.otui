@@ -124,4 +124,6 @@ HotkeyBarContainer < UIHotkeyBarContainer
     anchors.top: parent.top
     anchors.right: parent.right
 
-    @onClick: self:getParent():getParentBar():removeHotkey(self:getParent().settings.keyCombo)
+    @onClick: |
+      self:getParent():getParentBar():removeHotkey(self:getParent().settings.keyCombo)
+      g_sounds.getChannel(AudioChannels.Gui):play(f('%s/power_popout.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)

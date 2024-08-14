@@ -406,13 +406,29 @@ end
 -- Audio
 
 AudioChannels = {
-  Music = 1,
+  Music   = 1,
   Ambient = 2,
-  Effect = 3,
+  Effect  = 3,
+  Voice   = 4,
+  Gui     = 5,
 
   First = 1,
-  Last = 3
+  Last  = 5,
 }
+
+AudioChannelRootPath = '/audios'
+
+AudioChannelPath = {
+  [AudioChannels.Music]   = '/music',
+  [AudioChannels.Ambient] = '/env',
+  [AudioChannels.Effect]  = '/fx',
+  [AudioChannels.Voice]   = '/voice',
+  [AudioChannels.Gui]     = '/gui',
+}
+
+function getAudioChannelPath(id)
+  return f('%s%s', AudioChannelRootPath, AudioChannelPath[id])
+end
 
 -- ScreenImage
 

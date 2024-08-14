@@ -154,7 +154,11 @@ function GameHotkeyBars.onAssignHotkey(keySettings, applied)
   if keySettings.hotkeyBarId then
     local hotkeyBar = hotkeyBarList[keySettings.hotkeyBarId]
     keySettings.hotkeyBarId = nil
+
     hotkeyBar:onAssignHotkey(keySettings, applied)
+    if applied and keySettings.powerId then
+      g_sounds.getChannel(AudioChannels.Gui):play(f('%s/power_drop.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+    end
   end
 end
 

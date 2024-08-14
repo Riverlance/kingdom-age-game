@@ -8,13 +8,13 @@ function UIButton.create()
 end
 
 function UIButton:onMouseRelease(pos, button)
-  return self:isPressed()
-end
-
-function UIButton:onMouseRelease(mousePos, mouseButton)
   if g_tooltip then
-    g_tooltip.onWidgetMouseRelease(self, mousePos, mouseButton)
+    g_tooltip.onWidgetMouseRelease(self, pos, button)
   end
+
+  g_sounds.getChannel(AudioChannels.Gui):play(f('%s/button_1.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+
+  return self:isPressed()
 end
 
 function UIButton:onDestroy()

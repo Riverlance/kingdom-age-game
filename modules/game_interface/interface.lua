@@ -166,7 +166,7 @@ function GameInterface.init()
   shopButton = ClientTopMenu.addLeftButton('shopButton', tr('Visit the VIP shop on our Website'), '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
   shopButton:setOn(true)
   logoutButton = ClientTopMenu.addLeftButton('logoutButton', tr('Exit'), '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
-  streamerModeButton = ClientTopMenu.addLeftGameButton('streamerModeButton', tr('Streamer Mode'), '/images/ui/top_menu/streamer_mode', GameInterface.toggleStreamerMode)
+  streamerModeButton = ClientTopMenu.addRightGameToggleButton('streamerModeButton', tr('Streamer Mode'), '/images/ui/top_menu/streamer_mode', GameInterface.toggleStreamerMode)
 
   GameInterface.bindKeys()
 

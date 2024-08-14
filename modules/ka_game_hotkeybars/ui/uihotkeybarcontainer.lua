@@ -116,6 +116,7 @@ function UIHotkeyBarContainer:onDragLeave(droppedWidget, mousePos)
   g_mouse.popCursor('target')
   if not droppedWidget or droppedWidget ~= self:getParentBar() then
     self:getParentBar():removeHotkey(self.settings.keyCombo)
+    g_sounds.getChannel(AudioChannels.Gui):play(f('%s/power_popout.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   end
   return true
 end

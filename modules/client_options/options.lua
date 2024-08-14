@@ -41,9 +41,13 @@ local defaultOptions = {
   enableMusic = true,
   enableSoundAmbient = true,
   enableSoundEffect = true,
+  enableSoundVoice = true,
+  enableSoundGui = true,
   musicVolume = 100,
   soundAmbientVolume = 100,
   soundEffectVolume = 100,
+  soundVoiceVolume = 100,
+  soundGuiVolume = 100,
   showNames = true,
   showLevel = true,
   showIcons = true,
@@ -409,6 +413,8 @@ function ClientOptions.setOption(key, value, force)
       g_sounds.getChannel(AudioChannels.Music):setEnabled(value and ClientOptions.getOption('enableMusic'))
       g_sounds.getChannel(AudioChannels.Ambient):setEnabled(value and ClientOptions.getOption('enableSoundAmbient'))
       g_sounds.getChannel(AudioChannels.Effect):setEnabled(value and ClientOptions.getOption('enableSoundEffect'))
+      g_sounds.getChannel(AudioChannels.Voice):setEnabled(value and ClientOptions.getOption('enableSoundVoice'))
+      g_sounds.getChannel(AudioChannels.Gui):setEnabled(value and ClientOptions.getOption('enableSoundGui'))
       if value then
         audioButton:setIcon('/images/ui/top_menu/audio')
         audioButton:setOn(true)
@@ -446,6 +452,26 @@ function ClientOptions.setOption(key, value, force)
   elseif key == 'soundEffectVolume' then
     if g_sounds then
       ClientAudio.setEffectVolume(value / 100)
+    end
+
+  elseif key == 'enableSoundVoice' then
+    if g_sounds then
+      g_sounds.getChannel(AudioChannels.Voice):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    end
+
+  elseif key == 'soundVoiceVolume' then
+    if g_sounds then
+      ClientAudio.setVoiceVolume(value / 100)
+    end
+
+  elseif key == 'enableSoundGui' then
+    if g_sounds then
+      g_sounds.getChannel(AudioChannels.Gui):setEnabled(ClientOptions.getOption('enableAudio') and value)
+    end
+
+  elseif key == 'soundGuiVolume' then
+    if g_sounds then
+      ClientAudio.setGuiVolume(value / 100)
     end
 
   elseif modules.game_interface and key == 'enabledLeftPanels' then

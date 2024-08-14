@@ -24,6 +24,7 @@ local function addButton(id, description, icon, callback, panel, toggle, front)
   end
 
   local button = panel:getChildById(id)
+
   if not button then
     button = g_ui.createWidget(class)
     if front then
@@ -32,6 +33,7 @@ local function addButton(id, description, icon, callback, panel, toggle, front)
       panel:addChild(button)
     end
   end
+
   button:setId(id)
   if type(description) == 'table' then --workaround
     button.loct = description.loct
@@ -41,12 +43,15 @@ local function addButton(id, description, icon, callback, panel, toggle, front)
     button:setTooltip(description)
   end
   button:setIcon(resolvepath(icon, 3))
-  button.onMouseRelease = function(widget, mousePos, mouseButton)
-    if widget:containsPoint(mousePos) and mouseButton ~= MouseMidButton then
+
+  function button:onMouseRelease(pos, button)
+    if self:containsPoint(pos) and button ~= MouseMidButton then
       callback()
+      g_sounds.getChannel(AudioChannels.Gui):play(f('%s/button_2.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
       return true
     end
   end
+
   return button
 end
 

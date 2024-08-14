@@ -128,6 +128,9 @@ function GameHotkeys.show()
   if not g_game.isOnline() then
     return
   end
+
+  local wasOpened = hotkeysWindow:isVisible()
+
   hotkeysWindow:show()
   hotkeysWindow:raise()
   hotkeysWindow:focus()
@@ -136,9 +139,15 @@ function GameHotkeys.show()
     firstChild:focus()
   end
   hotkeysButton:setOn(true)
+
+  if not wasOpened then
+    g_sounds.getChannel(AudioChannels.Gui):play(f('%s/hotkeys_open.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+  end
 end
 
 function GameHotkeys.hide()
+  local wasOpened = hotkeysWindow:isVisible()
+
   hotkeysWindow:hide()
   hotkeysButton:setOn(false)
 
@@ -151,6 +160,10 @@ function GameHotkeys.hide()
   if hotkeysOverwriteWindow then
     hotkeysOverwriteWindow:destroy()
     hotkeysOverwriteWindow = nil
+  end
+
+  if wasOpened then
+    g_sounds.getChannel(AudioChannels.Gui):play(f('%s/hotkeys_close.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   end
 end
 

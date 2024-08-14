@@ -54,6 +54,8 @@ end
 function UIPowerButton:onDragEnter(mousePos)
   g_mouse.pushCursor('target')
   g_mouseicon.display(f('/images/ui/power/%d_off', self.power.id))
+
+  g_sounds.getChannel(AudioChannels.Gui):play(f('%s/power_drag.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   return true
 end
 

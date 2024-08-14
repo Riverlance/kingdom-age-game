@@ -31,23 +31,23 @@ local hasLoggedOnce = false
 
 
 
-local function onLocalCheckBoxChange(self, value)
+local function onLocalCheckBoxChange(self, value, oldValue)
   tempIp = value and ClientEnterGame.localIp or ClientEnterGame.clientIp
 
   ClientEnterGame.setUniqueServer(tempIp, tempPort, tempProtocolVersion)
 end
 
-local function onDevCheckBoxChange(self, value)
+local function onDevCheckBoxChange(self, value, oldValue)
   tempPort = value and '7175' or '7171'
 
   ClientEnterGame.setUniqueServer(tempIp, tempPort, tempProtocolVersion)
 end
 
-local function onDrawBoxesCheckBoxChange(self, value)
+local function onDrawBoxesCheckBoxChange(self, value, oldValue)
   draw_debug_boxes(value)
 end
 
-local function onHideMapCheckBoxChange(self, value)
+local function onHideMapCheckBoxChange(self, value, oldValue)
   if value then
     hide_map()
   else

@@ -3,7 +3,7 @@ Panel
   OptionCheckBox
     id: enableAudio
     !text: tr('Enable audio')
-    !tooltip: tr('Allows music, ambient sounds and effect sounds to be enabled.')
+    !tooltip: tr('Allows music and ambient/effect/voice/GUI sounds to be enabled.')
     !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
@@ -56,6 +56,42 @@ Panel
 
   OptionScrollbar
     id: soundEffectVolume
+    minimum: 0
+    maximum: 100
+    symbol: %
+
+  OptionHorizontalSeparator
+
+  OptionCheckBox
+    id: enableSoundVoice
+    !text: tr('Enable voice sounds')
+    $!first:
+      margin-top: 10
+
+  OptionLabel
+    id: soundVoiceVolumeLabel
+    !text: tr('Voice sounds volume')
+
+  OptionScrollbar
+    id: soundVoiceVolume
+    minimum: 0
+    maximum: 100
+    symbol: %
+
+  OptionHorizontalSeparator
+
+  OptionCheckBox
+    id: enableSoundGui
+    !text: tr('Enable GUI sounds')
+    $!first:
+      margin-top: 10
+
+  OptionLabel
+    id: soundGuiVolumeLabel
+    !text: tr('GUI sounds volume')
+
+  OptionScrollbar
+    id: soundGuiVolume
     minimum: 0
     maximum: 100
     symbol: %

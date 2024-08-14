@@ -131,29 +131,32 @@ function UIMiniWindow:setup(button)
     end
 
   local minimizeButton = self:getChildById('minimizeButton')
-  minimizeButton.onClick =
-    function()
-      if self:isLocked() then
-        return
-      end
-
-      if self:isOn() then
-        self:maximize()
-      else
-        self:minimize()
-      end
+  minimizeButton.onClick = function()
+    if self:isLocked() then
+      return
     end
 
-  self:getChildById('lockButton').onClick =
-    function()
-      if self:isLocked() then
-        self:unlock()
-      else
-        self:lock()
-      end
+    if self:isOn() then
+      self:maximize()
+    else
+      self:minimize()
     end
+  end
 
-  self:getChildById('miniwindowTopBar').onDoubleClick = minimizeButton.onClick
+  self:getChildById('lockButton').onClick = function()
+    if self:isLocked() then
+      self:unlock()
+    else
+      self:lock()
+    end
+  end
+
+  self:getChildById('miniwindowTopBar').onDoubleClick = function()
+    minimizeButton.onClick()
+
+    g_sounds.getChannel(AudioChannels.Gui):play(f('%s/button_1.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+  end
+
 
   if button then
     self.topMenuButton = button

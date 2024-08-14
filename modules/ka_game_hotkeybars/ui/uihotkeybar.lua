@@ -80,6 +80,7 @@ end
 
 function UIHotkeyBar:toggle()
   self:setup(not self.visibilityButton:isOn())
+  g_sounds.getChannel(AudioChannels.Gui):play(f('%s/hotkeybar.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
 end
 
 function UIHotkeyBar:setHighlight(highlight)
@@ -289,6 +290,9 @@ function UIHotkeyBar:onDrop(widget, mousePos)
   local keySettings = self.tempContainer.settings
   if keySettings.keyCombo then
     self:onAssignHotkey(keySettings, true)
+    if keySettings.powerId then
+      g_sounds.getChannel(AudioChannels.Gui):play(f('%s/power_drop.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+    end
   else
     self.tempContainer.locked = true
     GameHotkeys.assignHotkey(keySettings)

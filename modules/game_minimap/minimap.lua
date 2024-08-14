@@ -262,6 +262,7 @@ function GameMinimap.toggleFullMap()
     infoLabel:setMarginTop(3)
 
     minimapWidget:setZoom(minimapWidget.zoomFullmap)
+    g_sounds.getChannel(AudioChannels.Gui):play(f('%s/fullmap_open.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   else
     minimapWindow:show()
     minimapBackgroundWidget:addAnchor(AnchorTop, 'parent', AnchorTop)
@@ -283,6 +284,7 @@ function GameMinimap.toggleFullMap()
     infoLabel:setMarginTop(0)
 
     minimapWidget:setZoom(minimapWidget.zoomMinimap)
+    g_sounds.getChannel(AudioChannels.Gui):play(f('%s/fullmap_close.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   end
 
   -- Update camera position

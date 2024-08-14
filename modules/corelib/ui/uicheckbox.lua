@@ -16,6 +16,10 @@ function UICheckBox:onMouseRelease(mousePos, mouseButton)
   if g_tooltip then
     g_tooltip.onWidgetMouseRelease(self, mousePos, mouseButton)
   end
+
+  g_sounds.getChannel(AudioChannels.Gui):play(f('%s/mouse_click.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+
+  return self:isPressed()
 end
 
 function UICheckBox:onDestroy()

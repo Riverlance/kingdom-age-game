@@ -135,6 +135,9 @@ function UIComboBox:onMousePress(mousePos, mouseButton)
   })
 
   self:setOn(true)
+
+  g_sounds.getChannel(AudioChannels.Gui):play(f('%s/mouse_click.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+
   return true
 end
 
