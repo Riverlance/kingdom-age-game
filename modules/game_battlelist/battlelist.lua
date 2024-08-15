@@ -701,14 +701,10 @@ end
 
 function GameBattleList.onPositionChange(creature, pos, oldPos)
   local button = battleList[creature:getId()]
-  if button then
-    button:setOn(GameInterface.getMapPanel():isInRange(pos))
-  end
-
   local posCheck = g_clock.millis()
   local diffTime = posCheck - lastPosCheck
 
-  if creature:isLocalPlayer() or (GameBattleList.getSortType() == SortType.Distance and diffTime > posUpdateDelay) then
+  if creature:isLocalPlayer() or (GameBattleList.getSortType() == SortType.Distance and diffTime > posUpdateDelay) or (button and not button:isOn() and GameInterface.getMapPanel():isInRange(pos)) then
     GameBattleList.updateList()
     lastPosCheck = posCheck
   end
