@@ -6,7 +6,7 @@ local background
 -- local particles
 local clientVersionLabel
 
-local musicFilename = '/audios/startup'
+local musicFilename = '/audios/music/quest/nox/shell'
 local musicChannel
 
 if g_sounds then
