@@ -1111,7 +1111,6 @@ function GameConsole.sendMessage(message, tab)
       speaktypedesc = 'privatePlayerToPlayer'
     end
 
-
     local speaktype = SpeakTypesSettings[speaktypedesc]
     g_game.talkPrivate(speaktype.speakType, name, message)
 
@@ -1246,12 +1245,20 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
   local composedMessage = GameConsole.applyMessagePrefixies(name, level, message)
 
   if speaktype.private then
+    local tab     = GameConsole.getCurrentTab()
+    local tabText = tab:getText()
+
     GameConsole.addPrivateText(composedMessage, speaktype, name, false, name)
-    if ClientOptions.getOption('showPrivateMessagesOnScreen') and speaktype ~= SpeakTypesSettings.privateNpcToPlayer then
-      if modules.game_textmessage then
-        GameTextMessage.displayPrivateMessage(name .. ':\n' .. message)
+
+    -- Current tab is not from the player that you received the message
+    if tabText ~= name and (not clonedTab or clonedTab:getText() ~= name) and speaktype ~= SpeakTypesSettings.privateNpcToPlayer then
+      g_sounds.getChannel(AudioChannels.Gui):play(f('%s/msg_private.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+
+      if ClientOptions.getOption('showPrivateMessagesOnScreen') and modules.game_textmessage then
+        GameTextMessage.displayPrivateMessage(f('%s:\n%s', name, message))
       end
     end
+
   else
     local channel = tr('Default')
     if not defaultMessage then
