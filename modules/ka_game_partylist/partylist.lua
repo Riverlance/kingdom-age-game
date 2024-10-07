@@ -1,4 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GamePartyList = { }
+
+
+
+local GamePartyListActionKey = 'Ctrl+P'
 
 
 
@@ -19,8 +25,8 @@ partyPanel = nil
 inviteePanel = nil
 
 inviteeLabel = nil
-partyLabel = nil
 separator = nil
+partyLabel = nil
 
 mouseWidget = nil
 lastButtonSwitched = nil
@@ -60,19 +66,19 @@ SortOrderAscending  = 1
 SortOrderDescending = 2
 
 SortTypeStr = {
-  [SortTypeHierarchy] = 'Hierarchy',
-  [SortTypeAppear]    = 'Display Time',
-  [SortTypeDistance]  = 'Distance',
-  [SortTypeHealth]    = 'Hitpoints',
-  [SortTypeMana]      = 'Manapoints',
-  [SortTypeVigor]     = 'Vigorpoints',
-  [SortTypeName]      = 'Name',
-  [SortTypePing]      = 'Ping',
+  [SortTypeHierarchy] = loc'${GamePartyListSortTypeHierarchy}',
+  [SortTypeAppear]    = loc'${GamePartyListSortTypeDisplayTime}',
+  [SortTypeDistance]  = loc'${CorelibInfoDistance}',
+  [SortTypeHealth]    = loc'${GamePartyListSortTypeHitPoints}',
+  [SortTypeMana]      = loc'${GamePartyListSortTypeManaPoints}',
+  [SortTypeVigor]     = loc'${GamePartyListSortTypeVigorPoints}',
+  [SortTypeName]      = loc'${CorelibInfoName}',
+  [SortTypePing]      = loc'${GamePartyListSortTypePing}',
 }
 
 SortOrderStr = {
-  [SortOrderAscending]  = 'Ascending',
-  [SortOrderDescending] = 'Descending',
+  [SortOrderAscending]  = loc'${CorelibInfoAscending}',
+  [SortOrderDescending] = loc'${CorelibInfoDescending}',
 }
 
 local defaultValues = {
@@ -143,13 +149,13 @@ function GamePartyList.init()
   g_ui.importStyle('partylevelcalculatorwindow')
 
   partyWindow = g_ui.loadUI('partylist')
-  partyTopMenuButton = ClientTopMenu.addRightGameToggleButton('partyTopMenuButton', tr('Party List') .. ' (Ctrl+P)', '/images/ui/top_menu/party_list', GamePartyList.toggle)
+  partyTopMenuButton = ClientTopMenu.addRightGameToggleButton('partyTopMenuButton', { loct = '${GamePartyListWindowTitle} (${GamePartyListActionKey})', locpar = { GamePartyListActionKey = GamePartyListActionKey } }, '/images/ui/top_menu/party_list', GamePartyList.toggle)
 
   partyWindow.topMenuButton = partyTopMenuButton
 
   partyHeader = partyWindow:getChildById('miniWindowHeader')
 
-  g_keyboard.bindKeyDown('Ctrl+P', GamePartyList.toggle)
+  g_keyboard.bindKeyDown(GamePartyListActionKey, GamePartyList.toggle)
 
   partyWindow:setScrollBarAutoHiding(false)
 
@@ -159,8 +165,8 @@ function GamePartyList.init()
   inviteePanel = contentsPanel:getChildById('inviteePanel')
 
   inviteeLabel = contentsPanel:getChildById('inviteeLabel')
-  partyLabel   = contentsPanel:getChildById('separator')
-  separator    = contentsPanel:getChildById('partyLabel')
+  separator    = contentsPanel:getChildById('separator')
+  partyLabel   = contentsPanel:getChildById('partyLabel')
 
   mouseWidget = g_ui.createWidget('UIButton')
   mouseWidget:setVisible(false)
@@ -207,7 +213,7 @@ function GamePartyList.init()
   GamePartyList.onClickFilterWizardPlayers(filterWizardPlayersButton)
   GamePartyList.onClickFilterBardPlayers(filterBardPlayersButton)
 
-  partyLevelCalculatorButton = ClientTopMenu.addLeftButton('partyLevelCalculatorButton', tr('Party Level Calculator'), '/images/ui/top_menu/party_level_calculator', GamePartyList.partyLevelCalculatorWindowToggle)
+  partyLevelCalculatorButton = ClientTopMenu.addLeftButton('partyLevelCalculatorButton', loc'${GamePartyListLevelCalculatorWindowTitle}', '/images/ui/top_menu/party_level_calculator', GamePartyList.partyLevelCalculatorWindowToggle)
   GamePartyList.partyLevelCalculatorWindowHide()
 
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePartyList, GamePartyList.parsePartyList)
@@ -247,7 +253,7 @@ function GamePartyList.terminate()
 
   -- Window
 
-  g_keyboard.unbindKeyDown('Ctrl+P')
+  g_keyboard.unbindKeyDown(GamePartyListActionKey)
 
   partyTopMenuButton:destroy()
   partyWindow:destroy()
@@ -537,12 +543,12 @@ function GamePartyList.onButtonMouseRelease(self, mousePosition, mouseButton)
         if localPlayer:isPartyMember() then
           if localPlayer:isPartyLeader() then
             if localPlayer:isPartySharedExperienceActive() then
-              menu:addOption(tr('Disable shared XP'), function() g_game.partyShareExperience(false) end)
+              menu:addOption(loc'${GamePartyListInfoDisableSharedXP}', function() g_game.partyShareExperience(false) end)
             else
-              menu:addOption(tr('Enable shared XP'), function() g_game.partyShareExperience(true) end)
+              menu:addOption(loc'${GamePartyListInfoEnableSharedXP}', function() g_game.partyShareExperience(true) end)
             end
           end
-          menu:addOption(tr('Leave party'), function() g_game.partyLeave() end)
+          menu:addOption(loc'${GamePartyListInfoLeaveParty}', function() g_game.partyLeave() end)
         end
 
       -- Other player
@@ -553,13 +559,13 @@ function GamePartyList.onButtonMouseRelease(self, mousePosition, mouseButton)
 
         if localPlayerShield == ShieldWhiteYellow then
           if creatureShield == ShieldWhiteBlue then
-            menu:addOption(tr('Revoke %s\'s invitation', self.name), function() g_game.partyRevokeInvitation(self.cid) end)
+            menu:addOption(f(loc'${GamePartyListInfoRevokeInvitation}', self.name), function() g_game.partyRevokeInvitation(self.cid) end)
           end
         elseif localPlayerShield == ShieldYellow or localPlayerShield == ShieldYellowSharedExp or localPlayerShield == ShieldYellowNoSharedExpBlink or localPlayerShield == ShieldYellowNoSharedExp then
           if creatureShield == ShieldWhiteBlue then
-            menu:addOption(tr('Revoke %s\'s invitation', self.name), function() g_game.partyRevokeInvitation(self.cid) end)
+            menu:addOption(f(loc'${GamePartyListInfoRevokeInvitation}', self.name), function() g_game.partyRevokeInvitation(self.cid) end)
           elseif creatureShield == ShieldBlue or creatureShield == ShieldBlueSharedExp or creatureShield == ShieldBlueNoSharedExpBlink or creatureShield == ShieldBlueNoSharedExp then
-            menu:addOption(tr('Pass leadership to %s', self.name), function() g_game.partyPassLeadership(self.cid) end)
+            menu:addOption(f(loc'${GamePartyListInfoPassLeadership}', self.name), function() g_game.partyPassLeadership(self.cid) end)
           end
         end
       end
@@ -567,7 +573,7 @@ function GamePartyList.onButtonMouseRelease(self, mousePosition, mouseButton)
 
     menu:addSeparator()
 
-    menu:addOption(tr('Copy name'), function() g_window.setClipboardText(self.name) end)
+    menu:addOption(loc'${GamePartyListInfoCopyName}', function() g_window.setClipboardText(self.name) end)
 
     menu:display(menuPosition)
 
@@ -686,7 +692,7 @@ end
 
 function GamePartyList.setSortType(state)
   g_settings.setValue('PartyList', 'sortType', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', SortTypeStr[state] or '', SortOrderStr[GamePartyList.getSortOrder()] or ''))
+  sortMenuButton:setTooltip(f(loc'${CorelibInfoSortBy}: %s (%s)', SortTypeStr[state] or '', SortOrderStr[GamePartyList.getSortOrder()] or ''))
   GamePartyList.updateMemberList()
 end
 
@@ -696,7 +702,7 @@ end
 
 function GamePartyList.setSortOrder(state)
   g_settings.setValue('PartyList', 'sortOrder', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', SortTypeStr[GamePartyList.getSortType()] or '', SortOrderStr[state] or ''))
+  sortMenuButton:setTooltip(f(loc'${CorelibInfoSortBy}: %s (%s)', SortTypeStr[GamePartyList.getSortType()] or '', SortOrderStr[state] or ''))
   GamePartyList.updateMemberList()
 end
 
@@ -707,36 +713,36 @@ function GamePartyList.createSortMenu() -- todo
   local sortType  = GamePartyList.getSortType()
 
   if sortOrder == SortOrderAscending then
-    menu:addOption(tr('%s Order', SortOrderStr[SortOrderDescending]), function() GamePartyList.setSortOrder(SortOrderDescending) end)
+    menu:addOption(f(loc'${GamePartyListInfoOrder}', SortOrderStr[SortOrderDescending]), function() GamePartyList.setSortOrder(SortOrderDescending) end)
   elseif sortOrder == SortOrderDescending then
-    menu:addOption(tr('%s Order', SortOrderStr[SortOrderAscending]), function() GamePartyList.setSortOrder(SortOrderAscending) end)
+    menu:addOption(f(loc'${GamePartyListInfoOrder}', SortOrderStr[SortOrderAscending]), function() GamePartyList.setSortOrder(SortOrderAscending) end)
   end
 
   menu:addSeparator()
 
   if sortType ~= SortTypeHierarchy then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeHierarchy]), function() GamePartyList.setSortType(SortTypeHierarchy) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypeHierarchy]), function() GamePartyList.setSortType(SortTypeHierarchy) end)
   end
   if sortType ~= SortTypeAppear then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeAppear]), function() GamePartyList.setSortType(SortTypeAppear) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypeAppear]), function() GamePartyList.setSortType(SortTypeAppear) end)
   end
   if sortType ~= SortTypeDistance then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeDistance]), function() GamePartyList.setSortType(SortTypeDistance) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypeDistance]), function() GamePartyList.setSortType(SortTypeDistance) end)
   end
   if sortType ~= SortTypeHealth then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeHealth]), function() GamePartyList.setSortType(SortTypeHealth) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypeHealth]), function() GamePartyList.setSortType(SortTypeHealth) end)
   end
   if sortType ~= SortTypeMana then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeMana]), function() GamePartyList.setSortType(SortTypeMana) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypeMana]), function() GamePartyList.setSortType(SortTypeMana) end)
   end
   if sortType ~= SortTypeVigor then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeVigor]), function() GamePartyList.setSortType(SortTypeVigor) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypeVigor]), function() GamePartyList.setSortType(SortTypeVigor) end)
   end
   if sortType ~= SortTypeName then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypeName]), function() GamePartyList.setSortType(SortTypeName) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypeName]), function() GamePartyList.setSortType(SortTypeName) end)
   end
   if sortType ~= SortTypePing then
-    menu:addOption(tr('Sort by %s', SortTypeStr[SortTypePing]), function() GamePartyList.setSortType(SortTypePing) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', SortTypeStr[SortTypePing]), function() GamePartyList.setSortType(SortTypePing) end)
   end
 
   menu:display()
@@ -879,7 +885,7 @@ function GamePartyList.clearList()
 
   GamePartyList.updateInviteeList() -- Necessary to disable invitee widgets when invitee is empty
 
-  infoButton:setTooltip(tr('You are not in party.'), TooltipType.textBlock)
+  infoButton:setTooltip(loc'${GamePartyListInfoNotInParty}', TooltipType.textBlock)
 end
 
 function GamePartyList.refreshList()
@@ -1205,7 +1211,7 @@ serverSignals[PARTYLIST_SERVERSIGNAL_SENDEXTRAEXPERIENCETOOLTIP] = function(msg)
   local extraExperienceTooltip = msg:getString()
   local extraExperienceValue   = msg:getDouble()
 
-  infoButton:setTooltip(extraExperienceValue > 0 and tr(extraExperienceTooltip, extraExperienceValue) or tr('You have no partners in your party yet.'), TooltipType.textBlock)
+  infoButton:setTooltip(extraExperienceValue > 0 and f(extraExperienceTooltip, extraExperienceValue) or loc'${GamePartyListInfoNoPartners}', TooltipType.textBlock)
 end
 
 function GamePartyList.parsePartyList(protocol, msg)
@@ -1304,8 +1310,8 @@ function GamePartyList.onLevelTextEditChange(self)
   if number and number > 0 then
     local minLevel = math.ceil((number * 2) / 3)
     local maxLevel = math.floor((number * 3) / 2)
-    levelLabel:setText(tr('The required level range to be able to enable the shared experience in party is between %d and %d.', minLevel, maxLevel))
+    levelLabel:setText(f(loc'${GamePartyListInfoSharedExpLevelRange}', minLevel, maxLevel))
   else
-    levelLabel:setText(tr('Type a level.'))
+    levelLabel:setText(loc'${GamePartyListTypeLevel}')
   end
 end

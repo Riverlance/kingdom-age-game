@@ -38,7 +38,7 @@ MainWindow
 
   MenuLabel
     id: menuLabelAccountName
-    !text: tr('Account')
+    &loc: '${EnterGameAccountLabel}'
     color: #c9bdab
     anchors.verticalCenter: accountNameBackground.verticalCenter
     anchors.left: accountNameBackground.left
@@ -62,7 +62,7 @@ MainWindow
 
   MenuLabel
     id: menuLabelPassword
-    !text: tr('Password')
+    &loc: '${EnterGamePasswordLabel}'
     color: #c9bdab
     anchors.verticalCenter: accountPasswordBackground.verticalCenter
     anchors.left: menuLabelAccountName.left
@@ -76,8 +76,8 @@ MainWindow
 
   CheckBox
     id: rememberPasswordBox
-    !text: tr('Remember')
-    !tooltip: tr('Remember account and password when starts client')
+    &loc: '${EnterGamePasswordRememberCheckBox}'
+    &loct: '${EnterGamePasswordRememberTooltip}'
     color: #c9bdab
     anchors.top: accountPasswordBackground.outsideBottom
     anchors.left: menuLabelAccountName.left
@@ -88,8 +88,8 @@ MainWindow
   CheckBox
     id: autoLoginBox
     enabled: false
-    !text: tr('Auto Login')
-    !tooltip: tr('Open charlist automatically when starting client')
+    &loc: '${EnterGameAutoLoginCheckBox}'
+    &loct: '${EnterGameAutoLoginTooltip}'
     color: #c9bdab
     anchors.top: prev.bottom
     anchors.left: prev.left
@@ -97,7 +97,7 @@ MainWindow
     margin-top: 8
 
   LightButton
-    !text: tr('Enter')
+    &loc: '${EnterGameEnterButton}'
     width: 64
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter

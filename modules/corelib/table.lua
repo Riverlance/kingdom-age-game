@@ -484,5 +484,7 @@ end
 -- Format
 
 function table.list(t, sep)
-  return (table.concat(t, sep or ', '):gsub(', ([^,]+)$', ' ' .. (tr and tr('and') or 'and') .. ' %1')) -- Return only first return parameter of table.concat (like '1, 2 and 3')
+  -- e.g, 'A, B and C'
+  sep = sep or ','
+  return (table.concat(t, f('%s ', sep)):gsub(f('%s ([^%s]+)$', sep, sep), f(' %s %%1', loc'${CorelibInfoAnd}'))) -- Return first value of gsub only
 end

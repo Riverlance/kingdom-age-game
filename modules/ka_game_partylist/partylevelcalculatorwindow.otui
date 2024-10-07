@@ -1,6 +1,6 @@
 PartyLevelCalculatorWindow < MainWindow
   id: partyLevelCalculatorWindow
-  !text: tr('Party Level Calculator')
+  &loc: '${GamePartyListLevelCalculatorWindowTitle}'
   size: 250 150
   @onEscape: |
     GamePartyList.partyLevelCalculatorWindowHide()
@@ -15,7 +15,7 @@ PartyLevelCalculatorWindow < MainWindow
 
   Label
     id: levelLabel
-    !tooltip: tr('Type a level for calculate the required level range to be able to enable the shared experience in party.')
+    &loct: '${GamePartyListTypeLevelForCalculate}'
     !tooltip-type: TooltipType.textBlock
     text-wrap: true
     text-auto-resize: true
@@ -28,7 +28,7 @@ PartyLevelCalculatorWindow < MainWindow
 
   Button
     id: closeButton
-    !text: tr('Close')
+    &loc: '${CorelibInfoClose}'
     anchors.bottom: parent.bottom
     anchors.right: parent.right
     width: 80

@@ -12,7 +12,6 @@ Module
   load-later:
     - client_styles
     - client_shader
-    - client_locales
     - client_topmenu
     - client_background
     - client_options

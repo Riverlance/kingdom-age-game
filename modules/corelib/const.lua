@@ -331,20 +331,6 @@ NetworkMessageTypes = {
   Table = 8,
 }
 
-Locale = {
-  En = 1,
-  Pt = 2,
-  Es = 3,
-  De = 4,
-  Pl = 5,
-  Sv = 6,
-}
-Locale.First = Locale.En
-Locale.Last  = Locale.Sv
-
-InstalledLocales = { }
-DefaultLocaleId  = Locale.En
-
 ScreenRangeX = 12
 ScreenRangeY = 9
 ScreenRangeZ = 16
@@ -475,10 +461,10 @@ TooltipType = {
 -- ViewModes
 
 ViewModes = {
-  [0] = { id = 0, isCropped = false, isFull = false, name = 'Normal' },
-  [1] = { id = 1, isCropped = true,  isFull = false, name = 'Crop' },
-  [2] = { id = 2, isCropped = true,  isFull = true,  name = 'Crop Full' },
-  [3] = { id = 3, isCropped = false, isFull = true,  name = 'Full' }, -- Default
+  [0] = { id = 0, isCropped = false, isFull = false, name = loc'${CorelibViewModeNormal}' },
+  [1] = { id = 1, isCropped = true,  isFull = false, name = loc'${CorelibViewModeCrop}' },
+  [2] = { id = 2, isCropped = true,  isFull = true,  name = loc'${CorelibViewModeCropFull}' },
+  [3] = { id = 3, isCropped = false, isFull = true,  name = loc'${CorelibViewModeFull}' }, -- Default
 }
 
 -- Panel
@@ -489,10 +475,10 @@ GameSidePanelWidthOffset = 19 -- Minimum width
 -- PanelStickers
 
 PanelStickers = {
-  [1] = { opt = 'None',      path = '' },
-  [2] = { opt = 'Sticker 1', path = '/images/ui/sticker/sticker_1' },
-  [3] = { opt = 'Sticker 2', path = '/images/ui/sticker/sticker_2' },
-  [4] = { opt = 'Sticker 3', path = '/images/ui/sticker/sticker_3' },
-  [5] = { opt = 'Sticker 4', path = '/images/ui/sticker/sticker_4' },
-  [6] = { opt = 'Sticker 5', path = '/images/ui/sticker/sticker_5' }
+  [1] = { opt = loc'${CorelibInfoNone}',                  path = '' },
+  [2] = { opt = f(loc'${CorelibPanelStickerOptions}', 1), path = '/images/ui/sticker/sticker_1' },
+  [3] = { opt = f(loc'${CorelibPanelStickerOptions}', 2), path = '/images/ui/sticker/sticker_2' },
+  [4] = { opt = f(loc'${CorelibPanelStickerOptions}', 3), path = '/images/ui/sticker/sticker_3' },
+  [5] = { opt = f(loc'${CorelibPanelStickerOptions}', 4), path = '/images/ui/sticker/sticker_4' },
+  [6] = { opt = f(loc'${CorelibPanelStickerOptions}', 5), path = '/images/ui/sticker/sticker_5' }
 }

@@ -29,7 +29,7 @@ function ClientAddServer.add()
 
   local added, error = ClientServerList.add(host, port, protocol)
   if not added then
-    displayErrorBox(tr('Error'), tr(error))
+    displayErrorBox(loc'${CorelibInfoError}', error)
   else
     ClientAddServer.hide()
   end

@@ -5,6 +5,6 @@ Module
   website: https://github.com/edubart/otclient
   sandboxed: true
   scripts: [ options ]
-  dependencies: [ client_locales, client_topmenu ]
+  dependencies: [ client_topmenu ]
   @onLoad: ClientOptions.init()
   @onUnload: ClientOptions.terminate()

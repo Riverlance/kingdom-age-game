@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameContainers = { }
 
 
@@ -82,7 +84,7 @@ function GameContainers.refreshContainerPages(container)
 
   local currentPage = 1 + math.floor(container:getFirstIndex() / container:getCapacity())
   local pages       = 1 + math.floor(math.max(0, (container:getSize() - 1)) / container:getCapacity())
-  pagePanel:getChildById('pageLabel'):setText(tr('Page %d of %d', currentPage, pages))
+  pagePanel:getChildById('pageLabel'):setText(f(loc'${GameContainersCurrentPage}', currentPage, pages))
 
   local prevPageButton = pagePanel:getChildById('prevPageButton')
   if currentPage == 1 then
@@ -194,7 +196,7 @@ function GameContainers.onContainerOpen(container, previousContainer)
     g_game.openParent(container)
   end
   upArrowMenuButton:setVisible(container:hasParent())
-  upArrowMenuButton:setTooltip(tr('Back'))
+  upArrowMenuButton:setTooltip(loc'${GameContainersArrowUpButton}')
 
   -- Set item widget
   local containerItemWidget = containerWindow:getChildById('containerItemWidget')
@@ -204,11 +206,10 @@ function GameContainers.onContainerOpen(container, previousContainer)
   -- Set item name
 
   local name = container:getName()
-  name = name:sub(1,1):upper() .. name:sub(2)
+  name       = f('%s%s', name:sub(1, 1):upper(), name:sub(2))
 
   if #name > 11 then
-    name = string.sub(name, 1, #name - 3)
-    name = name .. "..."
+    name = f('%s%s', name:sub(1, #name - 3), '...')
   end
 
   containerWindow:setText(name)
@@ -230,7 +231,7 @@ function GameContainers.onContainerOpen(container, previousContainer)
   end
 
   -- Update container's window and itemsPanel
-  container.window = containerWindow
+  container.window     = containerWindow
   container.itemsPanel = contentsPanel
 
   -- Update pages bar

@@ -1,6 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameQuestLog = { }
 
 
+
+local GameQuestLogActionKey = 'Ctrl+Q'
 
 questLogButton = nil
 questLineWindow = nil
@@ -15,12 +19,12 @@ QUEST_CATEGORY_MONTHLY   = 5
 QUEST_CATEGORY_GUILD     = 6
 
 QUESTS_CATEGORIESNAMES = {
-  [QUEST_CATEGORY_MAIN]      = 'Main',
-  [QUEST_CATEGORY_SIDEQUEST] = 'Side Quest',
-  [QUEST_CATEGORY_DAILY]     = 'Daily',
-  [QUEST_CATEGORY_WEEKLY]    = 'Weekly',
-  [QUEST_CATEGORY_MONTHLY]   = 'Monthly',
-  [QUEST_CATEGORY_GUILD]     = 'Guild',
+  [QUEST_CATEGORY_MAIN]      = loc'${GameQuestLogMain}',
+  [QUEST_CATEGORY_SIDEQUEST] = loc'${GameQuestLogSide}',
+  [QUEST_CATEGORY_DAILY]     = loc'${GameQuestLogDaily}',
+  [QUEST_CATEGORY_WEEKLY]    = loc'${GameQuestLogWeekly}',
+  [QUEST_CATEGORY_MONTHLY]   = loc'${GameQuestLogMonthly}',
+  [QUEST_CATEGORY_GUILD]     = loc'${GameQuestLogGuild}',
 }
 
 
@@ -32,17 +36,17 @@ function GameQuestLog.init()
   g_ui.importStyle('questlogwindow')
   g_ui.importStyle('questlinewindow')
 
-  questLogButton = ClientTopMenu.addLeftGameButton('questLogButton', tr('Quest Log') .. ' (Ctrl+Q)', '/images/ui/top_menu/questlog', GameQuestLog.toggle)
+  questLogButton = ClientTopMenu.addLeftGameButton('questLogButton', { loct = '${GameQuestLogWindowTitle} (${GameQuestLogActionKey})', locpar = { GameQuestLogActionKey = GameQuestLogActionKey } }, '/images/ui/top_menu/questlog', GameQuestLog.toggle)
 
   connect(g_game, {
     onGameEnd = GameQuestLog.destroyWindows
   })
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeQuestLog, GameQuestLog.parseQuestLog)
-  g_keyboard.bindKeyDown('Ctrl+Q', GameQuestLog.toggle)
+  g_keyboard.bindKeyDown(GameQuestLogActionKey, GameQuestLog.toggle)
 end
 
 function GameQuestLog.terminate()
-  g_keyboard.unbindKeyDown('Ctrl+Q')
+  g_keyboard.unbindKeyDown(GameQuestLogActionKey)
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeQuestLog)
   disconnect(g_game, {
     onGameEnd = GameQuestLog.destroyWindows
@@ -206,7 +210,7 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
           end
         end
 
-        displayCustomBox('Quest Teleport', 'Are you sure that you want to teleport?', {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
+        displayCustomBox(loc'${GameQuestLogDialogTeleportTitle}', loc'${GameQuestLogDialogTeleportMsg}', {{ text = loc'${CorelibInfoYes}', buttonCallback = buttonCallback }}, 1, loc'${CorelibInfoNo}', onCancelCallback, nil)
         GameQuestLog.setTeleportLock(true)
       end
     end
@@ -217,7 +221,7 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
   if row.experience >= 1 then
     rewardExperienceLabel:setVisible(true)
     rewardExperienceValueLabel:setVisible(true)
-    rewardExperienceValueLabel:setText(tr(row.experience) .. ' ' .. tr('XP'))
+    rewardExperienceValueLabel:setText(f('%s XP', loc(row.experience)))
   else
     rewardExperienceLabel:setVisible(false)
     rewardExperienceValueLabel:setVisible(false)
@@ -226,7 +230,7 @@ function GameQuestLog.updateLayout(window, questId, missionId, row)
   if row.money >= 1 then
     rewardMoneyLabel:setVisible(true)
     rewardMoneyValueLabel:setVisible(true)
-    rewardMoneyValueLabel:setText(tr(row.money) .. ' ' .. tr('GPs'))
+    rewardMoneyValueLabel:setText(f('%s GPs', loc(row.money)))
   else
     rewardMoneyLabel:setVisible(false)
     rewardMoneyValueLabel:setVisible(false)
@@ -358,7 +362,7 @@ function GameQuestLog.onGameQuestLog(quests)
 
     local questMainDataLabel = g_ui.createWidget('QuestDataLabel', questLabel)
     questMainDataLabel:addAnchor(AnchorRight, 'parent', AnchorRight)
-    questMainDataLabel:setText('[' .. quest.categoryName .. ']'  .. (quest.minLevel > 1 and ' [Lv ' .. quest.minLevel .. ']' or ''))
+    questMainDataLabel:setText(f('[%s]%s', quest.categoryName, quest.minLevel > 1 and f(loc' [${GameQuestLogInfoLevel}]', quest.minLevel) or ''))
     questLabel.mainDataLabel = questMainDataLabel
 
     GameQuestLog.onRowUpdate(questLabel)
@@ -430,7 +434,7 @@ function GameQuestLog.onGameQuestLine(questId, missions)
 
     local missionMainDataLabel = g_ui.createWidget('MissionDataLabel', missionLabel)
     missionMainDataLabel:addAnchor(AnchorRight, 'parent', AnchorRight)
-    missionMainDataLabel:setText((mission.minLevel > 1 and '[Lv ' .. mission.minLevel .. ']' or ''))
+    missionMainDataLabel:setText(mission.minLevel > 1 and f(loc' [${GameQuestLogInfoLevel}]', mission.minLevel) or '')
     missionLabel.mainDataLabel = missionMainDataLabel
 
     GameQuestLog.onRowUpdate(missionLabel)

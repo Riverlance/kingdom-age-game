@@ -103,7 +103,7 @@ function UIResizeBorder:onMouseRelease(mousePos, mouseButton)
 end
 
 function UIResizeBorder:onStyleApply(styleName, styleNode)
-  for name,value in pairs(styleNode) do
+  for name, value in pairs(styleNode) do
     if name == 'maximum' then
       self:setMaximum(tonumber(value))
     elseif name == 'minimum' then

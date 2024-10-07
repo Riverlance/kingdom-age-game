@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GamePlayerDeath = { }
 
 
@@ -5,9 +7,9 @@ _G.GamePlayerDeath = { }
 deathWindow = nil
 
 local deathTexts = {
-  regular = { text = 'Alas! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nSimply click on Ok to resume your journeys!', height = 140, width = 0 },
-  unfair = { text = 'Alas! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back\ninto this world in exchange for a small sacrifice.\n\nThis death penalty has been reduced by %i%%.\n\nSimply click on Ok to resume your journeys!', height = 185, width = 0 },
-  blessed = { text = 'Alas! Brave adventurer, you have met a sad fate.\nBut do not despair, for the gods will bring you back into this world.\n\nThis death penalty has been reduced by 100%%.\n\nSimply click on Ok to resume your journeys!', height = 170, width = 90 }
+  regular = { text = loc'${GamePlayerDeathMsgRegular}' },
+  unfair = { text = loc'${GamePlayerDeathMsgUnfair}' },
+  blessed = { text = loc'${GamePlayerDeathMsgBlessed}' }
 }
 
 
@@ -54,7 +56,7 @@ function GamePlayerDeath.displayDeadMessage()
   end
 
   if modules.game_textmessage then
-    GameTextMessage.displayGameMessage(tr('You are dead') .. '.')
+    GameTextMessage.displayGameMessage(loc'${GamePlayerDeathMsgYouAreDead}.')
   end
 end
 
@@ -66,21 +68,14 @@ function GamePlayerDeath.openWindow(deathType, penalty)
 
   deathWindow = g_ui.createWidget('DeathWindow', rootWidget)
 
-  local textLabel = deathWindow:getChildById('labelText')
   if deathType == DeathType.Regular then
     if penalty == 100 then
-      textLabel:setText(tr(deathTexts.regular.text))
-      deathWindow:setHeight(deathWindow.baseHeight + deathTexts.regular.height)
-      deathWindow:setWidth(deathWindow.baseWidth + deathTexts.regular.width)
+      deathWindow:setTooltip(deathTexts.regular.text, TooltipType.textBlock)
     else
-      textLabel:setText(tr(deathTexts.unfair.text, 100 - penalty))
-      deathWindow:setHeight(deathWindow.baseHeight + deathTexts.unfair.height)
-      deathWindow:setWidth(deathWindow.baseWidth + deathTexts.unfair.width)
+      deathWindow:setTooltip(f(deathTexts.unfair.text, 100 - penalty), TooltipType.textBlock)
     end
   elseif deathType == DeathType.Blessed then
-    textLabel:setText(tr(deathTexts.blessed.text))
-    deathWindow:setHeight(deathWindow.baseHeight + deathTexts.blessed.height)
-    deathWindow:setWidth(deathWindow.baseWidth + deathTexts.blessed.width)
+    deathWindow:setTooltip(deathTexts.blessed.text, TooltipType.textBlock)
   end
 
   local okButton = deathWindow:getChildById('buttonOk')

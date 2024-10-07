@@ -1,4 +1,8 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientStyles = { }
+
+
 
 local resourceLoaders = {
   ['otui']   = g_ui.importStyle,

@@ -25,36 +25,37 @@ function live_textures_reload()
   g_textures.liveReload()
 end
 
-local pinging = false
-local function pingBack(ping)
-  if ping < 300 then color = 'green'
-  elseif ping < 600 then color = 'yellow'
-  else color = 'red' end
-  pcolored(g_game.getWorldName() .. ' => ' .. ping .. ' ms', color)
-end
-function ping()
-  if pinging then
-    pcolored('Ping stopped.')
-    g_game.setPingDelay(1000)
-    disconnect(g_game, {
-      onPingBack = pingBack
-    })
-  else
-    if not g_game.isOnline() then
-      pcolored('Ping command is only allowed when online.', 'red')
-      return
-    elseif not g_game.getFeature(GameClientPing) then
-      pcolored('This server does not support ping.', 'red')
-      return
-    end
+do
+  local pinging = false
 
-    pcolored('Starting ping...')
-    g_game.setPingDelay(0)
-    connect(g_game, {
-      onPingBack = pingBack
-    })
+  local function pingBack(ping)
+    pcolored(f(loc'%s => %d ${CorelibInfoMs}', g_game.getWorldName(), ping), ping < 300 and 'green' or ping < 600 and 'yellow' or 'red')
   end
-  pinging = not pinging
+
+  function ping()
+    if pinging then
+      pcolored(loc'${ClientTerminalPingStopped}')
+      g_game.setPingDelay(1000)
+      disconnect(g_game, {
+        onPingBack = pingBack
+      })
+    else
+      if not g_game.isOnline() then
+        pcolored(loc'${ClientTerminalErrorNotOnline}', 'red')
+        return
+      elseif not g_game.getFeature(GameClientPing) then
+        pcolored(loc'${ClientTerminalErrorPingNotSupported}', 'red')
+        return
+      end
+
+      pcolored(loc'${ClientTerminalPingStarting}')
+      g_game.setPingDelay(0)
+      connect(g_game, {
+        onPingBack = pingBack
+      })
+    end
+    pinging = not pinging
+  end
 end
 
 function clear()
@@ -64,7 +65,7 @@ end
 function ls(path)
   path = path or '/'
   local files = g_resources.listDirectoryFiles(path)
-  for k,v in pairs(files) do
+  for _, v in pairs(files) do
     if g_resources.directoryExists(path .. v) then
       pcolored(path .. v, 'blue')
     else
@@ -74,24 +75,24 @@ function ls(path)
 end
 
 function about_version()
-  pcolored(g_app.getName() .. ' ' .. g_app.getVersion() .. '\n' ..
-        'Rev  ' .. g_app.getBuildRevision() .. ' ('.. g_app.getBuildCommit() .. ')\n' ..
-        'Built on ' .. g_app.getBuildDate())
+  pcolored(f("%s %s", g_app.getName(), g_app.getVersion()))
+  pcolored(f(loc'${ClientTerminalAboutVersionRevision}', g_app.getBuildRevision(), g_app.getBuildCommit()))
+  pcolored(f(loc'${ClientTerminalAboutVersionBuilt}', g_app.getBuildDate()))
 end
 
 function about_graphics()
-  pcolored('Vendor ' .. g_graphics.getVendor() )
-  pcolored('Renderer' .. g_graphics.getRenderer())
-  pcolored('Version' .. g_graphics.getVersion())
+  pcolored(f(loc'${ClientTerminalAboutGraphicsVendor}', g_graphics.getVendor()))
+  pcolored(f(loc'${ClientTerminalAboutGraphicsRenderer}', g_graphics.getRenderer()))
+  pcolored(f(loc'${ClientTerminalAboutGraphicsVersion}', g_graphics.getVersion()))
 end
 
 function about_modules()
-  for k,m in pairs(g_modules.getModules()) do
+  for _, m in pairs(g_modules.getModules()) do
     local loadedtext
     if m:isLoaded() then
-      pcolored(m:getName() .. ' => loaded', 'green')
+      pcolored(f(loc'%s => ${ClientTerminalAboutModulesLoaded}', m:getName()), 'green')
     else
-      pcolored(m:getName() .. ' => not loaded', 'red')
+      pcolored(f(loc'%s => ${ClientTerminalAboutModulesNotLoaded}', m:getName()), 'red')
     end
   end
 end

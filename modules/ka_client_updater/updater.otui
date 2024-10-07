@@ -43,8 +43,8 @@ UIWidget
 
   Label
     id: rightText
-    height: 20
-    font: sans-bold-16px
+    height: 28
+    font: delitschantiqua-20px
     color: #f0f0f0
     anchors.verticalCenter: emptyBar.verticalCenter
     anchors.right: emptyBar.right

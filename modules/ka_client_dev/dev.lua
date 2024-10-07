@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientDev = { }
 
 
@@ -56,7 +58,7 @@ local function onHideMapCheckBoxChange(self, value, oldValue)
 end
 
 local function showDebugInfo()
-  developmentWindow:setSize({ width = 275, height = 550 })
+  developmentWindow:setHeight(550)
   debugInfoHorizontalSeparator:show()
   debugInfoLabel:show()
   debugInfoPanel:show()
@@ -66,7 +68,7 @@ local function hideDebugInfo()
   debugInfoPanel:hide()
   debugInfoLabel:hide()
   debugInfoHorizontalSeparator:hide()
-  developmentWindow:setSize({ width = 275, height = 125 })
+  developmentWindow:setHeight(125)
 end
 
 local function onShowDebugInfoCheckBox(self, value)
@@ -86,9 +88,9 @@ local function updateDebugInfoWidgetText(widget, idLabel, classNameLabel, styleN
   local class = widget and widget:getClassName()
   local style = widget and widget:getStyleName()
 
-  idLabel:setText(tr('%s - %s', isParent and 'Parent id' or 'Id', string.exists(id) and id or 'NONE'))
-  classNameLabel:setText(tr('%s - %s', isParent and 'Parent class' or 'Class', string.exists(class) and class or 'NONE'))
-  styleNameLabel:setText(tr('%s - %s', isParent and 'Parent style' or 'Style', string.exists(style) and style or 'NONE'))
+  idLabel:setText(f('%s - %s', isParent and loc'${KaClientDevWidgetParentId}' or loc'${KaClientDevWidgetId}', string.exists(id) and id or loc'${CorelibInfoNone}'))
+  classNameLabel:setText(f('%s - %s', isParent and loc'${KaClientDevWidgetParentClass}' or loc'${CorelibInfoClass}', string.exists(class) and class or loc'${CorelibInfoNone}'))
+  styleNameLabel:setText(f('%s - %s', isParent and loc'${KaClientDevWidgetParentStyle}' or loc'${KaClientDevWidgetStyle}', string.exists(style) and style or loc'${CorelibInfoNone}'))
 end
 
 -- Main widget
@@ -150,9 +152,9 @@ local function updateDebugInfo(mousePos, mouseMoved) -- ([mousePos [, mouseMoved
   local relativeY = widget and math.max(0, mousePos.y - widget:getY()) or 0
   local width     = widget and widget:getWidth() or 0
   local height    = widget and widget:getHeight() or 0
-  positionLabel:setText(tr('Pos: (%d, %d)', mousePos.x, mousePos.y))
-  relativePositionLabel:setText(tr('Relative pos: (%d, %d)', relativeX, relativeY))
-  sizeLabel:setText(tr('Size: (%d, %d)', width, height))
+  positionLabel:setText(f(loc'${KaClientDevWidgetPos}: (%d, %d)', mousePos.x, mousePos.y))
+  relativePositionLabel:setText(f(loc'${KaClientDevWidgetRelativePos}: (%d, %d)', relativeX, relativeY))
+  sizeLabel:setText(f(loc'${KaClientDevWidgetSize}: (%d, %d)', width, height))
 
   -- Main widget
   updateMainWidgetDebugInfoText(mousePos)

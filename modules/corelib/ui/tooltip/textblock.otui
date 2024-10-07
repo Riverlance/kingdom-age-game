@@ -12,6 +12,7 @@ TooltipTextBlock < Panel
     anchors.left: parent.left
     anchors.right: parent.right
     margin: 8
+    font: sans-11px
     text-align: left
     text-vertical-auto-resize: true
     text-wrap: true

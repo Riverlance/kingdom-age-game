@@ -233,7 +233,7 @@ function UIProgressBar:onSetup()
 end
 
 function UIProgressBar:onStyleApply(name, node)
-  for name,value in pairs(node) do
+  for name, value in pairs(node) do
     if name == 'background-padding-left' then
       self.bgBorderLeft = tonumber(value)
     elseif name == 'background-padding-right' then

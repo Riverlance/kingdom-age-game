@@ -186,7 +186,7 @@ function UIGameMap:canAcceptDrop(widget, mousePos)
     end
   end
 
-  error('Widget ' .. self:getId() .. ' not in drop list.')
+  error(f('Widget %s not in drop list.', self:getId()))
   return false
 end
 

@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameBattleList = { }
 
 
@@ -32,9 +34,9 @@ SortType = {
 
 BattleSortType = {
   [SortType.DisplayTime]   = '${SortDisplayTime}',
-  [SortType.Distance]      = '${SortDistance}',
+  [SortType.Distance]      = '${CorelibInfoDistance}',
   [SortType.HealthPercent] = '${SortHealthPercent}',
-  [SortType.Name]          = '${SortName}',
+  [SortType.Name]          = '${CorelibInfoName}',
 }
 
 Order = {
@@ -43,8 +45,8 @@ Order = {
 }
 
 BattleOrder = {
-  [Order.Ascending]  = '${OrderAscending}',
-  [Order.Descending] = '${OrderDescending}'
+  [Order.Ascending]  = '${CorelibInfoAscending}',
+  [Order.Descending] = '${CorelibInfoDescending}'
 }
 
 local defaultValues = {
@@ -83,7 +85,7 @@ function GameBattleList.init()
   g_keyboard.bindKeyDown(BattleActionKey, GameBattleList.toggle)
 
   battleWindow = g_ui.loadUI('battlelist')
-  battleTopMenuButton = ClientTopMenu.addRightGameToggleButton('battleTopMenuButton', {loct = '${BattleWindowTitle} (${BattleActionKey})', locpar = { BattleActionKey = BattleActionKey } }, '/images/ui/top_menu/battle_list', GameBattleList.toggle)
+  battleTopMenuButton = ClientTopMenu.addRightGameToggleButton('battleTopMenuButton', { loct = '${BattleWindowTitle} (${BattleActionKey})', locpar = { BattleActionKey = BattleActionKey } }, '/images/ui/top_menu/battle_list', GameBattleList.toggle)
 
   battleWindow.topMenuButton = battleTopMenuButton
 
@@ -92,11 +94,13 @@ function GameBattleList.init()
   battleWindow:setScrollBarAutoHiding(false)
 
   sortMenuButton = battleWindow:getChildById('sortMenuButton')
-  sortMenuButton.loct = '${BattleCurrentSorting}'
-  sortMenuButton.locpar = function() return {
+  sortMenuButton.loct = '${CorelibInfoSortingBy}: ${BattleSortType} (${BattleOrder})'
+  sortMenuButton.locpar = function()
+    return {
       BattleSortType = BattleSortType[GameBattleList.getSortType()],
       BattleOrder = BattleOrder[GameBattleList.getSortOrder()]
-    } end
+    }
+  end
 
   GameBattleList.setSortType(GameBattleList.getSortType())
   GameBattleList.setSortOrder(GameBattleList.getSortOrder())
@@ -518,16 +522,16 @@ function GameBattleList.createSortMenu()
   menu:addSeparator()
 
   if sortType ~= SortType.DisplayTime then
-    menu:addOption(loc('${BattleSortTooltip}', { BattleSortType = BattleSortType[SortType.DisplayTime] }), function() GameBattleList.setSortType(SortType.DisplayTime) end)
+    menu:addOption(loc('${CorelibInfoSortBy}: ${BattleSortType}', { BattleSortType = BattleSortType[SortType.DisplayTime] }), function() GameBattleList.setSortType(SortType.DisplayTime) end)
   end
   if sortType ~= SortType.Distance then
-    menu:addOption(loc('${BattleSortTooltip}', { BattleSortType = BattleSortType[SortType.Distance] }), function() GameBattleList.setSortType(SortType.Distance) end)
+    menu:addOption(loc('${CorelibInfoSortBy}: ${BattleSortType}', { BattleSortType = BattleSortType[SortType.Distance] }), function() GameBattleList.setSortType(SortType.Distance) end)
   end
   if sortType ~= SortType.HealthPercent then
-    menu:addOption(loc('${BattleSortTooltip}', { BattleSortType = BattleSortType[SortType.HealthPercent] }), function() GameBattleList.setSortType(SortType.HealthPercent) end)
+    menu:addOption(loc('${CorelibInfoSortBy}: ${BattleSortType}', { BattleSortType = BattleSortType[SortType.HealthPercent] }), function() GameBattleList.setSortType(SortType.HealthPercent) end)
   end
   if sortType ~= SortType.Name then
-    menu:addOption(loc('${BattleSortTooltip}', { BattleSortType = BattleSortType[SortType.Name] }), function() GameBattleList.setSortType(SortType.Name) end)
+    menu:addOption(loc('${CorelibInfoSortBy}: ${BattleSortType}', { BattleSortType = BattleSortType[SortType.Name] }), function() GameBattleList.setSortType(SortType.Name) end)
   end
 
   menu:display()

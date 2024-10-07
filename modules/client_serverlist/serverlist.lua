@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientServerList = { }
 
 
@@ -55,11 +57,11 @@ end
 
 function ClientServerList.add(host, port, protocol, load)
   if not host or not port or not protocol then
-    return false, 'Failed to load settings'
+    return false, loc'${ClientServerListErrorFailedLoadSettings}'
   elseif not load and servers[host] then
-    return false, 'Server already exists'
+    return false, loc'${ClientServerListErrorExistsAlready}'
   elseif host == '' or port == '' then
-    return false, 'Required fields are missing'
+    return false, loc'${ClientServerListErrorFieldsMissing}'
   end
   local widget = g_ui.createWidget('ServerWidget', serverTextList)
   widget:setId(host)
@@ -99,17 +101,18 @@ function ClientServerList.remove(widget)
     widget:destroy()
     servers[host] = nil
     removeWindow:destroy()
-    removeWindow=nil
+    removeWindow = nil
   end
   local noCallback = function()
     removeWindow:destroy()
-    removeWindow=nil
+    removeWindow = nil
   end
 
-  removeWindow = displayGeneralBox(tr('Remove'), tr('Remove') .. ' ' .. host .. '?', {
-      { text=tr('Yes'), callback=yesCallback },
-      { text=tr('No'), callback=noCallback },
-      anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+  removeWindow = displayGeneralBox(loc'${CorelibInfoRemove}', f(loc'${ClientServerListRemoveHostMsg}', host), {
+    { text = loc'${CorelibInfoYes}', callback = yesCallback },
+    { text = loc'${CorelibInfoNo}', callback = noCallback },
+    anchor = AnchorHorizontalCenter
+  }, yesCallback, noCallback)
 end
 
 function ClientServerList.destroy()
@@ -124,6 +127,7 @@ function ClientServerList.show()
   if g_game.isOnline() then
     return
   end
+
   serverListWindow:show()
   serverListWindow:raise()
   serverListWindow:focus()

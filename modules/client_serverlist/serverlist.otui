@@ -4,7 +4,7 @@ ServerWidget < UIWidget
   &updateOnStates: |
     function(self)
       local children = self:getChildren()
-      for i=1,#children do
+      for i = 1, #children do
         children[i]:setOn(self:isFocused())
       end
     end
@@ -55,7 +55,7 @@ ServerWidget < UIWidget
 
 MainWindow
   id: serverListWindow
-  !text: tr('Server List')
+  &loc: '${ClientServerListServerListWindow}'
   size: 340 290
   visible: false
   @onEnter: ClientServerList.select()
@@ -87,14 +87,14 @@ MainWindow
 
   AddButton
     id: buttonAdd
-    !tooltip: tr('Add new server')
+    &loct: '${CorelibInfoAdd}'
     anchors.left: parent.left
     anchors.bottom: parent.bottom
     @onClick: ClientAddServer.show()
 
   Button
     id: buttonOk
-    !text: tr('Select')
+    &loc: '${ClientServerListButtonOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -103,7 +103,7 @@ MainWindow
 
   Button
     id: buttonCancel
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom

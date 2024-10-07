@@ -1,4 +1,8 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.Client = { }
+
+
 
 local loadingBox
 local isLoaded = false
@@ -86,9 +90,7 @@ function Client.startup()
 
   -- Check for startup errors
   if g_graphics.getRenderer():lower():match('gdi generic') then
-    local errtitle = tr('Graphics card driver not detected')
-    local errmsg = tr('No graphics card detected. Everything will be drawn using the CPU,\nthus the performance will be really bad.\nUpdate your graphics driver to have a better performance.')
-    displayErrorBox(errtitle, errmsg)
+    displayErrorBox(loc'${ClientGraphicsCardNotDetectedTitle}', loc'${ClientGraphicsCardNotDetectedMessage}')
   end
 end
 
@@ -126,7 +128,7 @@ function Client.loadFiles()
     onUpdated = Client.loadFiles
   })
 
-  loadingBox = displaySystemBox(tr('Loading'), tr('Loading files...'))
+  loadingBox = displaySystemBox(loc'${CorelibInfoLoading}', loc'${ClientLoadingBoxMessage}')
 
   -- Client version
   local version = 1099
@@ -146,14 +148,14 @@ function Client.loadFiles()
     local path = resolvepath('/things/Kingdom Age')
     local errorMessage = ''
     if not g_things.loadDat(path) then
-      errorMessage = errorMessage .. tr("Unable to load dat file, place a valid dat in '%s'", path) .. '\n'
+      errorMessage = errorMessage .. f(loc'${ClientUnableToLoadDat}', path) .. '\n'
     end
     if not g_sprites.loadSpr(path) then
-      errorMessage = errorMessage .. tr("Unable to load spr file, place a valid spr in '%s'", path)
+      errorMessage = errorMessage .. f(loc'${ClientUnableToLoadSpr}', path)
     end
 
     if #errorMessage > 0 then
-      local messageBox = displayErrorBox(tr('Error'), errorMessage)
+      local messageBox = displayErrorBox(loc'${CorelibInfoError}', errorMessage)
       addEvent(function() messageBox:raise() messageBox:focus() end)
       g_game.setClientVersion(0)
       g_game.setProtocolVersion(0)

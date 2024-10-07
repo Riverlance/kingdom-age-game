@@ -1,6 +1,8 @@
 MoveableTabBar < UIMoveableTabBar
   size: 80 20
+
 MoveableTabBarPanel < Panel
+
 MoveableTabBarButton < UIButton
   size: 20 20
   image-source: /images/ui/_button/tab_rounded
@@ -27,12 +29,16 @@ MoveableTabBarButton < UIButton
   $on !checked:
     color: #c9340b
 
+
+
 TabBar < UITabBar
   size: 80 20
   Panel
     id: buttonsPanel
     anchors.fill: parent
+
 TabBarPanel < Panel
+
 TabBarButton < UIButton
   size: 20 20
   image-source: /images/ui/_button/tab_square
@@ -65,10 +71,16 @@ TabBarButton < UIButton
   $on !checked:
     color: #c83200
 
+
+
 TabBarRounded < TabBar
+
 TabBarRoundedPanel < TabBarPanel
+
 TabBarRoundedButton < TabBarButton
   image-source: /images/ui/_button/tab_rounded
+
+
 
 TabBarVertical < UITabBar
   width: 80
@@ -76,7 +88,7 @@ TabBarVertical < UITabBar
     id: buttonsPanel
     anchors.top: parent.top
     anchors.left: parent.left
-    anchors.right: scrollBar.left
+    anchors.right: scrollBar.outsideLeft
     anchors.bottom: parent.bottom
     vertical-scrollbar: scrollBar
   VerticalScrollBar
@@ -88,7 +100,9 @@ TabBarVertical < UITabBar
     pixels-scroll: true
     $!on:
       width: 0
+
 TabBarVerticalPanel < Panel
+
 TabBarVerticalButton < UIButton
   size: 48 48
   color: #aaaaaa

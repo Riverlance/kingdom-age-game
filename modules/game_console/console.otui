@@ -52,6 +52,7 @@ ConsoleTabBarButton < MoveableTabBarButton
   &minWidth: 135
   height: 28
   padding: 5
+  font: sans-11px
 
 Panel
   id: consolePanel
@@ -106,7 +107,7 @@ Panel
     Button
       id: closeChannelButton
       size: 22 22
-      !tooltip: tr('Close this channel') .. ' (Ctrl+E)'
+      !tooltip: f(loc'${GameConsoleCloseChannel}', "(Ctrl+E)")
       icon: /images/ui/console/close_channel
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: next.left
@@ -118,7 +119,7 @@ Panel
     Button
       id: clearChannelButton
       size: 22 22
-      !tooltip: tr('Clear current message window')
+      &loct: '${GameConsoleClearCurrentWindow}'
       icon: /images/ui/console/clear_channel
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: next.left
@@ -131,7 +132,7 @@ Panel
     Button
       id: channelsButton
       size: 22 22
-      !tooltip: tr('Open new channel') .. ' (Ctrl+O)'
+      !tooltip: f(loc'${GameConsoleNewChannel}', "(Ctrl+O)")
       icon: /images/ui/console/new_channel
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: next.left
@@ -142,7 +143,7 @@ Panel
     Button
       id: ignoreButton
       size: 22 22
-      !tooltip: tr('Ignore players')
+      &loct: '${GameConsoleIgnorePlayers}'
       icon: /images/ui/console/ignore
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: cloneTabSeparator.outsideLeft
@@ -162,7 +163,7 @@ Panel
 
     UIWidget
       id: cloneTabTipArea
-      !tooltip: tr('Tip: Double click on current tab to clone it')
+      &loct: '${GameConsoleCloneTabTip}'
       width: 95
       image-source: /images/ui/_background/default_stone_blue
       image-repeated: true
@@ -270,7 +271,7 @@ Panel
 
     Button
       id: sayModeButton
-      !tooltip: tr('Adjust volume')
+      &loct: '${GameConsoleMsgVolume}'
       size: 20 20
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
@@ -281,7 +282,8 @@ Panel
     Button
       id: toggleChat
       size: 22 22
-      !tooltip: tr('Disable chat (activates shortcuts to walk with WASD and others)')
+      // Do not use as &loct here, or it will keep always with tooltip of GameConsoleChatDisable, but never of GameConsoleChatEnable
+      !tooltip: loc'${GameConsoleChatDisable}'
       icon: /images/ui/console/chat
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right

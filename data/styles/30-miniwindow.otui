@@ -33,7 +33,7 @@ MiniWindow < UIMiniWindow
     phantom: true
 
   CloseMenuButton
-    !tooltip: tr('Close')
+    &loct: '${CorelibInfoClose}'
     anchors.verticalCenter: miniwindowTopBar.verticalCenter
     anchors.right: parent.right
     margin-top: -1

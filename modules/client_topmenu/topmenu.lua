@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientTopMenu = { }
 
 
@@ -131,7 +133,7 @@ function ClientTopMenu.updateFps(fps)
     return
   end
 
-  text = 'FPS: ' .. fps
+  text = f(loc'${ClientTopMenuFps}: %s', fps)
 
   if g_game.isOnline() then
     local vsync = ClientOptions.getOption('vsync')
@@ -157,7 +159,7 @@ function ClientTopMenu.updateFps(fps)
     end
 
     local midFps = math.floor((fpsMin + fpsMax) / 2)
-    fpsLabel:setTooltip('Min: ' .. fpsMin .. '\nMid: ' .. midFps .. '\nMax: ' .. fpsMax)
+    fpsLabel:setTooltip(f(loc'${ClientTopMenuFpsTooltip}', fpsMin, midFps, fpsMax))
   else
     fpsLabel:removeTooltip()
   end
@@ -170,17 +172,17 @@ function ClientTopMenu.updatePing(ping) -- See UICreatureButton:updatePing
     return
   end
 
-  local text = 'Ping: '
+  local text
   local color
 
   -- Unknown
   if ping < 0 then
-    text  = text .. '?'
+    text  = loc'${ClientTopMenuFpsInfoPing}: ?'
     color = 'yellow'
 
   -- Known
   else
-    text = text .. ping .. ' ms'
+    text = f(loc'${ClientTopMenuFpsInfoPing}: %d ${CorelibInfoMs}', ping)
 
     if ping >= 500 then
       color = 'red'

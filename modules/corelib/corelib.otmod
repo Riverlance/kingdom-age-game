@@ -15,7 +15,6 @@ Module
     dofile 'bitwise'
     dofile 'struct'
 
-    dofile 'const'
     dofile 'util'
     dofile 'config'
     dofile 'settings'
@@ -23,6 +22,10 @@ Module
     dofile 'mouse'
     dofile 'net'
 
+    dofile 'locales'
+    dofile 'corelib'
+
+    dofile 'const'
     dofiles 'ui'
 
     dofile 'inputmessage'

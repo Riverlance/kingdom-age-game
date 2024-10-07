@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientEnterGame = { }
 
 
@@ -6,6 +8,8 @@ ClientEnterGame.localIp = '127.0.0.1'
 ClientEnterGame.clientIp = 'kingdomageonline.com'
 ClientEnterGame.clientPort = '7171'
 ClientEnterGame.clientProtocolVersion = 1099
+
+EnterGameActionKey = 'Ctrl+G'
 
 local loadBox
 local enterGame
@@ -28,7 +32,7 @@ local function onError(protocol, message, errorCode)
     ClientEnterGame.clearAccountFields()
   end
 
-  local errorBox = displayErrorBox(tr('Login Error'), message)
+  local errorBox = displayErrorBox(loc'${EnterGameLoginErrorTitle}', message)
   connect(errorBox, {
     onOk = ClientEnterGame.show
   })
@@ -78,7 +82,7 @@ local function onCharacterList(protocol, characters, account, otui)
 
   for _, characterInfo in pairs(characters) do
     if characterInfo.previewState and characterInfo.previewState ~= PreviewState.Default then
-      characterInfo.worldName = characterInfo.worldName .. ', Preview'
+      characterInfo.worldName = f('%s, %s', characterInfo.worldName, loc'${EnterGamePreviewState}')
     end
   end
 
@@ -89,7 +93,7 @@ local function onCharacterList(protocol, characters, account, otui)
     local lastMotdNumber = g_settings.getNumber('motd')
     if G.motdNumber and G.motdNumber ~= lastMotdNumber then
       g_settings.set('motd', G.motdNumber)
-      motdWindow = displayInfoBox(tr('Message of the Day'), G.motdMessage)
+      motdWindow = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)
       motdButton:setOn(true)
       connect(motdWindow, {
         onOk = function()
@@ -112,7 +116,7 @@ local function onUpdateNeeded(protocol, signature)
     local cancelFunc = ClientEnterGame.show
     ClientEnterGame.updateFunc(signature, continueFunc, cancelFunc)
   else
-    local errorBox = displayErrorBox(tr('Update needed'), tr('Your client needs updating, try redownloading it.'))
+    local errorBox = displayErrorBox(loc'${EnterGameUpdateNeededTitle}', loc'${EnterGameUpdateNeededMessage}')
     connect(errorBox, {
       onOk = ClientEnterGame.show
     })
@@ -126,11 +130,11 @@ function ClientEnterGame.init()
   ClientEnterGame.m = modules.client_entergame
 
   enterGame = g_ui.displayUI('entergame')
-  enterGameButton = ClientTopMenu.addLeftButton('enterGameButton', tr('Login') .. ' (Ctrl+G)', '/images/ui/top_menu/login', ClientEnterGame.openWindow)
-  motdButton = ClientTopMenu.addLeftButton('motdButton', tr('Message of the Day'), '/images/ui/top_menu/motd', ClientEnterGame.toggleMotd)
+  enterGameButton = ClientTopMenu.addLeftButton('enterGameButton', { loct = '${EnterGameTitle} (${EnterGameActionKey})', locpar = { EnterGameActionKey = EnterGameActionKey } }, '/images/ui/top_menu/login', ClientEnterGame.openWindow)
+  motdButton = ClientTopMenu.addLeftButton('motdButton', loc'${EnterGameMotdTitle}', '/images/ui/top_menu/motd', ClientEnterGame.toggleMotd)
   motdButton:setOn(false)
   motdButton:hide()
-  g_keyboard.bindKeyDown('Ctrl+G', ClientEnterGame.openWindow)
+  g_keyboard.bindKeyDown(EnterGameActionKey, ClientEnterGame.openWindow)
 
   if motdEnabled and G.motdNumber then
     motdButton:show()
@@ -174,7 +178,7 @@ function ClientEnterGame.firstShow()
 end
 
 function ClientEnterGame.terminate()
-  g_keyboard.unbindKeyDown('Ctrl+G')
+  g_keyboard.unbindKeyDown(EnterGameActionKey)
   enterGame:destroy()
   enterGame = nil
   enterGameButton:destroy()
@@ -213,11 +217,7 @@ function ClientEnterGame.show()
   end
 
   if not Client.isLoaded() then
-    local callback = function()
-        g_platform.spawnProcess('Kingdom Age Online.exe', { })
-        exit()
-    end
-    displayOkCancelBox(tr('Info'), tr('Your client has been modified. Click OK to restart the client.'), callback)
+    displayOkCancelBox(loc'${EnterGameClientModifiedTitle}', loc'${EnterGameClientModifiedMessage}', function() restart() end)
     return
   end
 
@@ -225,9 +225,10 @@ function ClientEnterGame.show()
   enterGame:raise()
   enterGame:focus()
 
-  if ClientLocales.m.localesWindow then
-    ClientLocales.m.localesWindow:raise()
-    ClientLocales.m.localesWindow:focus()
+  local localesWindow = g_locales.getWindow()
+  if localesWindow then
+    localesWindow:raise()
+    localesWindow:focus()
   end
 end
 
@@ -295,7 +296,7 @@ function ClientEnterGame.doLogin()
   ClientEnterGame.hide()
 
   if g_game.isOnline() then
-    local errorBox = displayErrorBox(tr('Login Error'), tr('Cannot login while already in game.'))
+    local errorBox = displayErrorBox(loc'${EnterGameLoggedAlreadyTitle}', loc'${EnterGameLoggedAlreadyMessage}')
     connect(errorBox, {
       onOk = ClientEnterGame.show
     })
@@ -313,7 +314,7 @@ function ClientEnterGame.doLogin()
   protocolLogin.onCharacterList = onCharacterList
   protocolLogin.onUpdateNeeded = onUpdateNeeded
 
-  loadBox = displayCancelBox(tr('Loading'), tr('Connecting to login server...'))
+  loadBox = displayCancelBox(loc'${CorelibInfoLoading}', loc'${EnterGameConnectingToLoginServerMessage}')
   connect(loadBox, {
     onCancel = function(msgbox)
       loadBox = nil
@@ -337,7 +338,7 @@ end
 
 function ClientEnterGame.displayMotd()
   if not motdWindow then
-    motdWindow = displayInfoBox(tr('Message of the Day'), G.motdMessage)
+    motdWindow = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)
     motdButton:setOn(true)
     motdWindow.onOk = function() motdButton:setOn(false) motdWindow = nil end
   end

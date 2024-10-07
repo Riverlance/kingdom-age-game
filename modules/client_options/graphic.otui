@@ -1,7 +1,7 @@
 Panel
 
   OptionLabel
-    !text: tr('Game framerate limit')
+    &loc: '${ClientOptionsBackgroundFrameRate}'
 
   OptionScrollbar
     id: backgroundFrameRate
@@ -11,7 +11,7 @@ Panel
 
   OptionLabel
     id: gameScreenSizeLabel
-    !text: tr('Game screen viewport')
+    &loc: '${ClientOptionsGameScreenSize}'
 
   OptionScrollbar
     id: gameScreenSize
@@ -20,7 +20,7 @@ Panel
     symbol: SQMs
 
   OptionLabel
-    !text: 'Shader filter'
+    &loc: '${ClientOptionsShaderFilter}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -32,7 +32,7 @@ Panel
     margin-top: 2
 
   OptionLabel
-    !text: 'View mode'
+    &loc: '${ClientOptionsViewMode}'
     $!first:
       anchors.top: gameScreenSize.outsideBottom
     anchors.left: parent.horizontalCenter
@@ -47,7 +47,7 @@ Panel
 
   OptionCheckBox
     id: showClouds
-    !text: tr('Show clouds')
+    &loc: '${ClientOptionsShowClouds}'
     $!first:
       margin-top: 10
 
@@ -55,34 +55,35 @@ Panel
 
   OptionCheckBox
     id: optimizeFps
-    !text: tr('Optimize FPS')
-    !tooltip: tr('Tries to optimize when FPS (Frames Per Second) is below than 60.\nVisual issues may occur!')
+    &loc: '${ClientOptionsOptimizeFps}'
+    &loct: '${ClientOptionsOptimizeFpsTooltip}'
     !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10
 
   OptionCheckBox
     id: vsync
-    !text: tr('Enable Vsync (Vertical Synchronization)')
-    !tooltip: tr('Limits FPS (Frames Per Second) based on monitor refresh rate for avoid CPU unneeded usage.')
+    &loc: '${ClientOptionsVsync}'
+    &loct: '${ClientOptionsVsyncTooltip}'
     !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: fullscreen
-    !text: tr('Enable fullscreen mode')
-    !tooltip: tr('Shortcut to enable fullscreen mode: Ctrl+Shift+F.')
+    &loc: '${ClientOptionsFullscreen}'
+    &loct: '${ClientOptionsFullscreenTooltip}: ${ClientOptionsFullscreenActionKey}.'
+    @locpar: return { ClientOptionsFullscreenActionKey = ClientOptionsFullscreenActionKey }
     !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: showMouseItemIcon
-    !text: tr('Show mouse item icon')
-    !tooltip: tr('Shows the dragged item when drag and drop items.')
+    &loc: '${ClientOptionsShowMouseItemIcon}'
+    &loct: '${ClientOptionsShowMouseItemIconTooltip}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
   OptionLabel
     id: mouseItemIconOpacityLabel
-    !text: tr('Opacity')
+    &loc: '${ClientOptionsMouseItemIconOpacityLabel}'
     $!first:
       anchors.top: prev.top
       margin-top: 0

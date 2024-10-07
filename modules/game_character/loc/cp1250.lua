@@ -1,0 +1,59 @@
+-- Open this file with encode cp1250: Central European (Windows 1250)
+
+g_locales.addTranslations({
+  CharacterWindowTitle = {
+    pl = "Postaæ",
+  },
+
+  CharacterFightOffensiveBox = {
+    pl = "Ofensywny tryb walki",
+  },
+
+  CharacterFightBalancedBox = {
+    pl = "Zrównowa¿ony tryb walki",
+  },
+
+  CharacterFightDefensiveBox = {
+    pl = "Defensywny tryb walki",
+  },
+
+  CharacterChaseModeBox = {
+    pl = "Tryb poœcigu",
+  },
+
+  CharacterSafeFightBox = {
+    pl = "Tryb bezpieczny",
+  },
+
+  CharacterMountButton = {
+    pl = "Jazda",
+  },
+
+  CharacterInfoButtonMore = {
+    pl = "Poka¿ wiêcej",
+  },
+
+  CharacterInfoButtonLess = {
+    pl = "Poka¿ mniej",
+  },
+
+  BarHealthTooltip = {
+    pl = "Zdrowie twojej postaci wynosi %s z %s.\nKliknij, aby wyœwietliæ pasek zdrowia stworzeñ.",
+  },
+
+  BarManaTooltip = {
+    pl = "Mana twojej postaci wynosi %s z %s.\nKliknij, aby wyœwietliæ pasek many graczy.",
+  },
+
+  BarVigorTooltip = {
+    pl = "Wigor twojej postaci wynosi %s z %s.\nKliknij, aby wyœwietliæ pasek wigoru graczy.",
+  },
+
+  BarCapacityTooltip = {
+    pl = "Wolna pojemnoœæ twojej postaci wynosi %s oz z %s oz.",
+  },
+
+  BarExperienceTooltip = {
+    pl = "%s\nKliknij, aby wyœwietliæ pasek doœwiadczenia.",
+  },
+}, false)

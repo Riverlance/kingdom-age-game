@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameBugReport = { }
 
 
@@ -128,7 +130,7 @@ function GameBugReport.init()
 
   g_ui.importStyle('bugreport')
 
-  -- bugReportButton = ClientTopMenu.addLeftGameButton('bugReportButton', tr('Report Bug/Problem/Idea') .. ' (Ctrl+,)', '/images/ui/top_menu/bugreport', GameBugReport.toggle, true)
+  -- bugReportButton = ClientTopMenu.addLeftGameButton('bugReportButton', 'Report Bug/Problem/Idea (Ctrl+,)', '/images/ui/top_menu/bugreport', GameBugReport.toggle, true)
 
   bugReportWindow = g_ui.createWidget('BugReportWindow', rootWidget)
   bugReportWindow:hide()

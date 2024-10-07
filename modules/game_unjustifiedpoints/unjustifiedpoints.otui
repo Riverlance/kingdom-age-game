@@ -5,7 +5,7 @@ SkullWidget < UIWidget
 
 MiniWindow
   id: unjustifiedPointsWindow
-  !text: tr('Frags')
+  &loc: '${GameUnjustifiedPointsWindowTitle}'
   height: 91
   icon: /images/ui/top_menu/unjustifiedpoints
   @onOpen: GameUnjustifiedPoints.onMiniWindowOpen()
@@ -17,7 +17,7 @@ MiniWindow
 
     Label
       id: skullTimeLabel
-      !text: '00:00 (frags: 0)'
+      !text: f(loc'%.2d:%.2d (${GameUnjustifiedPointsInfoFrags}: %d)', 0, 0, 0)
       text-auto-resize: true
       anchors.top: prev.bottom
       anchors.horizontalCenter: parent.horizontalCenter

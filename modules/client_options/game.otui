@@ -1,24 +1,28 @@
 Panel
 
   OptionButton
-    id: changeLocale
-    !text: tr('Change language')
-    !tooltip: tr('Changes the game language.')
+    id: changeLocaleButton
+    &loc: '${ClientOptionsChangeLocaleButton}'
+    &loct: '${ClientOptionsChangeLocaleButtonTooltip}'
+    !tooltip-type: TooltipType.textBlock
     // Do not put it inside options.lua
-    @onClick: ClientLocales.createWindow()
+    @onClick: |
+      if not g_game.isOnline() then
+        g_locales.createWindow()
+      end
 
   OptionHorizontalSeparator
 
   OptionCheckBox
     id: moveFullStack
-    !text: tr('Move full item stack')
-    !tooltip: tr('Move full item stack without using (Ctrl). Use (Ctrl) to choose how many you want to move.')
+    &loc: '${ClientOptionsMoveFullStack}'
+    &loct: '${ClientOptionsMoveFullStackTooltip}'
     !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10
 
   OptionCheckBox
     id: goldLootAutoDeposit
-    !text: tr('Auto deposit gold on bank from monsters loot')
-    !tooltip: tr('The gold pieces from monsters loot goes to your bank account. This feature is for premium players or up to level %d.', 20)
+    &loc: '${ClientOptionsGoldLootAutoDeposit}'
+    !tooltip: f(loc'${ClientOptionsGoldLootAutoDepositTooltip}', 20)
     !tooltip-type: TooltipType.textBlock

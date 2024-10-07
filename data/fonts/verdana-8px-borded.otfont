@@ -1,7 +1,0 @@
-Font
-  name: verdana-8px-borded
-  texture: verdana-8px-borded
-  height: 11
-  glyph-size: 12 12
-  space-width: 3
-  default: false

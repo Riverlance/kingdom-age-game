@@ -1,10 +1,10 @@
 HotkeyAssignWindow < MainWindow
   id: assignWindow
-  !text: tr('Button Assign')
+  &loc: '${GameHotkeysAssignWindow}'
   size: 360 150
 
   Label
-    !text: tr('Press the key you wish to add onto your hotkeys manager')
+    &loc: '${GameHotkeysAssignWindowTip}'
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
@@ -13,7 +13,7 @@ HotkeyAssignWindow < MainWindow
 
   Label
     id: comboPreview
-    !text: tr('Current hotkey to add') .. ': ' .. tr('None')
+    !text: f(loc'${GameHotkeysAssignWindowComboPreview}: %s', loc'${CorelibInfoNone}')
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.top: prev.bottom
     margin-top: 10
@@ -27,16 +27,14 @@ HotkeyAssignWindow < MainWindow
 
   Button
     id: addButton
-    !text: tr('Add')
-    width: 64
+    &loc: '${CorelibInfoAdd}'
     anchors.right: next.left
     anchors.bottom: parent.bottom
     margin-right: 4
 
   Button
     id: cancelButton
-    !text: tr('Cancel')
-    width: 64
+    &loc: '${CorelibInfoCancel}'
     anchors.right: parent.right
     anchors.bottom: parent.bottom
 
@@ -44,17 +42,17 @@ HotkeyAssignWindow < MainWindow
 
 MainWindow
   id: hotkeysWindow
-  !text: tr('Hotkeys')
-  size: 350 555
+  &loc: '${GameHotkeysWindowTitle}'
+  size: 500 555
 
   @onEnter: GameHotkeys.ok()
   @onEscape: GameHotkeys.cancel()
 
   Label
-    !text: tr('Drag and drop a row below into any hotkey bar')
+    &loc: '${GameHotkeysWindowTip}'
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    font: verdana-8px-antialised
+    font: sans-8px
     text-auto-resize: true
 
   VerticalScrollBar
@@ -76,29 +74,26 @@ MainWindow
     focusable: false
 
   Button
-    id: resetHotkeyButton
-    width: 64
-    !text: tr('Reset')
+    id: applyHotkeyButton
+    &loc: '${CorelibInfoApply}'
     anchors.top: prev.bottom
     anchors.left: parent.left
     margin-top: 8
     enabled: false
-    @onClick: GameHotkeys.resetHotkey()
-
-  Button
-    id: applyHotkeyButton
-    !text: tr('Apply')
-    width: 64
-    anchors.top: next.top
-    anchors.right: next.left
-    margin-right: 4
-    enabled: false
     @onClick: GameHotkeys.apply()
 
   Button
+    id: resetHotkeyButton
+    &loc: '${CorelibInfoReset}'
+    anchors.top: prev.top
+    anchors.left: prev.outsideRight
+    margin-left: 4
+    enabled: false
+    @onClick: GameHotkeys.resetHotkey()
+
+  Button
     id: addHotkeyButton
-    !text: tr('Add')
-    width: 64
+    &loc: '${CorelibInfoAdd}'
     anchors.top: next.top
     anchors.right: next.left
     margin-right: 4
@@ -106,8 +101,7 @@ MainWindow
 
   Button
     id: removeHotkeyButton
-    !text: tr('Remove')
-    width: 64
+    &loc: '${CorelibInfoRemove}'
     anchors.top: currentHotkeys.bottom
     anchors.right: parent.right
     margin-top: 8
@@ -122,11 +116,11 @@ MainWindow
 
   Label
     id: hotkeyItemLabel
-    !text: tr('Item or Power') .. ':'
+    &loc: '${GameHotkeysHotkeyItemLabel}:'
+    text-auto-resize: true
     anchors.top: prev.bottom
     anchors.left: parent.left
     margin-top: 10
-    text-auto-resize: true
 
   Item
     id: itemPreview
@@ -147,16 +141,16 @@ MainWindow
 
     ButtonBox
       id: useOnSelf
-      !text: tr('Use on yourself')
+      &loc: '${GameHotkeysUseOnSelf}'
 
     ButtonBox
       id: useOnTarget
-      !text: tr('Use on target')
+      &loc: '${GameHotkeysUseOnTarget}'
       margin-top: 2
 
     ButtonBox
       id: useWith
-      !text: tr('With crosshair')
+      &loc: '${GameHotkeysUseWith}'
       margin-top: 2
 
   HorizontalSeparator
@@ -167,7 +161,7 @@ MainWindow
 
   Label
     id: hotkeyTextLabel
-    !text: tr('Text') .. ':'
+    &loc: '${GameHotkeysHotkeyTextLabel}:'
     anchors.top: prev.bottom
     anchors.left: parent.left
     margin-top: 10
@@ -175,7 +169,7 @@ MainWindow
 
   CheckBox
     id: sendAutomatically
-    !text: tr('Send automatically')
+    &loc: '${GameHotkeysSendAutomatically}'
     anchors.top: prev.top
     anchors.right: parent.right
     text-auto-resize: true
@@ -192,35 +186,33 @@ MainWindow
     @onTextChange: GameHotkeys.onHotkeyTextChange(self:getText())
 
   Button
-    id: resetButton
-    width: 72
-    !text: tr('Reset All')
-    anchors.bottom: parent.bottom
+    id: applyAllButton
+    &loc: '${GameHotkeysApplyAllButton}'
+    width: 120
     anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    @onClick: GameHotkeys.applyChanges()
+
+  Button
+    id: resetButton
+    &loc: '${GameHotkeysResetButton}'
+    width: 120
+    anchors.left: prev.right
+    anchors.bottom: parent.bottom
+    margin-left: 4
     @onClick: GameHotkeys.discardChanges()
 
   Button
-    id: applyAllButton
-    !text: tr('Apply All')
-    width: 72
-    anchors.right: next.left
-    anchors.bottom: parent.bottom
-    @onClick: GameHotkeys.applyChanges()
-    margin-right: 4
-
-  Button
     id: okButton
-    !text: tr('Ok')
-    width: 64
+    &loc: '${CorelibInfoOk}'
     anchors.right: next.left
     anchors.bottom: parent.bottom
-    @onClick: GameHotkeys.ok()
     margin-right: 4
+    @onClick: GameHotkeys.ok()
 
   Button
     id: cancelButton
-    !text: tr('Cancel')
-    width: 64
+    &loc: '${CorelibInfoCancel}'
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     @onClick: GameHotkeys.cancel()

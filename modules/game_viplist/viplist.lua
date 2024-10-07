@@ -1,4 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameVipList = { }
+
+
+
+local GameVipListActionKey = 'Ctrl+F'
 
 
 
@@ -22,10 +28,10 @@ function GameVipList.init()
     onVipStateChange = GameVipList.onVipStateChange
   })
 
-  g_keyboard.bindKeyDown('Ctrl+F', GameVipList.toggle)
+  g_keyboard.bindKeyDown(GameVipListActionKey, GameVipList.toggle)
 
   vipWindow = g_ui.loadUI('viplist')
-  vipTopMenuButton = ClientTopMenu.addRightGameToggleButton('vipTopMenuButton', tr('VIP List') .. ' (Ctrl+F)', '/images/ui/top_menu/viplist', GameVipList.toggle)
+  vipTopMenuButton = ClientTopMenu.addRightGameToggleButton('vipTopMenuButton', { loct = '${GameVipListWindowTitle} (${GameVipListActionKey})', locpar = { GameVipListActionKey = GameVipListActionKey } }, '/images/ui/top_menu/viplist', GameVipList.toggle)
   contentsPanel = vipWindow:getChildById('contentsPanel')
 
   vipWindow.topMenuButton = vipTopMenuButton
@@ -41,7 +47,7 @@ function GameVipList.init()
 end
 
 function GameVipList.terminate()
-  g_keyboard.unbindKeyDown('Ctrl+F')
+  g_keyboard.unbindKeyDown(GameVipListActionKey)
   disconnect(g_game, {
     onGameStart      = GameVipList.online,
     onGameEnd        = GameVipList.offline,
@@ -314,7 +320,7 @@ function GameVipList.onAddVip(id, name, state, description, iconId, notify)
   local nameLower = name:lower()
   local childrenCount = contentsPanel:getChildCount()
 
-  for i=1,childrenCount do
+  for i = 1, childrenCount do
     local child = contentsPanel:getChildByIndex(i)
     if (state == VipState.Online and child.vipState ~= VipState.Online and GameVipList.getSortedBy() == 'status')
         or (label.iconId > child.iconId and GameVipList.getSortedBy() == 'type') then
@@ -357,7 +363,7 @@ function GameVipList.onVipStateChange(id, state)
 
   if notify and state ~= VipState.Pending then
     if modules.game_textmessage then
-      GameTextMessage.displayFailureMessage(state == VipState.Online and tr('%s has logged in.', name) or tr('%s has logged out.', name))
+      GameTextMessage.displayFailureMessage(state == VipState.Online and f(loc'${GameVipListInfoPlayerLoggedIn}', name) or f(loc'${GameVipListInfoPlayerLoggedOut}', name))
     end
   end
 end
@@ -369,25 +375,25 @@ function GameVipList.onVipListMousePress(widget, mousePos, mouseButton)
 
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
-  menu:addOption(tr('Add new VIP'), function() GameVipList.createAddWindow() end)
+  menu:addOption(loc'${GameVipListContextMenuAddVip}', function() GameVipList.createAddWindow() end)
 
   menu:addSeparator()
   if not GameVipList.isHiddingOffline() then
-    menu:addOption(tr('Hide offline'), function() GameVipList.hideOffline(true) end)
+    menu:addOption(loc'${GameVipListContextMenuOfflineHide}', function() GameVipList.hideOffline(true) end)
   else
-    menu:addOption(tr('Show offline'), function() GameVipList.hideOffline(false) end)
+    menu:addOption(loc'${GameVipListContextMenuOfflineShow}', function() GameVipList.hideOffline(false) end)
   end
 
   if not(GameVipList.getSortedBy() == 'name') then
-    menu:addOption(tr('Sort by name'), function() GameVipList.sortBy('name') end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', loc'${CorelibInfoName}':lower()), function() GameVipList.sortBy('name') end)
   end
 
   if not(GameVipList.getSortedBy() == 'status') then
-    menu:addOption(tr('Sort by status'), function() GameVipList.sortBy('status') end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', loc'${CorelibInfoStatus}':lower()), function() GameVipList.sortBy('status') end)
   end
 
   if not(GameVipList.getSortedBy() == 'type') then
-    menu:addOption(tr('Sort by type'), function() GameVipList.sortBy('type') end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', loc'${CorelibInfoType}':lower()), function() GameVipList.sortBy('type') end)
   end
 
   menu:display(mousePos)
@@ -402,35 +408,35 @@ function GameVipList.onVipListLabelMousePress(widget, mousePos, mouseButton)
 
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
-  menu:addOption(tr('Send message'), function() g_game.openPrivateChannel(widget:getText()) end)
-  menu:addOption(tr('Add new VIP'), function() GameVipList.createAddWindow() end)
-  menu:addOption(tr('Edit') .. ' ' .. widget:getText(), function() if widget then GameVipList.createEditWindow(widget) end end)
-  menu:addOption(tr('Remove') .. ' ' .. widget:getText(), function() if widget then GameVipList.removeVip(widget) end end)
+  menu:addOption(loc'${GameVipListContextMenuSendMsg}', function() g_game.openPrivateChannel(widget:getText()) end)
+  menu:addOption(loc'${GameVipListContextMenuVipAdd}', function() GameVipList.createAddWindow() end)
+  menu:addOption(f(loc'${GameVipListContextMenuVipEdit}', widget:getText()), function() if widget then GameVipList.createEditWindow(widget) end end)
+  menu:addOption(f(loc'${GameVipListContextMenuVipRemove}', widget:getText()), function() if widget then GameVipList.removeVip(widget) end end)
   menu:addSeparator()
-  menu:addOption(tr('Copy name'), function() g_window.setClipboardText(widget:getText()) end)
+  menu:addOption(loc'${GameVipListContextMenuCopyName}', function() g_window.setClipboardText(widget:getText()) end)
 
   if GameConsole and GameConsole.getOwnPrivateTab() then
     menu:addSeparator()
-    menu:addOption(tr('Invite to private chat'), function() g_game.inviteToOwnChannel(widget:getText()) end)
-    menu:addOption(tr('Exclude from private chat'), function() g_game.excludeFromOwnChannel(widget:getText()) end)
+    menu:addOption(loc'${GameVipListContextMenuPrivateChatInvite}', function() g_game.inviteToOwnChannel(widget:getText()) end)
+    menu:addOption(loc'${GameVipListContextMenuPrivateChatExclude}', function() g_game.excludeFromOwnChannel(widget:getText()) end)
   end
 
   if not GameVipList.isHiddingOffline() then
-    menu:addOption(tr('Hide offline'), function() GameVipList.hideOffline(true) end)
+    menu:addOption(loc'${GameVipListContextMenuOfflineHide}', function() GameVipList.hideOffline(true) end)
   else
-    menu:addOption(tr('Show offline'), function() GameVipList.hideOffline(false) end)
+    menu:addOption(loc'${GameVipListContextMenuOfflineShow}', function() GameVipList.hideOffline(false) end)
   end
 
   if not(GameVipList.getSortedBy() == 'name') then
-    menu:addOption(tr('Sort by name'), function() GameVipList.sortBy('name') end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', loc'${CorelibInfoName}':lower()), function() GameVipList.sortBy('name') end)
   end
 
   if not(GameVipList.getSortedBy() == 'status') then
-    menu:addOption(tr('Sort by status'), function() GameVipList.sortBy('status') end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', loc'${CorelibInfoStatus}':lower()), function() GameVipList.sortBy('status') end)
   end
 
   if not(GameVipList.getSortedBy() == 'type') then
-    menu:addOption(tr('Sort by type'), function() GameVipList.sortBy('type') end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', loc'${CorelibInfoType}':lower()), function() GameVipList.sortBy('type') end)
   end
 
   menu:display(mousePos)

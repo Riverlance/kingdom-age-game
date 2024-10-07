@@ -1,10 +1,10 @@
-ThingCategoryItem = 0
+ThingCategoryItem     = 0
 ThingCategoryCreature = 1
-ThingCategoryEffect = 2
-ThingCategoryMissile = 3
-ThingInvalidCategory = 4
-ThingExternalTexture = 5
-ThingLastCategory = ThingInvalidCategory
+ThingCategoryEffect   = 2
+ThingCategoryMissile  = 3
+ThingInvalidCategory  = 4
+ThingExternalTexture  = 5
+ThingLastCategory     = ThingInvalidCategory
 
 ThingAttrGround           = 0
 ThingAttrGroundBorder     = 1
@@ -44,7 +44,7 @@ ThingAttrNoMoveAnimation  = 253 -- >= 1010, value = 16
 ThingAttrChargeable       = 254 -- deprecated
 ThingLastAttr             = 255
 
-SpriteMaskRed = 1
-SpriteMaskGreen = 2
-SpriteMaskBlue = 3
+SpriteMaskRed    = 1
+SpriteMaskGreen  = 2
+SpriteMaskBlue   = 3
 SpriteMaskYellow = 4

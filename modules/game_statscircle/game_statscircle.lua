@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameStatsCircle = { }
 
 
@@ -391,14 +393,14 @@ function GameStatsCircle.updateArcsComboBox()
   for arcPos, comboBox in ipairs(arcsComboBox or { }) do
     comboBox:clearOptions()
 
-    comboBox:addOption(tr('None'), Stats.None)
-    comboBox:addOption(tr('Health'), Stats.Health)
+    comboBox:addOption(loc'${CorelibInfoNone}', Stats.None)
+    comboBox:addOption(loc'${GameStatsCircleStatHealth}', Stats.Health)
     if isManaEnabled then
-      comboBox:addOption(tr('Mana'), Stats.Mana)
+      comboBox:addOption(loc'${GameStatsCircleStatMana}', Stats.Mana)
     end
-    comboBox:addOption(tr('Vigor'), Stats.Vigor)
-    comboBox:addOption(tr('Capacity'), Stats.Capacity)
-    comboBox:addOption(tr('Experience'), Stats.Experience)
+    comboBox:addOption(loc'${GameStatsCircleStatVigor}', Stats.Vigor)
+    comboBox:addOption(loc'${GameStatsCircleStatCapacity}', Stats.Capacity)
+    comboBox:addOption(loc'${GameStatsCircleStatExperience}', Stats.Experience)
     comboBox:setCurrentOptionByData(arcSettings[comboBox.arc:getId()])
   end
 end
@@ -406,7 +408,7 @@ end
 function GameStatsCircle.enableOptionsPanel()
   -- Add to options module
   optionPanel = g_ui.loadUI('option_statscircle')
-  ClientOptions.addTab(tr('Stats Circle'), optionPanel, '/images/ui/options/stats_circle')
+  ClientOptions.addTab(loc'${GameStatsCircleTitle}', optionPanel, '/images/ui/options/stats_circle')
 
   -- UI values
   leftArcComboBox   = optionPanel:recursiveGetChildById('leftArcComboBox')
@@ -448,6 +450,6 @@ function GameStatsCircle.disableOptionsPanel()
   fillOpacityScrollbar    = nil
   bgOpacityScrollbar      = nil
 
-  ClientOptions.removeTab(tr('Stats Circle'))
+  ClientOptions.removeTab(loc'${GameStatsCircleTitle}')
   optionPanel = nil
 end

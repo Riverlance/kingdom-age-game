@@ -93,7 +93,7 @@ function UITabBar:removeTab(tab)
 end
 
 function UITabBar:getTab(text)
-  for k,tab in pairs(self.tabs) do
+  for _, tab in pairs(self.tabs) do
     if tab:getText():lower() == text:lower() then
       return tab
     end

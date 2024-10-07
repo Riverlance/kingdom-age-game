@@ -89,7 +89,7 @@ end
 
 function Player:hasVip(creatureName)
   for _, vip in pairs(g_game.getVips()) do
-    if (vip[1] == creatureName) then
+    if vip[1] == creatureName then
       return true
     end
   end
@@ -127,7 +127,7 @@ function Player:getItems(itemId, subType)
   local subType = subType or -1
 
   local items = { }
-  for i=InventorySlotFirst,InventorySlotLast do
+  for i = InventorySlotFirst, InventorySlotLast do
     local item = self:getInventoryItem(i)
     if item and item:getId() == itemId and (subType == -1 or item:getSubType() == subType) then
       table.insert(items, item)
@@ -147,7 +147,7 @@ end
 
 function Player:getItemsCount(itemId)
   local items, count = self:getItems(itemId), 0
-  for i=1,#items do
+  for i = 1, #items do
     count = count + items[i]:getCount()
   end
   return count

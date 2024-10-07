@@ -17,9 +17,9 @@ UIConditionButton.boostColors[3] = '#70B8FF77'
 
 UIConditionButton.boostNames    = { }
 UIConditionButton.boostNames[0] = ''
-UIConditionButton.boostNames[1] = 'None'
-UIConditionButton.boostNames[2] = 'Low'
-UIConditionButton.boostNames[3] = 'High'
+UIConditionButton.boostNames[1] = loc'${CorelibInfoNone}'
+UIConditionButton.boostNames[2] = loc'${GamelibInfoBoostLow}'
+UIConditionButton.boostNames[3] = loc'${GamelibInfoBoostHigh}'
 
 function UIConditionButton.create()
   local button = UIConditionButton.internalCreate()

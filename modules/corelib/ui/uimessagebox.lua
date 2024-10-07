@@ -78,21 +78,21 @@ end
 function displayInfoBox(title, message)
   local messageBox
   local defaultCallback = function() messageBox:ok() end
-  messageBox = UIMessageBox.display(title, message, {{text=tr('Ok'), callback=defaultCallback}}, defaultCallback, defaultCallback)
+  messageBox = UIMessageBox.display(title, message, {{text = loc'${CorelibInfoOk}', callback = defaultCallback}}, defaultCallback, defaultCallback)
   return messageBox
 end
 
 function displayErrorBox(title, message)
   local messageBox
   local defaultCallback = function() messageBox:ok() end
-  messageBox = UIMessageBox.display(title, message, {{text=tr('Ok'), callback=defaultCallback}}, defaultCallback, defaultCallback)
+  messageBox = UIMessageBox.display(title, message, {{text = loc'${CorelibInfoOk}', callback = defaultCallback}}, defaultCallback, defaultCallback)
   return messageBox
 end
 
 function displayCancelBox(title, message)
   local messageBox
   local defaultCallback = function() messageBox:cancel() end
-  messageBox = UIMessageBox.display(title, message, {{text=tr('Cancel'), callback=defaultCallback}}, defaultCallback, defaultCallback)
+  messageBox = UIMessageBox.display(title, message, {{text = loc'${CorelibInfoCancel}', callback = defaultCallback}}, defaultCallback, defaultCallback)
   return messageBox
 end
 
@@ -106,7 +106,7 @@ function displayOkBox(title, message, okCallback)
     end
   end
 
-  messageBox = UIMessageBox.display(title, message, {{text=tr('Ok'), callback=_okCallback}}, _okCallback, _okCallback)
+  messageBox = UIMessageBox.display(title, message, {{text = loc'${CorelibInfoOk}', callback = _okCallback}}, _okCallback, _okCallback)
   return messageBox
 end
 
@@ -127,7 +127,7 @@ function displayOkCancelBox(title, message, okCallback, onCancelCallback)
     end
   end
 
-  messageBox = UIMessageBox.display(title, message, {{text=tr('Ok'), callback=_okCallback}, {text=tr('Cancel'), callback=_cancelCallback}}, _okCallback, _cancelCallback)
+  messageBox = UIMessageBox.display(title, message, {{text = loc'${CorelibInfoOk}', callback = _okCallback}, {text = loc'${CorelibInfoCancel}', callback = _cancelCallback}}, _okCallback, _cancelCallback)
   return messageBox
 end
 
@@ -153,7 +153,7 @@ function displayCustomBox(title, message, buttons, buttonIndexOnEnterCallback, c
     end
   end
 
-  table.insert(buttons, {text=cancelText or tr('Cancel'), callback=_cancelCallback})
+  table.insert(buttons, {text = cancelText or loc'${CorelibInfoCancel}', callback = _cancelCallback})
   messageBox = UIMessageBox.display(title, message, buttons, buttons[buttonIndexOnEnterCallback] and buttons[buttonIndexOnEnterCallback].callback or nil, _cancelCallback, buttonWidth or 80)
   return messageBox
 end

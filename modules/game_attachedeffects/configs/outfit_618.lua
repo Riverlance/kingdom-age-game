@@ -1,7 +1,8 @@
 --[[
     registerThingConfig(thingId, thingType)
     set(attachedEffectId, config)
-]] --
+]]--
+--[[
 local c = AttachedEffectManager.registerThingConfig(ThingCategoryCreature, 618)
 
 c:set(1, {
@@ -27,3 +28,4 @@ c:set(2, {
         print('onDetach in Config: ', effect:getId(), oldOwner:getName())
     end
 })
+]]--

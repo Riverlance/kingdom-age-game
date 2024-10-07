@@ -19,7 +19,7 @@ CreatureButtonMinimapWidget < UIWidget
     text-wrap: true
     text-auto-resize: true
     text-align: center
-    font: verdana-8px-antialised
+    font: sans-8px
     color: #000000
     anchors.top: prev.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter

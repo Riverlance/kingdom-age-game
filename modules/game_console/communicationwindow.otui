@@ -23,19 +23,19 @@ WhiteListLabel < Label
 
 MainWindow
   id: communicationWindow
-  !text: tr('Ignore List')
+  &loc: '${GameConsoleCommunicationWindow}'
   size: 515 410
   @onEscape: self:destroy()
 
   CheckBox
     id: checkboxUseIgnoreList
-    !text: tr('Activate ignore list')
+    &loc: '${GameConsoleCheckboxUseIgnoreList}'
     anchors.left: parent.left
     anchors.top: parent.top
     width: 230
 
   Label
-    !text: tr('Ignored players') .. ':'
+    &loc: '${GameConsoleIgnoredPlayersList}:'
     anchors.left: parent.left
     anchors.top: prev.bottom
     margin-top: 10
@@ -61,27 +61,27 @@ MainWindow
 
   Button
     id: buttonIgnoreAdd
-    !text: tr('Add')
+    &loc: '${CorelibInfoAdd}'
     margin-top: 5
     anchors.top: prev.bottom
     anchors.left: prev.left
 
   Button
     id: buttonIgnoreRemove
-    !text: tr('Remove')
+    &loc: '${CorelibInfoRemove}'
     margin-left: 5
     anchors.top: prev.top
     anchors.left: prev.right
 
   Label
-    !text: tr('Settings of ignore')
+    &loc: '${GameConsoleIgnoreSettings}'
     anchors.left: parent.left
     anchors.top: prev.bottom
     margin-top: 20
 
   CheckBox
     id: checkboxIgnorePrivateMessages
-    !text: tr('Ignore Private Messages')
+    &loc: '${GameConsoleCheckboxIgnorePrivateMessages}'
     anchors.left: parent.left
     anchors.top: prev.bottom
     width: 230
@@ -89,7 +89,7 @@ MainWindow
 
   CheckBox
     id: checkboxIgnoreYelling
-    !text: tr('Ignore Yelling')
+    &loc: '${GameConsoleCheckboxIgnoreYelling}'
     anchors.left: parent.left
     anchors.top: prev.bottom
     width: 230
@@ -97,14 +97,14 @@ MainWindow
 
   CheckBox
     id: checkboxUseWhiteList
-    !text: tr('Activate allowed list')
+    &loc: '${GameConsoleCheckboxUseWhiteList}'
     anchors.top: parent.top
     anchors.left: ignoreList.right
     margin-left: 20
     width: 230
 
   Label
-    !text: tr('Allowed players') .. ':'
+    &loc: '${GameConsoleAllowedPlayersList}:'
     anchors.top: prev.bottom
     anchors.left: prev.left
     margin-top: 10
@@ -130,27 +130,27 @@ MainWindow
 
   Button
     id: buttonWhitelistAdd
-    !text: tr('Add')
+    &loc: '${CorelibInfoAdd}'
     margin-top: 5
     anchors.top: prev.bottom
     anchors.left: prev.left
 
   Button
     id: buttonWhitelistRemove
-    !text: tr('Remove')
+    &loc: '${CorelibInfoRemove}'
     margin-left: 5
     anchors.top: prev.top
     anchors.left: prev.right
 
   Label
-    !text: tr('Settings of allowed')
+    &loc: '${GameConsoleAllowedSettings}'
     anchors.left: whiteList.left
     anchors.top: prev.bottom
     margin-top: 20
 
   CheckBox
     id: checkboxAllowVIPs
-    !text: tr('Allow VIPs to message you')
+    &loc: '${GameConsoleCheckboxAllowVIPs}'
     anchors.left: prev.left
     anchors.top: prev.bottom
     width: 230
@@ -168,14 +168,14 @@ MainWindow
 
       Button
         id: buttonSave
-        !text: tr('Save')
+        &loc: '${GameConsoleButtonSave}'
         width: 75
         anchors.top: parent.top
         anchors.left: parent.left
 
       Button
         id: buttonCancel
-        !text: tr('Cancel')
+        &loc: '${CorelibInfoCancel}'
         width: 75
         anchors.top: parent.top
         anchors.left: prev.right

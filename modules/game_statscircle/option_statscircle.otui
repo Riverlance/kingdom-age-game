@@ -2,8 +2,8 @@ Panel
 
   OptionLabel
     id: leftArcLabel
-    !text: tr('Left')
-    !tooltip: tr('Choose the stat to show on the left arc.')
+    &loc: '${GameStatsCircleOptionLeft}'
+    &loct: '${GameStatsCircleOptionLeftTooltip}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -23,8 +23,8 @@ Panel
 
   OptionLabel
     id: rightArcLabel
-    !text: tr('Right')
-    !tooltip: tr('Choose the stat to show on the right arc.')
+    &loc: '${GameStatsCircleOptionRight}'
+    &loct: '${GameStatsCircleOptionRightTooltip}'
     $!first:
       anchors.top: leftArcLabel.top
       margin-top: 0
@@ -47,8 +47,8 @@ Panel
 
   OptionLabel
     id: topArcLabel
-    !text: tr('Top')
-    !tooltip: tr('Choose the stat to show on the top arc.')
+    &loc: '${GameStatsCircleOptionTop}'
+    &loct: '${GameStatsCircleOptionTopTooltip}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -68,8 +68,8 @@ Panel
 
   OptionLabel
     id: bottomArcLabel
-    !text: tr('Bottom')
-    !tooltip: tr('Choose the stat to show on the bottom arc.')
+    &loc: '${GameStatsCircleOptionBottom}'
+    &loct: '${GameStatsCircleOptionBottomTooltip}'
     $!first:
       anchors.top: topArcLabel.top
       margin-top: 0
@@ -92,8 +92,8 @@ Panel
 
   OptionLabel
     id: sizeLabel
-    !text: tr('Size')
-    !tooltip: tr('Set arcs size.')
+    &loc: '${GameStatsCircleOptionSize}'
+    &loct: '${GameStatsCircleOptionSizeTooltip}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -110,8 +110,8 @@ Panel
 
   OptionLabel
     id: distFromCenLabel
-    !text: tr('Distance')
-    !tooltip: tr('Set arcs distance from center.')
+    &loc: '${CorelibInfoDistance}'
+    &loct: '${GameStatsCircleOptionDistanceTooltip}'
     $!first:
       anchors.top: sizeLabel.top
       margin-top: 0
@@ -131,8 +131,8 @@ Panel
 
   OptionLabel
     id: fillOpacityLabel
-    !text: tr('Fill opacity')
-    !tooltip: tr('Set fill opacity.')
+    &loc: '${GameStatsCircleOptionFillOpacity}'
+    &loct: '${GameStatsCircleOptionFillOpacityTooltip}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -149,8 +149,8 @@ Panel
 
   OptionLabel
     id: bgOpacityLabel
-    !text: tr('Background opacity')
-    !tooltip: tr('Set background opacity.')
+    &loc: '${GameStatsCircleOptionBackgroundOpacity}'
+    &loct: '${GameStatsCircleOptionBackgroundOpacityTooltip}'
     $!first:
       anchors.top: fillOpacityLabel.top
       margin-top: 0
@@ -170,8 +170,8 @@ Panel
 
   OptionCheckBox
     id: gameScreenBasedCheckBox
-    !text: tr('Game screen based')
-    !tooltip: tr('Set arcs size based on game screen.')
+    &loc: '${GameStatsCircleOptionGameScreenBased}'
+    &loct: '${GameStatsCircleOptionGameScreenBasedTooltip}'
     $!first:
       margin-top: 10
     @onCheckChange: GameStatsCircle.setGameScreenBased(self:isChecked())

@@ -1,4 +1,8 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameTracker = { }
+
+
 
 TrackingInfo = {
   Id       = 1,
@@ -11,35 +15,45 @@ TrackingInfo = {
   Paused   = 252,
   Start    = 253,
   Stop     = 254,
-  MsgEnd   = 255
+  MsgEnd   = 255,
 }
 
 trackList = { }
 
+
+
 function GameTracker.init()
   GameTracker.m = modules.ka_game_tracker -- Alias
+
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeTracking, GameTracker.parseTrack)
+
   connect(g_game, {
     onGameEnd = GameTracker.onGameEnd,
     onClickStartTrackPosition = GameTracker.startTrackPosition
   })
+
   connect(LocalPlayer, { onPositionChange = GameTracker.onLocalPlayerPositionChange })
 end
 
 function GameTracker.terminate()
   GameTracker.onGameEnd()
+
   disconnect(LocalPlayer, { onPositionChange = GameTracker.onLocalPlayerPositionChange })
+
   disconnect(g_game, {
     onGameEnd = GameTracker.onGameEnd,
     onClickStartTrackPosition = GameTracker.startTrackPosition
   })
+
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeTracking)
+
   _G.GameTracker = nil
 end
 
 function GameTracker.getTrackList()
   return trackList
 end
+
 
 
 --[[ Client Events ]]
@@ -59,6 +73,7 @@ function GameTracker.onLocalPlayerPositionChange()
     end
   end
 end
+
 
 
 --[[ Network ]]
@@ -86,8 +101,10 @@ function GameTracker.parseTrack(protocol, msg)
   if not protocolGame then
     return
   end
+
   local trackNode = { }
   trackNode.status = msg:getU8()
+
   while true do
     local flag = msg:getU8()
     if flag == TrackingInfo.Id then
@@ -105,13 +122,16 @@ function GameTracker.parseTrack(protocol, msg)
     elseif flag == TrackingInfo.MsgEnd then
       break
     else
-      print_traceback(tr('[GameTracker.onParseTrack] Error with flag %d', flag))
+      print_traceback(f('[GameTracker.parseTrack] Error with flag %d', flag))
       break
     end
   end
+
   GameTracker.onTrack(trackNode)
+
   return true
 end
+
 
 
 --[[ Track Events ]]
@@ -161,6 +181,7 @@ function GameTracker.onTrackEnd(trackNode)
 end
 
 
+
 --[[ Track Creatures ]]
 
 function Creature:getTrackInfo()
@@ -186,6 +207,7 @@ function GameTracker.toggleTracking(creature)
     GameTracker.stopTrackCreature(creature)
   end
 end
+
 
 
 --[[ Track Position ]]
@@ -215,6 +237,7 @@ function GameTracker.stopTrackPosition(position)
     end
   end
 end
+
 
 
 --[[ Track Window ]]
@@ -260,5 +283,4 @@ function GameTracker.createEditTrackWindow(trackNode)
   red.onValueChange = updateColor
   green.onValueChange = updateColor
   blue.onValueChange = updateColor
-
 end

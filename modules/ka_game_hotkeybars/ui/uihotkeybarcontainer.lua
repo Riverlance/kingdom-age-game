@@ -27,29 +27,33 @@ end
 function UIHotkeyBarContainer:updateLook()
   local keySettings = self.settings
   if not keySettings then
-    g_logger.error(tr('[UIHotkeyBarContainer.updateLook] missing field `settings` (%s)', self:getId()))
+    g_logger.error(f('[UIHotkeyBarContainer.updateLook] missing field `settings` (%s)', self:getId()))
     return
   end
 
-  --reset look
+  -- reset look
+
   local hasTooltip = true
   local tooltipText = ''
   self:setText('')
+
   local itemWidget = self:getChildById('item')
   itemWidget:setVisible(false)
+
   local powerWidget = self:getChildById('power')
   powerWidget:setVisible(false)
 
-  --update look
+  -- update look
+
   if string.exists(keySettings.keyCombo) then
-    tooltipText = tr('[%s]', keySettings.keyCombo)
+    tooltipText = f('[%s]', keySettings.keyCombo)
   else
     hasTooltip = false
   end
 
   if string.exists(keySettings.text) then
     self:setText('(...)')
-    tooltipText = tr('%s Send message%s:\n%s', tooltipText, keySettings.autoSend and ' (auto)' or '', keySettings.text)
+    tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerTooltipSendMessage}%s:\n%s', tooltipText, keySettings.autoSend and loc' (${GameHotkeyBarsInfoContainerTooltipAuto})' or '', keySettings.text)
 
     self:setTooltip(hasTooltip and tooltipText or '', TooltipType.textBlock)
 
@@ -59,7 +63,7 @@ function UIHotkeyBarContainer:updateLook()
 
     local power = GamePowers.getPowerInfo(keySettings.powerId)
     if power and power.name and power.level then
-      tooltipText = tr('%s %s (level %d)', tooltipText, power.name, power.level)
+      tooltipText = f(loc'%s %s (${GameHotkeyBarsInfoContainerTooltipLevel})', tooltipText, power.name, power.level)
     end
 
     self:setTooltip(hasTooltip and tooltipText or '')
@@ -69,13 +73,13 @@ function UIHotkeyBarContainer:updateLook()
     itemWidget:setItemId(keySettings.itemId)
     itemWidget:setItemSubType(keySettings.subType)
     if keySettings.useType == HotkeyItemUseType.Default then
-      tooltipText = tr('%s Use item', tooltipText)
+      tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseItem}', tooltipText)
     elseif keySettings.useType == HotkeyItemUseType.Self then
-      tooltipText = tr('%s Use on yourself', tooltipText)
+      tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseOnYourself}', tooltipText)
     elseif keySettings.useType == HotkeyItemUseType.Target then
-      tooltipText = tr('%s Use on target', tooltipText)
+      tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseOnTarget}', tooltipText)
     elseif keySettings.useType == HotkeyItemUseType.Crosshair then
-      tooltipText = tr('%s Use with', tooltipText)
+      tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseWith}', tooltipText)
     end
 
     self:setTooltip(hasTooltip and tooltipText or '')
@@ -87,9 +91,11 @@ end
 
 function UIHotkeyBarContainer:onHoverChange(hovered)
   UIWidget.onHoverChange(self, hovered)
+
   if g_ui.getDraggingWidget() then
     if not hovered and self:containsPoint(g_window.getMousePosition()) then
       self:getParentBar():resetTempContainer()
+
     else
       self:getParentBar():onHoverChange(hovered)
     end
@@ -100,12 +106,15 @@ function UIHotkeyBarContainer:onDragEnter(mousePos)
   self:setOpacity(0.5)
   self:setBorderWidth(1)
   g_mouse.pushCursor('target')
+
   local keySettings = self.settings
   if tonumber(keySettings.itemId) then
     g_mouseicon.displayItem(Item.create(keySettings.itemId))
+
   elseif tonumber(keySettings.powerId) then
     g_mouseicon.display(f('/images/ui/power/%d_off', keySettings.powerId))
   end
+
   return true
 end
 
@@ -114,10 +123,12 @@ function UIHotkeyBarContainer:onDragLeave(droppedWidget, mousePos)
   self:setBorderWidth(0)
   g_mouseicon.hide()
   g_mouse.popCursor('target')
+
   if not droppedWidget or droppedWidget ~= self:getParentBar() then
     self:getParentBar():removeHotkey(self.settings.keyCombo)
     g_sounds.getChannel(AudioChannels.Gui):play(f('%s/power_popout.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   end
+
   return true
 end
 
@@ -167,6 +178,7 @@ function UIHotkeyBarContainer:onCancelPower()
 end
 
 --[[ Power Effects ]]
+
 function UIHotkeyBarContainer:setPowerIcon(powerId, enabled)
   local path = f('/images/ui/power/%d_%s', powerId, enabled and 'on' or 'off')
   self:getChildById('power'):setImageSource(path)

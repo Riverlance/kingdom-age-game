@@ -288,7 +288,7 @@ function g_tooltip.init()
 
         -- Name
         local nameLabel = self.widget:getChildById('name')
-        nameLabel:setText(string.exists(power.name) and power.name or 'Unknown')
+        nameLabel:setText(string.exists(power.name) and power.name or loc'${CorelibTooltipInfoUnknown}')
 
         -- Class icon
         local classIconWidget = self.widget:getChildById('classIcon')
@@ -331,13 +331,13 @@ function g_tooltip.init()
         -- Cooldown
         cooldownValueWidget:setTextAlign(AlignRight)
         cooldownValueWidget:setTextWrap(true)
-        cooldownValueWidget:setText(f('%s second%s', exhaustTime, exhaustTime > 1 and 's' or ''))
+        cooldownValueWidget:setText(f(loc'${CorelibTooltipInfoSeconds}', exhaustTime))
         cooldownValueWidget:resizeToText()
 
         -- Premium
         premiumValueWidget:setTextAlign(AlignRight)
         premiumValueWidget:setTextWrap(true)
-        premiumValueWidget:setText(power.premium and 'Yes' or 'No')
+        premiumValueWidget:setText(power.premium and loc'${CorelibInfoYes}' or loc'${CorelibInfoNo}')
         premiumValueWidget:resizeToText()
 
         -- Description
@@ -465,7 +465,7 @@ function g_tooltip.init()
         -- Combat value
         local combatValueWidget = self.widget:getChildById('combatValue')
         combatValueWidget:setTextAlign(AlignRight)
-        combatValueWidget:setText(c.aggressive and 'Aggressive' or 'Non-Aggressive')
+        combatValueWidget:setText(c.aggressive and loc'${CorelibTooltipInfoAggressive}' or loc'${CorelibTooltipInfoNonAggressive}')
 
         -- Boost
         boostValueWidget:setTextAlign(AlignRight)

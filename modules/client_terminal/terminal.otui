@@ -29,7 +29,7 @@ UIWindow
 
   Label
     id: titleBar
-    !text: tr('Terminal')
+    &loc: '${ClientTerminalTitleBar}'
     border: 1 black
     color: white
     anchors.top: parent.top
@@ -43,7 +43,7 @@ UIWindow
 
   Button
     id: clearButton
-    !tooltip: tr('Clear terminal')
+    &loct: '${ClientTerminalClearButton}'
     width: 18
     icon: /images/ui/console/clear_channel
     anchors.top: prev.top

@@ -4,20 +4,20 @@ PartyTabButton < TabButton
 
 MiniWindow
   id: partyWindow
-  !text: tr('Party List')
+  &loc: '${GamePartyListWindowTitle}'
   icon: /images/ui/top_menu/party_list
   &save: true
   // Cool size when the panel has 4 slots
   &contentMinimumHeight: 45
 
   ArrowMenuButton
-    !tooltip: tr('Show options')
+    !tooltip: loc'${CorelibInfoShowOptions}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
     @onClick: GamePartyList.onClickArrowMenuButton(self)
 
     $on:
-      !tooltip: tr('Hide options')
+      !tooltip: loc'${CorelibInfoHideOptions}'
 
   BallMenuButton
     id: sortMenuButton
@@ -72,94 +72,94 @@ MiniWindow
 
       PartyTabButton
         id: filterKnightPlayers
-        !tooltip: tr('Show knight players')
+        !tooltip: loc'${GamePartyListFilterKnightPlayersShow}'
         icon-clip: 40 0 20 20
         @onClick: GamePartyList.onClickFilterKnightPlayers(self)
 
         $on:
-          !tooltip: tr('Hide knight players')
+          !tooltip: loc'${GamePartyListFilterKnightPlayersHide}'
           icon-clip: 40 20 20 20
 
       PartyTabButton
         id: filterPaladinPlayers
-        !tooltip: tr('Show paladin players')
+        !tooltip: loc'${GamePartyListFilterPaladinPlayersShow}'
         icon-clip: 60 0 20 20
         @onClick: GamePartyList.onClickFilterPaladinPlayers(self)
 
         $on:
-          !tooltip: tr('Hide paladin players')
+          !tooltip: loc'${GamePartyListFilterPaladinPlayersHide}'
           icon-clip: 60 20 20 20
 
       PartyTabButton
         id: filterArcherPlayers
-        !tooltip: tr('Show archer players')
+        !tooltip: loc'${GamePartyListFilterArcherPlayersShow}'
         icon-clip: 80 0 20 20
         @onClick: GamePartyList.onClickFilterArcherPlayers(self)
 
         $on:
-          !tooltip: tr('Hide archer players')
+          !tooltip: loc'${GamePartyListFilterArcherPlayersHide}'
           icon-clip: 80 20 20 20
 
       PartyTabButton
         id: filterAssassinPlayers
-        !tooltip: tr('Show assassin players')
+        !tooltip: loc'${GamePartyListFilterAssassinPlayersShow}'
         icon-clip: 100 0 20 20
         @onClick: GamePartyList.onClickFilterAssassinPlayers(self)
 
         $on:
-          !tooltip: tr('Hide assassin players')
+          !tooltip: loc'${GamePartyListFilterAssassinPlayersHide}'
           icon-clip: 100 20 20 20
 
       PartyTabButton
         id: filterWizardPlayers
-        !tooltip: tr('Show wizard players')
+        !tooltip: loc'${GamePartyListFilterWizardPlayersShow}'
         icon-clip: 120 0 20 20
         @onClick: GamePartyList.onClickFilterWizardPlayers(self)
 
         $on:
-          !tooltip: tr('Hide wizard players')
+          !tooltip: loc'${GamePartyListFilterWizardPlayersHide}'
           icon-clip: 120 20 20 20
 
       PartyTabButton
         id: filterBardPlayers
-        !tooltip: tr('Show bard players')
+        !tooltip: loc'${GamePartyListFilterBardPlayersShow}'
         icon-clip: 140 0 20 20
         @onClick: GamePartyList.onClickFilterBardPlayers(self)
 
         $on:
-          !tooltip: tr('Hide bard players')
+          !tooltip: loc'${GamePartyListFilterBardPlayersHide}'
           icon-clip: 140 20 20 20
 
       PartyTabButton
         id: filterPlayers
-        !tooltip: tr('Show players')
+        !tooltip: loc'${GamePartyListFilterPlayersShow}'
         icon-clip: 0 0 20 20
         @onClick: GamePartyList.onClickFilterPlayers(self)
 
         $on:
-          !tooltip: tr('Hide players')
+          !tooltip: loc'${GamePartyListFilterPlayersHide}'
           icon-clip: 0 20 20 20
 
       PartyTabButton
         id: filterSummons
-        !tooltip: tr('Show summons')
+        !tooltip: loc'${GamePartyListFilterSummonsShow}'
         icon-clip: 20 0 20 20
         @onClick: GamePartyList.onClickFilterSummons(self)
 
         $on:
-          !tooltip: tr('Hide summons')
+          !tooltip: loc'${GamePartyListFilterSummonsHide}'
           icon-clip: 20 20 20 20
 
   MiniWindowContents
 
     Label
       id: inviteeLabel
-      !text: tr('Invitees')
-      !tooltip: tr('Players that did not accept your request yet')
+      &loc: '${GamePartyListInviteeLabel}'
+      &loct: '${GamePartyListInviteeLabelTooltip}'
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      font: verdana-8px-antialised
+      font: sans-8px
       text-offset: 4 1
       phantom: false
 
@@ -206,12 +206,12 @@ MiniWindow
 
     Label
       id: partyLabel
-      !text: tr('Members')
-      !tooltip: tr('Effective party members and their summons')
+      &loc: '${GamePartyListPartyLabel}'
+      &loct: '${GamePartyListPartyLabelTooltip}'
       anchors.top: prev.outsideBottom
       anchors.left: parent.left
       anchors.right: parent.right
-      font: verdana-8px-antialised
+      font: sans-8px
       text-offset: 4 1
       phantom: false
 

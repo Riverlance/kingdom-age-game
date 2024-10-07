@@ -2,21 +2,21 @@ Panel
 
   OptionCheckBox
     id: enableAudio
-    !text: tr('Enable audio')
-    !tooltip: tr('Allows music and ambient/effect/voice/GUI sounds to be enabled.')
+    &loc: '${ClientOptionsEnableAudio}'
+    &loct: '${ClientOptionsEnableAudioTooltip}'
     !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
 
   OptionCheckBox
     id: enableMusic
-    !text: tr('Enable music')
+    &loc: '${ClientOptionsEnableMusic}'
     $!first:
       margin-top: 10
 
   OptionLabel
     id: musicVolumeLabel
-    !text: tr('Music volume')
+    &loc: '${ClientOptionsMusicVolumeLabel}'
 
   OptionScrollbar
     id: musicVolume
@@ -28,13 +28,13 @@ Panel
 
   OptionCheckBox
     id: enableSoundAmbient
-    !text: tr('Enable ambient sounds')
+    &loc: '${ClientOptionsEnableSoundAmbient}'
     $!first:
       margin-top: 10
 
   OptionLabel
     id: soundAmbientVolumeLabel
-    !text: tr('Ambient sounds volume')
+    &loc: '${ClientOptionsSoundAmbientVolumeLabel}'
 
   OptionScrollbar
     id: soundAmbientVolume
@@ -46,13 +46,13 @@ Panel
 
   OptionCheckBox
     id: enableSoundEffect
-    !text: tr('Enable effect sounds')
+    &loc: '${ClientOptionsEnableSoundEffect}'
     $!first:
       margin-top: 10
 
   OptionLabel
     id: soundEffectVolumeLabel
-    !text: tr('Effect sounds volume')
+    &loc: '${ClientOptionsSoundEffectVolumeLabel}'
 
   OptionScrollbar
     id: soundEffectVolume
@@ -64,13 +64,13 @@ Panel
 
   OptionCheckBox
     id: enableSoundVoice
-    !text: tr('Enable voice sounds')
+    &loc: '${ClientOptionsEnableSoundVoice}'
     $!first:
       margin-top: 10
 
   OptionLabel
     id: soundVoiceVolumeLabel
-    !text: tr('Voice sounds volume')
+    &loc: '${ClientOptionsSoundVoiceVolumeLabel}'
 
   OptionScrollbar
     id: soundVoiceVolume
@@ -82,13 +82,13 @@ Panel
 
   OptionCheckBox
     id: enableSoundGui
-    !text: tr('Enable GUI sounds')
+    &loc: '${ClientOptionsEnableSoundGui}'
     $!first:
       margin-top: 10
 
   OptionLabel
     id: soundGuiVolumeLabel
-    !text: tr('GUI sounds volume')
+    &loc: '${ClientOptionsSoundGuiVolumeLabel}'
 
   OptionScrollbar
     id: soundGuiVolume

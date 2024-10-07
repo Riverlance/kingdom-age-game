@@ -1,10 +1,10 @@
 UIHotkeyBar = extends(UIWidget, 'UIHotkeyBar')
 
-local containersLimit = 10
-local defaultTooltip = 'Drag hotkeys (%s), items or powers (%s) to this bar.'
+local containersLimit       = 10
+local defaultTooltip        = loc'${GameHotkeyBarsDefaultTooltip}'
 local hotkeyManagerKeyCombo = 'Ctrl+K'
-local powerListKeyCombo = 'Ctrl+Shift+P'
-local allowedDrops = {'UIHotkeyLabel', 'UIHotkeyBarContainer', 'UIPowerButton', 'UIItem', 'UIGameMap'}
+local powerListKeyCombo     = 'Ctrl+Shift+P'
+local allowedDrops          = { 'UIHotkeyLabel', 'UIHotkeyBarContainer', 'UIPowerButton', 'UIItem', 'UIGameMap' }
 
 local BGColors = {
   Open        = '#00000077',
@@ -16,7 +16,7 @@ function UIHotkeyBar.create()
   local obj = UIHotkeyBar.internalCreate()
   obj:setId('hotkeybar_none')
   obj.hotkeyList = { }
-  obj:setTooltip(tr(defaultTooltip, hotkeyManagerKeyCombo, powerListKeyCombo), TooltipType.textBlock)
+  obj:setTooltip(f(defaultTooltip, hotkeyManagerKeyCombo, powerListKeyCombo), TooltipType.textBlock)
   return obj
 end
 
@@ -46,12 +46,15 @@ function UIHotkeyBar:load(settings)
 
   self:setup(settings.visible)
   settings.visible = nil
+
   local hotkeyList = {}
-  --preload
+
+  -- Preload
   for index, keyCombo in pairs(settings) do
     hotkeyList[tonumber(index)] = tostring(keyCombo)
   end
-  --create widgets
+
+  -- Create widgets
   local index = 1
   for _, keyCombo in ipairs(hotkeyList) do
     local keySettings = GameHotkeys.getHotkey(keyCombo)
@@ -60,7 +63,7 @@ function UIHotkeyBar:load(settings)
       self:addHotkey(index, keySettings)
       index = index + 1
     else
-      print("Hotkey '" .. keyCombo .. "' does not exist.")
+      perror(f("Hotkey '%s' does not exist.", keyCombo))
     end
   end
 end
@@ -75,7 +78,7 @@ function UIHotkeyBar:setup(visible)
   self:setBackgroundColor(bg)
   self:getHotkeyList():setVisible(visible)
   self.visibilityButton:setOn(visible)
-  self.visibilityButton:setTooltip(visible and 'Hide Hotkey Bar' or 'Show Hotkey Bar')
+  self.visibilityButton:setTooltip(visible and loc'${GameHotkeyBarsButtonVisibilityHide}' or loc'${GameHotkeyBarsButtonVisibilityShow}')
 end
 
 function UIHotkeyBar:toggle()
@@ -153,13 +156,15 @@ end
 
 function UIHotkeyBar:onAssignHotkey(keySettings, applied, hotkeyWidget)
   if not keySettings then
-    print("Error: no keySettings!")
+    perror("Error: no keySettings!")
     return
   end
+
   if not hotkeyWidget then
     hotkeyWidget = self.tempContainer
     hotkeyWidget.locked = false
   end
+
   if hotkeyWidget then
     if applied then
       local keyCombo = keySettings.keyCombo
@@ -175,6 +180,7 @@ function UIHotkeyBar:onAssignHotkey(keySettings, applied, hotkeyWidget)
       self.hotkeyList[keyCombo] = hotkeyWidget
       hotkeyWidget:updateLook()
       self.tempContainer = nil
+
     elseif self.tempContainer then
       self.tempContainer.locked = false
       self:resetTempContainer()
@@ -182,18 +188,21 @@ function UIHotkeyBar:onAssignHotkey(keySettings, applied, hotkeyWidget)
   end
 end
 
-
 function UIHotkeyBar:configHotkey(widget)
   local keySettings = {}
   local widgetClass = widget:getClassName()
+
   if widgetClass == 'UIPowerButton' then
     keySettings.powerId = widget.power.id
+
   elseif widgetClass == 'UIItem' then
     keySettings.itemId = widget:getItemId()
     keySettings.subType = widget:getItemSubType()
+
     if widget:getItem():isMultiUse() then
       keySettings.useType = HotkeyItemUseType.Crosshair
     end
+
   elseif widgetClass == 'UIGameMap' then
     local item = widget.currentDragThing
     if item:isPickupable() then
@@ -203,13 +212,14 @@ function UIHotkeyBar:configHotkey(widget)
         keySettings.useType = HotkeyItemUseType.Crosshair
       end
     end
+
   elseif widgetClass == 'UIHotkeyLabel' or widgetClass == 'UIHotkeyBarContainer' then
     keySettings = widget.settings
   end
+
   keySettings.hotkeyBarId = self.id
   return keySettings
 end
-
 
 function UIHotkeyBar:removeHotkey(keyCombo)
   if self.hotkeyList[keyCombo] then
@@ -225,11 +235,12 @@ function UIHotkeyBar:resetTempContainer()
   end
 end
 
---mouse events
+-- mouse events
 
 function UIHotkeyBar:onHoverChange(hovered)
   UIWidget.onHoverChange(self, hovered)
   self.visibilityButton:setOpacity(hovered and 1 or 0)
+
   local mousePos = g_window.getMousePosition()
   if not hovered then
     if not self:containsPoint(mousePos) then
@@ -237,26 +248,28 @@ function UIHotkeyBar:onHoverChange(hovered)
     end
     return
   end
+
   local draggingWidget = g_ui.getDraggingWidget()
   if not draggingWidget then
     self:resetTempContainer()
     return
   end
-  if not self:canAcceptDrop(draggingWidget) then
+
+  if not self:canAcceptDrop(draggingWidget) or self.tempContainer then
     return
   end
-  if self.tempContainer then
-    return
-  end
+
   local index = self:getIndexByPos(mousePos)
   local widgetClass = draggingWidget:getClassName()
   if widgetClass == 'UIHotkeyBarContainer' and draggingWidget:getParentBar() == self then
     return
+
   elseif widgetClass == 'UIGameMap' then
     if not draggingWidget.currentDragThing:isPickupable() then
       return
     end
   end
+
   local keySettings = self:configHotkey(draggingWidget)
   self:addHotkey(index, keySettings)
 end
@@ -268,6 +281,7 @@ function UIHotkeyBar:onMouseMove(mousePos, mouseMoved)
     if draggingWidget:getClassName() == 'UIHotkeyBarContainer' and draggingWidget:getParentBar() == self then
       moveWidget = draggingWidget
     end
+
     if moveWidget and not moveWidget.locked then --only drag and drop
       local parent = moveWidget:getParent()
       local index =  self:getIndexByPos(mousePos)
@@ -275,28 +289,35 @@ function UIHotkeyBar:onMouseMove(mousePos, mouseMoved)
         parent:moveChildToIndex(moveWidget, index)
       end
     end
+
     return
   end
+
   self:resetTempContainer()
 end
 
 function UIHotkeyBar:onDrop(widget, mousePos)
   self:updateDraggable(self:isOn())
+
   if not self.tempContainer then
     return true
+
   elseif not self:canAcceptDrop(widget) then
     return false
   end
+
   local keySettings = self.tempContainer.settings
   if keySettings.keyCombo then
     self:onAssignHotkey(keySettings, true)
     if keySettings.powerId then
       g_sounds.getChannel(AudioChannels.Gui):play(f('%s/power_drop.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
     end
+
   else
     self.tempContainer.locked = true
     GameHotkeys.assignHotkey(keySettings)
   end
+
   return true
 end
 
@@ -304,22 +325,26 @@ function UIHotkeyBar:canAcceptDrop(widget)
   if not widget then
     return false
   end
+
   if widget:getId() == 'itemPreview' then
     return false
   end
+
   if not self.visibilityButton:isOn() then
     return false
   end
+
   if not table.contains(allowedDrops, widget:getClassName()) then
     return false
   end
+
   if self.tempContainer and self.tempContainer.locked then
     return false
   end
   return true
 end
 
---update functions
+-- update functions
 function UIHotkeyBar:updateHotkey(hotkey)
   if not hotkey or not hotkey.settings then
     local children = self:getHotkeyList():getChildren()

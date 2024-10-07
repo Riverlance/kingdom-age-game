@@ -1,4 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameSkills = { }
+
+
+
+local GameSkillsActionKey = 'Ctrl+T'
 
 
 
@@ -6,6 +12,8 @@ skillsWindow = nil
 skillsTopMenuButton = nil
 
 contentsPanel = nil
+
+
 
 function GameSkills.init()
   -- Alias
@@ -25,13 +33,13 @@ function GameSkills.init()
   })
 
   skillsWindow = g_ui.loadUI('skills')
-  skillsTopMenuButton = ClientTopMenu.addRightGameToggleButton('skillsTopMenuButton', tr('Stats') .. ' (Ctrl+T)', '/images/ui/top_menu/skills', GameSkills.toggle)
+  skillsTopMenuButton = ClientTopMenu.addRightGameToggleButton('skillsTopMenuButton', { loct = '${GameSkillsWindowTitle} (${GameSkillsActionKey})', locpar = { GameSkillsActionKey = GameSkillsActionKey } }, '/images/ui/top_menu/skills', GameSkills.toggle)
 
   skillsWindow.topMenuButton = skillsTopMenuButton
 
   contentsPanel = skillsWindow:getChildById('contentsPanel')
 
-  g_keyboard.bindKeyDown('Ctrl+T', GameSkills.toggle)
+  g_keyboard.bindKeyDown(GameSkillsActionKey, GameSkills.toggle)
 
   if g_game.isOnline() then
     GameSkills.online()
@@ -52,7 +60,7 @@ function GameSkills.terminate()
     onGameEnd   = GameSkills.offline
   })
 
-  g_keyboard.unbindKeyDown('Ctrl+T')
+  g_keyboard.unbindKeyDown(GameSkillsActionKey)
   skillsTopMenuButton:destroy()
   skillsWindow:destroy()
 
@@ -242,11 +250,11 @@ function GameSkills.onSkillButtonClick(button)
 end
 
 function GameSkills.onExperienceChange(localPlayer, value)
-  GameSkills.setSkillValue('experience', tr(value))
+  GameSkills.setSkillValue('experience', loc(value))
 end
 
 function GameSkills.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
-  GameSkills.setSkillValue('level', tr(level))
+  GameSkills.setSkillValue('level', loc(level))
   GameSkills.setSkillPercent('level', levelPercent, getExperienceTooltipText(localPlayer, level, levelPercent))
 end
 
@@ -260,11 +268,11 @@ function GameSkills.onStaminaChange(localPlayer, stamina)
   GameSkills.setSkillValue('stamina', hours .. ':' .. minutes)
 
   local percent = math.floor(100 * stamina / (42 * 60)) -- max is 42 hours
-  local text    = tr('Remaining %s%% (%s hours and %s minutes).', percent, hours, minutes)
+  local text    = f(loc'${GameSkillsStaminaRemainingTime}', percent, hours, minutes)
   if stamina <= 840 and stamina > 0 then -- red phase
-    text = f('%s\n%s', text, tr('You are receiving only 50%% of experience and you may not receive loot from monsters.'))
+    text = f('%s\n%s', text, f(loc'${GameSkillsStaminaExpNerf}'))
   elseif stamina == 0 then
-    text = f('%s\n%s', text, tr('You may not receive experience and loot from monsters.'))
+    text = f('%s\n%s', text, f(loc'${GameSkillsStaminaExpLootLock}'))
   end
   GameSkills.setSkillPercent('stamina', percent, text)
 end
@@ -285,7 +293,7 @@ function GameSkills.onRegenerationChange(localPlayer, time)
 end
 
 function GameSkills.onSpeedChange(localPlayer, speed)
-  GameSkills.setSkillValue('speed', tr(speed * 2))
+  GameSkills.setSkillValue('speed', loc(speed * 2))
 
   GameSkills.onBaseSpeedChange(localPlayer, localPlayer:getBaseSpeed())
 end

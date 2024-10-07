@@ -45,6 +45,11 @@ function quit()
   g_app.quit()
 end
 
+function restart()
+  g_platform.spawnProcess('Kingdom Age Online.exe', { })
+  exit()
+end
+
 function connect(object, arg1, arg2, arg3)
   local signalsAndSlots
   local pushFront
@@ -342,10 +347,6 @@ function signalcall(param, ...)
     error('attempt to call a non function value')
   end
   return false
-end
-
-function tr(s, ...)
-  return f(s, ...)
 end
 
 function getOppositeAnchor(anchor)

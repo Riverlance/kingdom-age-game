@@ -44,7 +44,8 @@ CharacterWidget < UIWidget
 
 MainWindow
   id: charactersWindow
-  !text: tr('Character List')
+  // &loc is not working in here, so I used `!text: loc'...'`
+  !text: loc'${CharacterListTitle}'
   visible: false
   draggable: false
   @onEnter: ClientCharacterList.doLogin()
@@ -81,7 +82,7 @@ MainWindow
 
   Label
     id: accountStatusCaption
-    !text: tr('Account Status') .. ':'
+    &loc: '${CharacterListAccountStatusLabel}:'
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: next.top
@@ -89,7 +90,7 @@ MainWindow
 
   Label
     id: accountStatusLabel
-    !text: tr('Free Account')
+    &loc: '${CharacterListAccountStatusValueFree}'
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: separator.top
@@ -108,7 +109,7 @@ MainWindow
 
   Button
     id: buttonOk
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -117,7 +118,7 @@ MainWindow
 
   Button
     id: buttonCancel
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom

@@ -1,9 +1,11 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameUnjustifiedPoints = { }
 
 
 
 local updateTime = 1 -- seconds
-local shortcut = 'Ctrl+U'
+local GameUnjustifiedPointsActionKey = 'Ctrl+U'
 
 unjustifiedPointsWindow = nil
 unjustifiedPointsHeader = nil
@@ -53,7 +55,7 @@ function GameUnjustifiedPoints.init()
   unjustifiedPointsWindow        = g_ui.loadUI('unjustifiedpoints')
   unjustifiedPointsHeader        = unjustifiedPointsWindow:getChildById('miniWindowHeader')
   unjustifiedPointsFooter        = unjustifiedPointsWindow:getChildById('miniWindowFooter')
-  unjustifiedPointsTopMenuButton = ClientTopMenu.addRightGameToggleButton('unjustifiedPointsTopMenuButton', f('%s (%s)', tr('Frags'), shortcut), '/images/ui/top_menu/unjustifiedpoints', GameUnjustifiedPoints.toggle)
+  unjustifiedPointsTopMenuButton = ClientTopMenu.addRightGameToggleButton('unjustifiedPointsTopMenuButton', { loct = '${GameUnjustifiedPointsWindowTitle} (${GameUnjustifiedPointsActionKey})', locpar = { GameUnjustifiedPointsActionKey = GameUnjustifiedPointsActionKey } }, '/images/ui/top_menu/unjustifiedpoints', GameUnjustifiedPoints.toggle)
 
   unjustifiedPointsWindow.topMenuButton = unjustifiedPointsTopMenuButton
   unjustifiedPointsWindow:disableResize()
@@ -78,7 +80,7 @@ function GameUnjustifiedPoints.init()
     onGameEnd   = GameUnjustifiedPoints.offline
   })
 
-  g_keyboard.bindKeyDown(shortcut, GameUnjustifiedPoints.toggle)
+  g_keyboard.bindKeyDown(GameUnjustifiedPointsActionKey, GameUnjustifiedPoints.toggle)
 
   if g_game.isOnline() then
     GameUnjustifiedPoints.online()
@@ -94,7 +96,7 @@ function GameUnjustifiedPoints.terminate()
     onGameEnd   = GameUnjustifiedPoints.offline
   })
 
-  g_keyboard.unbindKeyDown(shortcut)
+  g_keyboard.unbindKeyDown(GameUnjustifiedPointsActionKey)
 
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeUnjustifiedPoints)
 
@@ -163,10 +165,10 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
   blackSkullProgressBar:setPhases(fragsToBlackSkull)
 
   local nextFragRemainingTime = remainingTime % timeToRemoveFrag
-  skullTimeLabel:setText(f('%.2d:%.2d (frags: %d)', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, fragsCount))
+  skullTimeLabel:setText(f(loc'%.2d:%.2d (${GameUnjustifiedPointsInfoFrags}: %d)', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, fragsCount))
 
-  local nextFragRemainingTimeTooltip = f('Next frag will be lost in: %.2d:%.2d:%.2d', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, nextFragRemainingTime % 60)
-  skullTimeLabel:setTooltip(f('Total frags: %d\n%s\nAll frags will be lost in: %.2d:%.2d:%.2d', fragsCount, nextFragRemainingTimeTooltip, math.floor(remainingTime / (60 * 60)), math.floor(remainingTime / 60) % 60, remainingTime % 60))
+  local nextFragRemainingTimeTooltip = f(loc'${GameUnjustifiedPointsInfoNextFragTime}: %.2d:%.2d:%.2d', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, nextFragRemainingTime % 60)
+  skullTimeLabel:setTooltip(f(loc'${GameUnjustifiedPointsInfoTotalFrags}: %d\n%s\n${GameUnjustifiedPointsInfoFragsRemainingTime}: %.2d:%.2d:%.2d', fragsCount, nextFragRemainingTimeTooltip, math.floor(remainingTime / (60 * 60)), math.floor(remainingTime / 60) % 60, remainingTime % 60))
 
   skullTimeLabel.data = {
     remainingTime         = remainingTime,
@@ -178,10 +180,10 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
 
   if remainingTime >= 1 and table.contains({SkullWhite, SkullRed, SkullBlack}, skull) then
     currentSkullWidget:setIcon(getSkullImagePath(skull))
-    currentSkullWidget:setTooltip('Your current skull')
+    currentSkullWidget:setTooltip(loc'${GameUnjustifiedPointsInfoCurrentSkull}')
   else
     currentSkullWidget:setIcon('')
-    currentSkullWidget:setTooltip('You have no skull')
+    currentSkullWidget:setTooltip(loc'${GameUnjustifiedPointsInfoNoSkull}')
   end
 
   if fragsToRedSkull ~= 0 then
@@ -190,7 +192,7 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
   else
     redSkullProgressBar:setValue(0, 0, 1)
   end
-  redSkullProgressBar:setTooltip('Frags until red skull: ' .. math.max(0, fragsToRedSkull - fragsCount))
+  redSkullProgressBar:setTooltip(loc'${GameUnjustifiedPointsInfoFragsUntilSkullRed}: ' .. math.max(0, fragsToRedSkull - fragsCount))
 
   if fragsToBlackSkull ~= 0 then
     blackSkullProgressBar:setValue(fragsCount, 0, fragsToBlackSkull)
@@ -198,7 +200,7 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
   else
     blackSkullProgressBar:setValue(0, 0, 1)
   end
-  blackSkullProgressBar:setTooltip('Frags until black skull: ' .. math.max(0, fragsToBlackSkull - fragsCount))
+  blackSkullProgressBar:setTooltip(loc'${GameUnjustifiedPointsInfoFragsUntilSkullBlack}: ' .. math.max(0, fragsToBlackSkull - fragsCount))
 end
 
 function GameUnjustifiedPoints.parseUnjustifiedPoints(protocolGame, opcode, msg)

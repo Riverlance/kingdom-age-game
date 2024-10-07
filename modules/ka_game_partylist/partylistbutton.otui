@@ -24,7 +24,7 @@ PartyButton < CreatureButton
     anchors.top: vigorBar.outsideBottom
     anchors.right: vigorBar.right
     margin-top: 1
-    font: verdana-8px-antialised
+    font: sans-8px
     text-align: right
     text-auto-resize: true
     phantom: true
@@ -34,7 +34,7 @@ PartyButton < CreatureButton
     anchors.top: vigorBar.outsideBottom
     anchors.left: vigorBar.left
     margin-top: 1
-    font: verdana-8px-antialised
+    font: sans-8px
     text-auto-resize: true
     phantom: true
     //phantom: false

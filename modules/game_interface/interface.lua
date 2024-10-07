@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameInterface = { }
 
 
@@ -163,10 +165,10 @@ function GameInterface.init()
 
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeWidgetLock, GameInterface.parseWidgetLock)
 
-  shopButton = ClientTopMenu.addLeftButton('shopButton', tr('Visit the VIP shop on our Website'), '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
+  shopButton = ClientTopMenu.addLeftButton('shopButton', loc'${GameInterfaceButtonShopTooltip}', '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
   shopButton:setOn(true)
-  logoutButton = ClientTopMenu.addLeftButton('logoutButton', tr('Exit'), '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
-  streamerModeButton = ClientTopMenu.addRightGameToggleButton('streamerModeButton', tr('Streamer Mode'), '/images/ui/top_menu/streamer_mode', GameInterface.toggleStreamerMode)
+  logoutButton = ClientTopMenu.addLeftButton('logoutButton', loc'${CorelibInfoExit}', '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
+  streamerModeButton = ClientTopMenu.addRightGameToggleButton('streamerModeButton', loc'${GameInterfaceButtonStreamerModeTooltip}', '/images/ui/top_menu/streamer_mode', GameInterface.toggleStreamerMode)
 
   GameInterface.bindKeys()
 
@@ -418,10 +420,10 @@ function GameInterface.show()
   gameRootPanel:focus()
   gameMapPanel:followCreature(g_game.getLocalPlayer())
   GameInterface.updateStretchShrink()
-  logoutButton:setTooltip(tr('Logout'))
+  logoutButton:setTooltip(loc'${CorelibInfoLogout}')
 
   local charInfo = localPlayer:getCharacterInfo()
-  if charInfo and charInfo.worldId == WorldId.Fortuna then
+  if charInfo and charInfo.worldId ~= WorldId.Fortuna then
     streamerModeButton:show()
   else
     streamerModeButton:hide()
@@ -438,7 +440,7 @@ function GameInterface.hide()
   disconnect(g_app, {
     onClose = GameInterface.tryExit
   })
-  logoutButton:setTooltip(tr('Exit'))
+  logoutButton:setTooltip(loc'${CorelibInfoExit}')
 
   if logoutWindow then
     logoutWindow:destroy()
@@ -470,7 +472,7 @@ function GameInterface.load()
 end
 
 function GameInterface.onLoginAdvice(message)
-  displayInfoBox(tr('For Your Information'), message)
+  displayInfoBox(loc'${GameInterfaceFYI}', message)
 end
 
 function GameInterface.forceExit()
@@ -488,11 +490,12 @@ function GameInterface.tryExit()
   local logoutFunc = function() g_game.safeLogout() exitWindow:destroy() exitWindow = nil end
   local cancelFunc = function() exitWindow:destroy() exitWindow = nil end
 
-  exitWindow = displayGeneralBox(tr('Exit'), tr("If you shut down the program, your character might stay in the game.\nClick on 'Logout' to ensure that you character leaves the game properly.\nClick on 'Exit' if you want to exit the program without logging out your character."),
-  { { text=tr('Force Exit'), callback=exitFunc },
-    { text=tr('Logout'), callback=logoutFunc },
-    { text=tr('Cancel'), callback=cancelFunc },
-    anchor=AnchorHorizontalCenter }, logoutFunc, cancelFunc, 100)
+  exitWindow = displayGeneralBox(loc'${CorelibInfoExit}', loc'${GameInterfaceExitWindowMsg}', {
+    { text = loc'${GameInterfaceExitWindowButtonForceExit}', callback = exitFunc },
+    { text = loc'${CorelibInfoLogout}', callback = logoutFunc },
+    { text = loc'${CorelibInfoCancel}', callback = cancelFunc },
+    anchor = AnchorHorizontalCenter
+  }, logoutFunc, cancelFunc, 100)
 
   return true
 end
@@ -512,7 +515,7 @@ function GameInterface.tryLogout(prompt)
 
   local msg, yesCallback
   if not g_game.isConnectionOk() then
-    msg = tr('Your connection is failing. If you logout now, your\ncharacter will be still online. Do you want to\nforce logout?')
+    msg = loc'${GameInterfaceLogoutWindowFailingConnectionMsg}'
 
     yesCallback = function()
       g_game.forceLogout()
@@ -523,7 +526,7 @@ function GameInterface.tryLogout(prompt)
       end
     end
   else
-    msg = tr('Are you sure you want to logout?')
+    msg = loc'${GameInterfaceLogoutWindowRequestMsg}'
 
     yesCallback = function()
       g_game.safeLogout()
@@ -542,10 +545,11 @@ function GameInterface.tryLogout(prompt)
   end
 
   if prompt then
-    logoutWindow = displayGeneralBox(tr('Logout'), msg, {
-      { text=tr('Yes'), callback=yesCallback },
-      { text=tr('No'), callback=noCallback },
-      anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+    logoutWindow = displayGeneralBox(loc'${CorelibInfoLogout}', msg, {
+      { text = loc'${CorelibInfoYes}', callback = yesCallback },
+      { text = loc'${CorelibInfoNo}', callback = noCallback },
+      anchor = AnchorHorizontalCenter
+    }, yesCallback, noCallback)
     logoutButton:setOn(true)
   else
      yesCallback()
@@ -1146,7 +1150,7 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
   end
 
   if lookThing then
-    menu:addOption(tr('Look'), function() g_game.look(lookThing) end, shortcut)
+    menu:addOption(loc'${GameInterfaceContextMenuLook}', function() g_game.look(lookThing) end, shortcut)
   end
 
   if not classic then
@@ -1159,45 +1163,45 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
     local onWrapItem = function() g_game.wrap(wrapThing) end
 
     if wrapThing:isUnwrappable() then
-      menu:addOption(tr('Unwrap'), onWrapItem)
+      menu:addOption(loc'${GameInterfaceContextMenuUnwrap}', onWrapItem)
     end
 
     if wrapThing:isWrappable() then
-      menu:addOption(tr('Wrap'), onWrapItem)
+      menu:addOption(loc'${GameInterfaceContextMenuWrap}', onWrapItem)
     end
   end
 
   if useThing then
     if useThing:isContainer() then
       if useThing:getParentContainer() then
-        menu:addOption(tr('Open'), function() g_game.open(useThing, useThing:getParentContainer()) end, shortcut)
-        menu:addOption(tr('Open in new window'), function() g_game.open(useThing) end)
+        menu:addOption(loc'${CorelibInfoOpen}', function() g_game.open(useThing, useThing:getParentContainer()) end, shortcut)
+        menu:addOption(loc'${GameInterfaceContextMenuOpenInNewWindow}', function() g_game.open(useThing) end)
       else
-        menu:addOption(tr('Open'), function() g_game.open(useThing) end, shortcut)
+        menu:addOption(loc'${CorelibInfoOpen}', function() g_game.open(useThing) end, shortcut)
       end
     else
       if useThing:isMultiUse() then
-        menu:addOption(tr('Use with') .. ' ...', function() GameInterface.startUseWith(useThing) end, shortcut)
+        menu:addOption(loc'${GameInterfaceContextMenuUseWith}', function() GameInterface.startUseWith(useThing) end, shortcut)
       else
-        menu:addOption(tr('Use'), function() g_game.use(useThing) end, shortcut)
+        menu:addOption(loc'${GameInterfaceContextMenuUse}', function() g_game.use(useThing) end, shortcut)
       end
     end
 
     if useThing:isRotateable() then
-      menu:addOption(tr('Rotate'), function() g_game.rotate(useThing) end)
+      menu:addOption(loc'${GameInterfaceContextMenuRotate}', function() g_game.rotate(useThing) end)
     end
 
   end
 
   if lookThing and not lookThing:isCreature() and not lookThing:isNotMoveable() and lookThing:isPickupable() then
     menu:addSeparator()
-    menu:addOption(tr('Trade with') .. ' ...', function() GameInterface.startTradeWith(lookThing) end)
+    menu:addOption(loc'${GameInterfaceContextMenuTradeWith}', function() GameInterface.startTradeWith(lookThing) end)
   end
 
   if lookThing then
     local parentContainer = lookThing:getParentContainer()
     if parentContainer and parentContainer:hasParent() then
-      menu:addOption(tr('Move up'), function() g_game.moveToParentContainer(lookThing, lookThing:getCount()) end)
+      menu:addOption(loc'${GameInterfaceContextMenuMoveUp}', function() g_game.moveToParentContainer(lookThing, lookThing:getCount()) end)
     end
   end
 
@@ -1207,32 +1211,32 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
     menu:addSeparator()
 
     if creatureThing:isLocalPlayer() then
-      menu:addOption(tr('Set outfit'), function() g_game.requestOutfit() end)
+      menu:addOption(loc'${GameInterfaceContextMenuSetOutfit}', function() g_game.requestOutfit() end)
 
       if g_game.getFeature(GamePlayerMounts) then
         if not localPlayer:isMounted() then
-          menu:addOption(tr('Mount'), function() localPlayer:mount() end)
+          menu:addOption(loc'${GameInterfaceContextMenuMount}', function() localPlayer:mount() end)
         else
-          menu:addOption(tr('Dismount'), function() localPlayer:dismount() end)
+          menu:addOption(loc'${GameInterfaceContextMenuDismount}', function() localPlayer:dismount() end)
         end
       end
 
       if creatureThing:isPartyMember() then
         if creatureThing:isPartyLeader() then
           if creatureThing:isPartySharedExperienceActive() then
-            menu:addOption(tr('Disable shared XP'), function() g_game.partyShareExperience(false) end)
+            menu:addOption(loc'${GameInterfaceContextMenuSharedXPDisable}', function() g_game.partyShareExperience(false) end)
           else
-            menu:addOption(tr('Enable shared XP'), function() g_game.partyShareExperience(true) end)
+            menu:addOption(loc'${GameInterfaceContextMenuSharedXPEnable}', function() g_game.partyShareExperience(true) end)
           end
         end
-        menu:addOption(tr('Leave party'), function() g_game.partyLeave() end)
+        menu:addOption(loc'${GameInterfaceContextMenuLeaveParty}', function() g_game.partyLeave() end)
       end
 
       if g_game.getAccountType() >= ACCOUNT_TYPE_GAMEMASTER then
         menu:addSeparator()
 
-        menu:addOption(tr('View rule violations'), function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow() end end)
-        menu:addOption(tr('View bugs'), function() if modules.game_bugreport then GameBugReport.showViewWindow() end end)
+        menu:addOption(loc'${GameInterfaceContextMenuRuleViolations}', function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow() end end)
+        menu:addOption(loc'${GameInterfaceContextMenuViewBugs}', function() if modules.game_bugreport then GameBugReport.showViewWindow() end end)
       end
 
     else
@@ -1245,9 +1249,9 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
         end
 
         if g_game.getAttackingCreature() ~= creatureThing then
-          menu:addOption(tr('Attack'), function() g_game.attack(creatureThing) end, shortcut)
+          menu:addOption(loc'${GameInterfaceContextMenuAttack}', function() g_game.attack(creatureThing) end, shortcut)
         else
-          menu:addOption(tr('Stop attack'), function() g_game.cancelAttack() end, shortcut)
+          menu:addOption(loc'${GameInterfaceContextMenuAttackStop}', function() g_game.cancelAttack() end, shortcut)
         end
 
         if not classic then
@@ -1257,9 +1261,9 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
         end
 
         if g_game.getFollowingCreature() ~= creatureThing then
-          menu:addOption(tr('Follow'), function() g_game.follow(creatureThing) end, shortcut)
+          menu:addOption(loc'${GameInterfaceContextMenuFollow}', function() g_game.follow(creatureThing) end, shortcut)
         else
-          menu:addOption(tr('Stop follow'), function() g_game.cancelFollow() end, shortcut)
+          menu:addOption(loc'${GameInterfaceContextMenuFollowStop}', function() g_game.cancelFollow() end, shortcut)
         end
 
         if GameTracker then
@@ -1270,36 +1274,36 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
           end
 
           if not GameTracker.isTracked(creatureThing) then
-            menu:addOption(tr('Track'), function() GameTracker.startTrackCreature(creatureThing) end, shortcut)
+            menu:addOption(loc'${GameInterfaceContextMenuTrack}', function() GameTracker.startTrackCreature(creatureThing) end, shortcut)
           else
-            menu:addOption(tr('Stop track'), function() GameTracker.stopTrackCreature(creatureThing) end, shortcut)
-            menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(creatureThing:getTrackInfo()) end)
+            menu:addOption(loc'${GameInterfaceContextMenuTrackStop}', function() GameTracker.stopTrackCreature(creatureThing) end, shortcut)
+            menu:addOption(loc'${GameInterfaceContextMenuTrackEdit}', function() GameTracker.createEditTrackWindow(creatureThing:getTrackInfo()) end)
           end
         end
 
         local creatureDistance = getDistanceBetween(creatureThing:getPosition(), localPosition)
         if GameConsole and creatureThing:isNpc() and creatureDistance <= Npc.DefaultDistance then
-          menu:addOption(tr('Talk'), function() if GameConsole then GameConsole.greetNpc(creatureThing) end end)
+          menu:addOption(loc'${GameInterfaceContextMenuTalk}', function() if GameConsole then GameConsole.greetNpc(creatureThing) end end)
         end
       end
 
       if creatureThing:isPlayer() then
         menu:addSeparator()
 
-        menu:addOption(tr('Message to') .. ' ' .. creatureName, function() g_game.openPrivateChannel(creatureName) end)
+        menu:addOption(f(loc'${GameInterfaceContextMenuMsgTo}', creatureName), function() g_game.openPrivateChannel(creatureName) end)
 
         if GameConsole and GameConsole.getOwnPrivateTab() then
-          menu:addOption(tr('Invite to private chat'), function() g_game.inviteToOwnChannel(creatureName) end)
-          menu:addOption(tr('Exclude from private chat'), function() g_game.excludeFromOwnChannel(creatureName) end) -- [TODO] must be removed after message's popup labels been implemented
+          menu:addOption(loc'${GameInterfaceContextMenuPrivateChatInvite}', function() g_game.inviteToOwnChannel(creatureName) end)
+          menu:addOption(loc'${GameInterfaceContextMenuPrivateChatExclude}', function() g_game.excludeFromOwnChannel(creatureName) end) -- [TODO] must be removed after message's popup labels been implemented
         end
         if not localPlayer:hasVip(creatureName) then
-          menu:addOption(tr('Add to VIP list'), function() g_game.addVip(creatureName) end)
+          menu:addOption(loc'${GameInterfaceContextMenuVipListAdd}', function() g_game.addVip(creatureName) end)
         end
 
         if GameConsole and GameConsole.isIgnored(creatureName) then
-          menu:addOption(tr('Unignore') .. ' ' .. creatureName, function() if GameConsole then GameConsole.removeIgnoredPlayer(creatureName) end end)
+          menu:addOption(f(loc'${GameInterfaceContextMenuPlayerUnignore}', creatureName), function() if GameConsole then GameConsole.removeIgnoredPlayer(creatureName) end end)
         else
-          menu:addOption(tr('Ignore') .. ' ' .. creatureName, function() if GameConsole then GameConsole.addIgnoredPlayer(creatureName) end end)
+          menu:addOption(f(loc'${GameInterfaceContextMenuPlayerIgnore}', creatureName), function() if GameConsole then GameConsole.addIgnoredPlayer(creatureName) end end)
         end
 
         local localPlayerShield = localPlayer:getShield()
@@ -1307,21 +1311,21 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
 
         if localPlayerShield == ShieldNone or localPlayerShield == ShieldWhiteBlue then
           if creatureShield == ShieldWhiteYellow then
-            menu:addOption(tr('Join %s\'s party', creatureThing:getName()), function() g_game.partyJoin(creatureThing:getId()) end)
+            menu:addOption(f(loc'${GameInterfaceContextMenuPartyJoin}', creatureThing:getName()), function() g_game.partyJoin(creatureThing:getId()) end)
           else
-            menu:addOption(tr('Invite to party'), function() g_game.partyInvite(creatureThing:getId()) end)
+            menu:addOption(loc'${GameInterfaceContextMenuPartyInvite}', function() g_game.partyInvite(creatureThing:getId()) end)
           end
         elseif localPlayerShield == ShieldWhiteYellow then
           if creatureShield == ShieldWhiteBlue then
-            menu:addOption(tr('Revoke %s\'s invitation', creatureThing:getName()), function() g_game.partyRevokeInvitation(creatureThing:getId()) end)
+            menu:addOption(f(loc'${GameInterfaceContextMenuPartyRevokeInvitation}', creatureThing:getName()), function() g_game.partyRevokeInvitation(creatureThing:getId()) end)
           end
         elseif localPlayerShield == ShieldYellow or localPlayerShield == ShieldYellowSharedExp or localPlayerShield == ShieldYellowNoSharedExpBlink or localPlayerShield == ShieldYellowNoSharedExp then
           if creatureShield == ShieldWhiteBlue then
-            menu:addOption(tr('Revoke %s\'s invitation', creatureThing:getName()), function() g_game.partyRevokeInvitation(creatureThing:getId()) end)
+            menu:addOption(f(loc'${GameInterfaceContextMenuPartyRevokeInvitation}', creatureThing:getName()), function() g_game.partyRevokeInvitation(creatureThing:getId()) end)
           elseif creatureShield == ShieldBlue or creatureShield == ShieldBlueSharedExp or creatureShield == ShieldBlueNoSharedExpBlink or creatureShield == ShieldBlueNoSharedExp then
-            menu:addOption(tr('Pass leadership to %s', creatureThing:getName()), function() g_game.partyPassLeadership(creatureThing:getId()) end)
+            menu:addOption(f(loc'${GameInterfaceContextMenuPartyPassLeadership}', creatureThing:getName()), function() g_game.partyPassLeadership(creatureThing:getId()) end)
           else
-            menu:addOption(tr('Invite to party'), function() g_game.partyInvite(creatureThing:getId()) end)
+            menu:addOption(loc'${GameInterfaceContextMenuPartyInvite}', function() g_game.partyInvite(creatureThing:getId()) end)
           end
         end
 
@@ -1329,27 +1333,27 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
           menu:addSeparator()
 
           if g_game.getAccountType() >= ACCOUNT_TYPE_GAMEMASTER then
-            menu:addOption(tr('Add rule violation'), function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow(creatureName) end end)
+            menu:addOption(loc'${GameInterfaceContextMenuAddRuleViolation}', function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow(creatureName) end end)
           end
 
           local REPORT_TYPE_NAME      = 0
           local REPORT_TYPE_VIOLATION = 2
-          menu:addOption(tr('Report name'), function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_NAME, creatureName) end end)
-          menu:addOption(tr('Report violation'), function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_VIOLATION, creatureName) end end)
+          menu:addOption(loc'${GameInterfaceContextMenuReportName}', function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_NAME, creatureName) end end)
+          menu:addOption(loc'${GameInterfaceContextMenuReportViolation}', function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_VIOLATION, creatureName) end end)
         end
       end
     end
 
     menu:addSeparator()
 
-    menu:addOption(tr('Copy name'), function() g_window.setClipboardText(creatureName) end)
+    menu:addOption(loc'${GameInterfaceContextMenuCopyName}', function() g_window.setClipboardText(creatureName) end)
   end
 
   -- hooked menu options
-  for _,category in pairs(hookedMenuOptions) do
+  for _, category in pairs(hookedMenuOptions) do
     if not GameInterface.isMenuHookCategoryEmpty(category) then
       menu:addSeparator()
-      for name,opt in pairs(category) do
+      for name, opt in pairs(category) do
         if opt and opt.condition(menuPosition, lookThing, useThing, creatureThing) then
           menu:addOption(name, function() opt.callback(menuPosition,
             lookThing, useThing, creatureThing) end, opt.shortcut)
@@ -1810,7 +1814,7 @@ function GameInterface.onTrackPosition(posNode, remove)
   if not posNode.widget then
     local pos = posNode.position
     posNode.widget = g_ui.createWidget('TrackerWidget', gameScreenArea)
-    posNode.widget:setId(tr('tracked_position_%d_%d_%d', pos.x, pos.y, pos.z))
+    posNode.widget:setId(f('tracked_position_%d_%d_%d', pos.x, pos.y, pos.z))
     g_game.sendMagicEffect(g_game.getLocalPlayer():getPosition(), 347)
   end
 

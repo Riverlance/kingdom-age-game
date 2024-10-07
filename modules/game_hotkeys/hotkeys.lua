@@ -1,4 +1,8 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameHotkeys = { }
+
+
 
 HotkeyColors = {
   Text = '#ffffff44',
@@ -7,6 +11,10 @@ HotkeyColors = {
   ItemUseWith = '#f8e127',
   Power = '#cd4eff',
 }
+
+local GameHotkeysActionKey = 'Ctrl+K'
+
+
 
 hotkeysManagerLoaded = false
 hotkeysWindow = nil
@@ -38,10 +46,10 @@ function GameHotkeys.init()
 
   g_ui.importStyle('hotkeylabel.otui')
 
-  hotkeysButton = ClientTopMenu.addLeftGameButton('hotkeysButton', tr('Hotkeys') .. ' (Ctrl+K)', '/images/ui/top_menu/hotkeys', GameHotkeys.toggle)
+  hotkeysButton = ClientTopMenu.addLeftGameButton('hotkeysButton', { loct = '${GameHotkeysWindowTitle} (${GameHotkeysActionKey})', locpar = { GameHotkeysActionKey = GameHotkeysActionKey } }, '/images/ui/top_menu/hotkeys', GameHotkeys.toggle)
   hotkeysWindow = g_ui.displayUI('hotkeys')
   hotkeysWindow:setVisible(false)
-  g_keyboard.bindKeyDown('Ctrl+K', GameHotkeys.toggle)
+  g_keyboard.bindKeyDown(GameHotkeysActionKey, GameHotkeys.toggle)
 
   currentHotkeys = hotkeysWindow:getChildById('currentHotkeys')
   currentHotkeys.onChildFocusChange = function(self, hotkeyLabel, unfocused) GameHotkeys.onSelectHotkeyLabel(hotkeyLabel, unfocused) end
@@ -101,7 +109,7 @@ function GameHotkeys.terminate()
     GameHotkeys.offline()
   end
 
-  g_keyboard.unbindKeyDown('Ctrl+K')
+  g_keyboard.unbindKeyDown(GameHotkeysActionKey)
 
   hotkeysWindow:destroy()
   hotkeysButton:destroy()
@@ -407,10 +415,10 @@ function GameHotkeys.assignHotkey(keySettings)
         hotkeysOverwriteWindow = nil
       end
 
-      hotkeysOverwriteWindow = displayGeneralBox(tr('Overwrite'), 'This hotkey is set already.\nAre you sure that you want to overwrite it?', {
-        { text = tr('Yes'), callback = yesCallback },
-        { text = tr('No'), callback = noCallback },
-        anchor=AnchorHorizontalCenter}, yesCallback, noCallback)
+      hotkeysOverwriteWindow = displayGeneralBox(loc'${GameHotkeysAssignWindowOverwriteTitle}', loc'${GameHotkeysAssignWindowOverwriteMsg}', {
+        { text = loc'${CorelibInfoYes}', callback = yesCallback },
+        { text = loc'${CorelibInfoNo}', callback = noCallback },
+        anchor = AnchorHorizontalCenter}, yesCallback, noCallback)
 
     -- Not assigned yet
     else
@@ -577,7 +585,7 @@ function GameHotkeys.updateHotkeyLabel(hotkeyLabel)
 
   local keySettings = hotkeyLabel.settings
   if string.exists(keySettings.text) then
-    hotkeyLabel:setText(tr('%s: [Text] %s', keySettings.keyCombo, keySettings.text))
+    hotkeyLabel:setText(f(loc'%s: ${GameHotkeysLabelText}', keySettings.keyCombo, keySettings.text))
     if keySettings.autoSend then
       hotkeyLabel:setColor(HotkeyColors.TextAutoSend)
     else
@@ -585,28 +593,28 @@ function GameHotkeys.updateHotkeyLabel(hotkeyLabel)
     end
   elseif tonumber(keySettings.itemId) then
     if keySettings.useType == HotkeyItemUseType.Crosshair then
-      hotkeyLabel:setText(tr('%s: [Item] Use this object with crosshair.', keySettings.keyCombo))
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemCrosshair}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUseWith)
     elseif keySettings.useType == HotkeyItemUseType.Target then
-      hotkeyLabel:setText(tr('%s: [Item] Use this object on target.', keySettings.keyCombo))
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemTarget}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUseWith)
     elseif keySettings.useType == HotkeyItemUseType.Self then
-      hotkeyLabel:setText(tr('%s: [Item] Use this object on yourself.', keySettings.keyCombo))
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemYourself}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUse)
     else
-      hotkeyLabel:setText(tr('%s: [Item] Use this object.', keySettings.keyCombo))
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemUse}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUse)
     end
   elseif tonumber(keySettings.powerId) then
     local info = modules.ka_game_powers and GamePowers.getPowerInfo(keySettings.powerId) or nil
     if info then
-      hotkeyLabel:setText(tr('%s: [Power] %s (level %s)', keySettings.keyCombo, info.name, info.level))
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysPower}', keySettings.keyCombo, info.name, info.level))
     else
-      hotkeyLabel:setText(tr('%s: [Power] N/A', keySettings.keyCombo))
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysPowerNotApplicable}', keySettings.keyCombo))
     end
     hotkeyLabel:setColor(HotkeyColors.Power)
   else
-    hotkeyLabel:setText(tr('%s:', keySettings.keyCombo))
+    hotkeyLabel:setText(f('%s:', keySettings.keyCombo))
     hotkeyLabel:setColor(HotkeyColors.Text)
   end
 end
@@ -744,7 +752,7 @@ end
 function GameHotkeys.hotkeyCapture(assignWindow, keyCode, keyboardModifiers)
   local keyCombo = determineKeyComboDesc(keyCode, keyboardModifiers)
   local comboPreview = assignWindow:getChildById('comboPreview')
-  comboPreview:setText(tr('Current hotkey to add') .. ': ' .. keyCombo)
+  comboPreview:setText(f(loc'${GameHotkeysAssignWindowCurrentHotkey}: %s', keyCombo))
   comboPreview.keyCombo = keyCombo
   comboPreview:resizeToText()
   assignWindow:getChildById('addButton'):enable()

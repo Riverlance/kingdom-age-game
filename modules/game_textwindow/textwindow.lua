@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameTextWindow = { }
 
 
@@ -60,18 +62,18 @@ function GameTextWindow.onGameEditText(id, itemId, maxLength, text, writer, time
 
   local desc = ''
   if #writer > 0 then
-    desc = tr('You read the following, written by \n%s\n', writer)
+    desc = f(loc'${GameTextWindowReadWrittenBy}', writer)
     if #time > 0 then
-      desc = desc .. tr('on %s.\n', time)
+      desc = desc .. f(loc'${GameTextWindowReadWrittenByOn}', time)
     end
   elseif #time > 0 then
-    desc = tr('You read the following, written on \n%s.\n', time)
+    desc = f(loc'${GameTextWindowReadWrittenOn}', time)
   end
 
   if #text == 0 and not writeable then
-    desc = tr('It is empty.')
+    desc = loc'${GameTextWindowInfoItsEmpty}'
   elseif writeable then
-    desc = desc .. tr('You can enter new text.')
+    desc = desc .. loc'${GameTextWindowInfoEnterNewText}'
   end
 
   local lines = #{string.find(desc, '\n')}
@@ -82,12 +84,12 @@ function GameTextWindow.onGameEditText(id, itemId, maxLength, text, writer, time
   description:setText(desc)
 
   if not writeable then
-    textWindow:setText(tr('Show Text'))
+    textWindow:setText(loc'${GameTextWindowInfoShowText}')
     cancelButton:hide()
     cancelButton:setWidth(0)
     okButton:setMarginRight(0)
   else
-    textWindow:setText(tr('Edit Text'))
+    textWindow:setText(loc'${GameTextWindowInfoEditText}')
     textEdit:focus()
     textEdit:setCursorPos(#text)
   end
@@ -138,8 +140,8 @@ function GameTextWindow.onGameEditList(id, doorId, text)
   textEdit:setEditable(true)
   textEdit:focus()
   textEdit:setCursorPos(#text)
-  description:setText(tr('Enter one name per line.'))
-  textWindow:setText(tr('Edit List'))
+  description:setText(loc'${GameTextWindowInfoEnterPerLine}')
+  textWindow:setText(loc'${GameTextWindowInfoEditList}')
 
   if description:getHeight() < 64 then
     description:setHeight(64)

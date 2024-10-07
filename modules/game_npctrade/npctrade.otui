@@ -12,8 +12,8 @@ NPCItemBox < Panel
     anchors.fill: parent
     border-width: 1
     color: #aaaaaa
-    text-align: center
-    text-offset: 0 32
+    text-align: bottom
+    text-offset: 0 -4
     @onCheckChange: GameNpcTrade.onItemBoxChecked(self)
 
     Creature
@@ -59,21 +59,19 @@ NPCItemBox < Panel
 
 MainWindow
   id: npcWindow
-  !text: tr('NPC Trade')
+  &loc: '${GameNpcTradeNpcWindowTitle}'
   size: 600 620
   @onEscape: GameNpcTrade.closeNpcTrade()
 
   Button
-    !text: tr('Close')
-    width: 64
+    &loc: '${CorelibInfoClose}'
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     @onClick: GameNpcTrade.closeNpcTrade()
 
   Button
     id: tradeButton
-    !text: tr('Buy')
-    width: 64
+    &loc: '${GameNpcTradeButtonTrade}'
     anchors.right: prev.left
     anchors.bottom: parent.bottom
     margin-right: 10
@@ -81,8 +79,8 @@ MainWindow
 
   Button
     id: sellAllButton
-    !text: tr('Sell All')
-    width: 64
+    &loc: '${GameNpcTradeButtonSellAll}'
+    width: 120
     anchors.right: prev.left
     anchors.bottom: parent.bottom
     margin-right: 10
@@ -99,7 +97,7 @@ MainWindow
 
     Label
       id: searchLabel
-      !text: tr('Search') .. ':'
+      &loc: '${GameNpcTradeSearchLabel}:'
       anchors.left: parent.left
       anchors.top: parent.top
       text-auto-resize: true
@@ -118,7 +116,7 @@ MainWindow
 
     CheckBox
       id: bankTrade
-      !text: tr('Use bank money/KAps')
+      &loc: '${GameNpcTradeBankTrade}'
       anchors.top: prev.outsideBottom
       anchors.left: parent.left
       anchors.right: parent.right
@@ -128,7 +126,7 @@ MainWindow
 
     CheckBox
       id: buyWithBackpack
-      !text: tr('Buy with backpack')
+      &loc: '${GameNpcTradeBuyWithBackpack}'
       anchors.top: bankTrade.bottom
       anchors.left: parent.left
       anchors.right: parent.right
@@ -138,7 +136,7 @@ MainWindow
 
     CheckBox
       id: ignoreCapacity
-      !text: tr('Ignore capacity')
+      &loc: '${GameNpcTradeIgnoreCapacity}'
       anchors.top: prev.bottom
       anchors.left: parent.left
       anchors.right: parent.right
@@ -148,7 +146,7 @@ MainWindow
 
     CheckBox
       id: showAllItems
-      !text: tr('Show all items')
+      &loc: '${GameNpcTradeShowAllItems}'
       anchors.top: bankTrade.bottom
       anchors.left: parent.left
       anchors.right: parent.right
@@ -170,8 +168,8 @@ MainWindow
     Label
       phantom: false
       id: nameDesc
-      !text: tr('Name') .. ':'
-      !tooltip: tr('Item name')
+      &loc: '${CorelibInfoName}:'
+      &loct: '${GameNpcTradeNameDescTooltip}'
       anchors.left: parent.left
       anchors.top: parent.top
       margin-top: 5
@@ -184,8 +182,8 @@ MainWindow
     Label
       phantom: false
       id: priceDesc
-      !text: tr('Price') .. ':'
-      !tooltip: tr('Item price')
+      &loc: '${GameNpcTradePriceDesc}:'
+      &loct: '${GameNpcTradePriceDescTooltip}'
       anchors.top: prev.bottom
       anchors.left: nameDesc.left
       anchors.right: nameDesc.right
@@ -197,8 +195,8 @@ MainWindow
     Label
       phantom: false
       id: weightDesc
-      !text: tr('Weight') .. ':'
-      !tooltip: tr('Item weight')
+      &loc: '${GameNpcTradeWeightDesc}:'
+      &loct: '${GameNpcTradeWeightDescTooltip}'
       anchors.top: prev.bottom
       anchors.left: priceDesc.left
       anchors.right: priceDesc.right
@@ -210,8 +208,8 @@ MainWindow
     Label
       phantom: false
       id: moneyDesc
-      !text: tr('Money') .. ':'
-      !tooltip: tr('Your money')
+      &loc: '${GameNpcTradeMoneyDesc}:'
+      &loct: '${GameNpcTradeMoneyDescTooltip}'
       anchors.top: prev.bottom
       anchors.left: weightDesc.left
       anchors.right: weightDesc.right
@@ -224,8 +222,8 @@ MainWindow
     Label
       phantom: false
       id: kapsDesc
-      !text: tr('KAps') .. ':'
-      !tooltip: tr('Your Kingdom Age points')
+      &loc: '${GameNpcTradeKapsDesc}:'
+      &loct: '${GameNpcTradeKapsDescTooltip}'
       anchors.top: prev.bottom
       anchors.left: moneyDesc.left
       anchors.right: moneyDesc.right
@@ -238,8 +236,8 @@ MainWindow
     Label
       phantom: false
       id: capacityDesc
-      !text: tr('Capacity') .. ':'
-      !tooltip: tr('Your capacity')
+      &loc: '${GameNpcTradeCapacityDesc}:'
+      &loct: '${GameNpcTradeCapacityDescTooltip}'
       anchors.top: prev.bottom
       anchors.left: kapsDesc.left
       anchors.right: kapsDesc.right
@@ -251,8 +249,8 @@ MainWindow
     Label
       phantom: false
       id: trustDesc
-      !text: tr('Trust') .. ':'
-      !tooltip: tr('Your trust in this city')
+      &loc: '${GameNpcTradeTrustDesc}:'
+      &loct: '${GameNpcTradeTrustDescTooltip}'
       anchors.top: prev.bottom
       anchors.left: capacityDesc.left
       anchors.right: capacityDesc.right
@@ -278,8 +276,8 @@ MainWindow
 
   TabButton
     id: buyTab
-    !tooltip: tr("List of items that you're able to buy")
-    !text: tr('Buy')
+    &loc: '${GameNpcTradeTabBuy}'
+    &loct: '${GameNpcTradeTabBuyTooltip}'
     checked: true
     on: true
     anchors.left: parent.left
@@ -290,8 +288,8 @@ MainWindow
 
   TabButton
     id: sellTab
-    !tooltip: tr("List of items that you're able to sell")
-    !text: tr('Sell')
+    &loc: '${GameNpcTradeTabSell}'
+    &loct: '${GameNpcTradeTabSellTooltip}'
     anchors.left: parent.horizontalCenter
     anchors.right: parent.right
     anchors.top: parent.top

@@ -108,6 +108,7 @@ function UITextEdit:onMouseWheel(mousePos, mouseWheel)
       self.verticalScrollBar:onIncrement()
     end
     return true
+
   elseif self.horizontalScrollBar then
     if mouseWheel == MouseWheelUp then
       self.horizontalScrollBar:onIncrement()

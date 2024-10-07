@@ -1,7 +1,7 @@
 // Combobox Square - Scroll Content Button
 ComboBoxPopupScrollMenuButton < UIButton
   height: 23
-  font: verdana-11px-antialised
+  font: sans-11px
   text-align: left
   text-offset: 4 0
   color: #dfdfdf
@@ -27,7 +27,7 @@ ComboBoxPopupScrollMenu < UIPopupScrollMenu
 // Combobox Square - Content Button
 ComboBoxPopupMenuButton < UIButton
   height: 23
-  font: verdana-11px-antialised
+  font: sans-11px
   text-align: left
   text-offset: 4 0
   color: #dfdfdf
@@ -52,7 +52,7 @@ ComboBoxPopupMenu < UIPopupMenu
 
 // Combobox Square
 ComboBox < UIComboBox
-  font: verdana-11px-antialised
+  font: sans-11px
   color: #dfdfdf
   size: 91 23
   text-offset: 3 0
@@ -86,7 +86,7 @@ ComboBox < UIComboBox
 // Combobox Rounded - Scroll Content Button
 ComboBoxRoundedPopupScrollMenuButton < UIButton
   height: 23
-  font: verdana-11px-antialised
+  font: sans-11px
   text-align: left
   text-offset: 4 0
   color: #dfdfdf
@@ -111,7 +111,7 @@ ComboBoxRoundedPopupScrollMenu < UIPopupScrollMenu
 // Combobox Rounded - Content Button
 ComboBoxRoundedPopupMenuButton < UIButton
   height: 23
-  font: verdana-11px-antialised
+  font: sans-11px
   text-align: left
   text-offset: 4 0
   color: #dfdfdf

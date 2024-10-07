@@ -35,7 +35,7 @@ SkillPercentPanel < ProgressBar
 
 MiniWindow
   id: skillWindow
-  !text: tr('Stats')
+  &loc: '${GameSkillsWindowTitle}'
   icon: /images/ui/top_menu/skills
   &save: true
   &contentMinimumHeight: 40
@@ -48,7 +48,7 @@ MiniWindow
     SkillButton
       id: level
       SkillNameLabel
-        !text: tr('LV')
+        &loc: '${CorelibInfoLevel}'
       SkillValueLabel
       SkillPercentPanel
         background-color: green
@@ -58,27 +58,27 @@ MiniWindow
       id: experience
       height: 15
       SkillNameLabel
-        !text: tr('XP')
+        &loc: '${GameSkillsInfoXP}'
       SkillValueLabel
 
     SkillButton
       id: speed
       height: 15
       SkillNameLabel
-        !text: tr('Speed')
+        &loc: '${GameSkillsInfoSpeed}'
       SkillValueLabel
 
     SkillButton
       id: regenerationTime
       height: 15
       SkillNameLabel
-        !text: tr('Feed Time')
+        &loc: '${GameSkillsInfoFeedTime}'
       SkillValueLabel
 
     SkillButton
       id: stamina
       SkillNameLabel
-        !text: tr('Stamina')
+        &loc: '${GameSkillsInfoStamina}'
       SkillValueLabel
       SkillPercentPanel
         background-color: orange

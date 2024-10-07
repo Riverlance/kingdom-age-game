@@ -507,7 +507,7 @@ function UICreatureButton:updatePing(ping) -- See ClientTopMenu.updatePing
 
   -- Known
   else
-    text = f('%d ms', ping)
+    text = f(loc'%d ${CorelibInfoMs}', ping)
 
     if ping >= 500 then
       color = 'red'
@@ -632,8 +632,8 @@ function UICreatureButton:updateInfoIcon()
 
   local distance = getDistanceTo(localPlayer:getPosition(), self.position, true)
 
-  local hierarchyStr = tr('Hierarchy: %s', self.creatureTypeId == CreatureTypePlayer and ShieldStr[self.shieldId] or table.contains({ CreatureTypeSummonOwn, CreatureTypeSummonOther }, self.creatureTypeId) and tr('Summon') or tr('Unknown'))
-  local distanceStr  = tr('Distance: %d SQM%s', distance, distance > 1 and 's' or '')
+  local hierarchyStr = f(loc'${GamelibInfoCreatureButtonHierarchy}: %s', self.creatureTypeId == CreatureTypePlayer and ShieldStr[self.shieldId] or table.contains({ CreatureTypeSummonOwn, CreatureTypeSummonOther }, self.creatureTypeId) and loc'${GamelibInfoCreatureButtonSummon}' or loc'${GamelibInfoCreatureButtonUnknown}')
+  local distanceStr  = f(loc'${CorelibInfoDistance}: ${GamelibInfoCreatureButtonSQMs}', distance)
 
   infoIconWidget:setTooltip(f('%s\n%s', hierarchyStr, distanceStr))
 end

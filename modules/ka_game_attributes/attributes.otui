@@ -1,5 +1,5 @@
 AttributeAddButton < UIButton
-  !tooltip: tr('Add a distribution point')
+  &loct: '${GameAttributesButtonAddTooltip}'
   anchors.top: parent.top
   anchors.horizontalCenter: parent.horizontalCenter
   margin-top: 4
@@ -30,12 +30,12 @@ AttributeActLabel < Label
 MiniWindow
   icon: /images/ui/top_menu/attributes
   id: attributeWindow
-  !text: 'Attributes'
+  &loc: '${GameAttributesWindowTitle}'
   height: 235
   &save: true
 
   InfoMenuButton
-    !tooltip: tr("1. 'Distribution' are points that you distributed manually.\n\n2. 'Alignment' are recommended points that were distributed automatically due to your vocation.\n\n3. 'Quest' are points that you can acquire on quests (golden statue, stray faeries, capsules).\n\n4. 'Buff/Debuff' are points that were increased or decreased temporarily due to Powers.")
+    &loct: '${GameAttributesButtonInfoTooltip}'
     !tooltip-type: TooltipType.textBlock
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
@@ -47,7 +47,7 @@ MiniWindow
 
     Label
       id: labelAttribute
-      !text: tr('Attribute')
+      &loc: '${GameAttributesLabelAttribute}'
       text-align: left
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
@@ -56,8 +56,8 @@ MiniWindow
 
     Label
       id: labelAct
-      !text: 'Act'
-      !tooltip: tr('Actual effective points of the specific attribute')
+      &loc: '${GameAttributesLabelAct}'
+      &loct: '${GameAttributesLabelActTooltip}'
       text-align: right
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
@@ -99,55 +99,55 @@ MiniWindow
 
     AttributeLabel
       id: attackAttributeLabel
-      !text: 'Attack'
+      &loc: '${GameAttributesAttackAttributeLabel}'
       anchors.verticalCenter: attackAttributeAddButton.verticalCenter
       anchors.right: attackAttributeAddButton.left
 
     AttributeLabel
       id: defenseAttributeLabel
-      !text: 'Defense'
+      &loc: '${GameAttributesDefenseAttributeLabel}'
       anchors.verticalCenter: defenseAttributeAddButton.verticalCenter
       anchors.right: defenseAttributeAddButton.left
 
     AttributeLabel
       id: magicDefenseAttributeLabel
-      !text: 'Magic Def'
+      &loc: '${GameAttributesMagicDefenseAttributeLabel}'
       anchors.verticalCenter: magicDefenseAttributeAddButton.verticalCenter
       anchors.right: magicDefenseAttributeAddButton.left
 
     AttributeLabel
       id: vitalityAttributeLabel
-      !text: 'Vitality'
+      &loc: '${GameAttributesVitalityAttributeLabel}'
       anchors.verticalCenter: vitalityAttributeAddButton.verticalCenter
       anchors.right: vitalityAttributeAddButton.left
 
     AttributeLabel
       id: willPowerAttributeLabel
-      !text: 'Will Power'
+      &loc: '${GameAttributesWillPowerAttributeLabel}'
       anchors.verticalCenter: willPowerAttributeAddButton.verticalCenter
       anchors.right: willPowerAttributeAddButton.left
 
     AttributeLabel
       id: agilityAttributeLabel
-      !text: 'Agility'
+      &loc: '${GameAttributesAgilityAttributeLabel}'
       anchors.verticalCenter: agilityAttributeAddButton.verticalCenter
       anchors.right: agilityAttributeAddButton.left
 
     AttributeLabel
       id: dodgeAttributeLabel
-      !text: 'Dodge'
+      &loc: '${GameAttributesDodgeAttributeLabel}'
       anchors.verticalCenter: dodgeAttributeAddButton.verticalCenter
       anchors.right: dodgeAttributeAddButton.left
 
     AttributeLabel
       id: walkingAttributeLabel
-      !text: 'Walking'
+      &loc: '${GameAttributesWalkingAttributeLabel}'
       anchors.verticalCenter: walkingAttributeAddButton.verticalCenter
       anchors.right: walkingAttributeAddButton.left
 
     AttributeLabel
       id: luckAttributeLabel
-      !text: 'Luck'
+      &loc: '${GameAttributesLuckAttributeLabel}'
       anchors.verticalCenter: luckAttributeAddButton.verticalCenter
       anchors.right: luckAttributeAddButton.left
 

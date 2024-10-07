@@ -354,7 +354,9 @@ function UIMoveableTabBar:removeTab(tab)
       self:selectNextTab()
     end
   end
+
   table.remove(tabTable, index)
+
   if tab.blinkEvent then
     removeEvent(tab.blinkEvent)
     tab.blinkEvent = nil

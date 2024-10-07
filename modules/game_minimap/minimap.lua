@@ -1,4 +1,12 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameMinimap = { }
+
+
+
+local GameMinimapActionKey = 'Ctrl+M'
+
+
 
 MinimapFlags = {
   Info = 1,
@@ -35,7 +43,7 @@ function GameMinimap.init()
 
   minimapWindow        = g_ui.loadUI('minimap')
   local contentsPanel  = minimapWindow:getChildById('contentsPanel')
-  minimapTopMenuButton = ClientTopMenu.addRightGameToggleButton('minimapTopMenuButton', tr('Minimap') .. ' (Ctrl+M)', '/images/ui/top_menu/minimap', GameMinimap.toggle)
+  minimapTopMenuButton = ClientTopMenu.addRightGameToggleButton('minimapTopMenuButton', { loct = '${GameMinimapTitle} (${GameMinimapActionKey})', locpar = { GameMinimapActionKey = GameMinimapActionKey } }, '/images/ui/top_menu/minimap', GameMinimap.toggle)
 
   minimapWindow.topMenuButton = minimapTopMenuButton
 
@@ -61,11 +69,11 @@ function GameMinimap.init()
   end
 
   local gameRootPanel = GameInterface.getRootPanel()
-  g_keyboard.bindKeyPress('Alt+Left', function() minimapWidget:move(1,0) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Right', function() minimapWidget:move(-1,0) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Up', function() minimapWidget:move(0,1) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Down', function() minimapWidget:move(0,-1) end, gameRootPanel)
-  g_keyboard.bindKeyDown('Ctrl+M', GameMinimap.toggle)
+  g_keyboard.bindKeyPress('Alt+Left', function() minimapWidget:move(1, 0) end, gameRootPanel)
+  g_keyboard.bindKeyPress('Alt+Right', function() minimapWidget:move(-1, 0) end, gameRootPanel)
+  g_keyboard.bindKeyPress('Alt+Up', function() minimapWidget:move(0, 1) end, gameRootPanel)
+  g_keyboard.bindKeyPress('Alt+Down', function() minimapWidget:move(0, -1) end, gameRootPanel)
+  g_keyboard.bindKeyDown(GameMinimapActionKey, GameMinimap.toggle)
   g_keyboard.bindKeyDown('Ctrl+Shift+M', GameMinimap.toggleFullMap)
   g_keyboard.bindKeyDown('Escape', function() if minimapWidget.fullMapView then GameMinimap.toggleFullMap() end end)
 
@@ -118,7 +126,7 @@ function GameMinimap.terminate()
   g_keyboard.unbindKeyPress('Alt+Right', gameRootPanel)
   g_keyboard.unbindKeyPress('Alt+Up', gameRootPanel)
   g_keyboard.unbindKeyPress('Alt+Down', gameRootPanel)
-  g_keyboard.unbindKeyDown('Ctrl+M')
+  g_keyboard.unbindKeyDown('GameMinimapActionKey')
   g_keyboard.unbindKeyDown('Ctrl+Shift+M')
   g_keyboard.unbindKeyDown('Escape')
 
@@ -164,7 +172,7 @@ function GameMinimap.loadMap(clean)
 
   local minimapFile = '/minimap.otmm'
   if string.exists(currentMapFilename) then
-    minimapFile = tr('/%s.otmm', currentMapFilename)
+    minimapFile = f('/%s.otmm', currentMapFilename)
     preloaded = false
   end
 
@@ -177,7 +185,7 @@ end
 function GameMinimap.saveMap()
   local minimapFile = '/minimap.otmm'
   if string.exists(currentMapFilename) then
-    minimapFile = tr('/%s.otmm', currentMapFilename)
+    minimapFile = f('/%s.otmm', currentMapFilename)
   end
 
   g_minimap.saveOtmm(minimapFile)
@@ -354,7 +362,7 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
     if state then
       minimapBackgroundWidget:removeTooltip()
     else
-      minimapBackgroundWidget:setTooltip('Minimap not available')
+      minimapBackgroundWidget:setTooltip('${GameMinimapMinimapNotAvailable}')
     end
 
     minimapWidget:setVisible(state)
@@ -383,8 +391,8 @@ function GameMinimap.createTrackMenu(widget, mousePos, mouseButton)
     local menu = g_ui.createWidget('PopupMenu')
     menu:setGameMenu(true)
     if not widget.info.auto then
-      menu:addOption(tr('Edit track'), function() GameTracker.createEditTrackWindow(widget.info) end)
-      menu:addOption(tr('Stop track'), function() GameTracker.stopTrackPosition(widget.info.position) end)
+      menu:addOption(loc'${GameMinimapButtonTrackEdit}', function() GameTracker.createEditTrackWindow(widget.info) end)
+      menu:addOption(loc'${GameMinimapButtonTrackStop}', function() GameTracker.stopTrackPosition(widget.info.position) end)
     end
     menu:display(mousePos)
     return true

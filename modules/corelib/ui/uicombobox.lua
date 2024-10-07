@@ -24,7 +24,7 @@ function UIComboBox:isOption(text)
     return false
   end
 
-  for i,v in ipairs(self.options) do
+  for _, v in ipairs(self.options) do
     if v.text == text then
       return true
     end
@@ -37,7 +37,7 @@ function UIComboBox:setCurrentOption(text, dontSignal)
     return
   end
 
-  for i,v in ipairs(self.options) do
+  for i, v in ipairs(self.options) do
     if v.text == text and self.currentIndex ~= i then
       self.currentIndex = i
       self:setText(text)
@@ -55,7 +55,7 @@ function UIComboBox:setCurrentOptionByData(data, dontSignal)
     return
   end
 
-  for i,v in ipairs(self.options) do
+  for i, v in ipairs(self.options) do
     if v.data == data and self.currentIndex ~= i then
       self.currentIndex = i
       self:setText(v.text)
@@ -97,7 +97,7 @@ function UIComboBox:addOption(text, data)
 end
 
 function UIComboBox:removeOption(text)
-  for i,v in ipairs(self.options) do
+  for i, v in ipairs(self.options) do
     if v.text == text then
       table.remove(self.options, i)
       if self.currentIndex == i then
@@ -122,7 +122,7 @@ function UIComboBox:onMousePress(mousePos, mouseButton)
     menu = g_ui.createWidget(self:getStyleName() .. 'PopupMenu')
   end
   menu:setId(self:getId() .. 'PopupMenu')
-  for i,v in ipairs(self.options) do
+  for _, v in ipairs(self.options) do
     menu:addOption(v.text, function() self:setOption(v.text) end)
   end
   menu:setWidth(self:getWidth())
@@ -145,23 +145,25 @@ function UIComboBox:onMouseWheel(mousePos, direction)
   if not self.mouseScroll then
     return false
   end
+
   if direction == MouseWheelUp and self.currentIndex > 1 then
     self:setCurrentIndex(self.currentIndex - 1)
   elseif direction == MouseWheelDown and self.currentIndex < #self.options then
     self:setCurrentIndex(self.currentIndex + 1)
   end
+
   return true
 end
 
 function UIComboBox:onStyleApply(styleName, styleNode)
   if styleNode.options then
-    for k,option in pairs(styleNode.options) do
+    for _, option in pairs(styleNode.options) do
       self:addOption(option)
     end
   end
 
   if styleNode.data then
-    for k,data in pairs(styleNode.data) do
+    for k, data in pairs(styleNode.data) do
       local option = self.options[k]
       if option then
         option.data = data

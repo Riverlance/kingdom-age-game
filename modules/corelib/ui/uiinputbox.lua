@@ -10,6 +10,7 @@ function UIInputBox.create(title, okCallback, cancelCallback)
 
   inputBox:setText(title)
   inputBox.inputs = { }
+
   inputBox.onEnter = function()
     local results = { }
     for _,func in pairs(inputBox.inputs) do
@@ -18,6 +19,7 @@ function UIInputBox.create(title, okCallback, cancelCallback)
     okCallback(unpack(results))
     inputBox:destroy()
   end
+
   inputBox.onEscape = function()
     if cancelCallback then
       cancelCallback()
@@ -87,9 +89,10 @@ function UIInputBox:addComboBox(labelText, ...)
 
   local comboBox = g_ui.createWidget('InputBoxComboBox', self)
   local options = {...}
-  for i=1,#options do
+  for i = 1, #options do
     comboBox:addOption(options[i])
   end
+
   table.insert(self.inputs, function() return comboBox:getCurrentOption() end)
   return comboBox
 end
@@ -109,8 +112,8 @@ function UIInputBox:addSpinBox(labelText, minimum, maximum, value, step)
 end
 
 function UIInputBox:display(okButtonText, cancelButtonText)
-  okButtonText = okButtonText or tr('Ok')
-  cancelButtonText = cancelButtonText or tr('Cancel')
+  okButtonText = okButtonText or loc'${CorelibInfoOk}'
+  cancelButtonText = cancelButtonText or loc'${CorelibInfoCancel}'
 
   local buttonsWidget = g_ui.createWidget('InputBoxButtonsPanel', self)
   local okButton = g_ui.createWidget('InputBoxButton', buttonsWidget)

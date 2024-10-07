@@ -59,7 +59,7 @@ local function updateValueDisplay(widget)
   if widget:getShowValue() then
     local value  = widget:getValue()
     local symbol = widget:getSymbol()
-    local minMax = value >= widget:getMaximum() and f(' (%s)', tr('max')) or value <= widget:getMinimum() and f(' (%s)', tr('min')) or ''
+    local minMax = value >= widget:getMaximum() and loc' (${CorelibInfoMax})' or value <= widget:getMinimum() and loc' (${CorelibInfoMin})' or ''
 
     widget:setText(f('%d%s%s', value, symbol and f('%s%s', symbol:find('[%w]') and ' ' or '', symbol) or '', minMax))
   end
@@ -147,7 +147,7 @@ function UIScrollBar:onSetup()
 end
 
 function UIScrollBar:onStyleApply(styleName, styleNode)
-  for name,value in pairs(styleNode) do
+  for name, value in pairs(styleNode) do
     if name == 'maximum' then
       self:setMaximum(tonumber(value))
     elseif name == 'minimum' then

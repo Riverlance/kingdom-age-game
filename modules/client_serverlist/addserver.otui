@@ -1,14 +1,14 @@
 MainWindow
   id: addServerWindow
-  !text: tr('New Server')
-  size: 180 195
+  &loc: '${ClientServerListAddServerWindow}'
+  size: 250 190
   visible: false
   @onEscape: ClientAddServer.hide()
   @onEnter: ClientAddServer.add()
 
   Label
     id: hostLabel
-    !text: tr('Host') .. ':'
+    &loc: '${ClientServerListHostLabel}:'
     anchors.top: parent.top
     anchors.left: parent.left
     margin-bottom: 2
@@ -22,7 +22,7 @@ MainWindow
 
   Label
     id: portLabel
-    !text: tr('Port') .. ':'
+    &loc: '${ClientServerListPortLabel}:'
     anchors.top: host.bottom
     anchors.left: host.left
     margin-top: 3
@@ -37,7 +37,7 @@ MainWindow
 
   Label
     id: protocolLabel
-    !text: tr('Protocol') .. ':'
+    &loc: '${ClientServerListProtocolLabel}:'
     anchors.top: port.bottom
     anchors.left: port.left
     margin-top: 3
@@ -58,18 +58,17 @@ MainWindow
 
   Button
     id: buttonAdd
-    !text: tr('Add')
-    width: 64
-    anchors.right: parent.horizontalCenter
+    &loc: '${CorelibInfoAdd}'
+    width: 80
     anchors.bottom: parent.bottom
-    margin-right: 2
+    anchors.right: parent.right
     @onClick: ClientAddServer.add()
 
   Button
     id: buttonCancel
-    !text: tr('Cancel')
-    width: 64
-    anchors.left: parent.horizontalCenter
+    &loc: '${CorelibInfoCancel}'
+    width: 80
     anchors.bottom: parent.bottom
-    margin-left: 2
+    anchors.right: prev.outsideLeft
+    margin-right: 2
     @onClick: ClientAddServer.hide()

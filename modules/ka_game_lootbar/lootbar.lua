@@ -177,7 +177,7 @@ function GameLootbar.addItem(id, count, name, pos)
   end
 
   local widget = g_ui.createWidget('ItemBoxContainer', lootWidget)
-  widget:setTooltip((count > 1 and  count .. 'x 'or '') .. name)
+  widget:setTooltip((count > 1 and count .. 'x ' or '') .. name)
   widget.realWidth = widget:getWidth()
   widget.pos = pos
   widget.lastHover = 0

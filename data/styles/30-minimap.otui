@@ -17,7 +17,7 @@ Minimap < UIMinimap
 MinimapRegionLabel < UIWidget
   focusable: false
   phantom: true
-  font: verdana-8px-antialised
+  font: sans-8px
   text-auto-resize: true
   color: #ffffff
   background-color: #000000bb
@@ -63,11 +63,11 @@ MinimapFlagCheckBox < CheckBox
     icon-clip: 0 22 11 11
 
 MinimapAddFlagWindow < MainWindow
-  !text: tr('Add new map mark')
+  &loc: '${ClientStylesMapInfoAddMark}'
   size: 196 185
 
   Label
-    !text: tr('Position') .. ':'
+    &loc: '${ClientStylesMapInfoPosition}:'
     text-auto-resize: true
     anchors.top: parent.top
     anchors.left: parent.left
@@ -81,7 +81,7 @@ MinimapAddFlagWindow < MainWindow
     margin-top: 2
 
   Label
-    !text: tr('Description') .. ':'
+    &loc: '${CorelibInfoDescription}:'
     anchors.left: parent.left
     anchors.top: prev.bottom
     margin-top: 7
@@ -185,7 +185,7 @@ MinimapAddFlagWindow < MainWindow
 
   Button
     id: okButton
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -193,17 +193,17 @@ MinimapAddFlagWindow < MainWindow
 
   Button
     id: cancelButton
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
 
 MinimapEditFlagWindow < MainWindow
-  !text: tr('Edit map mark')
+  &loc: '${ClientStylesMapInfoEditMark}'
   size: 196 185
 
   Label
-    !text: tr('Position') .. ':'
+    &loc: '${ClientStylesMapInfoPosition}:'
     text-auto-resize: true
     anchors.top: parent.top
     anchors.left: parent.left
@@ -217,7 +217,7 @@ MinimapEditFlagWindow < MainWindow
     margin-top: 2
 
   Label
-    !text: tr('Description') .. ':'
+    &loc: '${CorelibInfoDescription}:'
     anchors.left: parent.left
     anchors.top: prev.bottom
     margin-top: 7
@@ -321,7 +321,7 @@ MinimapEditFlagWindow < MainWindow
 
   Button
     id: okButton
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -329,7 +329,7 @@ MinimapEditFlagWindow < MainWindow
 
   Button
     id: cancelButton
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom

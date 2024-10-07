@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameTextMessage = { }
 
 
@@ -6,20 +8,20 @@ DefaultFont = 'verdana-11px-rounded'
 
 MessageSettings = {
   none            = { },
-  consoleRed      = { color = TextColors.red,       consoleTab='Default' },
-  consoleOrange   = { color = TextColors.orange,    consoleTab='Default' },
-  consoleBlue     = { color = TextColors.blue,      consoleTab='Default' },
-  centerRed       = { color = TextColors.red,       consoleTab='Server', screenTarget='lowCenterLabel' },
-  centerGreen     = { color = TextColors.green,     consoleTab='Server', screenTarget='highCenterLabel',   consoleOption='showInfoMessagesInConsole' },
-  centerWhite     = { color = TextColors.white,     consoleTab='Server', screenTarget='middleCenterLabel', consoleOption='showEventMessagesInConsole' },
-  bottomWhite     = { color = TextColors.white,     consoleTab='Server', screenTarget='statusLabel',       consoleOption='showEventMessagesInConsole' },
-  status          = { color = TextColors.white,     consoleTab='Server', screenTarget='statusLabel',       consoleOption='showStatusMessagesInConsole' },
-  statusSmall     = { color = TextColors.white,                          screenTarget='statusLabel' },
-  loot            = { color = TextColors.green,     consoleTab='Server' },
-  private         = { color = TextColors.lightblue,                      screenTarget='privateLabel' },
-  statusBigTop    = { color = '#e1e1e1',            consoleTab='Server', screenTarget='privateLabel',      consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
-  statusBigCenter = { color = '#e1e1e1',            consoleTab='Server', screenTarget='middleCenterLabel', consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
-  statusBigBottom = { color = '#e1e1e1',            consoleTab='Server', screenTarget='statusLabel',       consoleOption='showStatusMessagesInConsole', font='sans-bold-borded-16px' },
+  consoleRed      = { color = TextColors.red,       consoleTab = loc'${CorelibInfoDefault}' },
+  consoleOrange   = { color = TextColors.orange,    consoleTab = loc'${CorelibInfoDefault}' },
+  consoleBlue     = { color = TextColors.blue,      consoleTab = loc'${CorelibInfoDefault}' },
+  centerRed       = { color = TextColors.red,       consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'lowCenterLabel' },
+  centerGreen     = { color = TextColors.green,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'highCenterLabel',   consoleOption = 'showInfoMessagesInConsole' },
+  centerWhite     = { color = TextColors.white,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'middleCenterLabel', consoleOption = 'showEventMessagesInConsole' },
+  bottomWhite     = { color = TextColors.white,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showEventMessagesInConsole' },
+  status          = { color = TextColors.white,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showStatusMessagesInConsole' },
+  statusSmall     = { color = TextColors.white,                                                    screenTarget = 'statusLabel' },
+  loot            = { color = TextColors.green,     consoleTab = loc'${GameConsoleTabNameServer}' },
+  private         = { color = TextColors.lightblue,                                                screenTarget = 'privateLabel' },
+  statusBigTop    = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'privateLabel',      consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
+  statusBigCenter = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'middleCenterLabel', consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
+  statusBigBottom = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
 }
 
 MessageTypes = {
@@ -170,7 +172,7 @@ function GameTextMessage.displayMessage(mode, text)
   end
 
   if msgtype.consoleTab ~= nil and (msgtype.consoleOption == nil or ClientOptions.getOption(msgtype.consoleOption)) then
-    GameConsole.addText(text, msgtype, tr(msgtype.consoleTab))
+    GameConsole.addText(text, msgtype, msgtype.consoleTab)
     --TODO move to game_console
   end
 
@@ -221,6 +223,6 @@ end
 
 function LocalPlayer:onAutoWalkFail(player)
   if modules.game_textmessage then
-    GameTextMessage.displayFailureMessage(tr('There is no way.'))
+    GameTextMessage.displayFailureMessage(loc'${GameTextMessageErrorNoWay}')
   end
 end

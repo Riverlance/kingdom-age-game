@@ -1,21 +1,21 @@
 Panel
 
   OptionLabel
-    !text: tr('Side panels priority')
-    !tooltip: tr('Side panels priority for the new mini windows to appear, including containers.')
+    &loc: '${ClientOptionsSidePanelsPriority}'
+    &loct: '${ClientOptionsSidePanelsPriorityTooltip}'
     !tooltip-type: TooltipType.textBlock
 
   FirstOptionButtonBox
     id: panelsPriorityLeftSide
-    !text: tr('Left side')
+    &loc: '${ClientOptionsPanelsPriorityLeftSide}'
 
   OptionButtonBox
     id: panelsPriorityRightSide
-    !text: tr('Right side')
+    &loc: '${ClientOptionsPanelsPriorityRightSide}'
 
   OptionLabel
     id: enabledLeftPanelsLabel
-    !text: tr('Left enabled panels')
+    &loc: '${ClientOptionsEnabledLeftPanels}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -27,7 +27,7 @@ Panel
 
   OptionLabel
     id: enabledRightPanelsLabel
-    !text: tr('Right enabled panels')
+    &loc: '${ClientOptionsEnabledRightPanels}'
     $!first:
       anchors.top: enabledLeftPanelsLabel.top
       margin-top: 0
@@ -42,7 +42,7 @@ Panel
 
   OptionLabel
     id: leftFirstPanelWidthLabel
-    !text: tr('Left first panel width')
+    &loc: '${ClientOptionsLeftFirstPanelWidth}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -55,7 +55,7 @@ Panel
 
   OptionLabel
     id: rightFirstPanelWidthLabel
-    !text: tr('Right first panel width')
+    &loc: '${ClientOptionsRightFirstPanelWidth}'
     $!first:
       anchors.top: leftFirstPanelWidthLabel.top
       margin-top: 0
@@ -71,7 +71,7 @@ Panel
 
   OptionLabel
     id: leftSecondPanelWidthLabel
-    !text: tr('Left second panel width')
+    &loc: '${ClientOptionsLeftSecondPanelWidth}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -84,7 +84,7 @@ Panel
 
   OptionLabel
     id: rightSecondPanelWidthLabel
-    !text: tr('Right second panel width')
+    &loc: '${ClientOptionsRightSecondPanelWidth}'
     $!first:
       anchors.top: leftSecondPanelWidthLabel.top
       margin-top: 0
@@ -100,7 +100,7 @@ Panel
 
   OptionLabel
     id: leftThirdPanelWidthLabel
-    !text: tr('Left third panel width')
+    &loc: '${ClientOptionsLeftThirdPanelWidth}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -113,7 +113,7 @@ Panel
 
   OptionLabel
     id: rightThirdPanelWidthLabel
-    !text: tr('Right third panel width')
+    &loc: '${ClientOptionsRightThirdPanelWidth}'
     $!first:
       anchors.top: leftThirdPanelWidthLabel.top
       margin-top: 0
@@ -131,7 +131,7 @@ Panel
 
   OptionLabel
     id: leftStickerLabel
-    !text: tr('Main left panel sticker')
+    &loc: '${ClientOptionsLeftSticker}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
@@ -145,7 +145,7 @@ Panel
   OptionLabel
     id: leftStickerOpacityLabel
     anchors.right: prev.right
-    !text: tr('Opacity')
+    &loc: '${ClientOptionsLeftStickerOpacity}'
 
   OptionScrollbar
     id: leftStickerOpacityScrollbar
@@ -156,7 +156,7 @@ Panel
 
   OptionLabel
     id: rightStickerLabel
-    !text: tr('Main right panel sticker')
+    &loc: '${ClientOptionsRightSticker}'
     $!first:
       anchors.top: leftStickerLabel.top
       margin-top: 0
@@ -173,7 +173,7 @@ Panel
   OptionLabel
     id: rightStickerOpacityLabel
     anchors.left: prev.left
-    !text: tr('Opacity')
+    &loc: '${ClientOptionsRightStickerOpacity}'
 
   OptionScrollbar
     id: rightStickerOpacityScrollbar

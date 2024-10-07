@@ -4,7 +4,7 @@ NextMountButton < NextButton
 PrevMountButton < PreviousButton
 
 MainWindow
-  !text: tr('Select Outfit')
+  &text: '${GameOutfitWindowTitle}'
   size: 340 340
 
   @onEnter: GameOutfit.accept()
@@ -22,7 +22,7 @@ MainWindow
 
   Label
     id: outfitName
-    !text: tr('No outfit')
+    &loc: '${GameOutfitOutfitName}'
     text-auto-resize: true
     anchors.bottom: prev.top
     anchors.left: prev.left
@@ -56,7 +56,7 @@ MainWindow
 
   Label
     id: mountName
-    !text: tr('No mount')
+    &loc: '${GameOutfitMountName}'
     text-auto-resize: true
     text-align: right
     anchors.bottom: prev.top
@@ -84,7 +84,7 @@ MainWindow
 
   CheckBox
     id: addon1
-    !text: tr('Addon') .. ' 1'
+    &loc: '${GameOutfitAddon} 1'
     width: 80
     anchors.top: outfitCreatureBox.bottom
     anchors.left: parent.left
@@ -94,7 +94,7 @@ MainWindow
 
   CheckBox
     id: addon2
-    !text: tr('Addon') .. ' 2'
+    &loc: '${GameOutfitAddon} 2'
     width: 80
     anchors.top: prev.top
     anchors.left: prev.right
@@ -104,7 +104,7 @@ MainWindow
 
   ButtonBox
     id: head
-    !text: tr('Head')
+    &loc: '${GameOutfitHead}'
     anchors.top: addon1.bottom
     anchors.left: parent.left
     margin-top: 5
@@ -113,21 +113,21 @@ MainWindow
 
   ButtonBox
     id: primary
-    !text: tr('Primary')
+    &loc: '${GameOutfitPrimary}'
     anchors.top: prev.top
     anchors.left: prev.outsideRight
     width: 75
 
   ButtonBox
     id: secondary
-    !text: tr('Secondary')
+    &loc: '${GameOutfitSecondary}'
     anchors.top: prev.top
     anchors.left: prev.outsideRight
     width: 75
 
   ButtonBox
     id: detail
-    !text: tr('Detail')
+    &loc: '${GameOutfitDetail}'
     anchors.top: prev.top
     anchors.left: prev.outsideRight
     width: 75
@@ -151,16 +151,16 @@ MainWindow
 
   Button
     id: randomizeButton
-    !text: tr('Randomize')
-    !tooltip: tr('Randomize characters outfit')
-    width: 75
+    &loc: '${GameOutfitRandomizeButton}'
+    &loct: '${GameOutfitRandomizeButtonTooltip}'
+    width: 100
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     @onClick: GameOutfit.randomize()
 
   Button
     id: outfitCancelButton
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.bottom: parent.bottom
     anchors.right: parent.right
@@ -168,7 +168,7 @@ MainWindow
 
   Button
     id: outfitOkButton
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.bottom: parent.bottom
     anchors.right: prev.left

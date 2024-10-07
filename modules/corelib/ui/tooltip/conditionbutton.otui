@@ -1,12 +1,14 @@
 TooltipConditionLabel < Label
   anchors.top: prev.outsideBottom
   anchors.left: parent.left
+  font: sans-11px
 
 TooltipConditionValueLabel < Label
   anchors.top: prev.top
   anchors.left: prev.outsideRight
   anchors.right: parent.right
   margin-left: 2
+  font: sans-11px
 
 
 
@@ -42,6 +44,7 @@ TooltipConditionButton < Panel
     anchors.bottom: conditionPowerIcon.bottom
     anchors.left: conditionPowerIcon.outsideRight
     anchors.right: parent.right
+    font: sans-11px
     color: #dfdfdf
     text-align: center
     image-source: /images/ui/_background/default_stone_blue
@@ -60,7 +63,7 @@ TooltipConditionButton < Panel
     margin-top: 4
 
     $!hidden:
-      !text: tr('Combat') .. ':'
+      !text: loc'${CorelibTooltipInfoCombat}:'
 
   UIWidget
     id: combatIcon
@@ -81,7 +84,7 @@ TooltipConditionButton < Panel
     anchors.top: combatValue.outsideBottom
 
     $!hidden:
-      !text: tr('Boost') .. ':'
+      !text: loc'${CorelibTooltipInfoBoost}:'
 
   TooltipConditionValueLabel
     id: boostValue
@@ -91,7 +94,7 @@ TooltipConditionButton < Panel
     id: attributeLabel
 
     $!hidden:
-      !text: tr('Attribute') .. ':'
+      !text: loc'${CorelibTooltipInfoAttribute}:'
 
   TooltipConditionValueLabel
     id: attributeValue
@@ -101,7 +104,7 @@ TooltipConditionButton < Panel
     id: durationLabel
 
     $!hidden:
-      !text: tr('Duration') .. ':'
+      !text: loc'${CorelibTooltipInfoDuration}:'
 
   TooltipConditionValueLabel
     id: durationValue
@@ -111,7 +114,7 @@ TooltipConditionButton < Panel
     id: ownerLabel
 
     $!hidden:
-      !text: tr('Created by') .. ':'
+      !text: loc'${CorelibTooltipInfoCreatedBy}:'
 
   TooltipConditionValueLabel
     id: ownerValue

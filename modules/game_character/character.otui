@@ -160,7 +160,7 @@ MountButton < CombatBox
 
 MiniWindow
   id: inventoryWindow
-  !text: tr('Character')
+  &loc: '${CharacterWindowTitle}'
   icon: /images/ui/top_menu/healthinfo
   // Mini window height is set in Lua
   &save: true
@@ -331,24 +331,24 @@ MiniWindow
 
       FightOffensiveBox
         id: fightOffensiveBox
-        !tooltip: tr('Offensive combat mode')
+        &loct: '${CharacterFightOffensiveBox}'
 
       FightBalancedBox
         id: fightBalancedBox
-        !tooltip: tr('Balanced combat mode')
+        &loct: '${CharacterFightBalancedBox}'
 
       FightDefensiveBox
         id: fightDefensiveBox
-        !tooltip: tr('Defensive combat mode')
+        &loct: '${CharacterFightDefensiveBox}'
 
       ChaseModeBox
         id: chaseModeBox
-        !tooltip: tr('Chase mode')
+        &loct: '${CharacterChaseModeBox}'
 
       SafeFightBox
         id: safeFightBox
-        !tooltip: tr('Secure mode')
+        &loct: '${CharacterSafeFightBox}'
 
       MountButton
         id: mountButton
-        !tooltip: tr('Mounting')
+        &loct: '${CharacterMountButton}'

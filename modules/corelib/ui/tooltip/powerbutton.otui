@@ -1,17 +1,20 @@
 TooltipPowerLabel < Label
   anchors.top: prev.outsideBottom
   anchors.left: parent.left
+  font: sans-11px
 
 TooltipPowerValueLabel < Label
   anchors.top: prev.top
   anchors.left: prev.outsideRight
   anchors.right: parent.right
   margin-left: 2
+  font: sans-11px
 
 TooltipPowerDescriptionLabel < Label
   anchors.top: prev.outsideBottom
   anchors.left: parent.left
   anchors.right: parent.right
+  font: sans-11px
 
 
 
@@ -38,6 +41,7 @@ TooltipPowerButton < Panel
     anchors.bottom: icon.bottom
     anchors.left: icon.outsideRight
     anchors.right: parent.right
+    font: sans-11px
     color: #dfdfdf
     text-align: center
     image-source: /images/ui/_background/default_stone_blue
@@ -50,7 +54,7 @@ TooltipPowerButton < Panel
     margin-top: 4
 
     $!hidden:
-      !text: tr('Class') .. ':'
+      !text: loc'${CorelibInfoClass}:'
 
   UIWidget
     id: classIcon
@@ -70,7 +74,7 @@ TooltipPowerButton < Panel
     id: vocationsLabel
 
     $!hidden:
-      !text: tr('Vocations') .. ':'
+      !text: loc'${CorelibTooltipInfoVocations}:'
 
   TooltipPowerValueLabel
     id: vocationsValue
@@ -80,7 +84,7 @@ TooltipPowerButton < Panel
     id: levelLabel
 
     $!hidden:
-      !text: tr('Level') .. ':'
+      !text: loc'${CorelibInfoLevel}:'
 
   TooltipPowerValueLabel
     id: levelValue
@@ -90,7 +94,7 @@ TooltipPowerButton < Panel
     id: manaCostLabel
 
     $!hidden:
-      !text: tr('Mana cost') .. ':'
+      !text: loc'${CorelibTooltipInfoManaCost}:'
 
   TooltipPowerValueLabel
     id: manaCostValue
@@ -100,7 +104,7 @@ TooltipPowerButton < Panel
     id: cooldownLabel
 
     $!hidden:
-      !text: tr('Cooldown') .. ':'
+      !text: loc'${CorelibTooltipInfoCooldown}:'
 
   TooltipPowerValueLabel
     id: cooldownValue
@@ -110,7 +114,7 @@ TooltipPowerButton < Panel
     id: premiumLabel
 
     $!hidden:
-      !text: tr('Premium') .. ':'
+      !text: loc'${CorelibTooltipInfoPremium}:'
 
   TooltipPowerValueLabel
     id: premiumValue

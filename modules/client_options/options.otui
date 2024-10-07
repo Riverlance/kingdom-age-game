@@ -73,8 +73,8 @@ OptionHorizontalSeparator < HorizontalSeparator
 
 MainWindow
   id: optionsWindow
-  !text: tr('Options')
-  size: 480 600
+  &loc: '${ClientOptionsTitle}'
+  size: 620 600
   &save: true
 
   @onEnter: ClientOptions.hide()
@@ -85,6 +85,7 @@ MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.bottom: parent.bottom
+    width: 100
     step: 10
 
   Panel
@@ -98,7 +99,7 @@ MainWindow
 
   Button
     id: okButton
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.bottom: parent.bottom
     anchors.right: parent.right

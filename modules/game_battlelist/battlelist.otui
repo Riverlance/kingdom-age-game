@@ -14,13 +14,13 @@ MiniWindow
   &contentMinimumHeight: 31
 
   ArrowMenuButton
-    &loct: '${ShowFilters}'
+    &loct: '${CorelibInfoShowOptions}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
     @onClick: GameBattleList.onClickArrowMenuButton(self)
 
     $on:
-      &loct: '${HideFilters}'
+      &loct: '${CorelibInfoHideOptions}'
 
   BallMenuButton
     id: sortMenuButton

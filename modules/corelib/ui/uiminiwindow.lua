@@ -82,6 +82,7 @@ function UIMiniWindow:maximize(dontSave, ignoreHeightChangeSignal)
   self:getChildById('miniwindowScrollBar'):show()
   self:getChildById('bottomResizeBorder'):show()
   self:getChildById('minimizeButton'):setOn(false)
+  print_r(self:getSettings('height'), self.maximizedHeight, self:getMinimumHeight()) -- attributes panel: printou nil, 32, 54; depois que abri de nv, printou 54, 54, 54; apesar de o correto ser 235
   self:setHeight(math.max(self:getSettings('height') or self.maximizedHeight, self:getMinimumHeight()), false, ignoreHeightChangeSignal)
 
   if not dontSave then

@@ -1,6 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameHotkeyBars = { }
 
 dofiles('ui')
+
+
 
 hotkeyBarList = { }
 
@@ -89,7 +93,7 @@ function GameHotkeyBars.onToggleHotkeyWindow(widget, visible)
   GameHotkeyBars.updateDraggable(visible)
   local screen = rootWidget:recursiveGetChildById('textMessageArea')
   if screen then
-    screen:setBackgroundColor(visible and "#000000cc" or "alpha")
+    screen:setBackgroundColor(visible and '#000000cc' or 'alpha')
   end
   GameHotkeyBars.setHighlight(visible)
 end

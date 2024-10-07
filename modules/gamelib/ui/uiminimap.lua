@@ -1,42 +1,42 @@
 local regionLabels = {
-  { pos = { x = 3400, y = 2670, z = 7 }, text = 'Rookie Island' },
-  { pos = { x = 2743, y = 2721, z = 7 }, text = 'City of Erembor' },
-  { pos = { x = 3017, y = 2619, z = 7 }, text = 'City of Elensar' },
-  { pos = { x = 3224, y = 2687, z = 7 }, text = 'City of Nova' },
-  { pos = { x = 2983, y = 2543, z = 7 }, text = 'City of Nalta' },
-  { pos = { x = 3292, y = 2997, z = 7 }, text = "City of Dron'Ma" },
-  { pos = { x = 2655, y = 2597, z = 7 }, text = 'Amazonia Hideout' },
-  { pos = { x = 2710, y = 2580, z = 7 }, text = 'Vengeance Village' },
-  { pos = { x = 2885, y = 2635, z = 7 }, text = 'Mount Farber' },
-  { pos = { x = 2855, y = 2700, z = 7 }, text = 'Eranin Woods' },
-  { pos = { x = 2740, y = 2795, z = 7 }, text = 'Troll Shaws' },
-  { pos = { x = 2625, y = 2805, z = 7 }, text = 'Death Claw Mountain' },
-  { pos = { x = 3155, y = 2595, z = 7 }, text = 'Krog-Har' },
-  { pos = { x = 3133, y = 2713, z = 7 }, text = 'Sand Hills' },
-  { pos = { x = 2965, y = 2790, z = 7 }, text = 'Mount Christ' },
-  { pos = { x = 3165, y = 2790, z = 7 }, text = 'Mavigic Valley' },
-  { pos = { x = 3140, y = 2855, z = 7 }, text = 'Mavigic Forest' },
-  { pos = { x = 3232, y = 2853, z = 7 }, text = 'Mavigic Citadel' },
-  { pos = { x = 2992, y = 2867, z = 7 }, text = "Anvhian's Mines" },
-  { pos = { x = 2830, y = 2865, z = 7 }, text = 'Holkagan Desert' },
-  { pos = { x = 3077, y = 2920, z = 7 }, text = 'Cyclops Tunnel' },
-  { pos = { x = 3100, y = 2990, z = 7 }, text = 'Elven Camp' },
-  { pos = { x = 3280, y = 2882, z = 7 }, text = 'Lollaard Cave' },
-  { pos = { x = 3000, y = 3052, z = 7 }, text = "Temple of Acegord's Plains" },
-  { pos = { x = 3000, y = 3120, z = 7 }, text = "Acegord's Plains" },
-  { pos = { x = 3105, y = 3120, z = 7 }, text = 'Dragon Lair' },
-  { pos = { x = 3180, y = 3120, z = 7 }, text = 'Vampire Mansion' },
-  { pos = { x = 2875, y = 2975, z = 7 }, text = 'Rakkar Hills' },
-  { pos = { x = 2733, y = 3028, z = 7 }, text = 'Greenest' },
-  { pos = { x = 2690, y = 3080, z = 7 }, text = 'Lusor Swamp' },
-  { pos = { x = 2495, y = 3120, z = 7 }, text = 'Thartov' },
-  { pos = { x = 2865, y = 3135, z = 7 }, text = 'Outlaw Village' },
-  { pos = { x = 2790, y = 3240, z = 7 }, text = 'Wealth Island' },
-  { pos = { x = 2945, y = 3430, z = 7 }, text = 'Roshamuul' },
+  { pos = { x = 3400, y = 2670, z = 7 }, text = loc'${GamelibInfoRegionRookieIsland}' },
+  { pos = { x = 2743, y = 2721, z = 7 }, text = loc'${GamelibInfoRegionCityErembor}' },
+  { pos = { x = 3017, y = 2619, z = 7 }, text = loc'${GamelibInfoRegionCityElensar}' },
+  { pos = { x = 3224, y = 2687, z = 7 }, text = loc'${GamelibInfoRegionCityNova}' },
+  { pos = { x = 2983, y = 2543, z = 7 }, text = loc'${GamelibInfoRegionCityNalta}' },
+  { pos = { x = 3292, y = 2997, z = 7 }, text = loc'${GamelibInfoRegionCityDronMa}' },
+  { pos = { x = 2655, y = 2597, z = 7 }, text = loc'${GamelibInfoRegionAmazoniaHideout}' },
+  { pos = { x = 2710, y = 2580, z = 7 }, text = loc'${GamelibInfoRegionVengeanceVillage}' },
+  { pos = { x = 2885, y = 2635, z = 7 }, text = loc'${GamelibInfoRegionMountFarber}' },
+  { pos = { x = 2855, y = 2700, z = 7 }, text = loc'${GamelibInfoRegionEraninWoods}' },
+  { pos = { x = 2740, y = 2795, z = 7 }, text = loc'${GamelibInfoRegionTrollShaws}' },
+  { pos = { x = 2625, y = 2805, z = 7 }, text = loc'${GamelibInfoRegionDeathClawMountain}' },
+  { pos = { x = 3155, y = 2595, z = 7 }, text = loc'${GamelibInfoRegionKrogHar}' },
+  { pos = { x = 3133, y = 2713, z = 7 }, text = loc'${GamelibInfoRegionSandHills}' },
+  { pos = { x = 2965, y = 2790, z = 7 }, text = loc'${GamelibInfoRegionMountChrist}' },
+  { pos = { x = 3165, y = 2790, z = 7 }, text = loc'${GamelibInfoRegionMavigicValley}' },
+  { pos = { x = 3140, y = 2855, z = 7 }, text = loc'${GamelibInfoRegionMavigicForest}' },
+  { pos = { x = 3232, y = 2853, z = 7 }, text = loc'${GamelibInfoRegionMavigicCitadel}' },
+  { pos = { x = 2992, y = 2867, z = 7 }, text = loc'${GamelibInfoRegionAnvhiansMines}' },
+  { pos = { x = 2830, y = 2865, z = 7 }, text = loc'${GamelibInfoRegionHolkaganDesert}' },
+  { pos = { x = 3077, y = 2920, z = 7 }, text = loc'${GamelibInfoRegionCyclopsTunnel}' },
+  { pos = { x = 3100, y = 2990, z = 7 }, text = loc'${GamelibInfoRegionElvenCamp}' },
+  { pos = { x = 3280, y = 2882, z = 7 }, text = loc'${GamelibInfoRegionLollaardCave}' },
+  { pos = { x = 3000, y = 3052, z = 7 }, text = loc'${GamelibInfoRegionTempleAcegordsPlains}' },
+  { pos = { x = 3000, y = 3120, z = 7 }, text = loc'${GamelibInfoRegionAcegordsPlains}' },
+  { pos = { x = 3105, y = 3120, z = 7 }, text = loc'${GamelibInfoRegionDragonLair}' },
+  { pos = { x = 3180, y = 3120, z = 7 }, text = loc'${GamelibInfoRegionVampireMansion}' },
+  { pos = { x = 2875, y = 2975, z = 7 }, text = loc'${GamelibInfoRegionRakkarHills}' },
+  { pos = { x = 2733, y = 3028, z = 7 }, text = loc'${GamelibInfoRegionGreenest}' },
+  { pos = { x = 2690, y = 3080, z = 7 }, text = loc'${GamelibInfoRegionLusorSwamp}' },
+  { pos = { x = 2495, y = 3120, z = 7 }, text = loc'${GamelibInfoRegionThartov}' },
+  { pos = { x = 2865, y = 3135, z = 7 }, text = loc'${GamelibInfoRegionOutlawVillage}' },
+  { pos = { x = 2790, y = 3240, z = 7 }, text = loc'${GamelibInfoRegionWealthIsland}' },
+  { pos = { x = 2945, y = 3430, z = 7 }, text = loc'${GamelibInfoRegionRoshamuul}' },
 }
 
 local function bindCopyPositionOption(menu, pos)
-  menu:addOption(tr('Copy position'), function() g_window.setClipboardText(f('Position(%d, %d, %d)', pos.x, pos.y, pos.z)) end)
+  menu:addOption(loc'${GamelibInfoOptionCopyPosition}', function() g_window.setClipboardText(f(loc'${GamelibInfoPosition}', pos.x, pos.y, pos.z)) end)
 end
 
 function UIMinimap:onCreate()
@@ -96,23 +96,27 @@ function UIMinimap:onSetup()
 end
 
 function UIMinimap:onDestroy()
-  for _,widget in pairs(self.alternatives) do
+  for _, widget in pairs(self.alternatives) do
     widget:destroy()
   end
+
   self.alternatives = { }
+
   disconnect(g_game, {
     onAddAutomapFlag    = self.onAddAutomapFlag,
     onRemoveAutomapFlag = self.onRemoveAutomapFlag,
     onGameEnd           = self.onGameEnd,
   })
+
   self:destroyAddFlagWindow()
   self:destroyEditFlagWindow()
   self.flags = { }
 end
 
 function UIMinimap:save()
-  local settings = { flags={ } }
-  for _,flag in pairs(self.flags) do
+  local settings = { flags = { } }
+
+  for _, flag in pairs(self.flags) do
     if not flag.temporary then
       table.insert(settings.flags, {
         position = flag.pos,
@@ -121,8 +125,10 @@ function UIMinimap:save()
       })
     end
   end
-  settings.zoom = self.zoomMinimap
+
+  settings.zoom     = self.zoomMinimap
   settings.zoomFull = self.zoomFullmap
+
   g_settings.setNode('Minimap', settings)
 end
 
@@ -130,19 +136,21 @@ function UIMinimap:load()
   local settings = g_settings.getNode('Minimap')
   if settings then
     if settings.flags then
-      for _,flag in pairs(settings.flags) do
+      for _, flag in pairs(settings.flags) do
         self:addFlag(flag.position, flag.icon, flag.description)
       end
     end
+
     self.zoomMinimap = settings.zoom
     self.zoomFullmap = settings.zoomFull or settings.zoom
+
     self:setZoom(self.zoomMinimap)
   end
 end
 
 function UIMinimap:move(x, y)
   local cameraPos = self:getCameraPosition()
-  local scale = self:getScale()
+  local scale     = self:getScale()
   if scale > 1 then
     scale = 1
   end
@@ -194,7 +202,7 @@ end
 
 
 function UIMinimap:getFlag(mapPos)
-  for _,flag in pairs(self.flags) do
+  for _, flag in pairs(self.flags) do
     if flag.pos.x == mapPos.x and flag.pos.y == mapPos.y and flag.pos.z == mapPos.z then
       return flag
     end
@@ -239,7 +247,7 @@ function UIMinimap:addFlag(mapPos, icon, description, force, temporary)
       local player = g_game.getLocalPlayer()
       if player then
         if Position.distance(player:getPosition(), widget.pos) > 250 then
-          GameTextMessage.displayStatusMessage(tr('Destination is out of range.'))
+          GameTextMessage.displayStatusMessage(loc'${GamelibInfoDestinationOutRange}')
           return false
         end
 
@@ -252,8 +260,8 @@ function UIMinimap:addFlag(mapPos, icon, description, force, temporary)
     elseif button == MouseRightButton then
       local menu = g_ui.createWidget('PopupMenu')
       menu:setGameMenu(true)
-      menu:addOption(tr('Edit mark'), function() self:createEditFlagWindow(mapPos) end)
-      menu:addOption(tr('Remove mark'), function() widget:destroy() end)
+      menu:addOption(loc'${GamelibInfoOptionEditMark}', function() self:createEditFlagWindow(mapPos) end)
+      menu:addOption(loc'${GamelibInfoOptionRemoveMark}', function() widget:destroy() end)
       menu:addSeparator()
       bindCopyPositionOption(menu, mapPos)
       menu:display(_pos)
@@ -285,8 +293,10 @@ end
 function UIMinimap:addAlternativeWidget(widget)
   local hasAlternativeWidget = table.contains(self.alternatives, widget)
   local hasChild             = self:hasChild(widget)
+
   if hasAlternativeWidget and hasChild then
     return
+
   else
     -- Ensure it is removed from both lists
     if hasAlternativeWidget then
@@ -300,14 +310,17 @@ function UIMinimap:addAlternativeWidget(widget)
   if self.alternativesVisible then
     self:insertChild(1, widget)
   end
+
   if widget.description then
     if widget:getStyleName() ~= 'CreatureButtonMinimapWidget' then -- CreatureButtonMinimapWidget updates its tooltip within UICreatureButton
       widget:setTooltip(widget.description)
     end
   end
+
   connect(widget, {
     onDestroy = function() table.removevalue(self.alternatives, widget, nil, true) end
   })
+
   self.alternatives[widget.alternativeId or tostring(widget:getId())] = widget
   self:centerInPosition(widget, widget.pos)
 end
@@ -315,19 +328,23 @@ end
 function UIMinimap:setAlternativeWidgetsVisible(show)
   local layout = self:getLayout()
   layout:disableUpdates()
+
   self.alternativesVisible = show
-  for _,widget in pairs(self.alternatives) do
+
+  for _, widget in pairs(self.alternatives) do
     if show then
       if not self:hasChild(widget) then
         self:insertChild(1, widget)
         self:centerInPosition(widget, widget.pos)
       end
+
     else
       if self:hasChild(widget) then
         self:removeChild(widget)
       end
     end
   end
+
   layout:enableUpdates()
   layout:update()
 end
@@ -342,12 +359,13 @@ function UIMinimap:createAddFlagWindow(mapPos)
   self.addFlagWindow = g_ui.createWidget('MinimapAddFlagWindow', rootWidget)
 
   local positionLabel = self.addFlagWindow:getChildById('position')
-  local description = self.addFlagWindow:getChildById('description')
-  local okButton = self.addFlagWindow:getChildById('okButton')
-  local cancelButton = self.addFlagWindow:getChildById('cancelButton')
+  local description   = self.addFlagWindow:getChildById('description')
+  local okButton      = self.addFlagWindow:getChildById('okButton')
+  local cancelButton  = self.addFlagWindow:getChildById('cancelButton')
 
   local flagRadioGroup = UIRadioGroup.create()
-  for i=0,19 do
+
+  for i = 0, 19 do
     local checkbox = self.addFlagWindow:getChildById('flag' .. i)
     checkbox.icon = i
     flagRadioGroup:addWidget(checkbox)
@@ -365,12 +383,11 @@ function UIMinimap:createAddFlagWindow(mapPos)
     self:destroyAddFlagWindow()
   end
 
-  okButton.onClick = successFunc
+  okButton.onClick     = successFunc
   cancelButton.onClick = cancelFunc
 
-  self.addFlagWindow.onEnter = successFunc
-  self.addFlagWindow.onEscape = cancelFunc
-
+  self.addFlagWindow.onEnter   = successFunc
+  self.addFlagWindow.onEscape  = cancelFunc
   self.addFlagWindow.onDestroy = function() flagRadioGroup:destroy() end
 end
 
@@ -394,12 +411,13 @@ function UIMinimap:createEditFlagWindow(mapPos)
   self.editFlagWindow = g_ui.createWidget('MinimapEditFlagWindow', rootWidget)
 
   local positionLabel = self.editFlagWindow:getChildById('position')
-  local description = self.editFlagWindow:getChildById('description')
-  local okButton = self.editFlagWindow:getChildById('okButton')
-  local cancelButton = self.editFlagWindow:getChildById('cancelButton')
+  local description   = self.editFlagWindow:getChildById('description')
+  local okButton      = self.editFlagWindow:getChildById('okButton')
+  local cancelButton  = self.editFlagWindow:getChildById('cancelButton')
 
   local flagRadioGroup = UIRadioGroup.create()
-  for i=0,19 do
+
+  for i = 0, 19 do
     local checkbox = self.editFlagWindow:getChildById('flag' .. i)
     checkbox.icon = i
     flagRadioGroup:addWidget(checkbox)
@@ -418,12 +436,11 @@ function UIMinimap:createEditFlagWindow(mapPos)
     self:destroyEditFlagWindow()
   end
 
-  okButton.onClick = successFunc
+  okButton.onClick     = successFunc
   cancelButton.onClick = cancelFunc
 
-  self.editFlagWindow.onEnter = successFunc
-  self.editFlagWindow.onEscape = cancelFunc
-
+  self.editFlagWindow.onEnter   = successFunc
+  self.editFlagWindow.onEscape  = cancelFunc
   self.editFlagWindow.onDestroy = function() flagRadioGroup:destroy() end
 end
 
@@ -499,7 +516,7 @@ function UIMinimap:onMouseRelease(pos, button)
   if button == MouseLeftButton then
     local player = g_game.getLocalPlayer()
     if Position.distance(player:getPosition(), mapPos) > 250 then
-    	GameTextMessage.displayStatusMessage(tr('Destination is out of range.'))
+    	GameTextMessage.displayStatusMessage(loc'${GamelibInfoDestinationOutRange}')
     	return false
     end
 
@@ -510,9 +527,9 @@ function UIMinimap:onMouseRelease(pos, button)
   elseif button == MouseRightButton then
     local menu = g_ui.createWidget('PopupMenu')
     menu:setGameMenu(true)
-    menu:addOption(tr('Add new mark'), function() self:createAddFlagWindow(mapPos) end)
+    menu:addOption(loc'${GamelibInfoOptionAddNewMark}', function() self:createAddFlagWindow(mapPos) end)
     if GameTracker then
-      menu:addOption(tr('Track position'), function() signalcall(g_game.onClickStartTrackPosition, mapPos) end)
+      menu:addOption(loc'${GamelibInfoOptionTrackPos}', function() signalcall(g_game.onClickStartTrackPosition, mapPos) end)
     end
     menu:addSeparator()
     bindCopyPositionOption(menu, mapPos)
@@ -530,9 +547,9 @@ end
 
 function UIMinimap:onDragMove(pos, moved)
   local scale = self:getScale()
-  local dx = (self.dragReference.x - pos.x)/scale
-  local dy = (self.dragReference.y - pos.y)/scale
-  local pos = {x = self.dragCameraReference.x + dx, y = self.dragCameraReference.y + dy, z = self.dragCameraReference.z}
+  local dx = (self.dragReference.x - pos.x) / scale
+  local dy = (self.dragReference.y - pos.y) / scale
+  local pos = { x = self.dragCameraReference.x + dx, y = self.dragCameraReference.y + dy, z = self.dragCameraReference.z }
   self:setCameraPosition(pos)
   return true
 end
@@ -542,7 +559,7 @@ function UIMinimap:onDragLeave(widget, pos)
 end
 
 function UIMinimap:onStyleApply(styleName, styleNode)
-  for name,value in pairs(styleNode) do
+  for name, value in pairs(styleNode) do
     if name == 'autowalk' then
       self.autowalk = value
     end

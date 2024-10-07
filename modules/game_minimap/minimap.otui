@@ -1,13 +1,13 @@
 MiniWindow
   id: minimapWindow
-  !text: tr('Minimap')
+  &loc: '${GameMinimapTitle}'
   icon: /images/ui/top_menu/minimap
   &save: true
   &contentMinimumHeight: 117
 
   BallMenuButton
     id: ballButton
-    !tooltip: tr('Hide controllers')
+    !tooltip: loc'${GameMinimapButtonHideControllers}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
     @onClick: |
@@ -18,15 +18,15 @@ MiniWindow
 
         if hide then
           widget:setWidth(0)
-          self:setTooltip(tr('Show controllers'))
+          self:setTooltip(loc'${GameMinimapButtonShowControllers}')
         else
           widget:setWidth(70)
-          self:setTooltip(tr('Hide controllers'))
+          self:setTooltip(loc'${GameMinimapButtonHideControllers}')
         end
       end
 
   InfoMenuButton
-    !tooltip: tr("Hold the left mouse button and drag-and-drop or press the '%s' holding '%s' for navigate.\n\nScroll the mouse wheel for zoom. Do the same holding '%s' for change the floor level.\n\nPress the right mouse button for create map marks.\n\nPress '%s' for view the entire game map.", 'Arrow Keys', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
+    !tooltip: f(loc'${GameMinimapButtonInfo}', loc'${GameMinimapButtonInfoArrowKeys}', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
     !tooltip-type: TooltipType.textBlock
 
   MiniWindowContents
@@ -55,7 +55,7 @@ MiniWindow
       color: #ffffff
       text-align: center
       text-auto-resize: true
-      font: verdana-8px-antialised
+      font: sans-8px
       text-wrap: true
       phantom: false
 
@@ -112,7 +112,7 @@ MiniWindow
         UIButton
           id: extraIconsButton
           size: 15 15
-          !tooltip: tr('Show minimap extra icons (e.g., title labels and party player icons).')
+          !tooltip: loc'${GameMinimapButtonExtraIconsShow}'
           !tooltip-type: TooltipType.textBlock
           anchors.top: parent.top
           anchors.left: parent.left
@@ -128,7 +128,7 @@ MiniWindow
             image-clip: 30 30 15 15
 
           $on:
-            !tooltip: tr('Hide minimap extra icons (e.g., title labels and party player icons).')
+            !tooltip: loc'${GameMinimapButtonExtraIconsShow}'
             !tooltip-type: TooltipType.textBlock
             image-clip: 45 0 15 15
 
@@ -140,7 +140,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveNorth
-          !tooltip: tr('Move to north')
+          &loct: '${GameMinimapButtonMoveNorth}'
           anchors.top: parent.top
           anchors.horizontalCenter: parent.horizontalCenter
           margin-top: 8
@@ -159,7 +159,7 @@ MiniWindow
         UIButton
           id: fullMapButton
           size: 15 15
-          !tooltip: tr('Show entire game map (%s)', 'Ctrl+Shift+M')
+          !tooltip: f(loc'${GameMinimapButtonFullMapShow}', 'Ctrl+Shift+M')
           anchors.top: parent.top
           anchors.right: parent.right
           margin-right: 4
@@ -174,7 +174,7 @@ MiniWindow
             image-clip: 0 30 15 15
 
           $on:
-            !tooltip: tr('Hide entire game map (%s)', 'Ctrl+Shift+M')
+            !tooltip: f(loc'${GameMinimapButtonFullMapHide}', 'Ctrl+Shift+M')
             image-clip: 15 0 15 15
 
           $on hover:
@@ -185,7 +185,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveWest
-          !tooltip: tr('Move to west')
+          &loct: '${GameMinimapButtonMoveWest}'
           anchors.verticalCenter: parent.verticalCenter
           anchors.left: parent.left
           margin-left: 8
@@ -203,7 +203,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveCenter
-          !tooltip: tr('Move to centralized position')
+          &loct: '${GameMinimapButtonMoveCenter}'
           anchors.verticalCenter: parent.verticalCenter
           anchors.horizontalCenter: parent.horizontalCenter
           size: 22 22
@@ -225,7 +225,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveEast
-          !tooltip: tr('Move to east')
+          &loct: '${GameMinimapButtonMoveEast}'
           anchors.verticalCenter: parent.verticalCenter
           anchors.right: parent.right
           margin-right: 7
@@ -243,7 +243,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveSouth
-          !tooltip: tr('Move to south')
+          &loct: '${GameMinimapButtonMoveSouth}'
           anchors.bottom: parent.bottom
           anchors.horizontalCenter: parent.horizontalCenter
           margin-bottom: 7
@@ -267,7 +267,7 @@ MiniWindow
 
         UIButton
           id: buttonZoomOut
-          !tooltip: tr('Zoom out')
+          &loct: '${GameMinimapButtonZoomOut}'
           anchors.bottom: parent.bottom
           anchors.right: parent.right
           size: 24 24
@@ -284,7 +284,7 @@ MiniWindow
 
         UIButton
           id: buttonZoomIn
-          !tooltip: tr('Zoom in')
+          &loct: '${GameMinimapButtonZoomIn}'
           anchors.bottom: prev.top
           anchors.right: parent.right
           margin-bottom: 2
@@ -302,7 +302,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveDown
-          !tooltip: tr('Down floor')
+          &loct: '${GameMinimapButtonFloorDown}'
           anchors.bottom: parent.bottom
           anchors.right: prev.left
           margin-right: 2
@@ -320,7 +320,7 @@ MiniWindow
 
         UIButton
           id: buttonMoveUp
-          !tooltip: tr('Up floor')
+          &loct: '${GameMinimapButtonFloorUp}'
           anchors.bottom: prev.top
           anchors.right: prev.right
           margin-bottom: 2

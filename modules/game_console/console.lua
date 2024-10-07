@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameConsole = { }
 
 
@@ -56,10 +58,10 @@ SayModes = {
 }
 
 ChannelEventFormats = {
-  [ChannelEvent.Join] = '%s joined the channel.',
-  [ChannelEvent.Leave] = '%s left the channel.',
-  [ChannelEvent.Invite] = '%s has been invited to the channel.',
-  [ChannelEvent.Exclude] = '%s has been removed from the channel.',
+  [ChannelEvent.Join]    = loc'${GameConsoleChannelEventJoin}',
+  [ChannelEvent.Leave]   = loc'${GameConsoleChannelEventLeave}',
+  [ChannelEvent.Invite]  = loc'${GameConsoleChannelEventInvite}',
+  [ChannelEvent.Exclude] = loc'${GameConsoleChannelEventExclude}',
 }
 
 CHANNEL_ID_LOOT = 2
@@ -307,7 +309,7 @@ function GameConsole.enableChat()
 
   g_keyboard.bindKeyDown('Ctrl+W', GameConsole.removeCurrentTab)
 
-  consoleToggleChat:setTooltip(tr('Disable chat (activates shortcuts to walk with WASD and others)'))
+  consoleToggleChat:setTooltip(loc'${GameConsoleChatDisable}')
 end
 
 function GameConsole.disableChat()
@@ -332,7 +334,7 @@ function GameConsole.disableChat()
   GameInterface.bindTurnKey('Ctrl+S', South, true)
   GameInterface.bindTurnKey('Ctrl+D', East, true)
 
-  consoleToggleChat:setTooltip(tr('Enable chat'))
+  consoleToggleChat:setTooltip(loc'${GameConsoleChatEnable}')
 
   -- Enable next target shortcut
   if GameBattleList.m then
@@ -777,19 +779,19 @@ function GameConsole.openClonedTab(tab)
   if clonedTab then
     if clonedTab == tab then
       return false
-    else --keep only one open
+    else -- keep only one open
       GameConsole.closeClonedTab()
     end
   end
 
   clonedTab = tab
-  cloneTab = cloneTabBar:addTab(tr(tab:getText()), nil, GameConsole.processCloneTabMenu)
+  cloneTab = cloneTabBar:addTab(tab:getText(), nil, GameConsole.processCloneTabMenu)
 
-  cloneTab.onDoubleClick = function(mousePosition)
+  cloneTab.onDoubleClick = function()
     GameConsole.closeClonedTab()
   end
 
-  cloneTab:setTooltip(tr('Tip: Double click on this tab to close it'))
+  cloneTab:setTooltip(loc'${GameConsoleCloseTabTip}')
 
   cloneTabSeparator:setOn(true)
   cloneTabTipArea:setOn(true)
@@ -798,7 +800,13 @@ function GameConsole.openClonedTab(tab)
 
   clonedSplitter:show()
   clonedSplitter:setMarginRight(g_settings.getNumber('clonedSplitter', contentPanel:getWidth() / 2))
+  function clonedSplitter:onDoubleClick(mousePosition)
+    self.currentMargin = contentPanel:getWidth() / 2
+    self:setMarginRight(self.currentMargin)
+  end
+
   GameConsole.cloneMessages(tab, cloneTab)
+
   return true
 end
 
@@ -856,15 +864,15 @@ function GameConsole.processChannelTabMenu(tab, mousePos, mouseButton)
 
   channelName = tab:getText()
   if tab ~= defaultTab and tab ~= serverTab then
-    menu:addOption(tr('Close'), function() GameConsole.removeTab(channelName) end)
-    --menu:addOption(tr('Show Server Messages'), function() --[[TODO]] end)
+    menu:addOption(loc'${CorelibInfoClose}', function() GameConsole.removeTab(channelName) end)
+    --menu:addOption(loc'${GameConsoleTabServerMsgs}', function() --[[TODO]] end)
     menu:addSeparator()
   end
 
   local _tab = GameConsole.getCurrentTab()
   if _tab and _tab == tab then
-    menu:addOption(tr('Clear messages'), function() GameConsole.clearChannel() end)
-    menu:addOption(tr('Save messages'), function()
+    menu:addOption(loc'${GameConsoleTabClearMsgs}', function() GameConsole.clearChannel() end)
+    menu:addOption(loc'${GameConsoleTabSaveMsgs}', function()
       local panel = consoleTabBar:getTabPanel(tab)
       local consoleBuffer = panel:getChildById('consoleBuffer')
       local lines = { }
@@ -877,7 +885,7 @@ function GameConsole.processChannelTabMenu(tab, mousePos, mouseButton)
       local filepath = '/' .. filename
 
       -- extra information at the beginning
-      table.insert(lines, 1, '\n' .. tr('Channel saved at') .. ' ' .. os.date('%a %b %d %H:%M:%S %Y'))
+      table.insert(lines, 1, f(loc'\n${GameConsoleTabSavedAt}', os.date('%a %b %d %H:%M:%S %Y')))
 
       if g_resources.fileExists(filepath) then
         table.insert(lines, 1, protectedcall(g_resources.readFileContents, filepath) or '')
@@ -885,15 +893,15 @@ function GameConsole.processChannelTabMenu(tab, mousePos, mouseButton)
 
       g_resources.writeFileContents(filepath, table.concat(lines, '\n'))
       if modules.game_textmessage then
-        GameTextMessage.displayStatusMessage(tr('Channel appended to %s', filename))
+        GameTextMessage.displayStatusMessage(f(loc'${GameConsoleTabAppendedTo}', filename))
       end
     end)
 
     menu:addSeparator()
     if clonedTab == tab then
-      menu:addOption(tr('Close clone'), function() GameConsole.closeClonedTab() end)
+      menu:addOption(loc'${GameConsoleTabCloneClose}', function() GameConsole.closeClonedTab() end)
     else
-      menu:addOption(tr('Clone tab'), function() GameConsole.openClonedTab(GameConsole.getCurrentTab()) end)
+      menu:addOption(loc'${GameConsoleTabClone}', function() GameConsole.openClonedTab(GameConsole.getCurrentTab()) end)
     end
   end
 
@@ -907,43 +915,43 @@ function GameConsole.processMessageMenu(mousePos, mouseButton, creatureName, tex
     menu:setGameMenu(true)
     if creatureName and #creatureName > 0 then
       if creatureName ~= g_game.getCharacterName() then
-        menu:addOption(tr('Message to') .. ' ' .. creatureName, function () g_game.openPrivateChannel(creatureName) end)
+        menu:addOption(f(loc'${GameConsoleMessageTo}', creatureName), function () g_game.openPrivateChannel(creatureName) end)
         if not localPlayer:hasVip(creatureName) then
-          menu:addOption(tr('Add to VIP list'), function () g_game.addVip(creatureName) end)
+          menu:addOption(loc'${GameConsoleAddVIP}', function () g_game.addVip(creatureName) end)
         end
         if GameConsole.getOwnPrivateTab() then
           menu:addSeparator()
-          menu:addOption(tr('Invite to private chat'), function() g_game.inviteToOwnChannel(creatureName) end)
-          menu:addOption(tr('Exclude from private chat'), function() g_game.excludeFromOwnChannel(creatureName) end)
+          menu:addOption(loc'${GameConsoleInviteToChat}', function() g_game.inviteToOwnChannel(creatureName) end)
+          menu:addOption(loc'${GameConsoleExcludeFromChat}', function() g_game.excludeFromOwnChannel(creatureName) end)
         end
         if GameConsole.isIgnored(creatureName) then
-          menu:addOption(tr('Unignore') .. ' ' .. creatureName, function() GameConsole.removeIgnoredPlayer(creatureName) end)
+          menu:addOption(f(loc'${GameConsoleUnignore}', creatureName), function() GameConsole.removeIgnoredPlayer(creatureName) end)
         else
-          menu:addOption(tr('Ignore') .. ' ' .. creatureName, function() GameConsole.addIgnoredPlayer(creatureName) end)
+          menu:addOption(f(loc'${GameConsoleIgnore}', creatureName), function() GameConsole.addIgnoredPlayer(creatureName) end)
         end
         menu:addSeparator()
 
         if g_game.getAccountType() >= ACCOUNT_TYPE_GAMEMASTER then
-          menu:addOption(tr('Add rule violation'), function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow(creatureName, text:sub(0, 255)) end end)
+          menu:addOption(loc'${GameConsoleAddRuleViolation}', function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow(creatureName, text:sub(0, 255)) end end)
         end
 
         local REPORT_TYPE_STATEMENT = 1
-        menu:addOption(tr('Report statement'), function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_STATEMENT, creatureName, text:match('.+%:%s(.+)')) end end)
+        menu:addOption(loc'${GameConsoleReportStatement}', function() if modules.game_ruleviolation then GameRuleViolation.showRuleViolationReportWindow(REPORT_TYPE_STATEMENT, creatureName, text:match('.+%:%s(.+)')) end end)
         menu:addSeparator()
       end
     end
 
     local selection = tab.tabPanel:getChildById('consoleBuffer').selectionText
     if selection and #selection > 0 then
-      menu:addOption(tr('Copy'), function() g_window.setClipboardText(selection) end, '(Ctrl+C)')
+      menu:addOption(loc'${GameConsoleCopy}', function() g_window.setClipboardText(selection) end, '(Ctrl+C)')
     end
     if text then
-      menu:addOption(tr('Copy message'), function() g_window.setClipboardText(text) end)
+      menu:addOption(loc'${GameConsoleCopyMsg}', function() g_window.setClipboardText(text) end)
     end
     if creatureName and #creatureName > 0 then
-      menu:addOption(tr('Copy name'), function () g_window.setClipboardText(creatureName) end)
+      menu:addOption(loc'${GameConsoleCopyName}', function () g_window.setClipboardText(creatureName) end)
     end
-    menu:addOption(tr('Select all'), function() GameConsole.selectAll(tab.tabPanel:getChildById('consoleBuffer')) end)
+    menu:addOption(loc'${GameConsoleSelectAll}', function() GameConsole.selectAll(tab.tabPanel:getChildById('consoleBuffer')) end)
     menu:display(mousePos)
   end
 end
@@ -952,7 +960,7 @@ function GameConsole.processCloneTabMenu(tab, mousePos, mouseButton)
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
 
-  menu:addOption(tr('Close clone'), function() GameConsole.closeClonedTab() end)
+  menu:addOption(loc'${GameConsoleTabCloneClose}', function() GameConsole.closeClonedTab() end)
 
   menu:display(mousePos)
 end
@@ -1192,7 +1200,7 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
   speaktype = SpeakTypes[mode]
 
   if not speaktype then
-    perror('unhandled onTalk message mode ' .. mode .. ': ' .. message)
+    perror(f(loc'${GameConsoleErrorUnhandledMsgMode}: %s', mode, message))
     return
   end
 
@@ -1260,7 +1268,7 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
     end
 
   else
-    local channel = tr('Default')
+    local channel = loc'${CorelibInfoDefault}'
     if not defaultMessage then
       channel = channels[channelId]
 
@@ -1274,7 +1282,7 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
       GameConsole.addText(composedMessage, speaktype, channel, name)
     else
       -- server sent a message on a channel that is not open
-      pwarning('message in channel id ' .. channelId .. ' which is unknown, this is a server bug, relogin if you want to see messages in this channel')
+      pwarning(f(loc'${GameConsoleUnknownMsg}', channelId))
     end
   end
 end
@@ -1318,7 +1326,7 @@ function GameConsole.doChannelListSubmit()
       g_game.openPrivateChannel(openPrivateChannelWith)
     else
       if modules.game_textmessage then
-        GameTextMessage.displayFailureMessage(tr('You cannot create a private chat channel with yourself.'))
+        GameTextMessage.displayFailureMessage(loc'${GameConsoleChatWithYourself}')
       end
     end
   else
@@ -1611,8 +1619,8 @@ function GameConsole.onClickIgnoreButton()
 end
 
 function GameConsole.online()
-  defaultTab = GameConsole.addTab(tr('Default'), true)
-  serverTab = GameConsole.addTab(tr('Server'), false) -- Server Log
+  defaultTab = GameConsole.addTab(loc'${CorelibInfoDefault}', true)
+  serverTab = GameConsole.addTab(loc'${GameConsoleTabNameServer}', false) -- Server Log
 
   -- Open last channels
   local settings = Client.getPlayerSettings()
@@ -1639,7 +1647,7 @@ end
 function GameConsole.onChannelEvent(channelId, name, type)
   local fmt = ChannelEventFormats[type]
   if not fmt then
-    print(f('Unknown channel event type (%d).', type))
+    print(f(loc'${GameConsoleUnknownChatEventType}', type))
     return
   end
 

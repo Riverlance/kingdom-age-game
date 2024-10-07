@@ -11,7 +11,7 @@ function UIScrollArea.create()
 end
 
 function UIScrollArea:onStyleApply(styleName, styleNode)
-  for name,value in pairs(styleNode) do
+  for name, value in pairs(styleNode) do
     if name == 'vertical-scrollbar' then
       addEvent(function()
         local parent = self:getParent()

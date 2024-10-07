@@ -216,7 +216,7 @@ UIWidget
     anchors.top: parent.top
     anchors.horizontalCenter: gameBottomPanel.horizontalCenter
     image-source: /images/ui/_button/sidebar_vertical
-    !tooltip: tr('Hide top menu (%s)', 'Ctrl+Shift+Q')
+    !tooltip: f(loc'${GameInterfaceTopMenuButtonHide}', 'Ctrl+Shift+Q')
     on: true
     @onClick: |
       ClientOptions.setOption('showTopMenu', not ClientOptions.getOption('showTopMenu'))
@@ -232,7 +232,7 @@ UIWidget
 
     $!on:
       image-clip: 20 0 20 7
-      !tooltip: tr('Show top menu (%s)', 'Ctrl+Shift+Q')
+      !tooltip: f(loc'${GameInterfaceTopMenuButtonShow}', 'Ctrl+Shift+Q')
 
     $!on hover:
       image-clip: 20 7 20 7
@@ -246,7 +246,7 @@ UIWidget
     anchors.verticalCenter: gameScreenArea.verticalCenter
     anchors.left: gameLeftThirdPanel.outsideRight
     image-source: /images/ui/_button/sidebar_horizontal
-    !tooltip: tr('Hide enabled left panels (%s)', 'Ctrl+Shift+A')
+    !tooltip: f(loc'${GameInterfaceLeftPanelButtonHide}', 'Ctrl+Shift+A')
     on: true
     @onClick: |
       ClientOptions.setOption('showLeftPanel', not ClientOptions.getOption('showLeftPanel'))
@@ -265,7 +265,7 @@ UIWidget
 
     $!on:
       image-clip: 7 0 7 20
-      !tooltip: tr('Show enabled left panels (%s)', 'Ctrl+Shift+A')
+      !tooltip: f(loc'${GameInterfaceLeftPanelButtonShow}', 'Ctrl+Shift+A')
 
     $!on hover:
       image-clip: 7 20 7 20
@@ -279,7 +279,7 @@ UIWidget
     anchors.verticalCenter: gameScreenArea.verticalCenter
     anchors.right: gameRightThirdPanel.outsideLeft
     image-source: /images/ui/_button/sidebar_horizontal
-    !tooltip: tr('Hide enabled right panels (%s)', 'Ctrl+Shift+S')
+    !tooltip: f(loc'${GameInterfaceRightPanelButtonHide}', 'Ctrl+Shift+S')
     on: true
     @onClick: |
       ClientOptions.setOption('showRightPanel', not ClientOptions.getOption('showRightPanel'))
@@ -298,7 +298,7 @@ UIWidget
 
     $!on:
       image-clip: 21 0 7 20
-      !tooltip: tr('Show enabled right panels (%s)', 'Ctrl+Shift+S')
+      !tooltip: f(loc'${GameInterfaceRightPanelButtonShow}', 'Ctrl+Shift+S')
 
     $!on hover:
       image-clip: 21 20 7 20
@@ -312,7 +312,7 @@ UIWidget
     anchors.bottom: gameExpBar.outsideTop
     anchors.horizontalCenter: gameBottomPanel.horizontalCenter
     image-source: /images/ui/_button/sidebar_vertical
-    !tooltip: tr('Hide chat (%s)', 'Ctrl+Shift+W')
+    !tooltip: f(loc'${GameInterfaceChatButtonHide}', 'Ctrl+Shift+W')
     on: true
     @onClick: |
       ClientOptions.setOption('showChat', not ClientOptions.getOption('showChat'))
@@ -328,7 +328,7 @@ UIWidget
 
     $!on:
       image-clip: 60 0 20 7
-      !tooltip: tr('Show chat (%s)', 'Ctrl+Shift+W')
+      !tooltip: f(loc'${GameInterfaceChatButtonShow}', 'Ctrl+Shift+W')
 
     $!on hover:
       image-clip: 60 7 20 7

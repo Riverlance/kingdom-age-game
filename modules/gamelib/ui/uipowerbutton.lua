@@ -4,10 +4,10 @@ UIPowerButton = extends(UIWidget, 'UIPowerButton')
 -- See uicreaturebutton.lua
 
 local extraLabelColors = { }
-extraLabelColors[0] = '#888888' -- No boost
-extraLabelColors[1] = '#FF7549'
-extraLabelColors[2] = '#B770FF'
-extraLabelColors[3] = '#70B8FF'
+extraLabelColors[0]    = '#888888' -- No boost
+extraLabelColors[1]    = '#FF7549'
+extraLabelColors[2]    = '#B770FF'
+extraLabelColors[3]    = '#70B8FF'
 
 POWER_CLASS_ALL       = 0
 POWER_CLASS_OFFENSIVE = 1
@@ -16,11 +16,11 @@ POWER_CLASS_SUPPORT   = 3
 POWER_CLASS_SPECIAL   = 4
 
 UIPowerButton.powerClass = {
-  [POWER_CLASS_ALL]       = 'All',
-  [POWER_CLASS_OFFENSIVE] = 'Offensive',
-  [POWER_CLASS_DEFENSIVE] = 'Defensive',
-  [POWER_CLASS_SUPPORT]   = 'Support',
-  [POWER_CLASS_SPECIAL]   = 'Special'
+  [POWER_CLASS_ALL]       = loc'${CorelibInfoAll}',
+  [POWER_CLASS_OFFENSIVE] = loc'${GamelibInfoPowerClassOffensive}',
+  [POWER_CLASS_DEFENSIVE] = loc'${GamelibInfoPowerClassDefensive}',
+  [POWER_CLASS_SUPPORT]   = loc'${GamelibInfoPowerClassSupport}',
+  [POWER_CLASS_SPECIAL]   = loc'${GamelibInfoPowerClassSpecial}',
 }
 
 --[[
@@ -124,7 +124,7 @@ end
 function UIPowerButton:getMana()
   local power = self.power
   if not power.mana or power.mana[1] == 0 or power.mana[2] == 0 or power.mana[3] == 0 then
-    return 'Variable'
+    return loc'${GamelibInfoManaVariable}'
   end
 
   return table.concat(power.mana, ' / ')
@@ -133,11 +133,11 @@ end
 function UIPowerButton:getVocations()
   local power = self.power
   if not power.vocations then
-    return 'Unknown'
+    return loc'${GamelibInfoVocationUnknown}'
   end
 
   if #power.vocations == table.size(VocationStr) then
-    return 'All'
+    return loc'${CorelibInfoAll}'
   end
 
   local vocations = { }

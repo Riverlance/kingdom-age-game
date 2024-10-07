@@ -4,19 +4,19 @@ ConditionTabButton < TabButton
 
 MiniWindow
   id: conditionWindow
-  !text: tr('Conditions')
+  &loc: '${GameConditionsWindowTitle}'
   icon: /images/ui/top_menu/conditions
   &save: true
   &contentMinimumHeight: 30
 
   ArrowMenuButton
-    !tooltip: tr('Show options')
+    &loct: '${CorelibInfoShowOptions}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
     @onClick: GameConditions.onClickArrowMenuButton(self)
 
     $on:
-      !tooltip: tr('Hide options')
+      &loct: '${CorelibInfoHideOptions}'
 
   BallMenuButton
     id: sortMenuButton
@@ -39,52 +39,52 @@ MiniWindow
 
       ConditionTabButton
         id: filterDefault
-        !tooltip: tr('Show default conditions')
+        &loct: '${GameConditionsTabFilterDefaultTooltipShow}'
         icon-clip: 0 0 20 20
         @onClick: GameConditions.onClickFilterDefault(self)
 
         $on:
-          !tooltip: tr('Hide default conditions')
+          &loct: '${GameConditionsTabFilterDefaultTooltipHide}'
           icon-clip: 0 20 20 20
 
       ConditionTabButton
         id: filterSelfPowers
-        !tooltip: tr('Show conditions caused by your powers')
+        &loct: '${GameConditionsTabFilterSelfPowersTooltipShow}'
         icon-clip: 20 0 20 20
         @onClick: GameConditions.onClickFilterSelfPowers(self)
 
         $on:
-          !tooltip: tr('Hide conditions caused by your powers')
+          &loct: '${GameConditionsTabFilterSelfPowersTooltipHide}'
           icon-clip: 20 20 20 20
 
       ConditionTabButton
         id: filterOtherPowers
-        !tooltip: tr('Show conditions caused by powers from others')
+        &loct: '${GameConditionsTabFilterOtherPowersTooltipShow}'
         icon-clip: 40 0 20 20
         @onClick: GameConditions.onClickFilterOtherPowers(self)
 
         $on:
-          !tooltip: tr('Hide conditions caused by powers from others')
+          &loct: '${GameConditionsTabFilterOtherPowersTooltipHide}'
           icon-clip: 40 20 20 20
 
       ConditionTabButton
         id: filterAggressive
-        !tooltip: tr('Show aggressive conditions')
+        &loct: '${GameConditionsTabFilterAggressiveTooltipShow}'
         icon-clip: 60 0 20 20
         @onClick: GameConditions.onClickFilterAggressive(self)
 
         $on:
-          !tooltip: tr('Hide aggressive conditions')
+          &loct: '${GameConditionsTabFilterAggressiveTooltipHide}'
           icon-clip: 60 20 20 20
 
       ConditionTabButton
         id: filterNonAggressive
-        !tooltip: tr('Show non aggressive conditions')
+        &loct: '${GameConditionsTabFilterNonAggressiveTooltipShow}'
         icon-clip: 80 0 20 20
         @onClick: GameConditions.onClickFilterNonAggressive(self)
 
         $on:
-          !tooltip: tr('Hide non aggressive conditions')
+          &loct: '${GameConditionsTabFilterNonAggressiveTooltipHide}'
           icon-clip: 80 20 20 20
 
   MiniWindowContents

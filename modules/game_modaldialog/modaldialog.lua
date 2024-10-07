@@ -1,3 +1,4 @@
+g_locales.loadLocales(resolvepath(''))
 
 _G.GameModalDialog = { }
 
@@ -244,7 +245,7 @@ do
 
         local messageLabel = self.widget.messageLabel
 
-        messageLabel:setText(tr(self.message))
+        messageLabel:setText(self.message)
         messageLabel:setTextWrap(true)
         messageLabel:resizeToText()
         messageLabel:setVisible(string.exists(messageLabel:getText()))
@@ -268,8 +269,8 @@ do
         for choiceId = 1, #choices do
           local label           = g_ui.createWidget('ModalChoice', choiceList)
           label.choiceId        = choiceId
-          label.choiceText      = choices[choiceId].name and tr(choices[choiceId].name) or ''
-          label.choiceTooltip   = choices[choiceId].tooltip and tr(choices[choiceId].tooltip) or ''
+          label.choiceText      = choices[choiceId].name and choices[choiceId].name or ''
+          label.choiceTooltip   = choices[choiceId].tooltip and choices[choiceId].tooltip or ''
           label.choiceInfo      = choices[choiceId].info or ''
           label.choiceInfoColor = choices[choiceId].infoColor or ''
 
@@ -352,8 +353,8 @@ do
 
         for checkBoxId = 1, #checkBoxes do
           local checkBox           = g_ui.createWidget('ModalCheckBox', checkBoxList)
-          checkBox.checkBoxText    = checkBoxes[checkBoxId].name and tr(checkBoxes[checkBoxId].name) or ''
-          checkBox.checkBoxTooltip = checkBoxes[checkBoxId].tooltip and tr(checkBoxes[checkBoxId].tooltip) or ''
+          checkBox.checkBoxText    = checkBoxes[checkBoxId].name and checkBoxes[checkBoxId].name or ''
+          checkBox.checkBoxTooltip = checkBoxes[checkBoxId].tooltip and checkBoxes[checkBoxId].tooltip or ''
 
           checkBox:setText(checkBox.checkBoxText)
 
@@ -407,8 +408,8 @@ do
         for fieldId = 1, #fields do
           local field         = g_ui.createWidget('ModalField', fieldList)
           field.fieldId       = fieldId
-          field.fieldName     = fields[fieldId].name and tr(fields[fieldId].name) or ''
-          field.fieldTooltip  = fields[fieldId].tooltip and tr(fields[fieldId].tooltip) or ''
+          field.fieldName     = fields[fieldId].name and fields[fieldId].name or ''
+          field.fieldTooltip  = fields[fieldId].tooltip and fields[fieldId].tooltip or ''
           field.fieldRegex    = fields[fieldId].regex or ''
           field.fieldMinChars = fields[fieldId].minChars or 0
           field.fieldMaxChars = fields[fieldId].maxChars or 0
@@ -426,7 +427,7 @@ do
             local max            = field.fieldMaxChars
             local hasMinMaxLimit = min > 0 and max > 0
             local higherAmount   = max > 0 and max or min > 0 and min or 0
-            local charsLimitText = (min > 0 or max > 0) and f("\nLimit: %s%s%s character%s.", min > 0 and f("%d%s", min, not hasMinMaxLimit and " (minimum)" or '') or '', hasMinMaxLimit and ' ~ ' or '', max > 0 and f("%d%s", max, not hasMinMaxLimit and " (maximum)" or '') or '', higherAmount > 1 and 's' or '') or ''
+            local charsLimitText = (min > 0 or max > 0) and f(loc'\n${GameModalDialogLimitChars}', min > 0 and f("%d%s", min, not hasMinMaxLimit and loc' (${GameModalDialogMin})' or '') or '', hasMinMaxLimit and ' ~ ' or '', max > 0 and f("%d%s", max, not hasMinMaxLimit and loc' (${GameModalDialogMax})' or '') or '') or ''
             local text           = f("%s%s\n%s", field.fieldName, charsLimitText, field.fieldTooltip)
             field.infoButton:setTooltip(text, TooltipType.textBlock)
             field.infoButton:show()
@@ -477,8 +478,8 @@ do
         for buttonId = 1, #buttons do
           local button         = g_ui.createWidget('ModalButton', buttonsPanel)
           button.buttonId      = buttonId
-          button.buttonText    = buttons[buttonId].name and tr(buttons[buttonId].name) or ''
-          button.buttonTooltip = buttons[buttonId].tooltip and tr(buttons[buttonId].tooltip) or ''
+          button.buttonText    = buttons[buttonId].name and buttons[buttonId].name or ''
+          button.buttonTooltip = buttons[buttonId].tooltip and buttons[buttonId].tooltip or ''
 
           button:setText(button.buttonText)
           button:setMarginLeft(buttonSpacing)
@@ -577,12 +578,12 @@ do
 
             -- Min characters
             if field.fieldMinChars > 0 and #text < field.fieldMinChars then
-              displayErrorBox(tr("Error"), f("The text field '%s' should have at least %d character%s.", field.fieldName, field.fieldMinChars, field.fieldMinChars and 's' or ''))
+              displayErrorBox(loc'${CorelibInfoError}', f(loc'${GameModalDialogCharsMinErrorMsg}', field.fieldName, field.fieldMinChars))
               return
 
             -- Max characters
             elseif field.fieldMaxChars > 0 and #text > field.fieldMaxChars then
-              displayErrorBox(tr("Error"), f("The text field '%s' should up to %d character%s.", field.fieldName, field.fieldMaxChars, field.fieldMaxChars and 's' or ''))
+              displayErrorBox(loc'${CorelibInfoError}', f(loc'${GameModalDialogCharsMaxErrorMsg}', field.fieldName, field.fieldMaxChars))
               return
             end
           end
@@ -621,7 +622,7 @@ do
         local choiceList = widget.choiceList
 
         -- Update content
-        widget:setText(tr(self.title))
+        widget:setText(self.title)
         self:setMessageLabel(false)
         self:setChoices(false)
         self:setCheckBoxes(false)

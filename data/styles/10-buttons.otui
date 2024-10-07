@@ -1,7 +1,7 @@
 Button < UIButton
   font: verdana-11px-antialised
   color: #f2af4eff
-  size: 106 23
+  size: 80 23
   //text-offset: 0 0
   image-source: /images/ui/_button/default_square
   image-color: #dfdfdf
@@ -148,7 +148,7 @@ InfoMenuButton < UIButton
 LockMenuButton < UIButton
   id: lockButton
   size: 14 14
-  !tooltip: tr('Lock')
+  !tooltip: loc'${ClientStylesButtonLockTooltip}'
   anchors.verticalCenter: prev.verticalCenter
   anchors.right: prev.outsideLeft
   image-source: /images/ui/_button/mini_window
@@ -161,7 +161,7 @@ LockMenuButton < UIButton
     image-clip: 84 28 14 14
 
   $on:
-    !tooltip: tr('Unlock')
+    !tooltip: loc'${ClientStylesButtonUnlockTooltip}'
     image-clip: 98 0 14 14
 
   $on hover:
@@ -271,7 +271,7 @@ CloseMenuButton < UIButton
 MinimizeMenuButton < UIButton
   id: minimizeButton
   size: 14 14
-  !tooltip: tr('Minimize')
+  !tooltip: loc'${ClientStylesButtonMinimizeTooltip}'
   anchors.verticalCenter: prev.verticalCenter
   anchors.right: prev.outsideLeft
   image-source: /images/ui/_button/mini_window
@@ -284,7 +284,7 @@ MinimizeMenuButton < UIButton
     image-clip: 0 28 14 14
 
   $on:
-    !tooltip: tr('Maximize')
+    !tooltip: loc'${ClientStylesButtonMaximizeTooltip}'
     image-clip: 14 0 14 14
 
   $on hover:

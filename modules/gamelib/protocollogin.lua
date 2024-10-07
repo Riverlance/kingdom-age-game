@@ -3,7 +3,7 @@ ProtocolLogin = extends(Protocol, 'ProtocolLogin')
 
 function ProtocolLogin:login(host, port, accountName, accountPassword, authenticatorToken, stayLogged)
   if string.len(host) == 0 or port == nil or port == 0 then
-    signalcall(self.onLoginError, self, tr('You must enter a valid server address and port.'))
+    signalcall(self.onLoginError, self, loc'${GamelibInfoEnterValidServerPort}')
     return
   end
 
@@ -146,13 +146,13 @@ function ProtocolLogin:onRecv(msg)
     elseif opcode == ServerOpcodes.ServerOpcodeLoginMotd then
       self:parseMotd(msg)
     elseif opcode == ServerOpcodes.ServerOpcodeLoginUpdateNeeded then
-      signalcall(self.onLoginError, self, tr('Client needs update.'))
+      signalcall(self.onLoginError, self, loc'${GamelibInfoClientNeedsUpdate}')
     elseif opcode == ServerOpcodes.ServerOpcodeLoginTokenSuccess then
       local unknown = msg:getU8()
     elseif opcode == ServerOpcodes.ServerOpcodeLoginTokenError then
       -- TODO: prompt for token here
       local unknown = msg:getU8()
-      signalcall(self.onLoginError, self, tr('Invalid authentication token.'))
+      signalcall(self.onLoginError, self, loc'${GamelibInfoInvalidAuthToken}')
     elseif opcode == ServerOpcodes.ServerOpcodeLoginCharacterList then
       self:parseCharacterList(msg)
     elseif opcode == ServerOpcodes.ServerOpcodeLoginExtendedCharacterList then
@@ -218,7 +218,7 @@ function ProtocolLogin:parseCharacterList(msg)
 
   else
     local charactersCount = msg:getU8()
-    for i=1,charactersCount do
+    for i = 1, charactersCount do
       local character = { }
       character.name = msg:getString()
       character.loginname = msg:getString()

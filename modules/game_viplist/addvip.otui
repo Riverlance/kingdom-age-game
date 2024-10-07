@@ -1,11 +1,11 @@
 MainWindow
   size: 256 128
-  !text: tr('Add to VIP list')
+  &loc: '${GameVipListWindowTitleAdd}'
   @onEnter: GameVipList.addVip()
   @onEscape: GameVipList.destroyAddWindow()
 
   Label
-    !text: tr('Character name') .. ':'
+    &loc: '${GameVipListInfoCharName}:'
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
@@ -24,7 +24,7 @@ MainWindow
     margin-bottom: 10
 
   Button
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -32,7 +32,7 @@ MainWindow
     @onClick: GameVipList.addVip()
 
   Button
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom

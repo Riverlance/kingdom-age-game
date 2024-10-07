@@ -1,17 +1,27 @@
 InputBoxLabel < Label
   fixed-size: true
   text-align: left
+
 InputBoxLineEdit < TextEdit
+
 InputBoxTextEdit < MultilineTextEdit
   text-wrap: true
+
 InputBoxSpinBox < SpinBox
+
 InputBoxCheckBox < CheckBox
+
 InputBoxComboBox < ComboBox
+
 InputBoxComboBoxPopupMenu < ComboBoxPopupMenu
+
 InputBoxComboBoxPopupMenuButton < ComboBoxPopupMenuButton
+
 InputBoxButton < Button
   margin-left: 10
   fixed-size: true
+
+
 
 InputBoxButtonsPanel < Panel
   height: 20
@@ -20,6 +30,8 @@ InputBoxButtonsPanel < Panel
   layout:
     type: horizontalBox
     align-right: true
+
+
 
 InputBoxWindow < MainWindow
   __class: UIInputBox

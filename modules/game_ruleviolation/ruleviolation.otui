@@ -45,19 +45,19 @@ RVTextEdit < TextEdit
 
 RVWindow < MainWindow
   id: ruleViolationWindow
-  size: 400 600
+  size: 500 600
   @onEscape: |
     GameRuleViolation.destroyRuleViolationReportWindow()
 
   RVLabel
     id: rvLabel
     color: #cccccc
-    !text: 'Use this dialog to only report players!\nONLY IN ENGLISH!'
+    &loc: '${GameRuleViolationWindowDesc}'
     text-wrap: true
     text-auto-resize: true
 
   RVLabel
-    !text: tr('Target name') .. ':'
+    &loc: '${GameRuleViolationLabelTargetName}:'
 
   RVTextEdit
     id: targetTextEdit
@@ -65,7 +65,7 @@ RVWindow < MainWindow
 
   RVLabel
     id: statementLabel
-    !text: tr('Statement') .. ':'
+    &loc: '${GameRuleViolationLabelStatement}:'
 
   RVTextEdit
     id: statementTextEdit
@@ -73,7 +73,7 @@ RVWindow < MainWindow
 
   RVLabel
     id: translationLabel
-    !text: tr('Translate to english if the statement is not on that language') .. ':'
+    &loc: '${GameRuleViolationLabelTranslation}:'
 
   RVTextEdit
     id: translationTextEdit
@@ -81,7 +81,7 @@ RVWindow < MainWindow
 
   RVLabel
     id: reasonLabel
-    !text: tr('Reason') .. ':'
+    &loc: '${GameRuleViolationLabelReason}:'
 
   ComboBox
     id: typeComboBox
@@ -112,7 +112,7 @@ RVWindow < MainWindow
 
   RVLabel
     id: commentLabel
-    !text: tr('Comment') .. ':'
+    &loc: '${GameRuleViolationLabelComment}:'
 
   VerticalScrollBar
     id: commentListScrollBar
@@ -136,7 +136,7 @@ RVWindow < MainWindow
 
   Button
     id: cancelButton
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     width: 80
@@ -145,7 +145,7 @@ RVWindow < MainWindow
 
   Button
     id: okButton
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     anchors.right: prev.left
     anchors.bottom: parent.bottom
     margin-right: 5

@@ -187,7 +187,7 @@ function string:removeBorders(begin, final) -- ([begin], [final])
   return self:match((begin or '') .. '(.+)' .. (final or ''))
 end
 
-function string:comma() -- Tip: You probably want to use tr(...) instead
+function string:comma() -- Tip: You probably want to use tr(...) / loc(...) instead
   local left, num, right = self:match('^([^%d]*%d)(%d*)(.-)$')
   return left .. num:reverse():gsub('(%d%d%d)', '%1,'):reverse() .. right
 end

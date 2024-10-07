@@ -11,9 +11,10 @@ ColorBar < HorizontalScrollBar
   show-value: true
 
 
+
 TrackerWindow < MainWindow
   size: 200 150
-  !text: tr('Set a color')
+  &loc: '${GameTrackerWindowTitle}'
 
   UIWidget
     id: colorDisplay
@@ -35,7 +36,7 @@ TrackerWindow < MainWindow
 
   Button
     id: okButton
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -43,10 +44,11 @@ TrackerWindow < MainWindow
 
   Button
     id: cancelButton
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom
+
 
 
 TrackerWindow

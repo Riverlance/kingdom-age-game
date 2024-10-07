@@ -1,6 +1,6 @@
 CountWindow < MainWindow
   id: countWindow
-  !text: tr('Move stackable item')
+  &loc: '${GameInterfaceCountWindowTitle}'
   size: 196 90
 
   SpinBox
@@ -33,7 +33,7 @@ CountWindow < MainWindow
 
   Button
     id: buttonCancel
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     height: 20
     anchors.left: countScrollBar.horizontalCenter
     anchors.right: countScrollBar.right
@@ -43,7 +43,7 @@ CountWindow < MainWindow
 
   Button
     id: buttonOk
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     height: 20
     anchors.right: countScrollBar.horizontalCenter
     anchors.left: countScrollBar.left

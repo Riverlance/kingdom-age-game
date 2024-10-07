@@ -1,9 +1,12 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientOptions = { }
 
 
 
-local optionsShortcut = 'Ctrl+Alt+O'
-local audioShortcut = 'Ctrl+Alt+A'
+ClientOptionsActionKey           = 'Ctrl+Alt+O'
+ClientOptionsAudioActionKey      = 'Ctrl+Alt+A'
+ClientOptionsFullscreenActionKey = 'Ctrl+Shift+F'
 
 local defaultOptions = {
   optimizeFps = true,
@@ -45,7 +48,7 @@ local defaultOptions = {
   enableSoundGui = true,
   musicVolume = 30,
   soundAmbientVolume = 30,
-  soundEffectVolume = 100,
+  soundEffectVolume = 70,
   soundVoiceVolume = 100,
   soundGuiVolume = 100,
   showNames = true,
@@ -92,7 +95,7 @@ local optionsButton
 local optionsTabBar
 local options = { }
 
-local generalPanel
+local gamePanel
 local controlPanel
 local audioPanel
 local graphicPanel
@@ -197,7 +200,7 @@ function ClientOptions.init()
   optionsTabBar = optionsWindow:getChildById('optionsTabBar')
   optionsTabBar:setContentWidget(optionsWindow:getChildById('optionsTabContent'))
 
-  generalPanel      = g_ui.loadUI('game')
+  gamePanel         = g_ui.loadUI('game')
   controlPanel      = g_ui.loadUI('control')
   audioPanel        = g_ui.loadUI('audio')
   graphicPanel      = g_ui.loadUI('graphic')
@@ -207,20 +210,20 @@ function ClientOptions.init()
 
   setupSidePanelsPriority()
 
-  optionsTabBar:addTab(tr('Game'), generalPanel, '/images/ui/options/game')
-  optionsTabBar:addTab(tr('Control'), controlPanel, '/images/ui/options/control')
-  optionsTabBar:addTab(tr('Audio'), audioPanel, '/images/ui/options/audio')
-  optionsTabBar:addTab(tr('Graphic'), graphicPanel, '/images/ui/options/graphic')
-  optionsTabBar:addTab(tr('Display'), displayPanel, '/images/ui/options/display')
-  optionsTabBar:addTab(tr('Panel'), panelOptionsPanel, '/images/ui/options/panel')
-  optionsTabBar:addTab(tr('Console'), consolePanel, '/images/ui/options/console')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleGame}', gamePanel, '/images/ui/options/game')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleControl}', controlPanel, '/images/ui/options/control')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleAudio}', audioPanel, '/images/ui/options/audio')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleGraphic}', graphicPanel, '/images/ui/options/graphic')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleDisplay}', displayPanel, '/images/ui/options/display')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitlePanel}', panelOptionsPanel, '/images/ui/options/panel')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleConsole}', consolePanel, '/images/ui/options/console')
 
-  g_keyboard.bindKeyDown('Ctrl+Shift+F', function() ClientOptions.toggleOption('fullscreen') end)
+  g_keyboard.bindKeyDown(ClientOptionsFullscreenActionKey, function() ClientOptions.toggleOption('fullscreen') end)
 
-  optionsButton = ClientTopMenu.addLeftButton('optionsButton', tr('Options') .. f(' (%s)', optionsShortcut), '/images/ui/top_menu/options', ClientOptions.toggle)
-  g_keyboard.bindKeyDown(optionsShortcut, ClientOptions.toggle)
-  audioButton = ClientTopMenu.addLeftButton('audioButton', tr('Audio') .. f(' (%s)', audioShortcut), '/images/ui/top_menu/audio', function() ClientOptions.toggleOption('enableAudio') end)
-  g_keyboard.bindKeyDown(audioShortcut, function() ClientOptions.toggleOption('enableAudio') end)
+  optionsButton = ClientTopMenu.addLeftButton('optionsButton', { loct = '${ClientOptionsTitle} (${ClientOptionsActionKey})', locpar = { ClientOptionsActionKey = ClientOptionsActionKey } }, '/images/ui/top_menu/options', ClientOptions.toggle)
+  g_keyboard.bindKeyDown(ClientOptionsActionKey, ClientOptions.toggle)
+  audioButton = ClientTopMenu.addLeftButton('audioButton', { loct = '${ClientOptionsAudioTitle} (${ClientOptionsAudioActionKey})', locpar = { ClientOptionsAudioActionKey = ClientOptionsAudioActionKey } }, '/images/ui/top_menu/audio', function() ClientOptions.toggleOption('enableAudio') end)
+  g_keyboard.bindKeyDown(ClientOptionsAudioActionKey, function() ClientOptions.toggleOption('enableAudio') end)
 
   -- Mouse item icon example
 
@@ -269,19 +272,19 @@ function ClientOptions.init()
 
   crosshairCombobox = displayPanel:getChildById('crosshair')
 
-  crosshairCombobox:addOption('Disabled', 'disabled')
-  crosshairCombobox:addOption('Default', 'default')
-  crosshairCombobox:addOption('Full', 'full')
+  crosshairCombobox:addOption(loc'${ClientOptionsCrosshairValueDisabled}', 'disabled')
+  crosshairCombobox:addOption(loc'${CorelibInfoDefault}', 'default')
+  crosshairCombobox:addOption(loc'${ClientOptionsCrosshairValueFull}', 'full')
 
   -- Floor view mode
 
   floorViewModeComboBox = displayPanel:getChildById('floorViewMode')
 
-  floorViewModeComboBox:addOption('Default', 0)
-  floorViewModeComboBox:addOption('Fading', 1)
-  floorViewModeComboBox:addOption('Locked', 2)
-  floorViewModeComboBox:addOption('Always visible', 3)
-  floorViewModeComboBox:addOption('Spy', 4)
+  floorViewModeComboBox:addOption(loc'${CorelibInfoDefault}', 0)
+  floorViewModeComboBox:addOption(loc'${ClientOptionsFloorViewModeValueFading}', 1)
+  floorViewModeComboBox:addOption(loc'${ClientOptionsFloorViewModeValueLocked}', 2)
+  floorViewModeComboBox:addOption(loc'${ClientOptionsFloorViewModeValueAlwaysVisible}', 3)
+  floorViewModeComboBox:addOption(loc'${ClientOptionsFloorViewModeValueSpy}', 4)
 
   addEvent(function()
     ClientOptions.setup()
@@ -322,9 +325,9 @@ function ClientOptions.terminate()
     onGameStart = ClientOptions.online,
   })
 
-  g_keyboard.unbindKeyDown(optionsShortcut)
-  g_keyboard.unbindKeyDown(audioShortcut)
-  g_keyboard.unbindKeyDown('Ctrl+Shift+F')
+  g_keyboard.unbindKeyDown(ClientOptionsActionKey)
+  g_keyboard.unbindKeyDown(ClientOptionsAudioActionKey)
+  g_keyboard.unbindKeyDown(ClientOptionsFullscreenActionKey)
   optionsWindow:destroy()
   optionsButton:destroy()
   audioButton:destroy()

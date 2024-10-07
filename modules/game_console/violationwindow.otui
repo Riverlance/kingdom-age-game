@@ -1,10 +1,10 @@
 MainWindow
   id: ignoreWindow
-  !text: tr('Report Rule Violation')
+  &loc: '${GameConsoleIgnoreWindow}'
   size: 300 240
 
   Label
-    !text: tr('State the rule violation in one clear sentence and wait for a reply from a gamemaster. Note that your message will disappear if you close the channel.')
+    &loc: '${GameConsoleRuleViolationSentence}'
     text-wrap: true
     text-auto-resize: true
     anchors.left: parent.left
@@ -24,7 +24,7 @@ MainWindow
 
   Button
     id: buttonOk
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -33,7 +33,7 @@ MainWindow
 
   Button
     id: buttonCancel
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom

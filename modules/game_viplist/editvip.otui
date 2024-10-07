@@ -11,7 +11,7 @@ VipListIconButton < ButtonBoxRounded
 
 MainWindow
   size: 218 200
-  !text: tr('Edit VIP list')
+  &loc: '${GameVipListWindowTitleEdit}'
 
   Label
     id: nameLabel
@@ -22,7 +22,7 @@ MainWindow
     color: green
 
   Label
-    !text: tr('Description') .. ':'
+    &loc: '${CorelibInfoDescription}:'
     height: 22
     anchors.top: prev.outsideBottom
     anchors.left: parent.left
@@ -38,7 +38,7 @@ MainWindow
     margin-left: 4
 
   Label
-    !text: tr('Notify login') .. ':'
+    &loc: '${GameVipListInfoNotifyLogin}:'
     height: 22
     anchors.top: prev.outsideBottom
     anchors.left: parent.left
@@ -113,7 +113,7 @@ MainWindow
 
   Button
     id: buttonOK
-    !text: tr('Ok')
+    &loc: '${CorelibInfoOk}'
     width: 64
     anchors.right: next.left
     anchors.bottom: parent.bottom
@@ -121,7 +121,7 @@ MainWindow
 
   Button
     id: buttonCancel
-    !text: tr('Cancel')
+    &loc: '${CorelibInfoCancel}'
     width: 64
     anchors.right: parent.right
     anchors.bottom: parent.bottom

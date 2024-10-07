@@ -1,4 +1,5 @@
 TooltipDefault < Label
+  font: sans-11px
   text-align: center
   text-auto-resize: true
   padding: 4

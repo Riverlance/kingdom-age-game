@@ -1,7 +1,8 @@
 RewardItem < UIWidget
   anchors.top: prev.top
   anchors.left: parent.left
-  image-source: /images/ui/slot/item
+  //image-source: /images/ui/slot/item
+  size: 58 34
 
   UIWidget
     id: arrow
@@ -11,10 +12,13 @@ RewardItem < UIWidget
     image-source: /images/ui/_button/arrow_horizontal
     image-clip: 12 0 12 21
     image-color: #ffffff
+    margin-right: 0
 
   Item
     id: item
     virtual: true
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
 
     $on:
       image-source: /images/ui/slot/item_blessed
@@ -22,6 +26,8 @@ RewardItem < UIWidget
   UIWidget
     id: blueLabel
     image-source: /images/ui/slot/blue_label_ne
+    anchors.verticalCenter: prev.verticalCenter
+    anchors.horizontalCenter: prev.horizontalCenter
     opacity: 0.5
     padding-right: 5
     text-align: topRight
@@ -49,7 +55,7 @@ RewardProgressBar < ProgressBar
 
 DailyRewardWindow < MainWindow
   id: dailyRewardWindow
-  !text: tr('Daily Rewards')
+  &loc: '${GameDailyRewardWindowTitle}'
   size: 500 280
   focusable: false
 
@@ -60,7 +66,7 @@ DailyRewardWindow < MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    !text: tr('Rewards to claim')
+    &loc: '${GameDailyRewardInfoRewardsClaim}'
 
   RewardItem
     id: rewardItem1
@@ -106,7 +112,8 @@ DailyRewardWindow < MainWindow
     anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 10
     focusable: false
-    !text: tr('Claim')
+    width: 140
+    &loc: '${GameDailyRewardButtonClaim}'
 
   HorizontalSeparator
     anchors.top: prev.outsideBottom
@@ -119,7 +126,7 @@ DailyRewardWindow < MainWindow
     anchors.left: parent.left
     anchors.right: parent.right
     margin-top: 10
-    !text: tr('Week Bonus')
+    &loc: '${GameDailyRewardInfoWeekBonus}'
 
   RewardProgressBar
     id: bonusBar
@@ -138,7 +145,7 @@ DailyRewardWindow < MainWindow
 
   Button
     id: closeButton
-    !text: tr('Close')
+    &loc: '${CorelibInfoClose}'
     anchors.bottom: parent.bottom
     anchors.right: parent.right
     width: 80

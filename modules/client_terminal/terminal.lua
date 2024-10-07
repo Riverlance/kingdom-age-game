@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientTerminal = { }
 
 
@@ -69,7 +71,7 @@ local function completeCommand()
   table.merge(allVars, commandEnv)
 
   -- match commands
-  for k,v in pairs(allVars) do
+  for k in pairs(allVars) do
     if k:sub(1, cursorPos) == commandBegin then
       table.insert(possibleCommands, k)
     end
@@ -81,7 +83,7 @@ local function completeCommand()
     commandTextEdit:setCursorPos(-1)
   -- show command matches
   elseif #possibleCommands > 0 then
-    print('>> ' .. commandBegin)
+    print(f('>> %s', commandBegin))
 
     -- expand command
     local expandedComplete = commandBegin
@@ -92,7 +94,7 @@ local function completeCommand()
         break
       end
       expandedComplete = commandBegin .. possibleCommands[1]:sub(cursorPos, cursorPos)
-      for i,v in ipairs(possibleCommands) do
+      for _, v in ipairs(possibleCommands) do
         if v:sub(1, #expandedComplete) ~= expandedComplete then
           done = true
         end
@@ -102,9 +104,9 @@ local function completeCommand()
       end
     end
     commandTextEdit:setText(commandBegin)
-      commandTextEdit:setCursorPos(-1)
+    commandTextEdit:setCursorPos(-1)
 
-    for i,v in ipairs(possibleCommands) do
+    for _, v in ipairs(possibleCommands) do
       print(v)
     end
   end
@@ -194,7 +196,7 @@ function ClientTerminal.init()
   if not g_app.isRunning() then
     g_logger.fireOldMessages()
   elseif _G.terminalLines then
-    for _,line in pairs(_G.terminalLines) do
+    for _, line in pairs(_G.terminalLines) do
       ClientTerminal.addLine(line.text, line.color)
     end
   end
@@ -335,7 +337,7 @@ function ClientTerminal.flushLines()
   local numLines = terminalBuffer:getChildCount() + #cachedLines
   local fulltext = terminalSelectText:getText()
 
-  for _,line in pairs(cachedLines) do
+  for _, line in pairs(cachedLines) do
     -- delete old lines if needed
     if numLines > MAX_LINES then
       local firstChild = terminalBuffer:getChildByIndex(1)
@@ -379,7 +381,7 @@ function ClientTerminal.executeCommand(command)
   end
 
   -- add command line
-  ClientTerminal.addLine('> ' .. command, '#ffffff')
+  ClientTerminal.addLine(f('> %s', command), '#ffffff')
 
   -- Add new command to console log
   currentMessageIndex = 0
@@ -393,7 +395,7 @@ function ClientTerminal.executeCommand(command)
   -- detect and convert commands with simple syntax
   local realCommand
   if string.sub(command, 1, 1) == '=' then
-    realCommand = 'print(' .. string.sub(command,2) .. ')'
+    realCommand = f('print(%s)', string.sub(command, 2))
   else
     realCommand = command
   end
@@ -408,7 +410,7 @@ function ClientTerminal.executeCommand(command)
       if commandEnv[command_name] and type(commandEnv[command_name]) == 'function' then
         func = function() commandEnv[command_name](unpack(args)) end
       elseif command_name == command then
-        ClientTerminal.addLine('ERROR: command not found', 'red')
+        ClientTerminal.addLine(loc'${ClientTerminalCommandNotFound}', 'red')
         return
       end
     end
@@ -416,7 +418,7 @@ function ClientTerminal.executeCommand(command)
 
   -- check for syntax errors
   if not func then
-    ClientTerminal.addLine('ERROR: incorrect lua syntax: ' .. err:sub(5), 'red')
+    ClientTerminal.addLine(f(loc'${ClientTerminalIncorrectLuaSyntax}: %s', err:sub(5)), 'red')
     return
   end
 
@@ -432,7 +434,7 @@ function ClientTerminal.executeCommand(command)
     end
 
   else
-    ClientTerminal.addLine('ERROR: command failed: ' .. ret, 'red')
+    ClientTerminal.addLine(f(loc'${ClientTerminalCommandFailed}: %s', ret), 'red')
   end
 end
 

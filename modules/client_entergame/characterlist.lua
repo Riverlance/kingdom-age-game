@@ -36,7 +36,7 @@ local function tryLogin(charInfo, tries)
 
   g_game.loginWorld(G.account, G.password, charInfo.worldName, charInfo.worldHost, charInfo.worldPort, charInfo.characterName, G.authenticatorToken, G.sessionKey)
 
-  loadBox = displayCancelBox(tr('Loading'), tr('Connecting to game server...'))
+  loadBox = displayCancelBox(loc'${CorelibInfoLoading}', loc'${CharacterListConnectingMessage}')
   connect(loadBox, {
     onCancel = function()
       loadBox = nil
@@ -61,7 +61,7 @@ local function updateWait(timeStart, timeEnd)
       progressBar:setPercent(percent)
 
       local label = waitingWindow:getChildById('timeLabel')
-      label:setText(tr('Trying to reconnect in %s seconds.', timeStr))
+      label:setText(f(loc'${CharacterListWaitingListTimelabel}', timeStr))
 
       updateWaitEvent = scheduleEvent(function() updateWait(timeStart, timeEnd) end, 1000 * progressBar:getPercentPixels() / 100 * (timeEnd - timeStart))
       return true
@@ -87,10 +87,7 @@ local function resendWait()
     if charactersWindow then
       local selected = characterList:getFocusedChild()
       if selected then
-        local charInfo = { worldHost = selected.worldHost,
-                           worldPort = selected.worldPort,
-                           worldName = selected.worldName,
-                           characterName = selected.characterName }
+        local charInfo = { worldHost = selected.worldHost, worldPort = selected.worldPort, worldName = selected.worldName, characterName = selected.characterName }
         tryLogin(charInfo)
       end
     end
@@ -102,7 +99,7 @@ local function onLoginWait(message, time)
 
   waitingWindow = g_ui.displayUI('waitinglist')
 
-  local label = waitingWindow:getChildById('infoLabel')
+  local label = waitingWindow.infoLabel
   label:setText(message)
 
   updateWaitEvent = scheduleEvent(function() updateWait(g_clock.seconds(), g_clock.seconds() + time) end, 0)
@@ -113,7 +110,7 @@ end
 
 function onGameLoginError(message)
   ClientCharacterList.destroyLoadBox()
-  errorBox = displayErrorBox(tr('Login Error'), message)
+  errorBox = displayErrorBox(loc'${CharacterListLoginErrorTitle}', message)
   errorBox.onOk = function()
     errorBox = nil
     ClientCharacterList.showAgain()
@@ -123,7 +120,7 @@ end
 function onGameLoginToken(unknown)
   ClientCharacterList.destroyLoadBox()
   -- TODO: make it possible to enter a new token here / prompt token
-  errorBox = displayErrorBox(tr('Two-Factor Authentication'), tr('A new authentication token is required.\nLogin again.'))
+  errorBox = displayErrorBox(loc'${CharacterListLoginTokenTitle}', loc'${CharacterListLoginTokenMessage}')
   errorBox.onOk = function()
     errorBox = nil
     ClientEnterGame.show()
@@ -133,7 +130,7 @@ end
 function onGameConnectionError(message, code)
   ClientCharacterList.destroyLoadBox()
   local text = translateNetworkError(code, g_game.getProtocolGame() and g_game.getProtocolGame():isConnecting(), message)
-  errorBox = displayErrorBox(tr('Connection Error'), text)
+  errorBox = displayErrorBox(loc'${CharacterListConnectionErrorTitle}', text)
   errorBox.onOk = function()
     errorBox = nil
     ClientCharacterList.showAgain()
@@ -142,7 +139,7 @@ end
 
 function onGameUpdateNeeded(signature)
   ClientCharacterList.destroyLoadBox()
-  errorBox = displayErrorBox(tr('Update needed'), tr('Enter with your account again to update your client.'))
+  errorBox = displayErrorBox(loc'${CharacterListUpdateNeededTitle}', loc'${CharacterListUpdateNeededMessage}')
   errorBox.onOk = function()
     errorBox = nil
     ClientCharacterList.showAgain()
@@ -255,9 +252,7 @@ function ClientCharacterList.create(characters, account, otui)
           subWidget:setOutfit(value)
         else
           local text = value
-          if subWidget.baseText and subWidget.baseTranslate then
-            text = tr(subWidget.baseText, text)
-          elseif subWidget.baseText then
+          if subWidget.baseText then
             text = f(subWidget.baseText, text)
           end
           subWidget:setText(text)
@@ -290,11 +285,11 @@ function ClientCharacterList.create(characters, account, otui)
 
   -- account
   if account.premDays >= 1 and account.premDays < 65535 then
-    accountStatusLabel:setText(tr('Premium Account - Days left') .. ': ' .. account.premDays)
+    accountStatusLabel:setText(f('%s: %d', loc'${CharacterListAccountStatusValuePremium} - ${CharacterListAccountStatusValuePremiumDaysLeft}', account.premDays))
   elseif account.premDays >= 65535 then
-    accountStatusLabel:setText(tr('Lifetime Premium Account'))
+    accountStatusLabel:setText(loc'${CharacterListAccountStatusValuePremiumLifetime}')
   else
-    accountStatusLabel:setText(tr('Free Account'))
+    accountStatusLabel:setText(loc'${CharacterListAccountStatusValueFree}')
   end
 
   if account.premDays >= 1 and account.premDays <= 7 then
@@ -368,7 +363,7 @@ function ClientCharacterList.doLogin()
     end
     tryLogin(charInfo)
   else
-    displayErrorBox(tr('Error'), tr('You must select a character to login.'))
+    displayErrorBox(loc'${CorelibInfoError}', loc'${CharacterListCharSelectionErrorMessage}')
   end
 end
 

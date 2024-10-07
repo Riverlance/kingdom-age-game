@@ -1,4 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameConditions = { }
+
+
+
+local GameConditionsActionKey = 'Ctrl+Shift+C'
 
 
 
@@ -49,51 +55,51 @@ CONDITION_ORDER_ASCENDING    = 1
 CONDITION_ORDER_DESCENDING   = 2
 
 local conditionSortStr = {
-  [CONDITION_SORT_APPEAR]        = 'Appear',
-  [CONDITION_SORT_NAME]          = 'Name',
-  [CONDITION_SORT_PERCENTAGE]    = 'Percentage',
-  [CONDITION_SORT_REMAININGTIME] = 'Remaining Time'
+  [CONDITION_SORT_APPEAR]        = loc'${GameConditionsSortAppear}',
+  [CONDITION_SORT_NAME]          = loc'${CorelibInfoName}',
+  [CONDITION_SORT_PERCENTAGE]    = loc'${GameConditionsSortPercentage}',
+  [CONDITION_SORT_REMAININGTIME] = loc'${GameConditionsSortRemainingTime}',
 }
 
 local conditionOrderStr = {
-  [CONDITION_ORDER_ASCENDING]  = 'Ascending',
-  [CONDITION_ORDER_DESCENDING] = 'Descending'
+  [CONDITION_ORDER_ASCENDING]  = loc'${CorelibInfoAscending}',
+  [CONDITION_ORDER_DESCENDING] = loc'${CorelibInfoDescending}',
 }
 
 local defaultValues = {
-  filterPanel = true,
-  filterDefault = true,
-  filterSelfPowers = true,
-  filterOtherPowers = true,
-  filterAggressive = true,
+  filterPanel         = true,
+  filterDefault       = true,
+  filterSelfPowers    = true,
+  filterOtherPowers   = true,
+  filterAggressive    = true,
   filterNonAggressive = true,
-  sortType = CONDITION_SORT_APPEAR,
-  sortOrder = CONDITION_ORDER_DESCENDING
+  sortType            = CONDITION_SORT_APPEAR,
+  sortOrder           = CONDITION_ORDER_DESCENDING
 }
 
 Icons = { }
-Icons[PlayerStates.Poison] = { tooltip = tr('You are poisoned'), path = '/images/game/creature/condition/default_poisoned', id = 'condition_poisoned' }
-Icons[PlayerStates.Burn] = { tooltip = tr('You are burning'), path = '/images/game/creature/condition/default_burning', id = 'condition_burning' }
-Icons[PlayerStates.Energy] = { tooltip = tr('You are electrified'), path = '/images/game/creature/condition/default_electrified', id = 'condition_electrified' }
-Icons[PlayerStates.Drunk] = { tooltip = tr('You are drunk'), path = '/images/game/creature/condition/default_drunk', id = 'condition_drunk' }
-Icons[PlayerStates.ManaShield] = { tooltip = tr('You are protected by a magic shield'), path = '/images/game/creature/condition/default_magic_shield', id = 'condition_magic_shield' }
-Icons[PlayerStates.Paralyze] = { tooltip = tr('You are paralysed'), path = '/images/game/creature/condition/default_slowed', id = 'condition_slowed' }
-Icons[PlayerStates.Haste] = { tooltip = tr('You are hasted'), path = '/images/game/creature/condition/default_haste', id = 'condition_haste' }
-Icons[PlayerStates.Swords] = { tooltip = tr('You may not logout during a fight'), path = '/images/game/creature/condition/default_logout_block', id = 'condition_logout_block' }
-Icons[PlayerStates.Drowning] = { tooltip = tr('You are drowning'), path = '/images/game/creature/condition/default_drowning', id = 'condition_drowning' }
-Icons[PlayerStates.Freezing] = { tooltip = tr('You are freezing'), path = '/images/game/creature/condition/default_freezing', id = 'condition_freezing' }
-Icons[PlayerStates.Dazzled] = { tooltip = tr('You are dazzled'), path = '/images/game/creature/condition/default_dazzled', id = 'condition_dazzled' }
-Icons[PlayerStates.Cursed] = { tooltip = tr('You are cursed'), path = '/images/game/creature/condition/default_cursed', id = 'condition_cursed' }
-Icons[PlayerStates.PartyBuff] = { tooltip = tr('You are strengthened'), path = '/images/game/creature/condition/default_strengthened', id = 'condition_strengthened' }
-Icons[PlayerStates.PZBlock] = { tooltip = tr('You may not logout or enter a protection zone'), path = '/images/game/creature/condition/default_pzblock', id = 'condition_pz_block' }
-Icons[PlayerStates.Secure] = { tooltip = tr('You are secured'), path = '/images/game/creature/condition/default_secured', id = 'condition_secured' }
-Icons[PlayerStates.Bleeding] = { tooltip = tr('You are bleeding'), path = '/images/game/creature/condition/default_bleeding', id = 'condition_bleeding' }
-Icons[PlayerStates.Hungry] = { tooltip = tr('You are hungry'), path = '/images/game/creature/condition/default_hungry', id = 'condition_hungry' }
-Icons[PlayerStates.SecureBlock] = { tooltip = tr('You are within a secure blocked zone'), path = '/images/game/creature/condition/default_secureblock', id = 'condition_secure_block' }
-Icons[PlayerStates.PZ] = { tooltip = tr('You are within a protection zone'), path = '/images/game/creature/condition/default_pz', id = 'condition_pz' }
-Icons[PlayerStates.WZ] = { tooltip = tr('You are within a white zone'), path = '/images/game/creature/condition/default_wz', id = 'condition_wz' }
-Icons[PlayerStates.RZ] = { tooltip = tr('You are within a red zone'), path = '/images/game/creature/condition/default_rz', id = 'condition_rz' }
-Icons[PlayerStates.BZ] = { tooltip = tr('You are within a black zone'), path = '/images/game/creature/condition/default_bz', id = 'condition_bz' }
+Icons[PlayerStates.Poison] = { tooltip = loc'${GameConditionsStatePoison}', path = '/images/game/creature/condition/default_poisoned', id = 'condition_poisoned' }
+Icons[PlayerStates.Burn] = { tooltip = loc'${GameConditionsStateBurn}', path = '/images/game/creature/condition/default_burning', id = 'condition_burning' }
+Icons[PlayerStates.Energy] = { tooltip = loc'${GameConditionsStateEnergy}', path = '/images/game/creature/condition/default_electrified', id = 'condition_electrified' }
+Icons[PlayerStates.Drunk] = { tooltip = loc'${GameConditionsStateDrunk}', path = '/images/game/creature/condition/default_drunk', id = 'condition_drunk' }
+Icons[PlayerStates.ManaShield] = { tooltip = loc'${GameConditionsStateManaShield}', path = '/images/game/creature/condition/default_magic_shield', id = 'condition_magic_shield' }
+Icons[PlayerStates.Paralyze] = { tooltip = loc'${GameConditionsStateParalyze}', path = '/images/game/creature/condition/default_slowed', id = 'condition_slowed' }
+Icons[PlayerStates.Haste] = { tooltip = loc'${GameConditionsStateHaste}', path = '/images/game/creature/condition/default_haste', id = 'condition_haste' }
+Icons[PlayerStates.Swords] = { tooltip = loc'${GameConditionsStateSwords}', path = '/images/game/creature/condition/default_logout_block', id = 'condition_logout_block' }
+Icons[PlayerStates.Drowning] = { tooltip = loc'${GameConditionsStateDrowning}', path = '/images/game/creature/condition/default_drowning', id = 'condition_drowning' }
+Icons[PlayerStates.Freezing] = { tooltip = loc'${GameConditionsStateFreezing}', path = '/images/game/creature/condition/default_freezing', id = 'condition_freezing' }
+Icons[PlayerStates.Dazzled] = { tooltip = loc'${GameConditionsStateDazzled}', path = '/images/game/creature/condition/default_dazzled', id = 'condition_dazzled' }
+Icons[PlayerStates.Cursed] = { tooltip = loc'${GameConditionsStateCursed}', path = '/images/game/creature/condition/default_cursed', id = 'condition_cursed' }
+Icons[PlayerStates.PartyBuff] = { tooltip = loc'${GameConditionsStatePartyBuff}', path = '/images/game/creature/condition/default_strengthened', id = 'condition_strengthened' }
+Icons[PlayerStates.PZBlock] = { tooltip = loc'${GameConditionsStatePZBlock}', path = '/images/game/creature/condition/default_pzblock', id = 'condition_pz_block' }
+Icons[PlayerStates.Secure] = { tooltip = loc'${GameConditionsStateSecure}', path = '/images/game/creature/condition/default_secured', id = 'condition_secured' }
+Icons[PlayerStates.Bleeding] = { tooltip = loc'${GameConditionsStateBleeding}', path = '/images/game/creature/condition/default_bleeding', id = 'condition_bleeding' }
+Icons[PlayerStates.Hungry] = { tooltip = loc'${GameConditionsStateHungry}', path = '/images/game/creature/condition/default_hungry', id = 'condition_hungry' }
+Icons[PlayerStates.SecureBlock] = { tooltip = loc'${GameConditionsStateSecureBlock}', path = '/images/game/creature/condition/default_secureblock', id = 'condition_secure_block' }
+Icons[PlayerStates.PZ] = { tooltip = loc'${GameConditionsStatePZ}', path = '/images/game/creature/condition/default_pz', id = 'condition_pz' }
+Icons[PlayerStates.WZ] = { tooltip = loc'${GameConditionsStateWZ}', path = '/images/game/creature/condition/default_wz', id = 'condition_wz' }
+Icons[PlayerStates.RZ] = { tooltip = loc'${GameConditionsStateRZ}', path = '/images/game/creature/condition/default_rz', id = 'condition_rz' }
+Icons[PlayerStates.BZ] = { tooltip = loc'${GameConditionsStateBZ}', path = '/images/game/creature/condition/default_bz', id = 'condition_bz' }
 
 
 
@@ -104,12 +110,12 @@ function GameConditions.init()
   conditionList = { }
 
   g_ui.importStyle('conditionbutton')
-  g_keyboard.bindKeyDown('Ctrl+Shift+C', GameConditions.toggle)
+  g_keyboard.bindKeyDown(GameConditionsActionKey, GameConditions.toggle)
 
   conditionWindow        = g_ui.loadUI('conditions')
   conditionHeader        = conditionWindow:getChildById('miniWindowHeader')
   conditionFooter        = conditionWindow:getChildById('miniWindowFooter')
-  conditionTopMenuButton = ClientTopMenu.addRightGameToggleButton('conditionTopMenuButton', tr('Conditions') .. ' (Ctrl+Shift+C)', '/images/ui/top_menu/conditions', GameConditions.toggle)
+  conditionTopMenuButton = ClientTopMenu.addRightGameToggleButton('conditionTopMenuButton', { loct = '${GameConditionsWindowTitle} (${GameConditionsActionKey})', locpar = { GameConditionsActionKey = GameConditionsActionKey } }, '/images/ui/top_menu/conditions', GameConditions.toggle)
 
   conditionWindow.topMenuButton = conditionTopMenuButton
 
@@ -178,7 +184,7 @@ function GameConditions.terminate()
   conditionTopMenuButton:destroy()
   conditionWindow:destroy()
 
-  g_keyboard.unbindKeyDown('Ctrl+Shift+C')
+  g_keyboard.unbindKeyDown(GameConditionsActionKey)
 
   _G.GameConditions = nil
 end
@@ -264,7 +270,7 @@ function GameConditions.parseConditions(protocol, msg)
         condition.offset = msg:getString()
         condition.factor = msg:getString()
       else
-        print('Unknown byte: ' .. nextByte)
+        perror(f('Unknown byte: %d', nextByte))
       end
       nextByte = msg:getU8()
     end
@@ -363,7 +369,7 @@ end
 
 function GameConditions.setSortType(state)
   g_settings.setValue('Conditions', 'sortType', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', conditionSortStr[state] or '', conditionOrderStr[GameConditions.getSortOrder()] or ''))
+  sortMenuButton:setTooltip(f(loc'${CorelibInfoSortBy}: %s (%s)', conditionSortStr[state] or '', conditionOrderStr[GameConditions.getSortOrder()] or ''))
   GameConditions.updateConditionList()
 end
 
@@ -373,7 +379,7 @@ end
 
 function GameConditions.setSortOrder(state)
   g_settings.setValue('Conditions', 'sortOrder', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', conditionSortStr[GameConditions.getSortType()] or '', conditionOrderStr[state] or ''))
+  sortMenuButton:setTooltip(f(loc'${CorelibInfoSortBy}: %s (%s)', conditionSortStr[GameConditions.getSortType()] or '', conditionOrderStr[state] or ''))
   GameConditions.updateConditionList()
 end
 
@@ -382,25 +388,25 @@ function GameConditions.createSortMenu()
 
   local sortOrder = GameConditions.getSortOrder()
   if sortOrder == CONDITION_ORDER_ASCENDING then
-    menu:addOption(tr('%s Order', conditionOrderStr[CONDITION_ORDER_DESCENDING]), function() GameConditions.setSortOrder(CONDITION_ORDER_DESCENDING) end)
+    menu:addOption(f(loc'%s ${GameConditionsInfoOrder}', conditionOrderStr[CONDITION_ORDER_DESCENDING]), function() GameConditions.setSortOrder(CONDITION_ORDER_DESCENDING) end)
   elseif sortOrder == CONDITION_ORDER_DESCENDING then
-    menu:addOption(tr('%s Order', conditionOrderStr[CONDITION_ORDER_ASCENDING]), function() GameConditions.setSortOrder(CONDITION_ORDER_ASCENDING) end)
+    menu:addOption(f(loc'%s ${GameConditionsInfoOrder}', conditionOrderStr[CONDITION_ORDER_ASCENDING]), function() GameConditions.setSortOrder(CONDITION_ORDER_ASCENDING) end)
   end
 
   menu:addSeparator()
 
   local sortType = GameConditions.getSortType()
   if sortType ~= CONDITION_SORT_APPEAR then
-    menu:addOption(tr('Sort by %s', conditionSortStr[CONDITION_SORT_APPEAR]), function() GameConditions.setSortType(CONDITION_SORT_APPEAR) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', conditionSortStr[CONDITION_SORT_APPEAR]), function() GameConditions.setSortType(CONDITION_SORT_APPEAR) end)
   end
   if sortType ~= CONDITION_SORT_NAME then
-    menu:addOption(tr('Sort by %s', conditionSortStr[CONDITION_SORT_NAME]), function() GameConditions.setSortType(CONDITION_SORT_NAME) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', conditionSortStr[CONDITION_SORT_NAME]), function() GameConditions.setSortType(CONDITION_SORT_NAME) end)
   end
   if sortType ~= CONDITION_SORT_PERCENTAGE then
-    menu:addOption(tr('Sort by %s', conditionSortStr[CONDITION_SORT_PERCENTAGE]), function() GameConditions.setSortType(CONDITION_SORT_PERCENTAGE) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', conditionSortStr[CONDITION_SORT_PERCENTAGE]), function() GameConditions.setSortType(CONDITION_SORT_PERCENTAGE) end)
   end
   if sortType ~= CONDITION_SORT_REMAININGTIME then
-    menu:addOption(tr('Sort by %s', conditionSortStr[CONDITION_SORT_REMAININGTIME]), function() GameConditions.setSortType(CONDITION_SORT_REMAININGTIME) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', conditionSortStr[CONDITION_SORT_REMAININGTIME]), function() GameConditions.setSortType(CONDITION_SORT_REMAININGTIME) end)
   end
 
   menu:display()

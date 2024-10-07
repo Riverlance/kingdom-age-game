@@ -1,5 +1,5 @@
 TradeWindow < MiniWindow
-  !text: tr('Trade')
+  &loc: '${GamePlayerTradeWindowTitle}'
 
   UIItem
     id: tradeItem
@@ -87,7 +87,7 @@ TradeWindow < MiniWindow
       margin-bottom: 2
 
     Button
-      !text: tr('Accept')
+      &loc: '${GamePlayerTradeButtonAccept}'
       id: acceptButton
       anchors.bottom: parent.bottom
       anchors.left: parent.left
@@ -99,7 +99,7 @@ TradeWindow < MiniWindow
         self:disable()
 
     Button
-      !text: tr('Reject')
+      &loc: '${GamePlayerTradeButtonReject}'
       id: rejectButton
       anchors.bottom: parent.bottom
       anchors.right: parent.right

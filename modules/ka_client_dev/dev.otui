@@ -14,10 +14,10 @@ DevLightButton < LightButton
 
 InfoTitleLabel < Label
   color: darkTeal
-  font: verdana-8px-antialised
+  font: sans-8px
 
 InfoLabel < Label
-  font: verdana-8px-antialised
+  font: sans-8px
   margin-left: 8
   margin-right: 8
 
@@ -27,15 +27,15 @@ InfoLabel < Label
 
 MainWindow
   id: developmentWindow
-  !text: tr('Development')
+  &loc: '${KaClientDevDevelopmentWindow}'
   // See also showDebugInfo() and hideDebugInfo()
-  size: 275 550
+  size: 350 550
   focusable: false
 
   DevLightButton
     id: terminalButton
-    !text: tr('Terminal')
-    !tooltip: tr('Show terminal')
+    &loc: '${KaClientDevTerminalButton}'
+    &loct: '${KaClientDevTerminalButtonTooltip}'
     anchors.top: parent.top
     margin-top: 0
     @onClick: |
@@ -43,8 +43,9 @@ MainWindow
       ClientTerminal.popWindow(false)
 
   DevLightButton
-    !text: tr('Ping')
-    !tooltip: tr('Start ping test at terminal')
+    id: pingButton
+    &loc: '${KaClientDevPingButton}'
+    &loct: '${KaClientDevPingButtonTooltip}'
     @onClick: |
       if not ClientTerminal.isVisible() then
         ClientTerminal.show()
@@ -53,15 +54,16 @@ MainWindow
       ping()
 
   DevLightButton
-    !text: tr('Auto-reload')
-    !tooltip: tr('Modules are reloaded when modified\nTo disable, simply restart the client')
+    id: autoReloadButton
+    &loc: '${KaClientDevAutoReloadButton}'
+    &loct: '${KaClientDevAutoReloadButtonTooltip}'
     @onClick: |
       g_modules.enableAutoReload()
 
   DevCheckBox
     id: localCheckBox
-    !text: tr('Local Server')
-    !tooltip: tr('Log on server from local host')
+    &loc: '${KaClientDevLocalCheckBox}'
+    &loct: '${KaClientDevLocalCheckBoxTooltip}'
     anchors.top: parent.top
     anchors.left: terminalButton.outsideRight
     margin-top: 0
@@ -70,26 +72,26 @@ MainWindow
 
   DevCheckBox
     id: devCheckBox
-    !text: tr('Dev Server (ports)')
-    !tooltip: tr('Log on server from development host')
+    &loc: '${KaClientDevDevCheckBox}'
+    &loct: '${KaClientDevDevCheckBoxTooltip}'
     color: #c9bdab
 
   DevCheckBox
     id: drawBoxesCheckBox
-    !text: tr('Draw Boxes')
-    !tooltip: tr('Draw debug boxes')
-    color: green
+    &loc: '${KaClientDevDrawBoxesCheckBox}'
+    &loct: '${KaClientDevDrawBoxesCheckBoxTooltip}'
+    color: darkGreen
 
   DevCheckBox
     id: hideMapCheckBox
-    !text: tr('Hide Map')
-    !tooltip: tr('Hide game map panel')
-    color: darkRed
+    &loc: '${KaClientDevHideMapCheckBox}'
+    &loct: '${KaClientDevHideMapCheckBoxTooltip}'
+    color: darkGray
 
   DevCheckBox
     id: showDebugInfoCheckBox
-    !text: tr('Show Debug Info')
-    !tooltip: tr('Show primary and widget informations')
+    &loc: '${KaClientDevShowDebugInfoCheckBox}'
+    &loct: '${KaClientDevShowDebugInfoCheckBoxTooltip}'
     color: darkTeal
 
   HorizontalSeparator
@@ -101,7 +103,7 @@ MainWindow
 
   Label
     id: debugInfoLabel
-    !text: tr('Debug Info')
+    &loc: '${KaClientDevDebugInfoLabel}'
     color: #c9bdab
     text-align: center
     anchors.top: prev.outsideBottom
@@ -125,7 +127,7 @@ MainWindow
     padding: 9
 
     InfoTitleLabel
-      !text: tr('Primary')
+      &loc: '${KaClientDevLabelPrimary}'
 
     InfoLabel
       id: positionLabel
@@ -137,7 +139,7 @@ MainWindow
       id: sizeLabel
 
     InfoTitleLabel
-      !text: tr('Main Widget')
+      &loc: '${KaClientDevLabelMainWidget}'
       margin-top: 4
 
     InfoLabel
@@ -160,7 +162,7 @@ MainWindow
       id: parentWidgetStyleNameLabel
 
     InfoTitleLabel
-      !text: tr('Phantom Widget')
+      &loc: '${KaClientDevLabelPhantomWidget}'
       margin-top: 4
 
     InfoLabel
@@ -183,7 +185,7 @@ MainWindow
       id: phantomParentWidgetStyleNameLabel
 
     InfoTitleLabel
-      !text: tr('Focused Widget')
+      &loc: '${KaClientDevLabelFocusedWidget}'
       margin-top: 4
 
     InfoLabel

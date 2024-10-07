@@ -34,7 +34,7 @@ end
 
 -- Clear table values
 function UITable:onDestroy()
-  for _,row in pairs(self.rows) do
+  for _, row in pairs(self.rows) do
     row.onClick = nil
   end
   self.rows = { }
@@ -120,7 +120,7 @@ function UITable:setHeader(headerWidget)
   self:removeHeader()
 
   if self.dataSpace then
-    local newHeight = self.dataSpace:getHeight()-headerRow:getHeight()-self.dataSpace:getMarginTop()
+    local newHeight = self.dataSpace:getHeight() - headerRow:getHeight() - self.dataSpace:getMarginTop()
     self.dataSpace:applyStyle({ height = newHeight })
   end
 

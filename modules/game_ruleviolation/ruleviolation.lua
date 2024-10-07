@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameRuleViolation = { }
 
 
@@ -113,63 +115,63 @@ cancelButton             = nil
 
 
 local types = {
-  [REPORT_TYPE_ALL]       = 'All',
-  [REPORT_TYPE_NAME]      = 'Name',
-  [REPORT_TYPE_STATEMENT] = 'Statement',
-  [REPORT_TYPE_VIOLATION] = 'Violation'
+  [REPORT_TYPE_ALL]       = loc'${CorelibInfoAll}',
+  [REPORT_TYPE_NAME]      = loc'${CorelibInfoName}',
+  [REPORT_TYPE_STATEMENT] = loc'${GameRuleViolationReportTypeStatement}',
+  [REPORT_TYPE_VIOLATION] = loc'${GameRuleViolationReportTypeViolation}',
 }
 
 local typeId = REPORT_TYPE_NAME
 
 local reasons = { -- Titles should have until 255 characters.
   [REPORT_TYPE_NAME] = {
-    [0]  = { title = 'Offensive - Racism',                                       description = "Reflect prejudice, or hatred against people from other races or other countries.\n\nExamples:\n\nIllegal - You can report names like:\nJew hater, White Power, Niggerkiller, Stupid Polak\n\nLegal - Names like the following are legal and must not be reported:\nPolish Warrior, Tiago de Brasilia, Black Fighter" },
-    [1]  = { title = 'Offensive - Harassing',                                    description = "Made to harass other players or to threaten other players in real life.\n\nExamples:\n\nIllegal - You can report names like:\nIkillyou Reallife, Wheelchair Marcin\n\nLegal - Names like the following are legal and must not be reported:\nTomurka's friend, Bubble Two" },
-    [2]  = { title = 'Offensive - Insulting',                                    description = "Contain very rude and offensive vocabulary or created to insult other character names.\n\nExamples:\n\nIllegal - You can report names like:\nStupid Retard, Katie the Moron, Dickhead\n\nLegal - Names like the following are legal and must not be reported:\nNoob, Crazy Guy, Silly Gerta" },
-    [3]  = { title = 'Offensive - Drug related',                                 description = "Explicitly relate to drugs and other illegal substances or to well-known drug dealers.\nThe same is true for names that refer to alcoholism.\n\nExamples:\n\nIllegal - You can report names like:\nJunkie, Weedsmoker, Pablo Escobar, Alcoholic\n\nLegal - Names like the following are legal and must not be reported:\nWater pipe, Tobacco Man, Rum bottle, Drunk Dwarf" },
-    [4]  = { title = 'Offensive - Sexually related',                             description = "Refer to sex, a sexual orientation or intimate body parts.\nAlso, names of well-known prostitutes or porn stars may be reported.\n\nExamples:\n\nIllegal - You can report names like:\nSixty-nine, Hetero Guy, Nipple, Breastfeeder\n\nLegal - Names like the following are legal and must not be reported:\nSweet Kiss, Macho, Long Legs" },
-    [5]  = { title = 'Offensive - Religious or political view',                  description = "Refer to a specific religion or to a person or position that is connected to a certain religion.\nThe same is true for names that express political views or refer to contemporary and well-known politicians.\n\nExamples:\n\nIllegal - You can report names like:\nHindu Master, Jesus Christ, Pope Frank, Anarchist, Dilma\n\nLegal - Names like the following are legal and must not be reported:\nJesus Gonzales, Elfish Priest, God of War, Satan, Abraham Lincoln" },
-    [6]  = { title = 'Offensive - Generally objectionable',                      description = "Distasteful and likely to offend people.\n\nFor example, references to body fluids, excrements, serious diseases or organised crime.\nAlso, names of contemporary persons known for serious crimes or inhuman actions.\n\nExamples:\n\nIllegal - You can report names like:\nSnot, Moe the Mongolist, Mafia Hitman, Hitler\n\nLegal - Names like the following are legal and must not be reported:\nVial of Blood, Blind beggar, Genghis Khan" },
-    [7]  = { title = 'Offensive - Supporting rule violation',                    description = "Support a rule break, encourage others to break a Kingdom Age Rule.\nOr imply a violation of the Kingdom Age Rules.\nThe same is true for names that have been created to fake an official position.\n\nExamples:\n\nIllegal - You can report names like:\nSellacc, Spam Sponsor, Bothater, God Durin, System Admin, Senator Kate\n\nLegal - Names like the following are legal and must not be reported:\nEvil Thief, Bad Guy, Steve Johnson, God of War, Count Stephan" },
-    [8]  = { title = 'Advertising - Brand, product or service of a third party', description = "Contain advertising for worldwide known products, services or companies including titles of other online games.\n\nExamples:\n\nIllegal - You can report names like:\nNike Shoes, Siemens, Frank Google, World of Warcraft\n\nLegal - Names like the following are legal and must not be reported:\nJennifer Lopez, Real Madrid, Chrono, Zelda, Megaman" },
-    [9]  = { title = 'Advertising - Content which is not related to the game',   description = "Contain advertising for content which is not related to the game.\n\nExamples:\n\nIllegal - You can report names like:\nMobile Sale, Buy headset, Sell My Car\n\nLegal - Names like the following are legal and must not be reported:\nMerchant, Potionbuyer" },
-    [10] = { title = 'Other - Name violation',                                   description = "Other violation." },
+    [0]  = { title = loc'${GameRuleViolationNameRacism}',                 description = loc'${GameRuleViolationNameRacismDesc}' },
+    [1]  = { title = loc'${GameRuleViolationNameHarassing}',              description = loc'${GameRuleViolationNameHarassingDesc}' },
+    [2]  = { title = loc'${GameRuleViolationNameInsulting}',              description = loc'${GameRuleViolationNameInsultingDesc}' },
+    [3]  = { title = loc'${GameRuleViolationNameDrug}',                   description = loc'${GameRuleViolationNameDrugDesc}' },
+    [4]  = { title = loc'${GameRuleViolationNameSexually}',               description = loc'${GameRuleViolationNameSexuallyDesc}' },
+    [5]  = { title = loc'${GameRuleViolationNameReligiousPolitical}',     description = loc'${GameRuleViolationNameReligiousPoliticalDesc}' },
+    [6]  = { title = loc'${GameRuleViolationNameGenerallyObjectionable}', description = loc'${GameRuleViolationNameGenerallyObjectionableDesc}' },
+    [7]  = { title = loc'${GameRuleViolationNameSupporting}',             description = loc'${GameRuleViolationNameSupportingDesc}' },
+    [8]  = { title = loc'${GameRuleViolationNameBrand}',                  description = loc'${GameRuleViolationNameBrandDesc}' },
+    [9]  = { title = loc'${GameRuleViolationNameNotRelatedToTheGame}',    description = loc'${GameRuleViolationNameNotRelatedToTheGameDesc}' },
+    [10] = { title = loc'${GameRuleViolationName}',                       description = loc'${GameRuleViolationNameDesc}' },
   },
 
   [REPORT_TYPE_STATEMENT] = {
-    [0]  = { title = 'Spam - Public statements ignoring the default language',      description = "Consist of a bad usage of channel sending messages that is not in the default required.\n\nFor example, the help channel requires only english statements." },
-    [1]  = { title = 'Spam - Statements not related to the channel subject',        description = "Consist of a bad usage with no related statement to the channel within.\n\nFor example, do not post trade messages in the help channel." },
-    [2]  = { title = 'Spam - Using badly formatted or nonsensical text',            description = 'Consist of nonsensical letter combinations.\n\nFor example, "asdfsdfskhjkh..." or "-*-*-*-*I $eLl @rr0wzz*-*-*-*-...".' },
-    [3]  = { title = 'Spam - Excessively repeating similar statements',             description = "Consist of annoying flood excessively repeating similar statements several times for a longer period of time." },
-    [4]  = { title = 'Offensive - Racism',                                          description = "Made to insult a certain country or its inhabitants, a certain nation or an ethnic group." },
-    [5]  = { title = 'Offensive - Harassing',                                       description = "Made to harass other players or to threaten other players in real life." },
-    [6]  = { title = 'Offensive - Insulting',                                       description = 'Insulting or contain very offensive vocabulary.\nKeep in mind that harmless words like "noob" might annoy you, but are tolerated and should not be reported.' },
-    [7]  = { title = 'Offensive - Drug related',                                    description = "Refer to drugs in any way." },
-    [8]  = { title = 'Offensive - Sexually related',                                description = "Contain references to sex, sexual related body parts or a sexual orientation." },
-    [9]  = { title = 'Offensive - Religious or political view',                     description = "Deal with controversial topics like religion and politics." },
-    [10] = { title = 'Offensive - Generally objectionable',                         description = "Grossly distasteful.\n\nFor example, cynical remarks about catastrophes." },
-    [11] = { title = 'Offensive - Supporting rule violation',                       description = "Support a rule break, encourage others to break a Kingdom Age Rule.\nOr imply a violation of the Kingdom Age Rules by the posting player." },
-    [12] = { title = 'Advertising - Brand, product or service of a third party',    description = "Made to advertise certain goods, services or brands of a third party.\n\nFor example, advertising other games, offering items from another game for Kingdom Age items.\nAlso, advertising other companies or their goods and services is illegal." },
-    [13] = { title = 'Advertising - Content which is not related to the game',      description = 'Contain advertising for all kind of goods and services that are not related to Kingdom Age.\n\nFor example, "sell my car".' },
-    [14] = { title = 'Advertising - Disclosing personal data of other people',      description = "Contain personal data of other people.\n\nFor example, email address or phone number." },
-    [15] = { title = 'Team - False information to Vision Entertainment',            description = "Prove that a player has intentionally given wrong or misleading information,\nconcerning rule violation reports, complaints, bug reports or support requests to Vision Entertainment." },
-    [16] = { title = 'Team - Publishing wrong info about Vision Entertainment',     description = "Made to publish clearly wrong information about Vision Entertainment or its services." },
-    [17] = { title = 'Team - Boycott against Vision Entertainment or its services', description = "Made to ask other players to boycott Vision Entertainment or its services." },
-    [18] = { title = 'Team - Pretending to be Vision Entertainment',                description = "Made to make other players believe that a player is a Vision Entertainment member or has their powers or legitimation." },
-    [19] = { title = 'Other - Statement violation',                                 description = "Other violation." },
+    [0]  = { title = loc'${GameRuleViolationStatementNotDefaultLanguage}',     description = loc'${GameRuleViolationStatementNotDefaultLanguageDesc}' },
+    [1]  = { title = loc'${GameRuleViolationStatementNotChannelSubject}',      description = loc'${GameRuleViolationStatementNotChannelSubjectDesc}' },
+    [2]  = { title = loc'${GameRuleViolationStatementNonsensicalText}',        description = loc'${GameRuleViolationStatementNonsensicalTextDesc}' },
+    [3]  = { title = loc'${GameRuleViolationStatementRepeatingText}',          description = loc'${GameRuleViolationStatementRepeatingTextDesc}' },
+    [4]  = { title = loc'${GameRuleViolationStatementRacism}',                 description = loc'${GameRuleViolationStatementRacismDesc}' },
+    [5]  = { title = loc'${GameRuleViolationStatementHarassing}',              description = loc'${GameRuleViolationStatementHarassingDesc}' },
+    [6]  = { title = loc'${GameRuleViolationStatementInsulting}',              description = loc'${GameRuleViolationStatementInsultingDesc}' },
+    [7]  = { title = loc'${GameRuleViolationStatementDrug}',                   description = loc'${GameRuleViolationStatementDrugDesc}' },
+    [8]  = { title = loc'${GameRuleViolationStatementSexually}',               description = loc'${GameRuleViolationStatementSexuallyDesc}' },
+    [9]  = { title = loc'${GameRuleViolationStatementReligiousPolitical}',     description = loc'${GameRuleViolationStatementReligiousPoliticalDesc}' },
+    [10] = { title = loc'${GameRuleViolationStatementGenerallyObjectionable}', description = loc'${GameRuleViolationStatementGenerallyObjectionableDesc}' },
+    [11] = { title = loc'${GameRuleViolationStatementSupporting}',             description = loc'${GameRuleViolationStatementSupportingDesc}' },
+    [12] = { title = loc'${GameRuleViolationStatementBrand}',                  description = loc'${GameRuleViolationStatementBrandDesc}' },
+    [13] = { title = loc'${GameRuleViolationStatementNotRelatedToTheGame}',    description = loc'${GameRuleViolationStatementNotRelatedToTheGameDesc}' },
+    [14] = { title = loc'${GameRuleViolationStatementDisclosingPersonalData}', description = loc'${GameRuleViolationStatementDisclosingPersonalDataDesc}' },
+    [15] = { title = loc'${GameRuleViolationStatementFalseInfoToTeam}',        description = loc'${GameRuleViolationStatementFalseInfoToTeamDesc}' },
+    [16] = { title = loc'${GameRuleViolationStatementWrongInfoAboutTeam}',     description = loc'${GameRuleViolationStatementWrongInfoAboutTeamDesc}' },
+    [17] = { title = loc'${GameRuleViolationStatementBoycootTeam}',            description = loc'${GameRuleViolationStatementBoycootTeamDesc}' },
+    [18] = { title = loc'${GameRuleViolationStatementPretendingBeTeam}',       description = loc'${GameRuleViolationStatementPretendingBeTeamDesc}' },
+    [19] = { title = loc'${GameRuleViolationStatement}',                       description = loc'${GameRuleViolationStatementDesc}' },
   },
 
   [REPORT_TYPE_VIOLATION] = {
-    [0] = { title = 'Abuse - Bug abuse on the game',                              description = "Abused an game bug." },
-    [1] = { title = "Abuse - Error abuse on the Vision Entertainment's services", description = "Abused an any part of Vision Entertainment's service." },
-    [2] = { title = 'Hacking - Using unofficial software to play',                description = "Used unofficial software.\n\nFor example, a macro program or a so-called tasker or bot." },
-    [3] = { title = "Hacking - Stealing other players' account or personal data", description = "Tried to steal another player's account data or to hack an account.\nOr tried to trick other players into downloading malicious software." },
-    [4] = { title = 'Hacking - Manipulating the official client program',         description = "Manipulating the client program to try gaining an advantage compared to other players." },
-    [5] = { title = 'Hacking - Attacking a Vision Entertainment service',         description = "Has or wants to attack, disrupt or damage the operation of Vision Entertainment servers,\nthe game or any other part of Vision Entertainment's service." },
-    [6] = { title = 'Law/Regulations - Violating the game Service Agreement',     description = "Violated the Kingdom Age Service Agreement or planned to be violated." },
-    [7] = { title = 'Law/Regulations - Violating a right of a third party',       description = "Violated the right of a third party or planned to be violated." },
-    [8] = { title = 'Law/Regulations - Violating applicable law',                 description = "Violated any applicable law or planned to be violated." },
-    [9] = { title = 'Other - Violation',                                          description = "Other violation." },
+    [0] = { title = loc'${GameRuleViolationMainBugAbuse}',            description = loc'${GameRuleViolationMainBugAbuseDesc}' },
+    [1] = { title = loc'${GameRuleViolationMainErrorAbuse}',          description = loc'${GameRuleViolationMainErrorAbuseDesc}' },
+    [2] = { title = loc'${GameRuleViolationMainUnofficialSoftware}',  description = loc'${GameRuleViolationMainUnofficialSoftwareDesc}' },
+    [3] = { title = loc'${GameRuleViolationMainStealingData}',        description = loc'${GameRuleViolationMainStealingDataDesc}' },
+    [4] = { title = loc'${GameRuleViolationMainManipulatingClient}',  description = loc'${GameRuleViolationMainManipulatingClientDesc}' },
+    [5] = { title = loc'${GameRuleViolationMainAttackingService}',    description = loc'${GameRuleViolationMainAttackingServiceDesc}' },
+    [6] = { title = loc'${GameRuleViolationMainAgainstService}',      description = loc'${GameRuleViolationMainAgainstServiceDesc}' },
+    [7] = { title = loc'${GameRuleViolationMainAgainstRightOfThird}', description = loc'${GameRuleViolationMainAgainstRightOfThirdDesc}' },
+    [8] = { title = loc'${GameRuleViolationMainAgainstLaw}',          description = loc'${GameRuleViolationMainAgainstLawDesc}' },
+    [9] = { title = loc'${GameRuleViolationMain}',                    description = loc'${GameRuleViolationMainDesc}' },
   }
 }
 
@@ -200,6 +202,7 @@ function GameRuleViolation.showRuleViolationReportWindow(_type, targetName, stat
   typeId = _type
 
   g_ui.importStyle('ruleviolation')
+
   rvWindow                 = g_ui.createWidget('RVWindow', rootWidget)
   rvLabel                  = rvWindow:getChildById('rvLabel')
   targetTextEdit           = rvWindow:getChildById('targetTextEdit')
@@ -211,7 +214,7 @@ function GameRuleViolation.showRuleViolationReportWindow(_type, targetName, stat
   okButton                 = rvWindow:getChildById('okButton')
   cancelButton             = rvWindow:getChildById('cancelButton')
 
-  rvWindow:setText('Report ' .. types[typeId])
+  rvWindow:setText(f(loc'${GameRuleViolationReportPlayer}', types[typeId]:lower()))
 
   if targetName then
     targetTextEdit:setText(targetName)
@@ -302,16 +305,16 @@ function GameRuleViolation.report()
 
   local err
   if typeId == REPORT_TYPE_STATEMENT and not statement then
-    err = 'No statement selected. Contact a gamemaster.'
+    err = loc'${GameRuleViolationErrorNoStatement}'
   elseif translation and translation:match(textPattern) then
-    err = "The 'Translation' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,."
+    err = loc'${GameRuleViolationErrorTranslationNotFormatted}'
   elseif #comment < minimumCommentSize then
-    err = 'You should write at least ' .. minimumCommentSize .. " chars on 'Comment' field."
+    err = f(loc'${GameRuleViolationErrorMinChars}', minimumCommentSize)
   elseif comment:match(textPattern) then
-    err = "The 'Comment' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,."
+    err = loc'${GameRuleViolationErrorCommentNotFormatted}'
   end
   if err then
-    displayErrorBox('Error', err)
+    displayErrorBox(loc'${CorelibInfoError}', err)
     return
   end
 
@@ -354,10 +357,10 @@ local REPORT_STATE_WORKING = 1
 local REPORT_STATE_DONE    = 2
 
 local states = {
-  [REPORT_STATE_UNDONE]  = 'Undone',
-  [REPORT_STATE_NEW]     = 'New',
-  [REPORT_STATE_WORKING] = 'Working',
-  [REPORT_STATE_DONE]    = 'Done'
+  [REPORT_STATE_UNDONE]  = loc'${GameRuleViolationStateUndone}',
+  [REPORT_STATE_NEW]     = loc'${GameRuleViolationStateNew}',
+  [REPORT_STATE_WORKING] = loc'${GameRuleViolationStateWorking}',
+  [REPORT_STATE_DONE]    = loc'${GameRuleViolationStateDone}'
 }
 
 
@@ -367,19 +370,19 @@ local VIOLATION_ACTIONTYPE_NAMELOCK  = 1
 local VIOLATION_ACTIONTYPE_ACCOUNT   = 2
 local VIOLATION_ACTIONTYPE_IPACCOUNT = 3
 
-local ACTION_NOTATION             = { title = 'Notation', actionType = VIOLATION_ACTIONTYPE_NOTATION }
-local ACTION_NAMELOCK             = { title = 'Name Lock', actionType = VIOLATION_ACTIONTYPE_NAMELOCK }
-local ACTION_BANISHMENT_7_DAYS    = { title = 'Banishment of 7 Days', actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 7 }
-local ACTION_BANISHMENT_14_DAYS   = { title = 'Banishment of 14 Days', actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 14 }
-local ACTION_BANISHMENT_30_DAYS   = { title = 'Banishment of 30 Days', actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 30 }
-local ACTION_BANISHMENT_60_DAYS   = { title = 'Banishment of 60 Days', actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 60 }
-local ACTION_BANISHMENT_90_DAYS   = { title = 'Banishment of 90 Days', actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 90 }
-local ACTION_BANISHMENT_PERMANENT = { title = 'Permanent Banishment', actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 0 }
-local ACTION_IPBANISHMENT_7_DAYS  = { title = 'IP Banishment of 7 Days', actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 7 }
-local ACTION_IPBANISHMENT_14_DAYS = { title = 'IP Banishment of 14 Days', actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 14 }
-local ACTION_IPBANISHMENT_30_DAYS = { title = 'IP Banishment of 30 Days', actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 30 }
-local ACTION_IPBANISHMENT_60_DAYS = { title = 'IP Banishment of 60 Days', actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 60 }
-local ACTION_IPBANISHMENT_90_DAYS = { title = 'IP Banishment of 90 Days', actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 90 }
+local ACTION_NOTATION             = { title = loc'${GameRuleViolationNotation}', actionType = VIOLATION_ACTIONTYPE_NOTATION }
+local ACTION_NAMELOCK             = { title = loc'${GameRuleViolationNameLock}', actionType = VIOLATION_ACTIONTYPE_NAMELOCK }
+local ACTION_BANISHMENT_7_DAYS    = { title = f(loc'${GameRuleViolationBanishmentDays}', 7), actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 7 }
+local ACTION_BANISHMENT_14_DAYS   = { title = f(loc'${GameRuleViolationBanishmentDays}', 14), actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 14 }
+local ACTION_BANISHMENT_30_DAYS   = { title = f(loc'${GameRuleViolationBanishmentDays}', 30), actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 30 }
+local ACTION_BANISHMENT_60_DAYS   = { title = f(loc'${GameRuleViolationBanishmentDays}', 60), actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 60 }
+local ACTION_BANISHMENT_90_DAYS   = { title = f(loc'${GameRuleViolationBanishmentDays}', 90), actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 90 }
+local ACTION_BANISHMENT_PERMANENT = { title = loc'${GameRuleViolationPermanentBanishment}', actionType = VIOLATION_ACTIONTYPE_ACCOUNT, days = 0 }
+local ACTION_IPBANISHMENT_7_DAYS  = { title = f(loc'${GameRuleViolationIPBanishmentDays}', 7), actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 7 }
+local ACTION_IPBANISHMENT_14_DAYS = { title = f(loc'${GameRuleViolationIPBanishmentDays}', 14), actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 14 }
+local ACTION_IPBANISHMENT_30_DAYS = { title = f(loc'${GameRuleViolationIPBanishmentDays}', 30), actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 30 }
+local ACTION_IPBANISHMENT_60_DAYS = { title = f(loc'${GameRuleViolationIPBanishmentDays}', 60), actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 60 }
+local ACTION_IPBANISHMENT_90_DAYS = { title = f(loc'${GameRuleViolationIPBanishmentDays}', 90), actionType = VIOLATION_ACTIONTYPE_IPACCOUNT, days = 90 }
 
 local actions = {
   [REPORT_TYPE_NAME] = {
@@ -615,7 +618,7 @@ function GameRuleViolation.openRow(row)
   end
 
   if rvWindow and rvWindow:isVisible() then
-    displayErrorBox('Error', "You should close the 'Report Rule Violation' window before do this.")
+    displayErrorBox(loc'${CorelibInfoError}', loc'${GameRuleViolationErrorCloseBeforeDo}')
     return
   end
 
@@ -626,7 +629,7 @@ function GameRuleViolation.openRow(row)
 
     rvWindow:lock()
 
-    rvLabel:setText(f('%s\n- Time: %s\n- Player name: %s', row:getText(), os.date('%Y %b %d %H:%M:%S', row.time), row.playerName))
+    rvLabel:setText(f(loc'%s\n- ${GameRuleViolationInfoTime}: %s\n- ${GameRuleViolationInfoPlayerName}: %s', row:getText(), os.date('%Y %b %d %H:%M:%S', row.time), row.playerName))
 
     typeComboBox:setOption(reasons[row.type][row.reasonId].title)
     typeComboBox:setEnabled(false)
@@ -701,7 +704,7 @@ function GameRuleViolation.updateRowsPerPageLabel(value)
     return
   end
 
-  rvViewRowsPerPageLabel:setText('Rows per page: ' .. value)
+  rvViewRowsPerPageLabel:setText(f(loc'${GameRuleViolationRowsPerPage}: ', value))
 end
 
 function GameRuleViolation.onViewChangeState(comboBox, option)
@@ -879,7 +882,7 @@ function GameRuleViolation.rvViewRemoveRow()
 
   local row = rvViewList:getFocusedChild()
   if not row then
-    displayErrorBox('Error', 'No row selected.')
+    displayErrorBox(loc'${CorelibInfoError}', loc'${GameRuleViolationErrorNoRowSelected}')
     return
   end
 
@@ -897,7 +900,7 @@ function GameRuleViolation.rvViewRemoveRow()
       end
     end
 
-    displayCustomBox('Warning', 'Are you sure that you want to remove the row id ' .. row.id .. '?', {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
+    displayCustomBox(loc'${GameRuleViolationWarningTitle}', 'Are you sure that you want to remove the row id ' .. row.id .. '?', {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
     GameRuleViolation.setConfirmWindowLock(true)
   end
 end
@@ -910,12 +913,12 @@ function GameRuleViolation.rvViewSetReportState()
   local err
   local row = rvViewList:getFocusedChild()
   if not row then
-    err = 'No row selected.'
+    err = loc'${GameRuleViolationErrorNoRowSelected}'
   elseif viewState == 255 then
-    err = 'Is not possible to set for this state.'
+    err = loc'${GameRuleViolationStateNotFound}'
   end
   if err then
-    displayErrorBox('Error', err)
+    displayErrorBox(loc'${CorelibInfoError}', err)
     return
   end
 
@@ -935,7 +938,7 @@ function GameRuleViolation.rvViewDetachRow()
   if not rvViewTargetNameTextEdit or not rvViewTargetNameTextEdit:isVisible() then
     rvViewActionTargetNameLabel = g_ui.createWidget('Label', rvViewWindow)
     rvViewActionTargetNameLabel:setId('rvViewActionTargetNameLabel')
-    rvViewActionTargetNameLabel:setText('Target name:')
+    rvViewActionTargetNameLabel:setText(loc'${GameRuleViolationLabelTargetName}:')
     rvViewActionTargetNameLabel:addAnchor(AnchorTop, 'rvViewActionReasonComboBox', AnchorBottom)
     rvViewActionTargetNameLabel:addAnchor(AnchorLeft, 'parent', AnchorLeft)
     rvViewActionTargetNameLabel:setMarginTop(5)
@@ -1021,14 +1024,14 @@ end
 local function checkActionFields(row, targetName)
   local err
   if row and (not row.targetName or row.targetName == '') then
-    err = 'The selected row has no target.'
+    err = loc'${GameRuleViolationErrorRowNoTarget}'
   elseif not row and (not targetName or targetName == '') then
-    err = "No row selected or field 'Target name' is empty."
+    err = loc'${GameRuleViolationErrorRowNoContent}'
   elseif rvViewCommentMultilineTextEdit:getText():match(textPattern) then
-    err = "The 'Action comment' field should contains only letters, numbers, spaces and !?+-*/=@()[]{}.,."
+    err = loc'${GameRuleViolationErrorActionCommentNotFormatted}'
   end
   if err then
-    displayErrorBox('Error', err)
+    displayErrorBox(loc'${CorelibInfoError}', err)
     return false
   end
   return true
@@ -1062,27 +1065,27 @@ function GameRuleViolation.rvViewAction()
     return
   end
 
-  local message = "Are you sure that you want to add the action '" .. actions[viewActionType][viewAction].title .. "' to player '" .. targetName .. "'?"
+  local message = f(loc'${GameRuleViolationActionMsgAdd}', actions[viewActionType][viewAction].title, targetName)
 
   -- Notes
   local notes = ''
   if not row then
-    notes = notes .. '\n' .. '- Is not recommended to make any action without a report attached.'
+    notes = f(loc'%s\n- GameRuleViolationInfoNeedReport', notes)
   end
   if row then
     if row.state == REPORT_STATE_DONE then
-      notes = notes .. '\n' .. "- The selected row has already been marked as '" .. states[REPORT_STATE_DONE] .. "'."
+      notes = f(loc'%s\n- GameRuleViolationMarkedAlready', notes, states[REPORT_STATE_DONE])
     end
     if viewActionType ~= row.type then
-      notes = notes .. '\n' .. '- The setted action has a different type (' .. types[viewActionType] .. ') of the selected row (' .. types[row.type] .. ').'
+      notes = f(loc'%s\n- GameRuleViolationDiffType', notes, types[viewActionType], types[row.type])
     else
       if viewActionReason ~= row.reasonId then
-        notes = notes .. '\n' .. '- The setted action has a different reason of the selected row.'
+        notes = f(loc'%s\n- GameRuleViolationDiffReason', notes)
       end
     end
   end
   if notes ~= '' then
-    message = message .. '\n\nIMPORTANT:\n' .. notes
+    message = f(loc'%s\n\n${GameRuleViolationInfoImportant}:\n%s', message, notes)
   end
 
   if not confirmWindowLock then
@@ -1099,7 +1102,7 @@ function GameRuleViolation.rvViewAction()
       end
     end
 
-    displayCustomBox('Warning', message, {{ text = 'Yes', buttonCallback = buttonCallback }}, 1, 'No', onCancelCallback, nil)
+    displayCustomBox(loc'${GameRuleViolationWarningTitle}', message, {{ text = loc'${CorelibInfoYes}', buttonCallback = buttonCallback }}, 1, loc'${CorelibInfoNo}', onCancelCallback, nil)
     GameRuleViolation.setConfirmWindowLock(true)
   end
 end

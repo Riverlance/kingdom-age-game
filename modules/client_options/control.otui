@@ -2,42 +2,42 @@ Panel
 
   OptionCheckBox
     id: classicControl
-    !text: tr('Classic control')
-    !tooltip: tr('Changes the game shortcuts to classic mode.')
+    &loc: '${ClientOptionsClassicControl}'
+    &loct: '${ClientOptionsClassicControlTooltip}'
     !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: autoChaseOverride
-    !text: tr('Allow auto-chase override')
-    !tooltip: tr('Your character stops to follow your target once you walk.')
+    &loc: '${ClientOptionsAutoChaseOverride}'
+    &loct: '${ClientOptionsAutoChaseOverrideTooltip}'
     !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
 
   OptionCheckBox
     id: smartWalk
-    !text: tr('Enable smart walking')
-    !tooltip: tr('Detect when to use diagonal step based on the keys you are pressing.')
+    &loc: '${ClientOptionsSmartWalk}'
+    &loct: '${ClientOptionsSmartWalkTooltip}'
     !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10
 
   OptionCheckBox
     id: bouncingKeys
-    !text: tr('Enable auto bouncing keys')
-    !tooltip: tr('Whenever new key is pressed, will bounce previous key.')
+    &loc: '${ClientOptionsBouncingKeys}'
+    &loct: '${ClientOptionsBouncingKeysTooltip}'
     !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: cycleWalk
-    !text: tr('Enable cycle walking')
-    !tooltip: tr('Cycle walk events by holding the middle mouse button.')
+    &loc: '${ClientOptionsCycleWalk}'
+    &loct: '${ClientOptionsCycleWalkTooltip}'
     !tooltip-type: TooltipType.textBlock
 
   OptionHorizontalSeparator
 
   OptionLabel
-    !text: tr('Auto bouncing keys interval')
+    &loc: '${ClientOptionsBouncingKeysDelayScrollBarLabel}'
 
   OptionScrollbar
     id: bouncingKeysDelayScrollBar
@@ -46,7 +46,7 @@ Panel
     symbol: ms
 
   OptionLabel
-    !text: tr('Cycle walk interval')
+    &loc: '${ClientOptionsCycleWalkDelayLabel}'
 
   OptionScrollbar
     id: cycleWalkDelay
@@ -55,7 +55,7 @@ Panel
     symbol: ms
 
   OptionLabel
-    !text: tr('Turn delay')
+    &loc: '${ClientOptionsTurnDelayLabel}'
 
   OptionScrollbar
     id: turnDelay
@@ -64,7 +64,7 @@ Panel
     symbol: ms
 
   OptionLabel
-    !text: tr('Hotkey delay')
+    &loc: '${ClientOptionsHotkeyDelayLabel}'
 
   OptionScrollbar
     id: hotkeyDelay

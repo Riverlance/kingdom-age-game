@@ -1,4 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameCharacter = { }
+
+
+
+CharacterWindowActionKey = 'Ctrl+I'
 
 
 
@@ -88,12 +94,12 @@ function GameCharacter.init()
     onAutoWalk        = GameCharacter.check
   })
 
-  g_keyboard.bindKeyDown('Ctrl+I', GameCharacter.toggle)
+  g_keyboard.bindKeyDown(CharacterWindowActionKey, GameCharacter.toggle)
 
 
   inventoryWindow = g_ui.loadUI('character')
   inventoryHeader = inventoryWindow:getChildById('miniWindowHeader')
-  inventoryTopMenuButton = ClientTopMenu.addRightGameToggleButton('inventoryTopMenuButton', tr('Character') .. ' (Ctrl+I)', '/images/ui/top_menu/healthinfo', GameCharacter.toggle)
+  inventoryTopMenuButton = ClientTopMenu.addRightGameToggleButton('inventoryTopMenuButton', { loct = "${CharacterWindowTitle} (${CharacterWindowActionKey})", locpar = { CharacterWindowActionKey = CharacterWindowActionKey } }, '/images/ui/top_menu/healthinfo', GameCharacter.toggle)
 
   inventoryWindow.topMenuButton = inventoryTopMenuButton
   inventoryWindow:disableResize()
@@ -102,12 +108,12 @@ function GameCharacter.init()
 
   local ballButton = inventoryWindow:getChildById('ballButton')
   inventoryWindow.onMinimize = function (self)
-    ballButton:setTooltip('Show more')
+    ballButton:setTooltip(loc'${CharacterInfoButtonMore}')
   end
   inventoryWindow.onMaximize = function (self)
     local headSlot = contentsPanel:getChildById('slot1')
     if headSlot:isVisible() then
-      ballButton:setTooltip('Show less')
+      ballButton:setTooltip(loc'${CharacterInfoButtonLess}')
     end
   end
 
@@ -216,7 +222,7 @@ function GameCharacter.terminate()
     onAutoWalk        = GameCharacter.check
   })
 
-  g_keyboard.unbindKeyDown('Ctrl+I')
+  g_keyboard.unbindKeyDown(CharacterWindowActionKey)
 
   -- Combat controls
   fightOffensiveBox:destroy()
@@ -441,8 +447,8 @@ function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
 
   healthBar:setValue(health, 0, maxHealth)
 
-  healthBarValueLabel:setText(f('%s / %s HP', tr(health), tr(maxHealth)))
-  healthBarValueLabel:setTooltip(tr('Your character health is %s out of %s.\nClick to show creature health bar.', tr(health), tr(maxHealth)), TooltipType.textBlock)
+  healthBarValueLabel:setText(f('%s / %s HP', loc(health), loc(maxHealth)))
+  healthBarValueLabel:setTooltip(f(loc'${BarHealthTooltip}', loc(health), loc(maxHealth)), TooltipType.textBlock)
 end
 
 function GameCharacter.onManaChange(localPlayer, mana, maxMana)
@@ -452,8 +458,8 @@ function GameCharacter.onManaChange(localPlayer, mana, maxMana)
     manaBar:setValueDelayed(mana, 0, maxMana, 200, 25, 0, true, false)
   end
 
-  manaBarValueLabel:setText(f('%s / %s MP', tr(mana), tr(maxMana)))
-  manaBarValueLabel:setTooltip(tr('Your character mana is %s out of %s.\nClick to show player mana bar.', tr(mana), tr(maxMana)), TooltipType.textBlock)
+  manaBarValueLabel:setText(f('%s / %s MP', loc(mana), loc(maxMana)))
+  manaBarValueLabel:setTooltip(f(loc'${BarManaTooltip}', loc(mana), loc(maxMana)), TooltipType.textBlock)
 end
 
 function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
@@ -463,8 +469,8 @@ function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
     vigorBar:setValueDelayed(vigor, 0, maxVigor, 200, 25, 0, true, false)
   end
 
-  vigorBarValueLabel:setText(f('%s / %s VP', tr(vigor), tr(maxVigor)))
-  vigorBarValueLabel:setTooltip(tr('Your character vigor is %s out of %s.\nClick to show player vigor bar.', tr(vigor), tr(maxVigor)), TooltipType.textBlock)
+  vigorBarValueLabel:setText(f('%s / %s VP', loc(vigor), loc(maxVigor)))
+  vigorBarValueLabel:setTooltip(f(loc'${BarVigorTooltip}', loc(vigor), loc(maxVigor)), TooltipType.textBlock)
 end
 
 function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity, oldFreeCapacity)
@@ -476,14 +482,14 @@ function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity, oldFreeCa
     capacityBar:setValueDelayed(freeCapacity, 0, totalCapacity, 200, 25, 0, true, false)
   end
 
-  capacityBarValueLabel:setText(f('%s / %s CAP', tr(freeCapacity), tr(totalCapacity)))
-  capacityBarValueLabel:setTooltip(tr('Your character free capacity is %s oz out of %s oz.', tr(freeCapacity), tr(totalCapacity)), TooltipType.textBlock)
+  capacityBarValueLabel:setText(f('%s / %s CAP', loc(freeCapacity), loc(totalCapacity)))
+  capacityBarValueLabel:setTooltip(f(loc'${BarCapacityTooltip}', loc(freeCapacity), loc(totalCapacity)), TooltipType.textBlock)
 end
 
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
   experienceBar:setPercent(levelPercent)
   experienceBarValueLabel:setText(levelPercent .. '% XP')
-  experienceBarValueLabel:setTooltip(f('%s\nClick to show player experience bar.', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
+  experienceBarValueLabel:setTooltip(f(loc'${BarExperienceTooltip}', getExperienceTooltipText(localPlayer, level, levelPercent)), TooltipType.textBlock)
 end
 
 
@@ -617,13 +623,13 @@ function GameCharacter.showMoreInfo(bool) -- true = Show more; false = Show less
     inventoryWindow:setHeight(GameCharacter.getMiniWindowHeight())
 
     if ballButton then
-      ballButton:setTooltip('Show less')
+      ballButton:setTooltip(loc'${CharacterInfoButtonLess}')
     end
   else
     inventoryWindow:setHeight(GameCharacter.getHeaderHeight())
 
     if ballButton then
-      ballButton:setTooltip('Show more')
+      ballButton:setTooltip(loc'${CharacterInfoButtonMore}')
     end
   end
 end

@@ -1,4 +1,10 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GamePowers = { }
+
+
+
+local GamePowersActionKey = 'Ctrl+Shift+P'
 
 
 
@@ -24,14 +30,14 @@ POWERS_ORDER_ASCENDING  = 1
 POWERS_ORDER_DESCENDING = 2
 
 local powersSortStr = {
-  [POWERS_SORT_NAME]  = 'Name',
-  [POWERS_SORT_CLASS] = 'Class',
-  [POWERS_SORT_LEVEL] = 'Level'
+  [POWERS_SORT_NAME]  = loc'${CorelibInfoName}',
+  [POWERS_SORT_CLASS] = loc'${CorelibInfoClass}',
+  [POWERS_SORT_LEVEL] = loc'${CorelibInfoLevel}',
 }
 
 local powersOrderStr = {
-  [POWERS_ORDER_ASCENDING]  = 'Ascending',
-  [POWERS_ORDER_DESCENDING] = 'Descending'
+  [POWERS_ORDER_ASCENDING]  = loc'${CorelibInfoAscending}',
+  [POWERS_ORDER_DESCENDING] = loc'${CorelibInfoDescending}',
 }
 
 local defaultValues = {
@@ -59,16 +65,16 @@ function GamePowers.init()
   -- Alias
   GamePowers.m = modules.ka_game_powers
 
-  powersList = { }
+  powersList       = { }
   powerListByIndex = { }
-  powerInfo = { }
+  powerInfo        = { }
 
   g_ui.importStyle('powersbutton')
-  g_keyboard.bindKeyDown('Ctrl+Shift+P', GamePowers.toggle)
+  g_keyboard.bindKeyDown(GamePowersActionKey, GamePowers.toggle)
 
   powersWindow        = g_ui.loadUI('powers')
   powersHeader        = powersWindow:getChildById('miniWindowHeader')
-  powersTopMenuButton = ClientTopMenu.addRightGameToggleButton('powersTopMenuButton', tr('Powers') .. ' (Ctrl+Shift+P)', '/images/ui/top_menu/powers', GamePowers.toggle)
+  powersTopMenuButton = ClientTopMenu.addRightGameToggleButton('powersTopMenuButton', { loct = '${GamePowersWindowTitle} (${GamePowersActionKey})', locpar = { GamePowersActionKey = GamePowersActionKey } }, '/images/ui/top_menu/powers', GamePowers.toggle)
 
   powersWindow.topMenuButton = powersTopMenuButton
 
@@ -132,7 +138,7 @@ function GamePowers.terminate()
   powersTopMenuButton:destroy()
   powersWindow:destroy()
 
-  g_keyboard.unbindKeyDown('Ctrl+Shift+P')
+  g_keyboard.unbindKeyDown(GamePowersActionKey)
 
   _G.GamePowers = nil
 end
@@ -210,7 +216,7 @@ end
 
 function GamePowers.setSortType(state)
   g_settings.setValue('Powers', 'sortType', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', powersSortStr[state] or '', powersOrderStr[GamePowers.getSortOrder()] or ''))
+  sortMenuButton:setTooltip(f(loc'${CorelibInfoSortBy}: %s (%s)', powersSortStr[state] or '', powersOrderStr[GamePowers.getSortOrder()] or ''))
   GamePowers.updatePowersList()
 end
 
@@ -220,7 +226,7 @@ end
 
 function GamePowers.setSortOrder(state)
   g_settings.setValue('Powers', 'sortOrder', state)
-  sortMenuButton:setTooltip(tr('Sort by: %s (%s)', powersSortStr[GamePowers.getSortType()] or '', powersOrderStr[state] or ''))
+  sortMenuButton:setTooltip(f(loc'${CorelibInfoSortBy}: %s (%s)', powersSortStr[GamePowers.getSortType()] or '', powersOrderStr[state] or ''))
   GamePowers.updatePowersList()
 end
 
@@ -229,22 +235,22 @@ function GamePowers.createSortMenu()
 
   local sortOrder = GamePowers.getSortOrder()
   if sortOrder == POWERS_ORDER_ASCENDING then
-    menu:addOption(tr('%s Order', powersOrderStr[POWERS_ORDER_DESCENDING]), function() GamePowers.setSortOrder(POWERS_ORDER_DESCENDING) end)
+    menu:addOption(f(loc'${GamePowersInfoOrder}', powersOrderStr[POWERS_ORDER_DESCENDING]), function() GamePowers.setSortOrder(POWERS_ORDER_DESCENDING) end)
   elseif sortOrder == POWERS_ORDER_DESCENDING then
-    menu:addOption(tr('%s Order', powersOrderStr[POWERS_ORDER_ASCENDING]), function() GamePowers.setSortOrder(POWERS_ORDER_ASCENDING) end)
+    menu:addOption(f(loc'${GamePowersInfoOrder}', powersOrderStr[POWERS_ORDER_ASCENDING]), function() GamePowers.setSortOrder(POWERS_ORDER_ASCENDING) end)
   end
 
   menu:addSeparator()
 
   local sortType = GamePowers.getSortType()
   if sortType ~= POWERS_SORT_NAME then
-    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_NAME]), function() GamePowers.setSortType(POWERS_SORT_NAME) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', powersSortStr[POWERS_SORT_NAME]), function() GamePowers.setSortType(POWERS_SORT_NAME) end)
   end
   if sortType ~= POWERS_SORT_CLASS then
-    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_CLASS]), function() GamePowers.setSortType(POWERS_SORT_CLASS) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', powersSortStr[POWERS_SORT_CLASS]), function() GamePowers.setSortType(POWERS_SORT_CLASS) end)
   end
   if sortType ~= POWERS_SORT_LEVEL then
-    menu:addOption(tr('Sort by %s', powersSortStr[POWERS_SORT_LEVEL]), function() GamePowers.setSortType(POWERS_SORT_LEVEL) end)
+    menu:addOption(f(loc'${CorelibInfoSortBy} %s', powersSortStr[POWERS_SORT_LEVEL]), function() GamePowers.setSortType(POWERS_SORT_LEVEL) end)
   end
 
   menu:display()
@@ -456,7 +462,7 @@ function GamePowers.onPlayerPowersList(powers, updateNonConstantPower, ignoreMes
   end
 
   if modules.game_textmessage and not ignoreMessage and (hasAdded or hasRemoved) then
-    GameTextMessage.displayGameMessage(tr('Your power list has been updated.'))
+    GameTextMessage.displayGameMessage(loc'${GamePowersInfoPowerListUpdated}')
   end
 
   if not updateNonConstantPower then

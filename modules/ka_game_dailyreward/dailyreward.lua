@@ -1,4 +1,8 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.GameDailyReward = { }
+
+
 
 local DailyReward = {
   Playing   = 1,
@@ -88,7 +92,7 @@ function GameDailyReward.onUpdateWindow(flag) -- only when change status
     cycleTimer = nil
   end
 
-  cycleTimer = Timer.new({ }, dailyRewardInfo.statusEnd * 1000 , '!%M:%S')
+  cycleTimer = Timer.new({ }, dailyRewardInfo.statusEnd * 1000, '!%M:%S')
   cycleTimer.updateTicks = 1
   cycleTimer.onUpdate = function() GameDailyReward.updateCycleTimer() end
   cycleTimer:start()
@@ -124,35 +128,35 @@ function GameDailyReward.onUpdateWindow(flag) -- only when change status
     rewardItemWidget.blueLabel:setText(prize)
 
     local desc = prizeItem.description and ('\n' .. prizeItem.description) or ''
-    rewardItemWidget.blueLabel:setTooltip(tr('%s%s', prizeItem.title, desc))
+    rewardItemWidget.blueLabel:setTooltip(f('%s%s', prizeItem.title, desc))
   end
 
   -- Reward Bar
   if dailyRewardInfo.status == DailyReward.Playing then
     claimButton:setEnabled(false)
-    claimButton:setText("Play Enough")
-    rewardsBar:setTooltip("You have not played enough yet to get a reward.", TooltipType.textBlock)
+    claimButton:setText(loc'${GameDailyRewardButtonClaimPlayEnough}')
+    rewardsBar:setTooltip(loc'${GameDailyRewardButtonClaimPlayEnoughTooltip}', TooltipType.textBlock)
   elseif dailyRewardInfo.status == DailyReward.Unclaimed then
     claimButton:setEnabled(true)
-    claimButton:setText("Claim now!")
-    rewardsBar:setTooltip("You are now able to get your daily reward.", TooltipType.textBlock)
+    claimButton:setText(loc'${GameDailyRewardButtonClaimClaimNow}')
+    rewardsBar:setTooltip(loc'${GameDailyRewardButtonClaimClaimNowTooltip}', TooltipType.textBlock)
   elseif dailyRewardInfo.status == DailyReward.Claimed then
     claimButton:setEnabled(false)
-    claimButton:setText("Claimed")
-    rewardsBar:setTooltip("You have already taken your reward today.", TooltipType.textBlock)
+    claimButton:setText(loc'${GameDailyRewardButtonClaimClaimed}')
+    rewardsBar:setTooltip(loc'${GameDailyRewardButtonClaimClaimedTooltip}', TooltipType.textBlock)
   end
 
   -- Bonus Bar
   local bonusTooltipText
   if bonusWeek then
-    bonusTooltipText = 'You are able to get the bonus on each daily reward!'
+    bonusTooltipText = loc'${GameDailyRewardBonusBarTooltipEnabled}'
   else
-    bonusTooltipText = f('You are not able to get the bonus on each daily reward yet.\n* Days to get the bonus: %d', math.max(0, 7 - dailyRewardInfo.dailyStreak))
+    bonusTooltipText = f(loc'${GameDailyRewardBonusBarTooltipDisabled}\n* ${GameDailyRewardBonusBarTooltipDaysToEnable}: %d', math.max(0, 7 - dailyRewardInfo.dailyStreak))
   end
   bonusBar:setTooltip(bonusTooltipText, TooltipType.textBlock)
 
   -- Streak Days
-  dailyRewardWindow.streakDays:setText("Streak: " .. dailyRewardInfo.dailyStreak)
+  dailyRewardWindow.streakDays:setText(f(loc'${GameDailyRewardInfoStreak}: %s', dailyRewardInfo.dailyStreak))
 
   if flag == DailyReward.Window then
     GameDailyReward.show()

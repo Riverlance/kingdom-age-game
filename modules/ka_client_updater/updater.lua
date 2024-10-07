@@ -1,3 +1,5 @@
+g_locales.loadLocales(resolvepath(''))
+
 _G.ClientUpdater = { }
 
 local updaterWindow
@@ -39,7 +41,7 @@ end
 function ClientUpdater.onUpdateStart()
   startTime = g_clock.millis()
   updaterWindow:show()
-  updaterWindow:getChildById('topText'):setText('Starting...')
+  updaterWindow:getChildById('topText'):setText(loc'${KaClientUpdaterStarting}')
 end
 
 function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
@@ -48,16 +50,12 @@ function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
   local avgSpeed = receivedBytes / 1024 / deltaTime
   local receivedMB = receivedBytes / 1024 / 1024
 
-  updaterWindow:getChildById('topText'):setText(f('Downloading: %s of %s files', tr(receivedObj), tr(totalObj)))
-  updaterWindow:getChildById('bottomText'):setText(f('Received: %.2f MB (%.2f %s/s)', receivedMB, avgSpeed < 1024 and avgSpeed or avgSpeed / 1024, avgSpeed < 1024 and 'kB' or 'MB'))
+  updaterWindow:getChildById('topText'):setText(f(loc'${KaClientUpdaterDownloading}', loc(receivedObj), loc(totalObj)))
+  updaterWindow:getChildById('bottomText'):setText(f(loc'${KaClientUpdaterReceived}', receivedMB, avgSpeed < 1024 and avgSpeed or avgSpeed / 1024, avgSpeed < 1024 and 'kB' or 'MB'))
   updaterWindow:getChildById('rightText'):setText(f('%.2f%%', percent))
   updaterWindow:getChildById('bar'):setPercent(percent)
 end
 
 function ClientUpdater.onUpdateEnd()
-  local callback = function()
-    g_platform.spawnProcess('Kingdom Age Online.exe', { })
-    exit()
-  end
-  displayOkBox(tr('Update'), tr('Your client has been updated. Click Ok to restart the client.'), callback)
+  displayOkBox(loc'${KaClientUpdaterEndTitle}', loc'${KaClientUpdaterEndMsg}', function() restart() end)
 end

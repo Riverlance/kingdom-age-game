@@ -18,7 +18,7 @@ EmoteWindow < UIWidget
   focusable: false
 
 EmoteWindowButton < Button
-  !tooltip: tr('Toggle emoticon panel')
+  &loct: '${GameEmotesButtonMainTooltip}'
   size: 22 22
   anchors.verticalCenter: parent.verticalCenter
   anchors.right: next.left
