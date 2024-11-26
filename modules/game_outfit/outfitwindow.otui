@@ -4,7 +4,7 @@ NextMountButton < NextButton
 PrevMountButton < PreviousButton
 
 MainWindow
-  &text: '${GameOutfitWindowTitle}'
+  &loc: '${GameOutfitWindowTitle}'
   size: 340 340
 
   @onEnter: GameOutfit.accept()

@@ -7,6 +7,10 @@ g_locales.addTranslations({
     pl = "Dziennik Zadañ",
   },
 
+  GameQuestLogDescriptionLabel = {
+    pl = "Opis",
+  },
+
   GameQuestLogRewardsLabel = {
     pl = "Nagrody",
   },

@@ -81,6 +81,7 @@ function GameStatsCircle.init()
     onManaChange         = GameStatsCircle.onManaChange,
     onVigorChange        = GameStatsCircle.onVigorChange,
     onFreeCapacityChange = GameStatsCircle.onFreeCapacityChange,
+    onOverweightChange   = GameStatsCircle.onFreeCapacityChange,
     onExperienceChange   = GameStatsCircle.onExperienceChange,
     onVocationChange     = GameStatsCircle.onVocationChange,
   })
@@ -103,6 +104,7 @@ function GameStatsCircle.terminate()
     onManaChange         = GameStatsCircle.onManaChange,
     onVigorChange        = GameStatsCircle.onVigorChange,
     onFreeCapacityChange = GameStatsCircle.onFreeCapacityChange,
+    onOverweightChange   = GameStatsCircle.onFreeCapacityChange,
     onExperienceChange   = GameStatsCircle.onExperienceChange,
     onVocationChange     = GameStatsCircle.onVocationChange,
   })
@@ -268,8 +270,8 @@ function GameStatsCircle.updateArc(arc, percent)
     percent = percent or 100 * player:getVigor() / player:getMaxVigor()
     color = '#FFA14F'
   elseif arc.statsType == Stats.Capacity then
-    percent = percent or 100 * player:getFreeCapacity() / player:getTotalCapacity()
-    color = '#4FACFF'
+    percent = percent or 100 * player:getCurrentWeight() / player:getTotalCapacity()
+    color = player:getWeightColor()
   elseif arc.statsType == Stats.Experience then
     percent = percent or player:getLevelPercent()
     color = '#8BE866'

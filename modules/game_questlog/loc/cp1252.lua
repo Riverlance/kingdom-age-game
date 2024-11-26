@@ -11,6 +11,14 @@ g_locales.addTranslations{
     sv = "Uppdragslogg",
   },
 
+  GameQuestLogDescriptionLabel = {
+    en = "Description",
+    pt = "Descrição",
+    es = "Descripción",
+    de = "Beschreibung",
+    sv = "Beskrivning",
+  },
+
   GameQuestLogRewardsLabel = {
     en = "Rewards",
     pt = "Recompensas",

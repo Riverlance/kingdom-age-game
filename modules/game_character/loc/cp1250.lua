@@ -50,7 +50,11 @@ g_locales.addTranslations({
   },
 
   BarCapacityTooltip = {
-    pl = "Wolna pojemnoœæ twojej postaci wynosi %s oz z %s oz.",
+    pl = "£adunek twojej postaci wa¿y %s oz z %s oz%s.",
+  },
+
+  BarCapacityTooltipOverweight = {
+    pl = "przeci¹¿ony",
   },
 
   BarExperienceTooltip = {

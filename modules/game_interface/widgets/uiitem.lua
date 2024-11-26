@@ -163,3 +163,16 @@ function UIItem:canAcceptDrop(widget, mousePos)
   error(f('Widget %s not in drop list.', self:getId()))
   return false
 end
+
+function UIItem:updateClass()
+  local item = self:getItem()
+  local itemClass = item and item:getClass() or 0
+  local rect = {x = itemClass * 34, y = 0, widget = 34, height = 34 }
+  self.itemClass:setImageClip(torect(itemClass * 34 .. " 0 34 34"))
+end
+
+function UIItem:updateBroken()
+  local item = self:getItem()
+  local dur = item and item:getDurability() or nil
+  self.broken:setVisible(dur and dur == 0)
+end

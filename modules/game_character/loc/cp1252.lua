@@ -98,11 +98,19 @@ g_locales.addTranslations{
   },
 
   BarCapacityTooltip = {
-    en = "Your character free capacity is %s oz out of %s oz.",
-    pt = "A capacidade livre do seu personagem é %s oz de %s oz.",
-    es = "La capacidad libre de tu personaje es %s oz de %s oz.",
-    de = "Die freie Kapazität deines Charakters beträgt %s oz von %s oz.",
-    sv = "Din karaktärs lediga kapacitet är %s oz av %s oz.",
+    en = "Your character load weighs %s oz out of %s oz%s.",
+    pt = "A carga do seu personagem pesa %s oz de %s oz%s.",
+    es = "La carga de tu personaje pesa %s oz de %s oz%s.",
+    de = "Die Last deines Charakters wiegt %s oz von %s oz%s.",
+    sv = "Lasten av din karaktär väger %s oz av %s oz%s.",
+  },
+
+  BarCapacityTooltipOverweight = {
+    en = "overweight",
+    pt = "acima do peso",
+    es = "sobrepeso",
+    de = "übergewichtig",
+    sv = "övervikt",
   },
 
   BarExperienceTooltip = {

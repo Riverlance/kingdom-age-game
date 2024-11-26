@@ -71,7 +71,8 @@ function GameCharacter.init()
     onHealthChange       = GameCharacter.onHealthChange,
     onManaChange         = GameCharacter.onManaChange,
     onVigorChange        = GameCharacter.onVigorChange,
-    onFreeCapacityChange = GameCharacter.onFreeCapacityChange,
+    onFreeCapacityChange = GameCharacter.onCapacityChange,
+    onOverweightChange   = GameCharacter.onCapacityChange,
     onLevelChange        = GameCharacter.onLevelChange,
 
     -- Inventory
@@ -199,7 +200,8 @@ function GameCharacter.terminate()
     onHealthChange       = GameCharacter.onHealthChange,
     onManaChange         = GameCharacter.onManaChange,
     onVigorChange        = GameCharacter.onVigorChange,
-    onFreeCapacityChange = GameCharacter.onFreeCapacityChange,
+    onFreeCapacityChange = GameCharacter.onCapacityChange,
+    onOverweightChange   = GameCharacter.onCapacityChange,
     onLevelChange        = GameCharacter.onLevelChange,
 
     -- Inventory
@@ -392,6 +394,8 @@ function GameCharacter.onInventoryChange(localPlayer, slot, item, oldItem)
   if item then
     itemWidget:setStyle('InventoryItem')
     itemWidget:setItem(item)
+    itemWidget:updateClass()
+    itemWidget:updateBroken()
   else
     itemWidget:setStyle(InventorySlotStyles[slot])
     itemWidget:setItem(nil)
@@ -473,17 +477,22 @@ function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
   vigorBarValueLabel:setTooltip(f(loc'${BarVigorTooltip}', loc(vigor), loc(maxVigor)), TooltipType.textBlock)
 end
 
-function GameCharacter.onFreeCapacityChange(localPlayer, freeCapacity, oldFreeCapacity)
+function GameCharacter.onCapacityChange(localPlayer)
+  local currentWeight = localPlayer:getCurrentWeight()
   local totalCapacity = localPlayer:getTotalCapacity()
+  local ratio         = currentWeight / totalCapacity
+
+  capacityBar.bgColor = localPlayer:getWeightColor()
+  capacityBar:updateBackground()
 
   if isLogin() then
-    capacityBar:setValue(freeCapacity, 0, totalCapacity)
+    capacityBar:setValue(currentWeight, 0, totalCapacity)
   else
-    capacityBar:setValueDelayed(freeCapacity, 0, totalCapacity, 200, 25, 0, true, false)
+    capacityBar:setValueDelayed(currentWeight, 0, totalCapacity, 200, 25, 0, true, false)
   end
 
-  capacityBarValueLabel:setText(f('%s / %s CAP', loc(freeCapacity), loc(totalCapacity)))
-  capacityBarValueLabel:setTooltip(f(loc'${BarCapacityTooltip}', loc(freeCapacity), loc(totalCapacity)), TooltipType.textBlock)
+  capacityBarValueLabel:setText(f('%s / %s (%d%%) CAP', loc(currentWeight), loc(totalCapacity), ratio * 100))
+  capacityBarValueLabel:setTooltip(f(loc'${BarCapacityTooltip}', loc(currentWeight), loc(totalCapacity), ratio > 1 and loc' (${BarCapacityTooltipOverweight})' or ''), TooltipType.textBlock)
 end
 
 function GameCharacter.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)

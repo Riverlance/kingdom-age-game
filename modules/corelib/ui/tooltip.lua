@@ -420,6 +420,7 @@ function g_tooltip.init()
         local durationValueWidget  = self.widget:getChildById('durationValue')
         local ownerLabelWidget     = self.widget:getChildById('ownerLabel')
         local ownerValueWidget     = self.widget:getChildById('ownerValue')
+        local descriptionWidget    = self.widget:getChildById('descriptionLabel')
 
         local isBoostEnabled = c.boost and true or false
 
@@ -429,6 +430,18 @@ function g_tooltip.init()
         -- Name
         local nameLabel = self.widget:getChildById('name')
         nameLabel:setText((not c.powerName or c.name == c.powerName) and c.name or f('%s\n(%s)', c.name, c.powerName))
+
+
+        local isDescriptionEnabled = string.exists(c.description) and true or false
+        descriptionWidget:setTextAlign(AlignCenter)
+        descriptionWidget:setTextWrap(isDescriptionEnabled)
+        if isDescriptionEnabled then
+          descriptionWidget:setText(c.description)
+          descriptionWidget:resizeToText()
+        else
+          descriptionWidget:setHeight(0)
+        end
+        descriptionWidget:setVisible(isDescriptionEnabled)
 
         -- Item Icon
         if c.itemId then
