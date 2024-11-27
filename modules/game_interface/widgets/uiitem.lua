@@ -151,7 +151,7 @@ function UIItem:canAcceptDrop(widget, mousePos)
   end
 
   local children = rootWidget:recursiveGetChildrenByPos(mousePos)
-  for i=1,#children do
+  for i = 1, #children do
     local child = children[i]
     if child == self then
       return true
@@ -165,14 +165,14 @@ function UIItem:canAcceptDrop(widget, mousePos)
 end
 
 function UIItem:updateClass()
-  local item = self:getItem()
+  local item      = self:getItem()
   local itemClass = item and item:getClass() or 0
-  local rect = {x = itemClass * 34, y = 0, widget = 34, height = 34 }
-  self.itemClass:setImageClip(torect(itemClass * 34 .. " 0 34 34"))
+  local rect      = { x = itemClass * 34, y = 0, widget = 34, height = 34 }
+  self.itemClass:setImageClip(torect(itemClass * 34 .. ' 0 34 34'))
 end
 
 function UIItem:updateBroken()
-  local item = self:getItem()
-  local dur = item and item:getDurability() or nil
-  self.broken:setVisible(dur and dur == 0)
+  local item     = self:getItem()
+  local duration = item and item:getDurability() or nil
+  self.broken:setVisible(duration and duration == 0)
 end

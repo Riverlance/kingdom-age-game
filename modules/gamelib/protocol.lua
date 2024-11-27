@@ -39,8 +39,8 @@ ServerOpcodes = {
   ServerDetachEffect                  = 53, -- KA - Renamed from GameServerDetachEffect
   ServerCreatureShader                = 54, -- KA - Renamed from GameServerCreatureShader
   ServerMapShader                     = 55, -- KA - Renamed from GameServerMapShader
-  ServerOpcodeProgressBar             = 56, -- KA - Progress Bar
-  -- Free                               56 to 82
+  ServerOpcodeProgressBar             = 56, -- KA - Progress bar
+  -- Free                               57 to 82
   ServerOpcodeCreatureColor           = 83,
   ServerOpcodeCreatureNickname        = 84,
   ServerOpcodePlayerLoginname         = 85,

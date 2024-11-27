@@ -184,7 +184,7 @@ do
 
       function ModalDialog:getGoalWidth()
         if self.width > 0 then
-          return math.max(minWidth, self.width)
+          return math.min(math.max(minWidth, self.width), maxWidth)
         end
 
         local widget            = self.widget
@@ -778,8 +778,8 @@ do
     local spectatorId = msg:getU32()
     local title       = msg:getString()
     local message     = msg:getString()
-    local width       = msg:getU8()
-    local height      = msg:getU8()
+    local width       = msg:getU16()
+    local height      = msg:getU16()
     local priority    = msg:getU8() == 1
 
     -- Choice

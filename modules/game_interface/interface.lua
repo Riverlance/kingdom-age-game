@@ -422,13 +422,6 @@ function GameInterface.show()
   GameInterface.updateStretchShrink()
   logoutButton:setTooltip(loc'${CorelibInfoLogout}')
 
-  local charInfo = localPlayer:getCharacterInfo()
-  if charInfo and charInfo.worldId ~= WorldId.Fortuna then
-    streamerModeButton:show()
-  else
-    streamerModeButton:hide()
-  end
-
   GameInterface.updateManaBar()
 
   -- Update panels
