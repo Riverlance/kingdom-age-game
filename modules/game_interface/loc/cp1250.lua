@@ -7,8 +7,8 @@ g_locales.addTranslations({
     pl = "Odwiedü sklep VIP na naszej stronie internetowej",
   },
 
-  GameInterfaceButtonStreamerModeTooltip = {
-    pl = "Tryb Streamera",
+  GameInterfaceButtonDealsTooltip = {
+    pl = "Oferty",
   },
 
   GameInterfaceFYI = {

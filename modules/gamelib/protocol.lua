@@ -311,7 +311,7 @@ ClientExtOpcodes = {
   ClientExtOpcodeDailyReward         = 11,
   ClientExtOpcodeGreetNpc            = 12,
   ClientExtOpcodeGoldLootAutoDeposit = 13,
-  ClientExtOpcodeStreamerMode        = 14,
+  ClientExtOpcodeDeals               = 14,
   -- Free                              15 to 65535
 }
 

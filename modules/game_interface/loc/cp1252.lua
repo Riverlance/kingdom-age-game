@@ -11,12 +11,12 @@ g_locales.addTranslations{
     sv = "Besök VIP-butiken på vår webbplats",
   },
 
-  GameInterfaceButtonStreamerModeTooltip = {
-    en = "Streamer Mode",
-    pt = "Modo Streamer",
-    es = "Modo Streamer",
-    de = "Streamer-Modus",
-    sv = "Streamerläge",
+  GameInterfaceButtonDealsTooltip = {
+    en = "Deals",
+    pt = "Ofertas",
+    es = "Ofertas",
+    de = "Angebote",
+    sv = "Erbjudanden",
   },
 
   GameInterfaceFYI = {

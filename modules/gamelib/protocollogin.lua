@@ -127,6 +127,12 @@ function ProtocolLogin:sendLoginPacket()
     self:enableXteaEncryption()
   end
 
+  if g_game.getFeature(GameSequencedPackets) then
+    scheduleEvent(function()
+        self:enableSequencedPackets()
+    end, 1000)
+  end
+
   self:recv()
 end
 

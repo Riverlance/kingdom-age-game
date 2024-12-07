@@ -28,7 +28,7 @@ gameLeftThirdPanelContainer = nil
 gameBottomPanel = nil
 shopButton = nil
 logoutButton = nil
-streamerModeButton = nil
+dealsButton = nil
 mouseGrabberWidget = nil
 countWindow = nil
 logoutWindow = nil
@@ -168,7 +168,7 @@ function GameInterface.init()
   shopButton = ClientTopMenu.addLeftButton('shopButton', loc'${GameInterfaceButtonShopTooltip}', '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
   shopButton:setOn(true)
   logoutButton = ClientTopMenu.addLeftButton('logoutButton', loc'${CorelibInfoExit}', '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
-  streamerModeButton = ClientTopMenu.addRightGameToggleButton('streamerModeButton', loc'${GameInterfaceButtonStreamerModeTooltip}', '/images/ui/top_menu/streamer_mode', GameInterface.toggleStreamerMode)
+  dealsButton = ClientTopMenu.addRightGameToggleButton('dealsButton', loc'${GameInterfaceButtonDealsTooltip}', '/images/ui/top_menu/deals', GameInterface.toggleDealsButton)
 
   GameInterface.bindKeys()
 
@@ -333,7 +333,7 @@ function GameInterface.terminate()
 
   shopButton:destroy()
   logoutButton:destroy()
-  streamerModeButton:destroy()
+  dealsButton:destroy()
 
   gameRootPanel:destroy()
 
@@ -2017,7 +2017,7 @@ function GameInterface.onFightModeChange(fightMode)
   end
 end
 
-function GameInterface.toggleStreamerMode()
+function GameInterface.toggleDealsButton()
   if not g_game.canPerformGameAction() then
     return
   end
@@ -2029,7 +2029,7 @@ function GameInterface.toggleStreamerMode()
 
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
-  msg:addU16(ClientExtOpcodes.ClientExtOpcodeStreamerMode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeDeals)
 
   protocolGame:send(msg)
 end

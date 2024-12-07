@@ -257,7 +257,7 @@ GameMapDontCorrectCorpse    = 81
 -- KA - Free
 -- KA - Free
 -- KA - Free
--- KA - Free
+GameSequencedPackets        = 90
 -- KA - Free
 -- KA - Free
 -- KA - Free
