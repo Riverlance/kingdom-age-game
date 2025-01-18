@@ -62,11 +62,10 @@ function GameContainers.destroy(container)
 end
 
 function GameContainers.refreshContainerItems(container)
-  for slot=0,container:getCapacity()-1 do
+  for slot = 0, container:getCapacity() - 1 do
     local itemWidget = container.itemsPanel:getChildById('item' .. slot)
     itemWidget:setItem(container:getItem(slot))
-    itemWidget:updateClass()
-    itemWidget:updateBroken()
+    itemWidget:updateBackground()
   end
 
   if container:hasPages() then
@@ -225,8 +224,7 @@ function GameContainers.onContainerOpen(container, previousContainer)
     itemWidget:setId('item' .. slot)
     itemWidget:setItem(container:getItem(slot))
     itemWidget:setMargin(0)
-    itemWidget:updateClass()
-    itemWidget:updateBroken()
+    itemWidget:updateBackground()
     itemWidget.position = container:getSlotPosition(slot)
 
     if not container:isUnlocked() then
@@ -270,6 +268,5 @@ function GameContainers.onContainerUpdateItem(container, slot, item, oldItem)
 
   local itemWidget = container.itemsPanel:getChildById('item' .. slot)
   itemWidget:setItem(item)
-  itemWidget:updateClass()
-  itemWidget:updateBroken()
+  itemWidget:updateBackground()
 end

@@ -1,3 +1,7 @@
+function UIItem:onSetup()
+  self:updateBackground()
+end
+
 function UIItem:onDragEnter(mousePos)
   if self:isVirtual() then
     return false
@@ -164,15 +168,17 @@ function UIItem:canAcceptDrop(widget, mousePos)
   return false
 end
 
-function UIItem:updateClass()
+function UIItem:updateBackground()
   local item      = self:getItem()
   local itemClass = item and item:getClass() or 0
-  local rect      = { x = itemClass * 34, y = 0, widget = 34, height = 34 }
-  self.itemClass:setImageClip(torect(itemClass * 34 .. ' 0 34 34'))
-end
+  local duration  = item and item:getDurability() or nil
 
-function UIItem:updateBroken()
-  local item     = self:getItem()
-  local duration = item and item:getDurability() or nil
-  self.broken:setVisible(duration and duration == 0)
+  -- Broken state
+  if duration == 0 then
+    self:setImageClip(torect('0 34 34 34'))
+
+  else
+    -- Class state
+    self:setImageClip(torect(itemClass * 34 .. ' 0 34 34'))
+  end
 end

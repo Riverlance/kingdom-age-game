@@ -2,25 +2,10 @@ Item < UIItem
   size: 34 34
   padding: 1
   image-source: /images/ui/slot/item
+  image-clip: 0 0 34 34
   font: verdana-11px-rounded
   border-color: #faebd5
   color: white
-
-  UIWidget
-    id: itemClass
-    size: 34 34
-    image-source: /images/ui/slot/class
-    image-clip: 0 0 34 34
-    phantom: true
-    anchors.fill: parent
-
-  UIWidget
-    id: broken
-    image-source: /images/ui/slot/broken
-    visible: false
-    size: 34 34
-    phantom: true
-    anchors.fill: parent
 
   $disabled:
     color: #646464

@@ -394,12 +394,11 @@ function GameCharacter.onInventoryChange(localPlayer, slot, item, oldItem)
   if item then
     itemWidget:setStyle('InventoryItem')
     itemWidget:setItem(item)
-    itemWidget:updateClass()
-    itemWidget:updateBroken()
   else
     itemWidget:setStyle(InventorySlotStyles[slot])
     itemWidget:setItem(nil)
   end
+  itemWidget:updateBackground()
 end
 
 function GameCharacter.onBlessingsChange(player, blessings, oldBlessings)
