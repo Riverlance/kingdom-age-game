@@ -11,7 +11,7 @@ table.insert(barColors, { percentAbove = -1, color = '#850C0C' } )
 
 UIConditionButton.boostColors    = { }
 UIConditionButton.boostColors[0] = '#88888877' -- No boost
-UIConditionButton.boostColors[1] = '#FF754977'
+UIConditionButton.boostColors[1] = '#9E9A3277'
 UIConditionButton.boostColors[2] = '#B770FF77'
 UIConditionButton.boostColors[3] = '#70B8FF77'
 

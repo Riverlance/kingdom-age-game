@@ -5,7 +5,7 @@ UIPowerButton = extends(UIWidget, 'UIPowerButton')
 
 local extraLabelColors = { }
 extraLabelColors[0]    = '#888888' -- No boost
-extraLabelColors[1]    = '#FF7549'
+extraLabelColors[1]    = '#9E9A32'
 extraLabelColors[2]    = '#B770FF'
 extraLabelColors[3]    = '#70B8FF'
 

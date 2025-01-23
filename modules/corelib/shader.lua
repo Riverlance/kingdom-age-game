@@ -71,6 +71,7 @@ ItemShaders = {
   { name = 'None' }, -- No fragment
   { name = 'Bloom', frag = 'shader/fragment/bloom.frag' },
   { name = 'Negative Grayscale', frag = 'shader/fragment/negative-grayscale.frag' },
+  { name = 'Outline', frag = 'shader/fragment/outline.frag' },
   { name = 'Party', frag = 'shader/fragment/party.frag' },
   { name = 'Radial Blur', frag = 'shader/fragment/radialblur.frag' },
 }

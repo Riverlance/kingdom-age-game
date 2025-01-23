@@ -98,6 +98,7 @@ HotkeyBarHorizontal < UIHotkeyBar
 HotkeyBarContainer < UIHotkeyBarContainer
   text-align: center
   image-source: /images/ui/slot/item
+  image-clip: 0 0 34 34
   width: 32
   height: 32
   fixed-size: true

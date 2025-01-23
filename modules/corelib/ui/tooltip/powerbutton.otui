@@ -132,7 +132,7 @@ TooltipPowerButton < Panel
   TooltipPowerDescriptionLabel
     id: boostNoneDescriptionLabel
     margin-top: 10
-    background-color: #ff754977
+    background-color: #9E9A3277
 
   TooltipPowerDescriptionLabel
     id: boostLowDescriptionLabel

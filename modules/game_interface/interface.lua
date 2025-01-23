@@ -1852,24 +1852,26 @@ function updateTrackArrow(trackNode)
     end
   end
 
-  local distance = Position.distance(playerPos, trackPos)
+  local distance  = Position.distance(playerPos, trackPos)
+  local _distance = math.floor(distance)
   if not trackNode.id and not trackNode.auto then
-    if distance == 0  and trackPos.z == playerPos.z then
+    if distance == 0 and trackPos.z == playerPos.z then
       GameTracker.stopTrackPosition(trackNode.position)
       return
     end
   end
 
   local trackerLabel = trackNode.widget:getChildById('distance')
-  trackerLabel:setText(f('%d m', math.floor(distance)))
+  trackerLabel:setText(f('%d m', _distance))
+  trackerLabel:setVisible(_distance > 0)
 
   local orientation = math.atan2(trackPos.y - playerPos.y, trackPos.x - playerPos.x)
   local trackerArrow = trackNode.widget:getChildById('arrow')
-  trackerArrow:setRotation(math.deg(orientation))
+  trackerArrow:setRotation(_distance > 0 and math.deg(orientation) or (trackPos.z < playerPos.z and -135 or trackPos.z > playerPos.z and 45) or 0)
 
   if trackNode.color then
     trackerLabel:setColor(trackNode.color)
-    trackerArrow:setImageColor(trackNode.color)
+    trackerArrow:setImageColor(_distance <= 0 and (trackPos.z ~= playerPos.z and '#38aa34') or trackNode.color)
   end
 
   trackerLabel:breakAnchors()
