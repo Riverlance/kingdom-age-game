@@ -148,20 +148,19 @@ function GameTracker.onTrack(trackNode)
     trackList[trackIndex] = { }
   end
 
-  local trackView = trackList[trackIndex]
-  trackView.status = trackNode.status
+  local trackView    = trackList[trackIndex]
+  trackView.status   = trackNode.status
+  trackView.id       = trackNode.id
+  trackView.name     = trackNode.name
+  trackView.position = trackNode.position
+  trackView.outfit   = trackNode.outfit
+  trackView.color    = trackNode.color or trackView.color or '#ffc659'
+  trackView.auto     = trackNode.auto
 
   if trackNode.status == TrackingInfo.Stop then
     GameTracker.onTrackEnd(trackNode)
     return
   end
-
-  trackView.id = trackNode.id
-  trackView.name = trackNode.name
-  trackView.position =  trackNode.position
-  trackView.outfit = trackNode.outfit
-  trackView.color = trackNode.color or trackView.color or '#ffc659'
-  trackView.auto = trackNode.auto
 
   if trackView.id then
     signalcall(g_game.onTrackCreature, trackView)
@@ -283,4 +282,50 @@ function GameTracker.createEditTrackWindow(trackNode)
   red.onValueChange = updateColor
   green.onValueChange = updateColor
   blue.onValueChange = updateColor
+end
+
+function GameTracker.createTrackByPosWindow(mapPos)
+  local trackerWindow = g_ui.displayUI('trackerbypos')
+
+  local xTextEdit = trackerWindow.posX
+  local yTextEdit = trackerWindow.posY
+  local zTextEdit = trackerWindow.posZ
+
+  local function onPositionTextChange(self)
+    local text   = self:getText()
+    local number = tonumber(text) or 0
+    if text:match('[^0-9]+') or number > 65535 or text:match('^[0]+[1-9]*') then -- Pattern: Cannot have non numbers (Correct: '7', '777' | Wrong: 'A7', '-7')
+      return self:setText(0)
+    end
+  end
+
+  local function trackCallback()
+    local x = tonumber(xTextEdit:getText()) or 0
+    local y = tonumber(yTextEdit:getText()) or 0
+    local z = tonumber(zTextEdit:getText()) or 0
+    if x ~= 0 and y ~= 0 then
+      local toPos = { x = x, y = y, z = z }
+      signalcall(g_game.onClickStartTrackPosition, toPos)
+      trackerWindow:destroy()
+    end
+  end
+
+  local function cancelCallback()
+    trackerWindow:destroy()
+  end
+
+  xTextEdit:setText(tostring(mapPos.x))
+  xTextEdit.onTextChange = onPositionTextChange
+
+  yTextEdit:setText(tostring(mapPos.y))
+  yTextEdit.onTextChange = onPositionTextChange
+
+  zTextEdit:setText(tostring(mapPos.z))
+  zTextEdit.onTextChange = onPositionTextChange
+
+  trackerWindow.onEnter  = trackCallback
+  trackerWindow.onEscape = cancelCallback
+
+  trackerWindow.okButton.onClick = trackCallback
+  trackerWindow.cancelButton.onClick = cancelCallback
 end

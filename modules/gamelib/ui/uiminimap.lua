@@ -530,6 +530,7 @@ function UIMinimap:onMouseRelease(pos, button)
     menu:addOption(loc'${GamelibInfoOptionAddNewMark}', function() self:createAddFlagWindow(mapPos) end)
     if GameTracker then
       menu:addOption(loc'${GamelibInfoOptionTrackPos}', function() signalcall(g_game.onClickStartTrackPosition, mapPos) end)
+      menu:addOption(loc'${GamelibInfoOptionTrackCustomPos}', function() GameTracker.createTrackByPosWindow(mapPos) end)
     end
     menu:addSeparator()
     bindCopyPositionOption(menu, mapPos)

@@ -6,4 +6,8 @@ g_locales.addTranslations({
   GameTrackerWindowTitle = {
     pl = "Ustaw kolor",
   },
+
+  GameTrackerByPosWindowTitle = {
+    pl = "ŒledŸ inn¹ pozycjê",
+  },
 }, false)

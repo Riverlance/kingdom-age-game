@@ -503,6 +503,14 @@ g_locales.addTranslations{
     sv = "Spåra position",
   },
 
+  GamelibInfoOptionTrackCustomPos = {
+    en = "Track another position",
+    pt = "Rastrear outra posição",
+    es = "Rastrear otra posición",
+    de = "Eine andere position verfolgen",
+    sv = "Spåra en annan position",
+  },
+
 
 
   -- ui power button

@@ -10,4 +10,12 @@ g_locales.addTranslations{
     de = "Farbe festlegen",
     sv = "Ange en färg",
   },
+
+  GameTrackerByPosWindowTitle = {
+    en = "Track another position",
+    pt = "Rastrear outra posição",
+    es = "Rastrear otra posición",
+    de = "Eine andere position verfolgen",
+    sv = "Spåra en annan position",
+  },
 }

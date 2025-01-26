@@ -266,6 +266,10 @@ g_locales.addTranslations({
     pl = "ŒledŸ pozycjê",
   },
 
+  GamelibInfoOptionTrackCustomPos = {
+    pl = "ŒledŸ inn¹ pozycjê",
+  },
+
 
 
   -- ui power button
