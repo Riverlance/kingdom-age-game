@@ -355,7 +355,7 @@ function GameAttributes.parseAttribute(protocol, msg)
       attributeActLabel[id].buffPoints              = attribute.buffPoints
       attributeActLabel[id].total                   = attribute.total
 
-      attributeActLabel[id]:setText(f('%0.02f', attributeActLabel[id].total))
+      attributeActLabel[id]:setText(f('%.2f', attributeActLabel[id].total))
       GameAttributes.updateActLabelTooltip(id)
       attributeActLabel[id]:setColor(attributeActLabel[id].buffPoints > 0 and 'green' or attributeActLabel[id].buffPoints < 0 and 'red' or '#dfdfdf')
     end
