@@ -58,7 +58,7 @@ Panel
   id: consolePanel
   anchors.fill: parent
   padding: 7
-  image-source: /images/ui/_background/frame
+  image-source: /images/ui/_background/frame_alpha
   image-border: 7
   phantom: false
 
@@ -197,6 +197,8 @@ Panel
     anchors.right: parent.right
     margin-top: 1
     margin-bottom: 1
+    image-source: /images/ui/_background/default_stone_darkblue
+    image-repeated: true
     focusable: false
 
     // Archors are updated at modules.ka_game_emotes
