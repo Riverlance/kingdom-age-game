@@ -600,11 +600,11 @@ g_locales.addTranslations{
   },
 
   ClientOptionsGoldLootAutoDeposit = {
-    en = "Auto deposit gold on bank from monsters loot",
-    pt = "Depositar ouro automaticamente no banco a partir do saque de monstros",
-    es = "Depositar oro automáticamente en el banco desde el botín de monstruos",
-    de = "Gold automatisch von Monsterbeute auf die Bank einzahlen",
-    sv = "Sätt in guld automatiskt på banken från monsterbyte",
+    en = "Auto deposit gold on bank",
+    pt = "Depositar ouro automaticamente no banco",
+    es = "Depositar oro automáticamente en el banco",
+    de = "Gold automatisch auf die Bank einzahlen",
+    sv = "Automatiskt sätta in guld på banken",
   },
 
   ClientOptionsChangeLocaleButtonTooltip = {
@@ -624,11 +624,11 @@ g_locales.addTranslations{
   },
 
   ClientOptionsGoldLootAutoDepositTooltip = {
-    en = "The gold pieces from monsters loot goes to your bank account. This feature is for premium players or up to level %d.",
-    pt = "As peças de ouro do saque de monstros vão para sua conta bancária. Este recurso é para jogadores premium ou até o nível %d.",
-    es = "Las piezas de oro del botín de monstruos van a tu cuenta bancaria. Esta función es para jugadores premium o hasta el nivel %d.",
-    de = "Die Goldstücke aus der Monsterbeute gehen auf dein Bankkonto. Diese Funktion ist für Premium-Spieler oder bis Stufe %d verfügbar.",
-    sv = "Guldmynten från monsterbyte går till ditt bankkonto. Den här funktionen är för premiumspelare eller upp till nivå %d.",
+    en = "The gold pieces from loots found goes to your bank account. This feature is for premium players or up to level %d.",
+    pt = "As peças de ouro dos saques encontrados vão para sua conta bancária. Este recurso é para jogadores premium ou até o nível %d.",
+    es = "Las piezas de oro de los botines encontrados van a tu cuenta bancaria. Esta función es para jugadores premium o hasta el nivel %d.",
+    de = "Die Goldstücke aus gefundenen Beuten werden auf dein Bankkonto eingezahlt. Diese Funktion ist für Premium-Spieler oder bis Level %d verfügbar.",
+    sv = "Guldmynten från hittade byten går till ditt bankkonto. Denna funktion är för premiumspelare eller upp till nivå %d.",
   },
 
 

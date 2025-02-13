@@ -312,7 +312,7 @@ g_locales.addTranslations({
   },
 
   ClientOptionsGoldLootAutoDeposit = {
-    pl = "Automatyczny depozyt z³ota do banku z ³upu potworów",
+    pl = "Automatyczne wp³acanie z³ota do banku",
   },
 
   ClientOptionsChangeLocaleButtonTooltip = {
@@ -324,7 +324,7 @@ g_locales.addTranslations({
   },
 
   ClientOptionsGoldLootAutoDepositTooltip = {
-    pl = "Z³ote monety z ³upów potworów trafiaj¹ na twoje konto bankowe. Ta funkcja jest dostêpna dla graczy premium lub do poziomu %d.",
+    pl = "Z³ote monety z ³upów trafiaj¹ na twoje konto bankowe. Ta funkcja jest dostêpna dla graczy premium lub do poziomu %d.",
   },
 
 

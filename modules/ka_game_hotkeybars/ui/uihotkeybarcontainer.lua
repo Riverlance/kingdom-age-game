@@ -50,12 +50,13 @@ function UIHotkeyBarContainer:updateLook()
   else
     hasTooltip = false
   end
+  tooltipType = TooltipType.default
 
   if string.exists(keySettings.text) then
     self:setText('(...)')
     tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerTooltipSendMessage}%s:\n%s', tooltipText, keySettings.autoSend and loc' (${GameHotkeyBarsInfoContainerTooltipAuto})' or '', keySettings.text)
 
-    self:setTooltip(hasTooltip and tooltipText or '', TooltipType.textBlock)
+    tooltipType = TooltipType.textBlock
 
   elseif keySettings.powerId and powerWidget then
     powerWidget:setVisible(true)
@@ -65,8 +66,6 @@ function UIHotkeyBarContainer:updateLook()
     if power and power.name and power.level then
       tooltipText = f(loc'%s %s (${GameHotkeyBarsInfoContainerTooltipLevel})', tooltipText, power.name, power.level)
     end
-
-    self:setTooltip(hasTooltip and tooltipText or '')
 
   elseif keySettings.itemId and itemWidget then
     itemWidget:setVisible(true)
@@ -81,9 +80,8 @@ function UIHotkeyBarContainer:updateLook()
     elseif keySettings.useType == HotkeyItemUseType.Crosshair then
       tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseWith}', tooltipText)
     end
-
-    self:setTooltip(hasTooltip and tooltipText or '')
   end
+  self:setTooltip(hasTooltip and tooltipText or '', tooltipType)
 end
 
 

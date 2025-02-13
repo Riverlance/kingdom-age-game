@@ -237,7 +237,7 @@ function GameInterface.bindKeys()
   GameInterface.bindTurnKey('Ctrl+Numpad2', South)
   GameInterface.bindTurnKey('Ctrl+Numpad6', East)
 
-  g_keyboard.bindKeyPress('Escape', function()
+  g_keyboard.bindKeyDown('Escape', function()
     if not g_ui.resetDraggingWidget() then
       if selectedThing then
         GameInterface.onMouseGrabberRelease(mouseGrabberWidget)
