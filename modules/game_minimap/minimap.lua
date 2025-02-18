@@ -126,7 +126,7 @@ function GameMinimap.terminate()
   g_keyboard.unbindKeyPress('Alt+Right', gameRootPanel)
   g_keyboard.unbindKeyPress('Alt+Up', gameRootPanel)
   g_keyboard.unbindKeyPress('Alt+Down', gameRootPanel)
-  g_keyboard.unbindKeyDown('GameMinimapActionKey')
+  g_keyboard.unbindKeyDown(GameMinimapActionKey)
   g_keyboard.unbindKeyDown('Ctrl+Shift+M')
   g_keyboard.unbindKeyDown('Escape')
 

@@ -26,6 +26,8 @@ gameLeftFirstPanelContainer = nil
 gameLeftSecondPanelContainer = nil
 gameLeftThirdPanelContainer = nil
 gameBottomPanel = nil
+discordButton = nil
+linksButton = nil
 shopButton = nil
 logoutButton = nil
 dealsButton = nil
@@ -165,6 +167,8 @@ function GameInterface.init()
 
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeWidgetLock, GameInterface.parseWidgetLock)
 
+  discordButton = ClientTopMenu.addLeftButton('discordButton', loc'${GameInterfaceButtonDiscordTooltip}', '/images/ui/top_menu/discord', function() g_platform.openUrl('https://discord.gg/vZjxdwp') end, true)
+  linksButton = ClientTopMenu.addLeftButton('linksButton', loc'${GameInterfaceButtonLinksTooltip}', '/images/ui/top_menu/links', function() g_platform.openUrl('https://linktr.ee/kingdomage') end, true)
   shopButton = ClientTopMenu.addLeftButton('shopButton', loc'${GameInterfaceButtonShopTooltip}', '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
   shopButton:setOn(true)
   logoutButton = ClientTopMenu.addLeftButton('logoutButton', loc'${CorelibInfoExit}', '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
@@ -327,15 +331,25 @@ function GameInterface.terminate()
   })
 
   _gamePanelsContainer = { }
-  _gamePanels = { }
-  gamePanelsContainer = { }
-  gamePanels = { }
+  _gamePanels          = { }
+  gamePanelsContainer  = { }
+  gamePanels           = { }
 
+  discordButton:destroy()
+  linksButton:destroy()
   shopButton:destroy()
   logoutButton:destroy()
   dealsButton:destroy()
 
   gameRootPanel:destroy()
+
+  discordButton = nil
+  linksButton   = nil
+  shopButton    = nil
+  logoutButton  = nil
+  dealsButton   = nil
+
+  gameRootPanel = nil
 
   _G.GameInterface = nil
 end

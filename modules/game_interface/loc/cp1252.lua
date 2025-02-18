@@ -3,6 +3,22 @@
 g_locales.addTranslations{
   -- interface
 
+  GameInterfaceButtonDiscordTooltip = {
+    en = "Found a bug? Do you have a suggestion or feedback? Join our Discord Server!",
+    pt = "Encontrou um bug? Tem uma sugestão ou feedback? Junte-se ao nosso servidor do Discord!",
+    es = "¿Encontraste un error? ¿Tienes una sugerencia o comentario? ¡Únete a nuestro servidor de Discord!",
+    de = "Einen Fehler gefunden? Hast du eine Anregung oder Feedback? Tritt unserem Discord-Server bei!",
+    sv = "Hittade du en bugg? Har du ett förslag eller feedback? Gå med i vår Discord-server!",
+  },
+
+  GameInterfaceButtonLinksTooltip = {
+    en = "Access our links",
+    pt = "Acesse nossos links",
+    es = "Accede a nuestros enlaces",
+    de = "Greife auf unsere Links zu",
+    sv = "Få åtkomst till våra länkar",
+  },
+
   GameInterfaceButtonShopTooltip = {
     en = "Visit the VIP shop on our Website",
     pt = "Visite a loja VIP no nosso site",

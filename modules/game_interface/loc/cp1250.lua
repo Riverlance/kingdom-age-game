@@ -3,6 +3,14 @@
 g_locales.addTranslations({
   -- interface
 
+  GameInterfaceButtonDiscordTooltip = {
+    pl = "Znalaz³eœ b³¹d? Masz sugestiê lub opiniê? Do³¹cz do naszego serwera Discord!",
+  },
+
+  GameInterfaceButtonLinksTooltip = {
+    pl = "Uzyskaj dostêp do naszych linków",
+  },
+
   GameInterfaceButtonShopTooltip = {
     pl = "OdwiedŸ sklep VIP na naszej stronie internetowej",
   },
