@@ -200,7 +200,6 @@ function GameConsole.init()
   consoleToggleChat = footerPanel:getChildById('toggleChat')
 
   g_keyboard.bindKeyDown('Ctrl+O', g_game.requestChannels)
-  GameConsole.enableChat()
 
   if g_game.isOnline() then
     GameConsole.online()
@@ -274,42 +273,71 @@ function GameConsole.selectAll(consoleBuffer)
 end
 
 function GameConsole.toggleConsoleChat()
-  if consoleTextEdit:isVisible() then
+  if GameConsole.isChatEnabled() then
     GameConsole.disableChat()
   else
     GameConsole.enableChat()
   end
 end
 
-function GameConsole.enableChat()
+function GameConsole.onEnableChat()
+  GameInterface.unbindWalkKey('W')
+  GameInterface.unbindWalkKey('A')
+  GameInterface.unbindWalkKey('S')
+  GameInterface.unbindWalkKey('D')
+
+  GameInterface.unbindWalkKey('Q')
+  GameInterface.unbindWalkKey('E')
+  GameInterface.unbindWalkKey('Z')
+  GameInterface.unbindWalkKey('C')
+
+  g_keyboard.unbindKeyPress('Ctrl+W', gameRootPanel)
+  g_keyboard.unbindKeyPress('Ctrl+A', gameRootPanel)
+  g_keyboard.unbindKeyPress('Ctrl+S', gameRootPanel)
+  g_keyboard.unbindKeyPress('Ctrl+D', gameRootPanel)
+
+  g_keyboard.bindKeyDown('Ctrl+W', GameConsole.removeCurrentTab)
+
   -- Disable next target shortcut
   if GameBattleList then
     g_keyboard.unbindKeyDown(GameBattleList.m.NextTargetActionKey)
     g_keyboard.unbindKeyDown(GameBattleList.m.PrevTargetActionKey)
   end
+end
 
+function GameConsole.onDisableChat()
+  g_keyboard.unbindKeyDown('Ctrl+W')
+
+  GameInterface.bindWalkKey('W', North)
+  GameInterface.bindWalkKey('A', West)
+  GameInterface.bindWalkKey('S', South)
+  GameInterface.bindWalkKey('D', East)
+
+  GameInterface.bindWalkKey('Q', NorthWest)
+  GameInterface.bindWalkKey('E', NorthEast)
+  GameInterface.bindWalkKey('Z', SouthWest)
+  GameInterface.bindWalkKey('C', SouthEast)
+
+  GameInterface.bindTurnKey('Ctrl+W', North, true)
+  GameInterface.bindTurnKey('Ctrl+A', West, true)
+  GameInterface.bindTurnKey('Ctrl+S', South, true)
+  GameInterface.bindTurnKey('Ctrl+D', East, true)
+
+  -- Enable next target shortcut
+  if GameBattleList.m then
+    g_keyboard.bindKeyDown(GameBattleList.m.NextTargetActionKey, GameBattleList.selectNextTarget)
+    g_keyboard.bindKeyDown(GameBattleList.m.PrevTargetActionKey, GameBattleList.selectNextTarget)
+  end
+end
+
+function GameConsole.enableChat()
   consoleTextEdit:setVisible(true)
   consoleTextEdit:setText('')
   consoleTextEdit:enable()
 
-  GameInterface.unbindWalkKey('W')
-  GameInterface.unbindWalkKey('D')
-  GameInterface.unbindWalkKey('S')
-  GameInterface.unbindWalkKey('A')
-
-  GameInterface.unbindWalkKey('E')
-  GameInterface.unbindWalkKey('Q')
-  GameInterface.unbindWalkKey('C')
-  GameInterface.unbindWalkKey('Z')
-
-  g_keyboard.unbindKeyPress('Ctrl+W', gameRootPanel)
-  g_keyboard.unbindKeyPress('Ctrl+D', gameRootPanel)
-  g_keyboard.unbindKeyPress('Ctrl+S', gameRootPanel)
-  g_keyboard.unbindKeyPress('Ctrl+A', gameRootPanel)
-
-  g_keyboard.bindKeyDown('Ctrl+W', GameConsole.removeCurrentTab)
-
   consoleToggleChat:setTooltip(loc'${GameConsoleChatDisable}')
+
+  GameConsole.onEnableChat()
 end
 
 function GameConsole.disableChat()
@@ -317,30 +345,16 @@ function GameConsole.disableChat()
   consoleTextEdit:setText('')
   consoleTextEdit:disable()
 
-  g_keyboard.unbindKeyDown('Ctrl+W')
-
-  GameInterface.bindWalkKey('W', North)
-  GameInterface.bindWalkKey('D', East)
-  GameInterface.bindWalkKey('S', South)
-  GameInterface.bindWalkKey('A', West)
-
-  GameInterface.bindWalkKey('E', NorthEast)
-  GameInterface.bindWalkKey('Q', NorthWest)
-  GameInterface.bindWalkKey('C', SouthEast)
-  GameInterface.bindWalkKey('Z', SouthWest)
-
-  GameInterface.bindTurnKey('Ctrl+W', North, true)
-  GameInterface.bindTurnKey('Ctrl+A', West, true)
-  GameInterface.bindTurnKey('Ctrl+S', South, true)
-  GameInterface.bindTurnKey('Ctrl+D', East, true)
-
   consoleToggleChat:setTooltip(loc'${GameConsoleChatEnable}')
 
-  -- Enable next target shortcut
-  if GameBattleList.m then
-    g_keyboard.bindKeyDown(GameBattleList.m.NextTargetActionKey, GameBattleList.selectNextTarget)
-    g_keyboard.bindKeyDown(GameBattleList.m.PrevTargetActionKey, GameBattleList.selectNextTarget)
+  GameConsole.onDisableChat()
+end
+
+function GameConsole.isChatEnabled(checkTextEditOnly)
+  if checkTextEditOnly then
+    return consoleTextEdit:isVisible()
   end
+  return consoleTextEdit:isVisible() and GameInterface.getChatButton():isOn()
 end
 
 function GameConsole.load()
@@ -968,7 +982,7 @@ end
 function GameConsole.onEnterKeyDown()
   local message = consoleTextEdit:getText()
 
-  if consoleTextEdit:isVisible() then
+  if GameConsole.isChatEnabled() then
     if #message == 0 then
       GameConsole.disableChat()
       return
@@ -1156,7 +1170,7 @@ function GameConsole.setIgnoreNpcMessages(ignore)
 end
 
 function GameConsole.navigateConsoleLog(step)
-  if not consoleTextEdit:isVisible() then
+  if not GameConsole.isChatEnabled() then
     return
   end
 
@@ -1619,6 +1633,8 @@ function GameConsole.onClickIgnoreButton()
 end
 
 function GameConsole.online()
+  ClientOptions.updateOption('showChat')
+
   defaultTab = GameConsole.addTab(loc'${CorelibInfoDefault}', true)
   serverTab = GameConsole.addTab(loc'${GameConsoleTabNameServer}', false) -- Server Log
 
@@ -1632,10 +1648,6 @@ function GameConsole.online()
   end
 
   GameConsole.load()
-
-  if ClientOptions.getOption('autoDisableChatOnSendMessage') then
-    GameConsole.disableChat()
-  end
 end
 
 function GameConsole.offline()

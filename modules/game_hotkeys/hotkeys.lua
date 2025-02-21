@@ -442,9 +442,8 @@ function GameHotkeys.assignHotkey(keySettings)
 end
 
 function GameHotkeys.canUseHotkey(keySettings)
-  local chat = GameConsole.getFooterPanel():getChildById('consoleTextEdit')
   local keyAlone = translateKeyCombo({ backtranslateKeyComboDesc(keySettings.keyCombo).keyCode })
-  if chat and chat:isEnabled() and (string.match(keyAlone, '^%C$') or keyAlone == "Space" or keyAlone == "Backspace") then
+  if GameConsole.isChatEnabled() and (string.match(keyAlone, '^%C$') or keyAlone == "Space" or keyAlone == "Backspace") then
     return false
   end
   return true

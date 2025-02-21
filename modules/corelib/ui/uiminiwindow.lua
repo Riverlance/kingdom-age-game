@@ -82,7 +82,9 @@ function UIMiniWindow:maximize(dontSave, ignoreHeightChangeSignal)
   self:getChildById('miniwindowScrollBar'):show()
   self:getChildById('bottomResizeBorder'):show()
   self:getChildById('minimizeButton'):setOn(false)
-  self:setHeight(math.max(self:getSettings('height') or self.maximizedHeight, self:getMinimumHeight()), false, ignoreHeightChangeSignal)
+
+  local height = not self:isResizeable() and self.defaultHeight or self:getSettings('height') or self.maximizedHeight
+  self:setHeight(math.max(height, self:getMinimumHeight()), false, ignoreHeightChangeSignal)
 
   if not dontSave then
     self:setSettings({minimized = false})
@@ -157,10 +159,11 @@ function UIMiniWindow:setup(button)
     g_sounds.getChannel(AudioChannels.Gui):play(f('%s/button_1.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   end
 
-
   if button then
     self.topMenuButton = button
   end
+
+  self.defaultHeight = self:getHeight()
 
   local isResizeable = self:isResizeable()
   local selfSettings = self:getSettings(true)
@@ -216,18 +219,16 @@ function UIMiniWindow:setup(button)
     end
   end
 
-  if (not selfSettings or not selfSettings.minimized) and isResizeable then
-    if self.contentMinimumHeight then
-      self:setContentMinimumHeight(self.contentMinimumHeight)
+  if self.contentMinimumHeight then
+    self:setContentMinimumHeight(self.contentMinimumHeight)
+  end
 
-      if not selfSettings or not selfSettings.height then
-        self:setHeight(self:getRealMinHeight() + self.contentMinimumHeight, true, true)
-      end
-    end
+  if self.contentMaximumHeight then
+    self:setContentMaximumHeight(self.contentMaximumHeight)
+  end
 
-    if self.contentMaximumHeight then
-      self:setContentMaximumHeight(self.contentMaximumHeight)
-    end
+  if isResizeable and (not selfSettings or not selfSettings.minimized or not selfSettings.height) then
+    self:setHeight(self:getMinimumHeight(), true, true)
   end
 
   self:fitOnParent()

@@ -195,7 +195,7 @@ end
 
 function GameInterface.bindTurnKey(key, dir, checkConsole)
   local function callback(widget, code, repeatTicks)
-    if checkConsole and GameConsole and GameConsole.m.consoleTextEdit:isVisible() then
+    if checkConsole and GameConsole and GameConsole.isChatEnabled() then
       return
     end
 
