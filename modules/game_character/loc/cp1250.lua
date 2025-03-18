@@ -60,4 +60,20 @@ g_locales.addTranslations({
   BarExperienceTooltip = {
     pl = "%s\nKliknij, aby wyœwietliæ pasek doœwiadczenia.",
   },
+
+  CharacterStatsWindowShow = {
+    pl = "Poka¿ statystyki",
+  },
+
+  CharacterStatsWindowHide = {
+    pl = "Ukryj statystyki",
+  },
+
+  CharacterInventoryWindowShow = {
+    pl = "Poka¿ ekwipunek",
+  },
+
+  CharacterInventoryWindowHide = {
+    pl = "Ukryj ekwipunek",
+  },
 }, false)

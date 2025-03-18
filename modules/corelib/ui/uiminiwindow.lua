@@ -57,11 +57,11 @@ function UIMiniWindow:minimize(dontSave, ignoreHeightChangeSignal)
   self:getChildById('miniwindowScrollBar'):hide()
   self:getChildById('bottomResizeBorder'):hide()
   self:getChildById('minimizeButton'):setOn(true)
-  self.maximizedHeight = self:getHeight()
+
   self:setHeight(self.minimizedHeight, true, ignoreHeightChangeSignal)
 
   if not dontSave then
-    self:setSettings({minimized = true})
+    self:setSettings({ minimized = true })
   end
 
   signalcall(self.onMinimize, self)
@@ -83,11 +83,11 @@ function UIMiniWindow:maximize(dontSave, ignoreHeightChangeSignal)
   self:getChildById('bottomResizeBorder'):show()
   self:getChildById('minimizeButton'):setOn(false)
 
-  local height = not self:isResizeable() and self.defaultHeight or self:getSettings('height') or self.maximizedHeight
-  self:setHeight(math.max(height, self:getMinimumHeight()), false, ignoreHeightChangeSignal)
+  local height = not self:isResizeable() and self.defaultHeight or self:getSettings('height') or self:getMinimumHeight()
+  self:setHeight(self:isResizeable() and math.max(height, self:getMinimumHeight()) or height, false, ignoreHeightChangeSignal)
 
   if not dontSave then
-    self:setSettings({minimized = false})
+    self:setSettings({ minimized = false })
   end
 
   local parent = self:getParent()
@@ -163,10 +163,11 @@ function UIMiniWindow:setup(button)
     self.topMenuButton = button
   end
 
-  self.defaultHeight = self:getHeight()
+  self.defaultHeight = self.defaultHeight or 140 -- (see ResizeBorder on 30-miniwindow for the 140 value)
 
   local isResizeable = self:isResizeable()
   local selfSettings = self:getSettings(true)
+  local isMinimized  = selfSettings and selfSettings.minimized or self:isOn()
 
   if selfSettings then
     if selfSettings.parentId then
@@ -182,13 +183,14 @@ function UIMiniWindow:setup(button)
       end
     end
 
-    if selfSettings.minimized then
+    if isMinimized then
       self:minimize(true)
     else
-      if selfSettings.height and isResizeable then
-        self:setHeight(selfSettings.height)
-      elseif selfSettings.height and not isResizeable then
-        self:eraseSettings({height = true})
+      if isResizeable then
+        self:setHeight(selfSettings.height or self:getMinimumHeight(), true)
+      else
+        self:setHeight(self.defaultHeight, true)
+        -- self:eraseSettings({height = true})
       end
     end
 
@@ -202,6 +204,12 @@ function UIMiniWindow:setup(button)
       self:close(true)
     else
       self:open(true)
+    end
+  else
+    if isMinimized then
+      self:minimize(true)
+    else
+      self:setHeight(isResizeable and self:getMinimumHeight() or self.defaultHeight, true)
     end
   end
 
@@ -225,10 +233,6 @@ function UIMiniWindow:setup(button)
 
   if self.contentMaximumHeight then
     self:setContentMaximumHeight(self.contentMaximumHeight)
-  end
-
-  if isResizeable and (not selfSettings or not selfSettings.minimized or not selfSettings.height) then
-    self:setHeight(self:getMinimumHeight(), true, true)
   end
 
   self:fitOnParent()
@@ -529,7 +533,7 @@ function UIMiniWindow:getContentHeight()
 end
 
 function UIMiniWindow:getMinimumHeight()
-  return self:getChildById('bottomResizeBorder'):getMinimum()
+  return math.min(self.defaultHeight, self:getChildById('bottomResizeBorder'):getMinimum())
 end
 
 function UIMiniWindow:getMaximumHeight()

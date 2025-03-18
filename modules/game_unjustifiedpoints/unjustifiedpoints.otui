@@ -6,7 +6,7 @@ SkullWidget < UIWidget
 MiniWindow
   id: unjustifiedPointsWindow
   &loc: '${GameUnjustifiedPointsWindowTitle}'
-  height: 91
+  &defaultHeight: 91
   icon: /images/ui/top_menu/unjustifiedpoints
   @onOpen: GameUnjustifiedPoints.onMiniWindowOpen()
   @onClose: GameUnjustifiedPoints.onMiniWindowClose()

@@ -37,10 +37,10 @@ InventorySlotLeg = 7
 InventorySlotFeet = 8
 InventorySlotFinger = 9
 InventorySlotAmmo = 10
-InventorySlotPurse = 11
+InventorySlotInbox = 11
 
 InventorySlotFirst = 1
-InventorySlotLast = 10
+InventorySlotLast = 11
 
 function Player:getCharacterInfo()
   return ClientCharacterList.getCharacterInfoByName(self:getName())

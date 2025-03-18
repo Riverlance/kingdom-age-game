@@ -20,7 +20,7 @@ g_locales.addTranslations({
   },
 
   GameNpcTradeBankTrade = {
-    pl = "U¿yj pieniêdzy bankowych/KAps",
+    pl = "U¿yj pieniêdzy/KAps bankowych",
   },
 
   GameNpcTradeBuyWithBackpack = {

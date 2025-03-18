@@ -93,14 +93,22 @@ function table.clear(t)
   end
 end
 
-function table.copy(t, keys) -- (t[, keys])
+function table.copy(t, keys, copied) -- (t[, keys])
+  -- Internal usage to avoid loops
+  copied = copied or { }
+  if copied[t] then
+    return copied[t]
+  end
+
   local ret = { }
+
+  copied[t] = ret
 
   if keys then
     for _, k in ipairs(keys) do
       local v = t[k]
       if type(v) == 'table' then
-        ret[k] = table.copy(v)
+        ret[k] = table.copy(v, nil, copied)
       else
         ret[k] = v
       end
@@ -108,7 +116,7 @@ function table.copy(t, keys) -- (t[, keys])
   else
     for k, v in pairs(t) do
       if type(v) == 'table' then
-        ret[k] = table.copy(v)
+        ret[k] = table.copy(v, nil, copied)
       else
         ret[k] = v
       end

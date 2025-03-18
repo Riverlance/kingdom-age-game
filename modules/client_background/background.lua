@@ -13,7 +13,7 @@ local musicChannel
 
 if g_sounds then
   musicChannel = g_sounds.getChannel(AudioChannels.Music)
-  g_sounds.preload(musicFilename)
+  g_sounds.preload()
 end
 
 function ClientBackground.init()

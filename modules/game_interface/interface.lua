@@ -2012,7 +2012,9 @@ function GameInterface.onAttackingCreatureChange(creature, prevCreature)
   end
 
   if creature then
+    local pos = creature:getPosition()
     creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().notHovered)
+    g_game.sendDistanceEffect(pos, 41)
   end
 end
 

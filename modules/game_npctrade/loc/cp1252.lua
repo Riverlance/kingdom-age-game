@@ -37,8 +37,8 @@ g_locales.addTranslations{
 
   GameNpcTradeBankTrade = {
     en = "Use bank money/KAps",
-    pt = "Usar dinheiro do banco/KAps",
-    es = "Usar dinero del banco/KAps",
+    pt = "Usar dinheiro/KAps do banco",
+    es = "Usar dinero/KAps del banco",
     de = "Bankgeld/KAps verwenden",
     sv = "Använd bankpengar/KAps",
   },

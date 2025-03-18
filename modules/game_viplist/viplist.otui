@@ -13,7 +13,6 @@ VipListLabel < GameLabel
 MiniWindow
   id: vipWindow
   &loc: '${GameVipListWindowTitle}'
-  height: 100
   icon: /images/ui/top_menu/viplist
   &save: true
   &contentMinimumHeight: 24

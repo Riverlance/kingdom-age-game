@@ -28,6 +28,11 @@ experienceBarValueLabel = nil
 
 
 
+local defaultValues = {
+  statsWindow     = true,
+  inventoryWindow = true,
+}
+
 InventorySlotStyles = {
   [InventorySlotHead] = 'HeadSlot',
   [InventorySlotNeck] = 'NeckSlot',
@@ -38,7 +43,8 @@ InventorySlotStyles = {
   [InventorySlotLeg] = 'LegSlot',
   [InventorySlotFeet] = 'FeetSlot',
   [InventorySlotFinger] = 'FingerSlot',
-  [InventorySlotAmmo] = 'AmmoSlot'
+  [InventorySlotAmmo] = 'AmmoSlot',
+  [InventorySlotInbox] = 'InboxSlot'
 }
 
 inventoryTopMenuButton = nil
@@ -97,26 +103,16 @@ function GameCharacter.init()
 
   g_keyboard.bindKeyDown(CharacterWindowActionKey, GameCharacter.toggle)
 
-
-  inventoryWindow = g_ui.loadUI('character')
-  inventoryHeader = inventoryWindow:getChildById('miniWindowHeader')
-  inventoryTopMenuButton = ClientTopMenu.addRightGameToggleButton('inventoryTopMenuButton', { loct = "${CharacterWindowTitle} (${CharacterWindowActionKey})", locpar = { CharacterWindowActionKey = CharacterWindowActionKey } }, '/images/ui/top_menu/healthinfo', GameCharacter.toggle)
+  inventoryWindow            = g_ui.loadUI('character')
+  inventoryWindow.onMinimize = GameCharacter.onMinimize
+  inventoryWindow.onMaximize = GameCharacter.onMaximize
+  inventoryHeader            = inventoryWindow:getChildById('miniWindowHeader')
+  inventoryTopMenuButton     = ClientTopMenu.addRightGameToggleButton('inventoryTopMenuButton', { loct = "${CharacterWindowTitle} (${CharacterWindowActionKey})", locpar = { CharacterWindowActionKey = CharacterWindowActionKey } }, '/images/ui/top_menu/healthinfo', GameCharacter.toggle)
 
   inventoryWindow.topMenuButton = inventoryTopMenuButton
   inventoryWindow:disableResize()
 
   local contentsPanel = inventoryWindow:getChildById('contentsPanel')
-
-  local ballButton = inventoryWindow:getChildById('ballButton')
-  inventoryWindow.onMinimize = function (self)
-    ballButton:setTooltip(loc'${CharacterInfoButtonMore}')
-  end
-  inventoryWindow.onMaximize = function (self)
-    local headSlot = contentsPanel:getChildById('slot1')
-    if headSlot:isVisible() then
-      ballButton:setTooltip(loc'${CharacterInfoButtonLess}')
-    end
-  end
 
   outfitCreatureBox = contentsPanel:getChildById('outfitCreatureBox')
 
@@ -386,7 +382,7 @@ function GameCharacter.toggle()
 end
 
 function GameCharacter.onInventoryChange(localPlayer, slot, item, oldItem)
-  if slot > InventorySlotAmmo then
+  if slot > InventorySlotInbox then
     return
   end
 
@@ -513,6 +509,7 @@ function GameCharacter.online()
   loginTime = g_clock.millis() + 50
 
   inventoryWindow:setup(inventoryTopMenuButton)
+  GameCharacter.updateMiniWindowSize()
 
   connect(player, {
     onVocationChange = GameCharacter.onVocationChange,
@@ -529,7 +526,7 @@ function GameCharacter.online()
 
   -- Inventory
 
-  for i = InventorySlotFirst, InventorySlotAmmo do
+  for i = InventorySlotFirst, InventorySlotInbox do
     if g_game.isOnline() then
       GameCharacter.onInventoryChange(player, i, player:getInventoryItem(i))
     else
@@ -557,8 +554,6 @@ function GameCharacter.online()
   else
     mountButton:setVisible(false)
   end
-
-  GameCharacter.updateMiniWindowSize()
 
   GameCharacter.updateCombatControls()
 end
@@ -593,55 +588,6 @@ function GameCharacter.offline()
   settings:save()
 end
 
-function GameCharacter.showMoreInfo(bool) -- true = Show more; false = Show less; nil = Default
-  if inventoryWindow:getSettings('minimized') then
-    inventoryWindow:maximize(false)
-    return
-  end
-
-  local contentsPanel = inventoryWindow:getChildById('contentsPanel')
-
-  local hide     = false
-  local headSlot = contentsPanel:getChildById('slot1')
-  if bool ~= nil then
-    hide = bool
-  else
-    hide = not headSlot:isVisible()
-  end
-
-  headSlot:setVisible(hide)
-  contentsPanel:getChildById('slot4'):setVisible(hide) -- Body
-  contentsPanel:getChildById('slot7'):setVisible(hide) -- Legs
-  contentsPanel:getChildById('slot8'):setVisible(hide) -- Feet
-  contentsPanel:getChildById('slot2'):setVisible(hide) -- Neck
-  contentsPanel:getChildById('slot6'):setVisible(hide) -- Left Hand
-  contentsPanel:getChildById('slot9'):setVisible(hide) -- Ring
-  contentsPanel:getChildById('slot3'):setVisible(hide) -- Backpack
-  contentsPanel:getChildById('slot5'):setVisible(hide) -- Right Hand
-  contentsPanel:getChildById('slot10'):setVisible(hide) -- Ammo
-
-  contentsPanel:getChildById('combatControls'):setVisible(hide)
-
-  if outfitCreatureBox then
-    outfitCreatureBox:setVisible(hide)
-  end
-
-  local ballButton = inventoryWindow:getChildById('ballButton')
-  if hide then
-    inventoryWindow:setHeight(GameCharacter.getMiniWindowHeight())
-
-    if ballButton then
-      ballButton:setTooltip(loc'${CharacterInfoButtonLess}')
-    end
-  else
-    inventoryWindow:setHeight(GameCharacter.getHeaderHeight())
-
-    if ballButton then
-      ballButton:setTooltip(loc'${CharacterInfoButtonMore}')
-    end
-  end
-end
-
 function GameCharacter.onVocationChange(creature, vocation, oldVocation)
   local localPlayer = g_game.getLocalPlayer()
   if creature ~= localPlayer then
@@ -652,34 +598,120 @@ function GameCharacter.onVocationChange(creature, vocation, oldVocation)
 end
 
 function GameCharacter.onMiniWindowBallButton()
-  GameCharacter.showMoreInfo()
+  if inventoryWindow:getSettings('minimized') then
+    return
+  end
+
+  -- If all hidden, show them all
+  local function onHide()
+    local isStatsEnabled     = GameCharacter.isStatsEnabled()
+    local isInventoryEnabled = GameCharacter.isInventoryEnabled()
+    if isStatsEnabled or isInventoryEnabled then -- Any visible
+      return
+    end
+
+    -- Show all
+    GameCharacter.setStatsEnabled(true)
+    GameCharacter.setInventoryEnabled(true)
+  end
+
+  local menu = g_ui.createWidget('PopupMenu')
+
+  local isStatsEnabled = GameCharacter.isStatsEnabled()
+  if isStatsEnabled then
+    menu:addOption(loc'${CharacterStatsWindowHide}', function()
+      GameCharacter.setStatsEnabled(false)
+      onHide()
+    end)
+  else
+    menu:addOption(loc'${CharacterStatsWindowShow}', function() GameCharacter.setStatsEnabled(true) end)
+  end
+
+  local isInventoryEnabled = GameCharacter.isInventoryEnabled()
+  if isInventoryEnabled then
+    menu:addOption(loc'${CharacterInventoryWindowHide}', function()
+      GameCharacter.setInventoryEnabled(false)
+      onHide()
+    end)
+  else
+    menu:addOption(loc'${CharacterInventoryWindowShow}', function() GameCharacter.setInventoryEnabled(true) end)
+  end
+
+  menu:display()
+end
+
+function GameCharacter.isStatsEnabled()
+  return g_settings.getValue('Character', 'statsWindow', defaultValues.statsWindow)
+end
+
+function GameCharacter.setStatsEnabled(on)
+  g_settings.setValue('Character', 'statsWindow', on)
+  if on then
+    inventoryHeader:setHeight(GameCharacter.getHeaderHeight())
+    inventoryHeader:setOn(true)
+  else
+    inventoryHeader:setOn(false)
+  end
+  inventoryWindow:setHeight(GameCharacter.getMiniWindowHeight(), true)
+end
+
+function GameCharacter.isInventoryEnabled()
+  return g_settings.getValue('Character', 'inventoryWindow', defaultValues.inventoryWindow)
+end
+
+function GameCharacter.setInventoryEnabled(on)
+  local contentsPanel = inventoryWindow:getChildById('contentsPanel')
+  g_settings.setValue('Character', 'inventoryWindow', on)
+  if on then
+    contentsPanel:setHeight(GameCharacter.getInventoryHeight())
+    contentsPanel:setOn(true)
+  else
+    contentsPanel:setOn(false)
+  end
+  inventoryWindow:setHeight(GameCharacter.getMiniWindowHeight(), true)
 end
 
 function GameCharacter.getHeaderHeight()
+  if not GameCharacter.isStatsEnabled() then
+    return 0
+  end
+
+  local barHeight   = 17 -- height + padding between
   local localPlayer = g_game.getLocalPlayer()
-  return 114 - (localPlayer and localPlayer:isWarrior() and 17 or 0)
+  return 5 * barHeight - (localPlayer and localPlayer:isWarrior() and barHeight or 0) - 1 --[[ remove padding on bottom ]] + 2 --[[ border ]]
 end
 
 function GameCharacter.getInventoryHeight()
-  return 165
+  if not GameCharacter.isInventoryEnabled() then
+    return 0
+  end
+
+  return 186
 end
 
 function GameCharacter.getMiniWindowHeight()
-  return GameCharacter.getHeaderHeight() + GameCharacter.getInventoryHeight()
+  return inventoryWindow.miniwindowTopBar:getHeight() + GameCharacter.getHeaderHeight() + GameCharacter.getInventoryHeight() + 2
 end
 
-function GameCharacter.updateHeaderSize()
+function GameCharacter.updateMiniWindowSize()
+  if inventoryWindow:getSettings('minimized') then
+    return
+  end
+
   local player    = g_game.getLocalPlayer()
   local isWarrior = player and player:isWarrior()
 
   manaBar:setOn(not isWarrior)
-  inventoryHeader:setHeight(isWarrior and 69 or 86) -- 16 for each bar + 1 of top margin between + 2 of top and bottom header border
+  inventoryHeader:setHeight(GameCharacter.getHeaderHeight())
+
+  GameCharacter.setStatsEnabled(GameCharacter.isStatsEnabled())
+  GameCharacter.setInventoryEnabled(GameCharacter.isInventoryEnabled())
 end
 
-function GameCharacter.updateMiniWindowSize()
-  local contentsPanel = inventoryWindow:getChildById('contentsPanel')
-  local headSlot      = contentsPanel:getChildById('slot1')
+function GameCharacter.onMinimize(window)
+  inventoryHeader:setOn(false)
+end
 
-  GameCharacter.showMoreInfo(headSlot:isVisible()) -- Force update same size, so it's possible to add/remove vigor bar
-  GameCharacter.updateHeaderSize()
+function GameCharacter.onMaximize(window)
+  GameCharacter.updateMiniWindowSize()
 end

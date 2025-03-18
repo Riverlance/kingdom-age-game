@@ -38,6 +38,7 @@ local defaultOptions = {
   rightThirdPanelWidth = 5,
   showTopMenu = true,
   showChat = true,
+  enableChat = true,
   gameScreenSize = 19,
   backgroundFrameRate = 201,
   enableAudio = true,
@@ -574,14 +575,9 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.getBottomPanel():setVisible(value)
     GameInterface.getSplitter():setVisible(value)
     GameInterface.getChatButton():setOn(value)
-
-    if GameConsole.isChatEnabled() then
-      if GameConsole.isChatEnabled(true) then
-        GameConsole.onEnableChat()
-      end
-    else
-      GameConsole.onDisableChat()
-    end
+  
+  elseif modules.game_interface and key == "enableChat" then
+    GameConsole.m.consoleToggleChat:setOn(value)
 
   elseif modules.game_interface and key == 'gameScreenSize' then
     GameInterface.getMapPanel():setZoom(value)

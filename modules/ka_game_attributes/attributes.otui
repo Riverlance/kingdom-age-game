@@ -31,7 +31,7 @@ MiniWindow
   icon: /images/ui/top_menu/attributes
   id: attributeWindow
   &loc: '${GameAttributesWindowTitle}'
-  height: 235
+  &defaultHeight: 235
   &save: true
 
   InfoMenuButton

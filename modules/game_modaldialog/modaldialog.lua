@@ -34,7 +34,7 @@ do
     ModalDialog = createClass{
       id = 0,
 
-      spectatorId = 0,
+      spectatorUid = 0,
 
       title   = '',
       message = '',
@@ -590,7 +590,7 @@ do
         end
 
         -- Send answer to server
-        GameModalDialog.sendAnswer(self.id, self.spectatorId, buttonId, self:getButtonText(buttonId), choiceId, choiceText, self:getCheckBoxValues(), self:getFieldsText(), self.playerData)
+        GameModalDialog.sendAnswer(self.id, self.spectatorUid, buttonId, self:getButtonText(buttonId), choiceId, choiceText, self:getCheckBoxValues(), self:getFieldsText(), self.playerData)
 
         -- Destroy window
         self:destroy()
@@ -698,8 +698,8 @@ do
     if debugging then
       ModalDialog.destroy() -- Destroy all dialogs
       ModalDialog:new{
-        id          = 0,
-        spectatorId = 0,
+        id           = 0,
+        spectatorUid = 0,
 
         title   = 'Lorem ipsum dolor',
         message = 'Lorem ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet.',
@@ -774,13 +774,13 @@ do
       return
     end
 
-    local id          = msg:getU32()
-    local spectatorId = msg:getU32()
-    local title       = msg:getString()
-    local message     = msg:getString()
-    local width       = msg:getU16()
-    local height      = msg:getU16()
-    local priority    = msg:getU8() == 1
+    local id           = msg:getU32()
+    local spectatorUid = msg:getU32()
+    local title        = msg:getString()
+    local message      = msg:getString()
+    local width        = msg:getU16()
+    local height       = msg:getU16()
+    local priority     = msg:getU8() == 1
 
     -- Choice
     local choices           = { }
@@ -837,8 +837,8 @@ do
     local playerData = table.unserialize(msg:getString())
 
     ModalDialog:new{
-      id          = id,
-      spectatorId = spectatorId,
+      id           = id,
+      spectatorUid = spectatorUid,
 
       title   = title,
       message = message,
@@ -860,7 +860,7 @@ do
     }
   end
 
-  function GameModalDialog.sendAnswer(id, spectatorId, buttonId, buttonText, choiceId, choiceText, checkBoxes, fields, playerData)
+  function GameModalDialog.sendAnswer(id, spectatorUid, buttonId, buttonText, choiceId, choiceText, checkBoxes, fields, playerData)
     if not g_game.canPerformGameAction() then
       return
     end
@@ -869,7 +869,7 @@ do
     msg:addU8(ClientOpcodes.ClientOpcodeAnswerModalDialog)
 
     msg:addU32(id)
-    msg:addU32(spectatorId)
+    msg:addU32(spectatorUid)
 
     -- Button
     msg:addU8(buttonId)

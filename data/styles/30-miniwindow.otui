@@ -52,7 +52,9 @@ MiniWindow < UIMiniWindow
     margin-left: 3
     margin-right: 3
     background: #ffffff44
-    minimum: 54
+
+    // 100 for content, 20 for header, 20 for footer
+    minimum: 140
 
   VerticalScrollBar
     id: miniwindowScrollBar

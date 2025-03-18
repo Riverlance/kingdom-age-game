@@ -120,4 +120,36 @@ g_locales.addTranslations{
     de = "%s\nKlicke, um deine Erfahrungsleiste anzuzeigen.",
     sv = "%s\nKlicka för att visa din erfarenhetsbar.",
   },
+
+  CharacterStatsWindowShow = {
+    en = "Show stats",
+    pt = "Mostrar estatísticas",
+    es = "Mostrar estadísticas",
+    de = "Statistiken anzeigen",
+    sv = "Visa statistik",
+  },
+
+  CharacterStatsWindowHide = {
+    en = "Hide stats",
+    pt = "Ocultar estatísticas",
+    es = "Ocultar estadísticas",
+    de = "Statistiken ausblenden",
+    sv = "Dölj statistik",
+  },
+
+  CharacterInventoryWindowShow = {
+    en = "Show inventory",
+    pt = "Mostrar inventário",
+    es = "Mostrar inventario",
+    de = "Inventar anzeigen",
+    sv = "Visa inventering",
+  },
+
+  CharacterInventoryWindowHide = {
+    en = "Hide inventory",
+    pt = "Ocultar inventário",
+    es = "Ocultar inventario",
+    de = "Inventar ausblenden",
+    sv = "Dölj inventering",
+  },
 }

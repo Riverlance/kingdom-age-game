@@ -22,6 +22,8 @@ battlePanel = nil
 
 mouseWidget = nil
 
+currentTarget = nil
+
 
 -- Sorting
 
@@ -66,7 +68,7 @@ local defaultValues = {
 
 -- Position checking
 lastPosCheck   = g_clock.millis()
-posUpdateDelay = 200
+posUpdateDelay = 500
 
 -- Action Keys
 BattleActionKey     = 'Ctrl+B'
@@ -164,7 +166,8 @@ function GameBattleList.init()
     onGameEnd                 = GameBattleList.offline,
     onTrackCreature           = GameBattleList.onTrackCreature,
     onTrackCreatureEnd        = GameBattleList.onTrackCreature,
-    onUpdateTrackColor        = GameBattleList.onUpdateTrackColor
+    onUpdateTrackColor        = GameBattleList.onUpdateTrackColor,
+    onToggleChat              = GameBattleList.onToggleChat,
   })
 
 	connect(GameInterface.getMapPanel(), {
@@ -191,7 +194,8 @@ function GameBattleList.terminate()
     onGameEnd                 = GameBattleList.offline,
     onTrackCreature           = GameBattleList.onTrackCreature,
     onTrackCreatureEnd        = GameBattleList.onTrackCreature,
-    onUpdateTrackColor        = GameBattleList.onUpdateTrackColor
+    onUpdateTrackColor        = GameBattleList.onUpdateTrackColor,
+    onToggleChat              = GameBattleList.onToggleChat,
   })
 
   disconnect(LocalPlayer, {
@@ -228,6 +232,7 @@ end
 
 function GameBattleList.offline()
   GameBattleList.clearList()
+  currentTarget = nil
 end
 
 function GameBattleList.toggle()
@@ -310,6 +315,10 @@ function GameBattleList.remove(creature)
   if not index then
     -- print('Trying to remove invalid battleButton')
     return
+  end
+
+  if currentTarget and battlePanel:getChildIndex(currentTarget) == index then
+    currentTarget = nil
   end
 
   if battleList[cid] then
@@ -648,6 +657,7 @@ function GameBattleList.onAttackingCreatureChange(creature, prevCreature)
     prevButton = prevCreature and battleList[prevCreature:getId()]
   end
 
+  currentTarget = button
   if button then
     button.isTarget   = creature and true or false
     button.isFollowed = false
@@ -812,45 +822,37 @@ end
 
 -- Select next target (see NextTargetActionKey/PrevTargetActionKey)
 
-function GameBattleList.selectNextTarget()
+function GameBattleList.selectNextTarget(widget, keyCode, keyboardModifiers, reverse)
   if not GameCharacter.m or table.empty(battleListByIndex) then
     return
   end
-
-  local isReverseOrder = g_keyboard.isCtrlPressed()
-
-  local oldSelectedButton
-  local selectedButton
-
-  -- Try find target. If found, try select next target.
-  for i = isReverseOrder and #battleListByIndex or 1, isReverseOrder and 1 or #battleListByIndex, isReverseOrder and -1 or 1 do
-    local button = battleListByIndex[i]
-    if button:isOn() and button.creature:isMonster() and button.isTarget then
-      oldSelectedButton = button
-
-      -- Target found, then try to select next of list
-      for j = isReverseOrder and i - 1 or i + 1, isReverseOrder and 1 or #battleListByIndex, isReverseOrder and -1 or 1 do
-        local _button = battleListByIndex[j]
-        if _button:isOn() and _button.creature:isMonster() then
-          selectedButton = _button
-          break
-        end
-      end
-
-      break
-    end
+  local currentIndex = currentTarget and battlePanel:getChildIndex(currentTarget) or 0
+  local nextIndex = reverse and (currentIndex - 1) or (currentIndex + 1)
+  if nextIndex == 0 then
+    nextIndex = reverse and -1 or 1
   end
 
-  -- Could not find any target, then try select first
-  if not selectedButton then
-    selectedButton = isReverseOrder and GameBattleList.getLastVisibleButton() or GameBattleList.getFirstVisibleButton()
-  end
-
-  -- Found a new button to target
-  if selectedButton and selectedButton ~= oldSelectedButton then
+  local nextTarget = battlePanel:getChildByIndex(nextIndex) or nil
+  currentTarget = nextTarget
+  if currentTarget and currentTarget:isOn() then
     -- Disable chase mode (this is the price to use the select target shortcut feature)
     GameCharacter.onSetChaseMode(GameCharacter.m.chaseModeButton, false)
+    g_game.attack(currentTarget.creature)
+  else
+    GameBattleList.selectNextTarget(widget, keyCode, keyboardModifiers, reverse)
+  end
+end
 
-    g_game.attack(selectedButton.creature)
+function GameBattleList.selectPrevTarget(widget, keyCode, keyboardModifiers)
+  GameBattleList.selectNextTarget(widget, keyCode, keyboardModifiers, true)
+end
+
+function GameBattleList.onToggleChat(enabled)
+  if enabled then -- Disable next target shortcut
+    g_keyboard.unbindKeyDown(NextTargetActionKey)
+    g_keyboard.unbindKeyDown(PrevTargetActionKey)
+  else -- Enable next target shortcut
+    g_keyboard.bindKeyDown(NextTargetActionKey, GameBattleList.selectNextTarget)
+    g_keyboard.bindKeyDown(PrevTargetActionKey, GameBattleList.selectPrevTarget)
   end
 end

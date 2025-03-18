@@ -66,6 +66,7 @@ ChannelEventFormats = {
 
 CHANNEL_ID_LOOT = 2
 
+isChatEnabled = true
 consolePanel = nil
 headerPanel = nil
 contentPanel = nil
@@ -139,6 +140,7 @@ function GameConsole.init()
     onGameStart             = GameConsole.online,
     onGameEnd               = GameConsole.offline,
     onChannelEvent          = GameConsole.onChannelEvent,
+    onClientOptionChanged   = GameConsole.onClientOptionChanged,
   })
 
   consolePanel = g_ui.loadUI('console', GameInterface.getBottomPanel())
@@ -217,6 +219,7 @@ function GameConsole.terminate()
     onGameStart             = GameConsole.online,
     onGameEnd               = GameConsole.offline,
     onChannelEvent          = GameConsole.onChannelEvent,
+    onClientOptionChanged   = GameConsole.onClientOptionChanged,
   })
 
   g_keyboard.unbindKeyDown('Ctrl+O')
@@ -272,14 +275,6 @@ function GameConsole.selectAll(consoleBuffer)
   end
 end
 
-function GameConsole.toggleConsoleChat()
-  if GameConsole.isChatEnabled() then
-    GameConsole.disableChat()
-  else
-    GameConsole.enableChat()
-  end
-end
-
 function GameConsole.onEnableChat()
   GameInterface.unbindWalkKey('W')
   GameInterface.unbindWalkKey('A')
@@ -298,11 +293,7 @@ function GameConsole.onEnableChat()
 
   g_keyboard.bindKeyDown('Ctrl+W', GameConsole.removeCurrentTab)
 
-  -- Disable next target shortcut
-  if GameBattleList then
-    g_keyboard.unbindKeyDown(GameBattleList.m.NextTargetActionKey)
-    g_keyboard.unbindKeyDown(GameBattleList.m.PrevTargetActionKey)
-  end
+  signalcall(g_game.onToggleChat, true)
 end
 
 function GameConsole.onDisableChat()
@@ -323,14 +314,29 @@ function GameConsole.onDisableChat()
   GameInterface.bindTurnKey('Ctrl+S', South, true)
   GameInterface.bindTurnKey('Ctrl+D', East, true)
 
-  -- Enable next target shortcut
-  if GameBattleList.m then
-    g_keyboard.bindKeyDown(GameBattleList.m.NextTargetActionKey, GameBattleList.selectNextTarget)
-    g_keyboard.bindKeyDown(GameBattleList.m.PrevTargetActionKey, GameBattleList.selectNextTarget)
+  signalcall(g_game.onToggleChat, false)
+end
+
+function GameConsole.onClientOptionChanged(key, value, force, wasClientSettingUp)
+  if key == "enableChat" then -- chat toggle
+    if value and GameConsole.isChatEnabled() then
+      GameConsole.enableChat()
+    else
+      GameConsole.disableChat()
+    end
+  elseif key == "showChat" then -- panel toggle
+    if value and GameConsole.isChatEnabled() then
+      GameConsole.enableChat()
+    else
+      GameConsole.disableChat()
+    end
   end
 end
 
 function GameConsole.enableChat()
+  if isChatEnabled then return end
+
+  isChatEnabled = true
   consoleTextEdit:setVisible(true)
   consoleTextEdit:setText('')
   consoleTextEdit:enable()
@@ -341,6 +347,9 @@ function GameConsole.enableChat()
 end
 
 function GameConsole.disableChat()
+  if not isChatEnabled then return end
+
+  isChatEnabled = false
   consoleTextEdit:setVisible(false)
   consoleTextEdit:setText('')
   consoleTextEdit:disable()
@@ -350,11 +359,8 @@ function GameConsole.disableChat()
   GameConsole.onDisableChat()
 end
 
-function GameConsole.isChatEnabled(checkTextEditOnly)
-  if checkTextEditOnly then
-    return consoleTextEdit:isVisible()
-  end
-  return consoleTextEdit:isVisible() and GameInterface.getChatButton():isOn()
+function GameConsole.isChatEnabled()
+  return ClientOptions.getOption("showChat") and ClientOptions.getOption("enableChat")
 end
 
 function GameConsole.load()
@@ -982,13 +988,8 @@ end
 function GameConsole.onEnterKeyDown()
   local message = consoleTextEdit:getText()
 
-  if GameConsole.isChatEnabled() then
-    if #message == 0 then
-      GameConsole.disableChat()
-      return
-    end
-  else
-    GameConsole.enableChat()
+  if #message == 0 then
+    ClientOptions.setOption('enableChat', not ClientOptions.getOption('enableChat'))
     return
   end
 
@@ -996,7 +997,7 @@ function GameConsole.onEnterKeyDown()
     GameConsole.sendMessage(message)
 
     if ClientOptions.getOption('autoDisableChatOnSendMessage') then
-      GameConsole.disableChat()
+      ClientOptions.setOption('enableChat', false)
     end
   end
 
@@ -1633,8 +1634,6 @@ function GameConsole.onClickIgnoreButton()
 end
 
 function GameConsole.online()
-  ClientOptions.updateOption('showChat')
-
   defaultTab = GameConsole.addTab(loc'${CorelibInfoDefault}', true)
   serverTab = GameConsole.addTab(loc'${GameConsoleTabNameServer}', false) -- Server Log
 

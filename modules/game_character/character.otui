@@ -26,19 +26,8 @@ CharacterProgressBarValue < Label
   text-align: center
   phantom: false
 
-ConditionWidget < UIWidget
-  size: 18 18
-
-  $!first:
-    margin-left: 2
-
-
-
-
 
 InventoryItem < Item
-  $on:
-    image-source: /images/ui/slot/item_blessed
 
 HeadSlot < InventoryItem
   id: slot1
@@ -110,6 +99,10 @@ AmmoSlot < InventoryItem
   $on:
     image-source: /images/ui/slot/ammo_blessed
 
+InboxSlot < InventoryItem
+  id: slot11
+  &position: {x=65535, y=11, z=0}
+
 
 
 
@@ -164,15 +157,22 @@ MiniWindow
   icon: /images/ui/top_menu/healthinfo
   // Mini window height is set in Lua
   &save: true
+  &defaultHeight: 279
 
   BallMenuButton
     id: ballButton
+    &loct: '${ClientOptionsTitle}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
     @onClick: GameCharacter.onMiniWindowBallButton()
 
   MiniWindowHeader
-    // Header height is set in Lua
+    $on:
+      visible: true
+
+    $!on:
+      visible: false
+      height: 0
 
     CharacterProgressBar
       id: healthBarPrevious
@@ -236,6 +236,13 @@ MiniWindow
       @onClick: ClientOptions.toggleOption('showExpBar')
 
   MiniWindowContents
+    $on:
+      visible: true
+
+    $!on:
+      visible: false
+      height: 0
+
     Panel
       id: centerPanel
       // Same width as outfitCreatureBox
@@ -301,6 +308,11 @@ MiniWindow
       margin-top: 2
 
     AmmoSlot
+      anchors.top: prev.outsideBottom
+      anchors.horizontalCenter: prev.horizontalCenter
+      margin-top: 2
+
+    InboxSlot
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
       margin-top: 2

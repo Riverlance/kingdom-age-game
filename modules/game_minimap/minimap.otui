@@ -10,20 +10,7 @@ MiniWindow
     !tooltip: loc'${GameMinimapButtonHideControllers}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
-    @onClick: |
-      local widget = GameMinimap.getMinimapBar()
-      if widget then
-        local hide = widget:isVisible()
-        widget:setVisible(not hide)
-
-        if hide then
-          widget:setWidth(0)
-          self:setTooltip(loc'${GameMinimapButtonShowControllers}')
-        else
-          widget:setWidth(70)
-          self:setTooltip(loc'${GameMinimapButtonHideControllers}')
-        end
-      end
+    @onClick: GameMinimap.toggleControllers()
 
   InfoMenuButton
     !tooltip: f(loc'${GameMinimapButtonInfo}', loc'${GameMinimapButtonInfoArrowKeys}', 'Alt', 'Ctrl', 'Ctrl+Shift+M')

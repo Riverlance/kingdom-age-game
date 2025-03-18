@@ -15,16 +15,19 @@ local stringMetatable = getmetatable('')
   print(weirdString('(%d+)', 4)) --> 89 (same as weirdString:match('(%d+)', 4); match sliced '789' from pos 4)
   print(weirdString('(%d+)', 6)) --> 89 (same as weirdString:match('(%d+)', 6); match complete '789' from pos 6)
 ]]
-local stringMetamethodCall = stringMetatable.__call
-stringMetatable.__call = function(self, ...)
-  local args = {...}
-  if #args > 0 and type(args[1]) == 'string' then
-    return self:match(...)
+if not stringMetatable.isset__call then
+  local stringMetamethodCall = stringMetatable.__call
+  stringMetatable.__call = function(self, ...)
+    local args = {...}
+    if #args > 0 and type(args[1]) == 'string' then
+      return self:match(...)
+    end
+    if stringMetamethodCall then
+      return stringMetamethodCall(self, ...)
+    end
+    return nil
   end
-  if stringMetamethodCall then
-    return stringMetamethodCall(self, ...)
-  end
-  return nil
+  stringMetatable.isset__call = true -- Set only once
 end
 
 --[[
@@ -34,18 +37,21 @@ end
   print(('Hello, world!')[{'world', 'Lua'}]) --> Hello, Lua!
   print(('A B C A B A')[{'A', '_', 2}]) --> _ B C _ B A
 ]]
-local stringMetamethodIndex = stringMetatable.__index
-stringMetatable.__index = function(self, v)
-  if type(v) == 'table' then
-    if type(v[1]) == 'number' then
-      return self:sub(v[1], v[2])
-    elseif type(v[1]) == 'string' then
-      return self:gsub(unpack(v))
+if not stringMetatable.isset__index then
+  local stringMetamethodIndex = stringMetatable.__index
+  stringMetatable.__index = function(self, v)
+    if type(v) == 'table' then
+      if type(v[1]) == 'number' then
+        return self:sub(v[1], v[2])
+      elseif type(v[1]) == 'string' then
+        return self:gsub(unpack(v))
+      end
+    elseif type(v) == 'number' then
+      return self:sub(v, v)
     end
-  elseif type(v) == 'number' then
-    return self:sub(v, v)
+    return stringMetamethodIndex[v]
   end
-  return stringMetamethodIndex[v]
+  stringMetatable.isset__index = true -- Set only once
 end
 
 --[[
@@ -154,7 +160,7 @@ end
 -- Find
 
 function string:contains(...)
-  for _, keyword in ipairs({ ... }) do
+  for _, keyword in ipairs{ ... } do
     if (' ' .. self .. ' '):find('%s+' .. keyword .. '[%s%p]+') then
       return true
     end

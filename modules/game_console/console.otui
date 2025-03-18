@@ -288,7 +288,7 @@ Panel
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
       margin-right: 1
-      @onClick: GameConsole.toggleConsoleChat()
+      @onClick: ClientOptions.setOption('enableChat', not ClientOptions.getOption('enableChat'))
 
     TextEdit
       id: consoleTextEdit

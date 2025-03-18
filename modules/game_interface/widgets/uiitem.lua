@@ -173,6 +173,8 @@ function UIItem:updateBackground()
   local itemClass = item and item:getClass() or 0
   local duration  = item and item:getDurability() or nil
 
+  self:setOn(item and item:hasHighlight())
+
   -- Broken state
   if duration == 0 then
     self:setImageClip(torect('0 34 34 34'))

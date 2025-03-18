@@ -151,6 +151,10 @@ end
 function GameMinimap.online()
   minimapWindow:setup(minimapTopMenuButton)
 
+  local hideControllers = minimapWindow:getSettings("hideControllers")
+  ballButton:setOn(not hideControllers)
+  GameMinimap.toggleControllers()
+
   GameMinimap.loadMap(not preloaded)
   GameMinimap.updateCameraPosition()
 
@@ -158,6 +162,7 @@ function GameMinimap.online()
 end
 
 function GameMinimap.offline()
+  minimapWindow:setSettings({ hideControllers = ballButton:isOn() })
   GameMinimap.saveMap()
   if minimapWidget.fullMapView then
     GameMinimap.toggleFullMap()
@@ -310,6 +315,19 @@ end
 
 function GameMinimap.getMinimapBar()
   return minimapBar
+end
+
+function GameMinimap.toggleControllers()
+  local hiddenControllers = ballButton:isOn()
+  if hiddenControllers then -- show
+    minimapBar:setWidth(70)
+    ballButton:setTooltip(loc'${GameMinimapButtonHideControllers}')
+  else -- hide
+    minimapBar:setWidth(0)
+    ballButton:setTooltip(loc'${GameMinimapButtonShowControllers}')
+  end
+  minimapBar:setVisible(hiddenControllers)
+  ballButton:setOn(not hiddenControllers)
 end
 
 function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)

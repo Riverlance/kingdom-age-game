@@ -2,6 +2,13 @@ ConditionTabButton < TabButton
   size: 20 20
   icon-source: /images/ui/condition/filter
 
+ConditionWidget < UIWidget
+  size: 18 18
+
+  $!first:
+    margin-left: 2
+
+
 MiniWindow
   id: conditionWindow
   &loc: '${GameConditionsWindowTitle}'
