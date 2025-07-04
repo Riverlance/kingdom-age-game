@@ -31,6 +31,7 @@ linksButton = nil
 shopButton = nil
 logoutButton = nil
 dealsButton = nil
+jobsButton = nil
 mouseGrabberWidget = nil
 countWindow = nil
 logoutWindow = nil
@@ -167,12 +168,15 @@ function GameInterface.init()
 
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeWidgetLock, GameInterface.parseWidgetLock)
 
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeCreatureOutline, GameInterface.setCreatureOutline)
+
   discordButton = ClientTopMenu.addLeftButton('discordButton', loc'${GameInterfaceButtonDiscordTooltip}', '/images/ui/top_menu/discord', function() g_platform.openUrl('https://discord.gg/vZjxdwp') end, true)
   linksButton = ClientTopMenu.addLeftButton('linksButton', loc'${GameInterfaceButtonLinksTooltip}', '/images/ui/top_menu/links', function() g_platform.openUrl('https://linktr.ee/kingdomage') end, true)
   shopButton = ClientTopMenu.addLeftButton('shopButton', loc'${GameInterfaceButtonShopTooltip}', '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
   shopButton:setOn(true)
   logoutButton = ClientTopMenu.addLeftButton('logoutButton', loc'${CorelibInfoExit}', '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
   dealsButton = ClientTopMenu.addRightGameToggleButton('dealsButton', loc'${GameInterfaceButtonDealsTooltip}', '/images/ui/top_menu/deals', GameInterface.toggleDealsButton)
+  jobsButton = ClientTopMenu.addRightGameToggleButton('jobsButton', "Jobs", '/images/ui/top_menu/jobs', GameInterface.toggleJobsButton)
 
   GameInterface.bindKeys()
 
@@ -280,6 +284,8 @@ function GameInterface.terminate()
   hookedMenuOptions = { }
   GameInterface.stopSmartWalk()
 
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeCreatureOutline)
+
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeWidgetLock)
 
   disconnect(bottomSplitter, {
@@ -340,6 +346,7 @@ function GameInterface.terminate()
   shopButton:destroy()
   logoutButton:destroy()
   dealsButton:destroy()
+  jobsButton:destroy()
 
   gameRootPanel:destroy()
 
@@ -348,6 +355,7 @@ function GameInterface.terminate()
   shopButton    = nil
   logoutButton  = nil
   dealsButton   = nil
+  jobsButton    = nil
 
   gameRootPanel = nil
 
@@ -2012,9 +2020,8 @@ function GameInterface.onAttackingCreatureChange(creature, prevCreature)
   end
 
   if creature then
-    local pos = creature:getPosition()
     creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().notHovered)
-    g_game.sendDistanceEffect(pos, 41)
+    g_game.sendDistanceEffect(creature:getPosition(), 41)
   end
 end
 
@@ -2050,4 +2057,32 @@ function GameInterface.toggleDealsButton()
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeDeals)
 
   protocolGame:send(msg)
+end
+
+function GameInterface.toggleJobsButton()
+  if not g_game.canPerformGameAction() then
+    return
+  end
+
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeJobsModalDialog)
+
+  protocolGame:send(msg)
+end
+
+local alpha = { r = 0, g = 0, b = 0, a = 0 }
+
+function GameInterface.setCreatureOutline(protocol, msg)
+  local creatureId = msg:getU32()
+  local outlineColor = msg:getColor()
+  local creature = g_map.getCreatureById(creatureId)
+  if creature then
+    creature:setShader("Outfit - Outline")
+  end
 end

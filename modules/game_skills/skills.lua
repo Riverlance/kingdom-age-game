@@ -41,12 +41,16 @@ function GameSkills.init()
 
   g_keyboard.bindKeyDown(GameSkillsActionKey, GameSkills.toggle)
 
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeFocusPoints, GameSkills.updateFocusPoints)
+
   if g_game.isOnline() then
     GameSkills.online()
   end
 end
 
 function GameSkills.terminate()
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeFocusPoints, GameSkills.updateFocusPoints)
+
   disconnect(LocalPlayer, {
     onExperienceChange      = GameSkills.onExperienceChange,
     onLevelChange           = GameSkills.onLevelChange,
@@ -301,3 +305,9 @@ end
 function GameSkills.onBaseSpeedChange(localPlayer, baseSpeed)
   GameSkills.setSkillBase('speed', localPlayer:getSpeed() * 2, baseSpeed * 2)
 end
+
+function GameSkills.updateFocusPoints(protocol, msg)
+  local focusPoints = msg:getU32()
+  GameSkills.setSkillValue('focusPoints', loc(focusPoints))
+end
+

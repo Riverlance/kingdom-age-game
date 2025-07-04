@@ -32,7 +32,10 @@ DrawEffectShaderFlags = { -- setDrawEffectShaders
 
 
 ShaderUniforms = {
-  Progress = 20
+  Progress      = 20,
+  ExternalColor = 24,
+  InternalColor = 25,
+  ContentColor  = 26,
 }
 
 MapShaders = {
@@ -56,6 +59,11 @@ OutfitShaders = {
   { name = 'Party', frag = 'shader/fragment/party.frag' },
   { name = 'Radial Blur Grayscale', frag = 'shader/fragment/radialblur.frag', drawColor = false },
   { name = 'Water', frag = 'shader/fragment/water.frag' },
+  { name = 'Outline', frag = 'shader/fragment/outline.frag', uniforms = {
+    [ShaderUniforms.ExternalColor] = 'u_eColor',
+    [ShaderUniforms.InternalColor] = 'u_iColor',
+    [ShaderUniforms.ContentColor]  = 'u_cColor',
+  } },
 }
 
 MountShaders = {

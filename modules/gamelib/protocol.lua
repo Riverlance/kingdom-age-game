@@ -40,7 +40,9 @@ ServerOpcodes = {
   ServerCreatureShader                = 54, -- KA - Renamed from GameServerCreatureShader
   ServerMapShader                     = 55, -- KA - Renamed from GameServerMapShader
   ServerOpcodeProgressBar             = 56, -- KA - Progress bar
-  -- Free                               57 to 82
+  ServerOpcodeFocusPoints             = 57, -- KA - Focus Points
+  ServerOpcodeCreatureOutline         = 58, -- KA - Creature Outline
+  -- Free                               59 to 82
   ServerOpcodeCreatureColor           = 83,
   ServerOpcodeCreatureNickname        = 84,
   ServerOpcodePlayerLoginname         = 85,
@@ -312,7 +314,8 @@ ClientExtOpcodes = {
   ClientExtOpcodeGreetNpc            = 12,
   ClientExtOpcodeGoldLootAutoDeposit = 13,
   ClientExtOpcodeDeals               = 14,
-  -- Free                              15 to 65535
+  ClientExtOpcodeJobsModalDialog     = 15,
+  -- Free                              16 to 65535
 }
 
 ClientActions = {

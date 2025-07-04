@@ -39,6 +39,14 @@ g_locales.addTranslations{
     sv = "Uthållighet",
   },
 
+  GameSkillsInfoFocusPoints = {
+    en = "Focus Points",
+    pt = "Pontos de Foco",
+    es = "Puntos de Enfoque",
+    de = "Fokuspunkte",
+    sv = "Fokuspunkter",
+  },
+
 
 
   -- lua

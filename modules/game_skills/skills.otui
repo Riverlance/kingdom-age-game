@@ -39,7 +39,7 @@ MiniWindow
   icon: /images/ui/top_menu/skills
   &save: true
   &contentMinimumHeight: 40
-  &contentMaximumHeight: 102
+  &contentMaximumHeight: 119
 
   MiniWindowContents
     padding: 4
@@ -66,6 +66,13 @@ MiniWindow
       height: 15
       SkillNameLabel
         &loc: '${GameSkillsInfoSpeed}'
+      SkillValueLabel
+
+    SkillButton
+      id: focusPoints
+      height: 15
+      SkillNameLabel
+        &loc: '${GameSkillsInfoFocusPoints}'
       SkillValueLabel
 
     SkillButton

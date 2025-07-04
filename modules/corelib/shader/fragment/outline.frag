@@ -7,8 +7,9 @@ varying vec2 v_TexCoord;
 void main()
 {
 	vec4 col = texture2D(u_Tex0, v_TexCoord);
-	if (col.a >= 0.5) {
-		float b = texture2D(u_Tex0, vec2(v_TexCoord.x + offset, v_TexCoord.y)).a *
+
+	if (col.a == 1.0) {
+		float nbs = texture2D(u_Tex0, vec2(v_TexCoord.x + offset, v_TexCoord.y)).a *
 			texture2D(u_Tex0, vec2(v_TexCoord.x, v_TexCoord.y - offset)).a *
 			texture2D(u_Tex0, vec2(v_TexCoord.x - offset, v_TexCoord.y)).a *
 			texture2D(u_Tex0, vec2(v_TexCoord.x, v_TexCoord.y + offset)).a *
@@ -18,8 +19,8 @@ void main()
 			texture2D(u_Tex0, vec2(v_TexCoord.x - offset, v_TexCoord.y - offset)).a;
 
 		// Internal outline
-		if (b == 0.0) {
-			gl_FragColor = vec4(u_iColor.rgb, 1.0);
+		if (nbs == 0.0) {
+			gl_FragColor = vec4(mix(col, u_iColor.rgb, 0.5), 1.0);
 
 		// Content area
 		} else {
@@ -31,13 +32,17 @@ void main()
 			}
 		}
 	} else {
-		float a = texture2D(u_Tex0, vec2(v_TexCoord.x + offset, v_TexCoord.y)).a +
+		float nbs = texture2D(u_Tex0, vec2(v_TexCoord.x + offset, v_TexCoord.y)).a +
 			texture2D(u_Tex0, vec2(v_TexCoord.x, v_TexCoord.y - offset)).a +
 			texture2D(u_Tex0, vec2(v_TexCoord.x - offset, v_TexCoord.y)).a +
-			texture2D(u_Tex0, vec2(v_TexCoord.x, v_TexCoord.y + offset)).a;
+			texture2D(u_Tex0, vec2(v_TexCoord.x, v_TexCoord.y + offset)).a +
+			texture2D(u_Tex0, vec2(v_TexCoord.x + offset, v_TexCoord.y + offset)).a +
+			texture2D(u_Tex0, vec2(v_TexCoord.x + offset, v_TexCoord.y - offset)).a +
+			texture2D(u_Tex0, vec2(v_TexCoord.x - offset, v_TexCoord.y + offset)).a +
+			texture2D(u_Tex0, vec2(v_TexCoord.x - offset, v_TexCoord.y - offset)).a;
 
 		// External outline
-		if (col.a < 1.0 && a > 0.0) {
+		if (nbs > 0.0) {
 			float x = (cos(u_Time * 6.3) + 1.0)/2.0 * 0.2 + 0.8;
 			gl_FragColor = vec4(x * u_eColor.rgb, x * u_eColor.a);
 

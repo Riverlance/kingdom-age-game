@@ -274,7 +274,8 @@ end
 function GameBattleList.add(creature)
   if not g_game.getLocalPlayer() or
      creature:isLocalPlayer() or
-     creature:isDead()
+     creature:isDead() or
+     creature:getName() == ""
   then
     return
   end

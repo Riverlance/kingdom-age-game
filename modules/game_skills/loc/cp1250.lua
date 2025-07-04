@@ -22,6 +22,9 @@ g_locales.addTranslations({
     pl = "Wytrzyma³oœæ",
   },
 
+  GameSkillsInfoFocusPoints = {
+    pl = "Punkty Skupienia", 
+  },
 
 
   -- lua
