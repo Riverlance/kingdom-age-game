@@ -116,17 +116,15 @@ f = string.format
 -- Use your string between [[]]
 -- e.g, [[Hello, world.\nThis is my literal string.]]
 
+--- Returns a table of a binary version of a string.
 ---
----Returns a table of a binary version of a string.
+--- IMPORTANT: This idiom only works for strings somewhat shorter than 1MB.
 ---
----IMPORTANT: This idiom only works for strings somewhat shorter than 1MB.
+--- Inspired by `b-string` of Python.
 ---
----Inspired by `b-string` of Python.
----
----e.g, b'Hello!' --> { 72, 101, 108, 108, 111, 33 }
----
----@param str string
----@return table
+--- e.g, b'Hello!' --> { 72, 101, 108, 108, 111, 33 }
+--- @param str string
+--- @return table
 function b(str)
   return { str:byte(1, -1) }
 end
@@ -232,13 +230,11 @@ end
 
 -- Iterator
 
+--- Traverses all words of a string.
 ---
----Traverses all words of a string.
----
----e.g, for w in ('Lorem ipsum dolor sit amet.'):words() do print(w) end --> Lorem; ipsum; dolor; sit; amet
----
----@param startPos number
----@return function
+--- e.g, for w in ('Lorem ipsum dolor sit amet.'):words() do print(w) end --> Lorem; ipsum; dolor; sit; amet
+--- @param startPos number
+--- @return function
 function string:words(startPos)
   local pos = startPos or 1 -- Current position in the string
   return function() -- Iterator function

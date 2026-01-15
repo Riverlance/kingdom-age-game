@@ -27,6 +27,14 @@ g_locales.addTranslations{
     sv = "Besök VIP-butiken på vår webbplats",
   },
 
+  GameInterfaceButtonJobSkillsTooltip = {
+    en = "Job Skills",
+    pt = "Habilidades de Trabalho",
+    es = "Habilidades de Oficio",
+    de = "Berufsfertigkeiten",
+    sv = "Jobbfärdigheter",
+  },
+
   GameInterfaceButtonDealsTooltip = {
     en = "Deals",
     pt = "Ofertas",

@@ -298,58 +298,45 @@ MessageModes = {
   Channel               = 7,
   ChannelHighlight      = 8,
   Spell                 = 9,
-  NpcFrom               = 10,
-  NpcTo                 = 11,
-  GamemasterBroadcast   = 12,
-  GamemasterChannel     = 13,
-  GamemasterPrivateFrom = 14,
-  GamemasterPrivateTo   = 15,
-  Login                 = 16,
-  Warning               = 17,
-  Game                  = 18,
-  Failure               = 19,
-  Look                  = 20,
-  DamageDealed          = 21,
-  DamageReceived        = 22,
-  Heal                  = 23,
-  Exp                   = 24,
-  DamageOthers          = 25,
-  HealOthers            = 26,
-  ExpOthers             = 27,
-  Status                = 28,
-  Loot                  = 29,
-  TradeNpc              = 30,
-  Guild                 = 31,
-  PartyManagement       = 32,
-  Party                 = 33,
-  BarkLow               = 34,
-  BarkLoud              = 35,
-  Report                = 36,
-  HotkeyUse             = 37,
-  TutorialHint          = 38,
-  Thankyou              = 39,
-  -- KA - Free
-  Mana                  = 41,
-  BeyondLast            = 42,
+  NpcFromStartBlock     = 10,
+  NpcFrom               = 11,
+  NpcTo                 = 12,
+  GamemasterBroadcast   = 13,
+  GamemasterChannel     = 14,
+  GamemasterPrivateFrom = 15,
+  GamemasterPrivateTo   = 16,
+  Login                 = 17,
+  Warning               = 18,
+  Game                  = 19,
+  GameHighlight         = 20,
+  Failure               = 21,
+  Look                  = 22,
+  DamageDealed          = 23,
+  DamageReceived        = 24,
+  Heal                  = 25,
+  Exp                   = 26,
+  DamageOthers          = 27,
+  HealOthers            = 28,
+  ExpOthers             = 29,
+  Status                = 30,
+  Loot                  = 31,
+  TradeNpc              = 32,
+  Guild                 = 33,
+  PartyManagement       = 34,
+  Party                 = 35,
+  BarkLow               = 36,
+  BarkLoud              = 37,
+  Report                = 38,
+  HotkeyUse             = 39,
+  TutorialHint          = 40,
+  Thankyou              = 41,
+  GamemasterSay         = 42,
+  Mana                  = 43,
+  GameBigTop            = 44, -- KA - Big font text message (Jotun)
+  GameBigCenter         = 45, -- KA - Big font text message (Jotun)
+  GameBigBottom         = 46, -- KA - Big font text message (Jotun)
 
-  -- deprecated
-  MonsterYell           = 43,
-  MonsterSay            = 44,
-  Red                   = 45,
-  Blue                  = 46,
-  GameBigTop            = 47, -- KA - Big font text message (Jotun)
-  GameBigCenter         = 48, -- KA - Big font text message (Jotun)
-  GameBigBottom         = 49, -- KA - Big font text message (Jotun)
-  GameHighlight         = 50,
-  NpcFromStartBlock     = 51,
-  -- KA - Free
-  -- KA - Free
-  -- KA - Free
-  -- KA - Free
-  -- KA - Free
-
-  Last                  = 57,
-
+  Last                  = 52,
   Invalid               = 255,
 }
 

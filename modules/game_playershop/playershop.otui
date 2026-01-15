@@ -1,0 +1,333 @@
+ShopOfferLabel < Label
+  anchors.left: prev.right
+  anchors.right: parent.right
+  anchors.top: prev.top
+  margin-left: 5
+  margin-right: 5
+  text-auto-resize: false
+
+ShopItemBox < Panel
+  UICheckBox
+    id: itemBox
+    anchors.fill: parent
+    border-width: 1
+    color: #aaaaaa
+    text-align: bottom
+    text-offset: 0 -4
+    @onCheckChange: GamePlayerShop.onItemBoxChecked(self)
+
+    Creature
+      id: outfit
+      size: 64 64
+      phantom: true
+      anchors.top: parent.top
+      anchors.horizontalCenter: parent.horizontalCenter
+      creature-size: 97
+      image-source: none
+      image-color: #ffffffff
+
+      $!on:
+        image-color: #ffffff88
+
+    Item
+      id: item
+      phantom: true
+      anchors.verticalCenter: prev.verticalCenter
+      anchors.horizontalCenter: parent.horizontalCenter
+      image-color: #ffffffff
+
+      $!on:
+        image-color: #ffffff88
+
+    $checked on:
+      border-color: #faebd5
+
+    $!checked:
+      border-color: #7b6e4c
+
+    $!on:
+      border-color: #7b6e4c88
+      image-color: #ffffff88
+      color: #aaaaaa88
+
+  InfoMenuButton
+    anchors.top: prev.top
+    anchors.right: prev.right
+    anchors.verticalCenter: none
+    margin-top: 5
+    margin-right: 5
+
+MainWindow
+  id: ShopWindow
+  &loc: '${GamePlayerShopWindowTitle}'
+  size: 600 620
+  @onEscape: GamePlayerShop.closeShop()
+
+  Button
+    &loc: '${CorelibInfoClose}'
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    @onClick: GamePlayerShop.closeShop()
+
+  Button
+    id: tradeButton
+    &loc: '${GamePlayerShopButtonTrade}'
+    anchors.right: prev.left
+    anchors.bottom: parent.bottom
+    margin-right: 10
+    @onClick: GamePlayerShop.onTradeClick()
+
+  Button
+    id: sellAllButton
+    &loc: '${GamePlayerShopButtonSellAll}'
+    width: 120
+    anchors.right: prev.left
+    anchors.bottom: parent.bottom
+    margin-right: 10
+    visible: false
+    @onClick: GamePlayerShop.sellAll()
+
+  LightFlatPanel
+    id: buyOptions
+    width: 200
+    height: 144
+    anchors.bottom: prev.top
+    anchors.right: parent.right
+    margin-bottom: 10
+
+    Label
+      id: searchLabel
+      &loc: '${GamePlayerShopSearchLabel}:'
+      anchors.left: parent.left
+      anchors.top: parent.top
+      text-auto-resize: true
+      margin-top: 7
+      margin-left: 5
+
+    TextEdit
+      id: searchText
+      anchors.top: prev.top
+      anchors.left: prev.right
+      anchors.right: parent.right
+      margin-top: -2
+      margin-left: 5
+      margin-right: 5
+      @onTextChange: GamePlayerShop.refreshPlayerGoods()
+
+    CheckBox
+      id: bankTrade
+      &loc: '${GamePlayerShopBankTrade}'
+      anchors.top: prev.outsideBottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-left: 5
+      margin-top: 10
+      @onCheckChange: GamePlayerShop.refreshPlayerGoods()
+
+    CheckBox
+      id: buyWithBackpack
+      &loc: '${GamePlayerShopBuyWithBackpack}'
+      anchors.top: bankTrade.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-left: 5
+      margin-top: 3
+      @onCheckChange: GamePlayerShop.refreshSelectedItem()
+
+    CheckBox
+      id: ignoreCapacity
+      &loc: '${GamePlayerShopIgnoreCapacity}'
+      anchors.top: prev.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-left: 5
+      margin-top: 3
+      @onCheckChange: GamePlayerShop.refreshPlayerGoods()
+
+    CheckBox
+      id: showAllItems
+      &loc: '${GamePlayerShopShowAllItems}'
+      anchors.top: bankTrade.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-left: 5
+      margin-top: 3
+      visible: false
+      checked: true
+      @onCheckChange: GamePlayerShop.refreshPlayerGoods()
+
+  LightFlatPanel
+    id: setupPanel
+    enabled: false
+    anchors.top: prev.top
+    anchors.bottom: prev.bottom
+    anchors.left: parent.left
+    anchors.right: prev.outsideLeft
+    margin-right: 5
+
+    Label
+      phantom: false
+      id: nameDesc
+      &loc: '${CorelibInfoName}:'
+      &loct: '${GamePlayerShopNameDescTooltip}'
+      anchors.left: parent.left
+      anchors.top: parent.top
+      margin-top: 5
+      margin-left: 5
+      width: 100
+
+    ShopOfferLabel
+      id: name
+
+    Label
+      phantom: false
+      id: priceDesc
+      &loc: '${GamePlayerShopPriceDesc}:'
+      &loct: '${GamePlayerShopPriceDescTooltip}'
+      anchors.top: prev.bottom
+      anchors.left: nameDesc.left
+      anchors.right: nameDesc.right
+      margin-top: 3
+
+    ShopOfferLabel
+      id: price
+
+    Label
+      phantom: false
+      id: weightDesc
+      &loc: '${GamePlayerShopWeightDesc}:'
+      &loct: '${GamePlayerShopWeightDescTooltip}'
+      anchors.top: prev.bottom
+      anchors.left: priceDesc.left
+      anchors.right: priceDesc.right
+      margin-top: 3
+
+    ShopOfferLabel
+      id: weight
+
+    Label
+      phantom: false
+      id: moneyDesc
+      &loc: '${GamePlayerShopMoneyDesc}:'
+      &loct: '${GamePlayerShopMoneyDescTooltip}'
+      anchors.top: prev.bottom
+      anchors.left: weightDesc.left
+      anchors.right: weightDesc.right
+      margin-top: 10
+
+    ShopOfferLabel
+      id: money
+      phantom: false
+
+    Label
+      phantom: false
+      id: kapsDesc
+      &loc: '${GamePlayerShopKapsDesc}:'
+      &loct: '${GamePlayerShopKapsDescTooltip}'
+      anchors.top: prev.bottom
+      anchors.left: moneyDesc.left
+      anchors.right: moneyDesc.right
+      margin-top: 3
+
+    ShopOfferLabel
+      id: kaps
+      phantom: false
+
+    Label
+      phantom: false
+      id: capacityDesc
+      &loc: '${GamePlayerShopCapacityDesc}:'
+      &loct: '${GamePlayerShopCapacityDescTooltip}'
+      anchors.top: prev.bottom
+      anchors.left: kapsDesc.left
+      anchors.right: kapsDesc.right
+      margin-top: 3
+
+    ShopOfferLabel
+      id: capacity
+
+    Label
+      phantom: false
+      id: trustDesc
+      &loc: '${GamePlayerShopTrustDesc}:'
+      &loct: '${GamePlayerShopTrustDescTooltip}'
+      anchors.top: prev.bottom
+      anchors.left: capacityDesc.left
+      anchors.right: capacityDesc.right
+      margin-top: 3
+
+    ShopOfferLabel
+      id: trust
+      phantom: false
+
+    HorizontalScrollBar
+      id: quantityScroll
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      margin-bottom: 5
+      margin-left: 5
+      margin-right: 5
+      show-value: true
+      minimum: 1
+      maximum: 100
+      step: 1
+      @onValueChange: GamePlayerShop.refreshSelectedItem()
+
+  TabButton
+    id: buyTab
+    &loc: '${GamePlayerShopTabBuy}'
+    &loct: '${GamePlayerShopTabBuyTooltip}'
+    checked: true
+    on: true
+    anchors.left: parent.left
+    anchors.right: parent.horizontalCenter
+    anchors.top: parent.top
+    margin-right: 4
+    margin-top: 4
+
+  TabButton
+    id: sellTab
+    &loc: '${GamePlayerShopTabSell}'
+    &loct: '${GamePlayerShopTabSellTooltip}'
+    anchors.left: parent.horizontalCenter
+    anchors.right: parent.right
+    anchors.top: parent.top
+    margin-left: 4
+    margin-top: 4
+
+  LightFlatPanel
+    id: itemsArea
+    anchors.top: prev.bottom
+    anchors.bottom: setupPanel.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-bottom: 6
+    padding-top: 4
+    padding-left: 4
+    padding-bottom: 4
+    padding-right: 4
+
+    VerticalScrollBar
+      id: itemsPanelListScrollBar
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      step: 24
+      pixels-scroll: true
+
+    ScrollablePanel
+      id: itemsPanel
+      height: 250
+      anchors.left: parent.left
+      anchors.right: prev.left
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      vertical-scrollbar: itemsPanelListScrollBar
+      margin-left: 1
+      margin-right: 4
+      layout:
+        type: grid
+        cell-size: 180 114
+        flow: true
+        auto-spacing: true

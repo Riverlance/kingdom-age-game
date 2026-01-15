@@ -250,6 +250,10 @@ g_locales.addTranslations({
     pl = "Cel jest poza zasiêgiem.",
   },
 
+  GamelibInfoNoOpenedPanel = {
+    pl = "Najpierw otwórz panel boczny.",
+  },
+
   GamelibInfoOptionEditMark = {
     pl = "Edytuj znacznik",
   },

@@ -10,25 +10,23 @@ end
 
 
 
+--- Traverses a table in order, based on keys.
 ---
----Traverses a table in order, based on keys.
+--- ```lua
+--- local t = { coconut = 8, apple = 7, banana = 9 }
+---  -- or local t = { ['coconut'] = 8, ['apple'] = 7, ['banana'] = 9 }
 ---
----```lua
----local t = { coconut = 8, apple = 7, banana = 9 }
---- -- or local t = { ['coconut'] = 8, ['apple'] = 7, ['banana'] = 9 }
----
----for k, v in sortedpairs(t) do
----  print(k, v) --> apple 7; banana 9; coconut 8
----end
+--- for k, v in sortedpairs(t) do
+---   print(k, v) --> apple 7; banana 9; coconut 8
+--- end
 ---
 --- for k, v in sortedpairs(t, function(a, b) return a > b end) do
 ---   print(k, v) --> coconut 8; banana 9; apple 7
 --- end
----```
----
----@param t table
----@param sortCallback function
----@return function
+--- ```
+--- @param t table
+--- @param sortCallback function
+--- @return function
 function sortedpairs(t, sortCallback)
   local mt = getmetatable(t)
   if mt and mt.__sortedpairs then
@@ -53,16 +51,14 @@ end
 
 -- Base
 
+--- Gets a value from a zipped table.
 ---
----Gets a value from a zipped table.
+--- Worst way: `local zip = company and company.director and company.director.address and company.director.address.zipcode`
 ---
----Worst way: `local zip = company and company.director and company.director.address and company.director.address.zipcode`
----
----Best way: `local zip = table.get(company, 'director', 'address', 'zipcode')`
----
----@param t   table
----@param ... string
----@return any
+--- Best way: `local zip = table.get(company, 'director', 'address', 'zipcode')`
+--- @param t   table
+--- @param ... string
+--- @return any
 function table.get(t, ...)
   local args         = {...}
   local __emptyTable = { }

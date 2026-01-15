@@ -176,7 +176,7 @@ function GameInterface.init()
   shopButton:setOn(true)
   logoutButton = ClientTopMenu.addLeftButton('logoutButton', loc'${CorelibInfoExit}', '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
   dealsButton = ClientTopMenu.addRightGameToggleButton('dealsButton', loc'${GameInterfaceButtonDealsTooltip}', '/images/ui/top_menu/deals', GameInterface.toggleDealsButton)
-  jobsButton = ClientTopMenu.addRightGameToggleButton('jobsButton', "Jobs", '/images/ui/top_menu/jobs', GameInterface.toggleJobsButton)
+  jobsButton = ClientTopMenu.addRightGameToggleButton('jobsButton', loc'${GameInterfaceButtonJobSkillsTooltip}', '/images/ui/top_menu/jobs', GameInterface.toggleJobsButton)
 
   GameInterface.bindKeys()
 
@@ -777,9 +777,9 @@ function GameInterface.fitAllPanelChildren(miniWindowContainer, noRemoveChild)
     return
   end
   if hadNoRemoveChild then
-    local nextAvailablePanel, nextAvailablePanelKey = GameInterface.getNextPanel(function(_gamePanel, k) return gamePanelsContainer[k] ~= miniWindowContainer and _gamePanel:isVisible() and gamePanelsContainer[k]:getEmptySpaceHeight() - noRemoveChild:getHeight() >= 0 end)
-    if nextAvailablePanel then
-      noRemoveChild:setParent(gamePanelsContainer[nextAvailablePanelKey])
+    local panel, panelKey = GameInterface.getAvailablePanel(noRemoveChild, miniWindowContainer)
+    if panel then
+      noRemoveChild:setParent(gamePanelsContainer[panelKey])
       return
     end
   end
@@ -866,6 +866,11 @@ function GameInterface.getNextPanel(condition)
   return nil, -1
 end
 
+function GameInterface.getAvailablePanel(miniWindow, miniWindowContainer) -- (miniWindow = nil, miniWindowContainer = nil)
+  local nextAvailablePanel, nextAvailablePanelKey = GameInterface.getNextPanel(function(_gamePanel, k) return (not miniWindowContainer or gamePanelsContainer[k] ~= miniWindowContainer) and _gamePanel:isVisible() and (not miniWindow or gamePanelsContainer[k]:getEmptySpaceHeight() - miniWindow:getHeight() >= 0) end)
+  return nextAvailablePanel, nextAvailablePanelKey
+end
+
 function GameInterface.addToPanels(miniWindow, force)
   if #gamePanels == 0 then
     return false
@@ -877,24 +882,22 @@ function GameInterface.addToPanels(miniWindow, force)
     return false
   end
 
-  local nextAvailablePanel, nextAvailablePanelKey = GameInterface.getNextPanel(function(_gamePanel, k) return _gamePanel:isVisible() and gamePanelsContainer[k]:getEmptySpaceHeight() - miniWindow:getHeight() >= 0 end)
+  local panel, panelKey = GameInterface.getAvailablePanel(miniWindow)
 
   -- No available panel
-  if not nextAvailablePanel then
+  if not panel then
     return false
   end
 
   -- Attach it to available panel
-  miniWindow:setParent(gamePanelsContainer[nextAvailablePanelKey])
+  miniWindow:setParent(gamePanelsContainer[panelKey])
 
   return true
 end
 
 function GameInterface.onContainerMiniWindowOpen(containerWindow, previousContainer)
   if not previousContainer then -- Opened in new window
-    if GameInterface.addToPanels(containerWindow) then
-      containerWindow:setup()
-    end
+    GameInterface.addToPanels(containerWindow) -- Attempt to add to panels
   end
 end
 

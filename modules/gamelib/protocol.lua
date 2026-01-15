@@ -14,7 +14,7 @@ ServerOpcodes = {
   -- -- --
 
   -- Free                               0 to 10
-  ServerOpcodeGMActions               = 11,
+  -- Free                               11
   -- Free                               12 to 14
   ServerOpcodeEnterGame               = 15,
   -- Free                               16
@@ -75,7 +75,9 @@ ServerOpcodes = {
   ServerOpcodeCreateContainer         = 112,
   ServerOpcodeChangeInContainer       = 113,
   ServerOpcodeDeleteInContainer       = 114,
-  -- Free                               115 to 119
+  ServerOpcodeOpenShop                = 115, -- KA - Open shop
+  ServerOpcodeCloseShop               = 116, -- KA - Close shop
+  -- Free                               117 to 119
   ServerOpcodeSetInventory            = 120,
   ServerOpcodeDeleteInventory         = 121,
   ServerOpcodeOpenNpcTrade            = 122,
@@ -205,7 +207,12 @@ ClientOpcodes = {
   -- Free                                 62
   ClientOpcodeTracking                  = 63,
   ClientOpcodePowerCast                 = 64,
-  -- Free                                 65 to 99
+  ClientOpcodeAddShopItem               = 65, -- KA - Add shop item
+  ClientOpcodeRemoveShopItem            = 66, -- KA - Remove shop item
+  ClientOpcodeConfigShopItem            = 67, -- KA - Configure shop item
+  ClientOpcodeMoveShopItem              = 68, -- KA - Move shop item
+  ClientOpcodeCloseShop                 = 69, -- KA - Close shop
+  -- Free                                 70 to 99
   ClientOpcodeAutoWalk                  = 100,
   ClientOpcodeWalkNorth                 = 101,
   ClientOpcodeWalkEast                  = 102,

@@ -47,7 +47,7 @@ do
       choices    = { }, -- { [id] = { name = '', tooltip = '', info = '', infoColor = '', selected = false } }
       checkBoxes = { }, -- { [id] = { name = '', tooltip = '', value = false } }
       fields     = { }, -- { [id] = { name = '', tooltip = '', regex = '', minChars = 0, maxChars = 0, hidden = false, value = '' } }
-      buttons    = { }, -- { [id] = { name = '', tooltip = '' } }
+      buttons    = { }, -- { [id] = { name = '', tooltip = '', close = true } }
 
       enterButton  = true,
       escapeButton = true,
@@ -123,7 +123,7 @@ do
 
       function ModalDialog:getEscapeButton()
         if self.escapeButton == true then
-          return #self.buttons and 1 or 0
+          return #self.buttons > 0 and 1 or 0
         end
         return self.escapeButton
       end
@@ -563,6 +563,11 @@ do
       end
 
       function ModalDialog:answer(buttonId)
+        local button = self.buttons[buttonId]
+        if button and button.close == false or not g_game.canPerformGameAction() then
+          return
+        end
+
         local widget = self.widget
 
         local choice     = self:getFocusedChoice()
@@ -690,56 +695,19 @@ do
     })
 
     connect(g_game, {
-      onGameEnd = GameModalDialog.onGameEnd,
+      onGameStart = GameModalDialog.onGameStart,
+      onGameEnd   = GameModalDialog.onGameEnd,
     })
 
     ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeModalDialog, GameModalDialog.parse)
-
-    if debugging then
-      ModalDialog.destroy() -- Destroy all dialogs
-      ModalDialog:new{
-        id           = 0,
-        spectatorUid = 0,
-
-        title   = 'Lorem ipsum dolor',
-        message = 'Lorem ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet.',
-
-        width  = 0,
-        height = 0,
-
-        priority = false,
-
-        choices = {
-          { name = "Choice 1", tooltip = "Tooltip of 'Choice 1'." },
-          { name = "Choice 2", info = "Extra info.", selected = true },
-          { name = "Choice 3", info = "Additional information.", infoColor = '#e6db74', tooltip = "Tooltip of 'Choice 3'." },
-        },
-
-        checkBoxes = {
-          { name = "CheckBox 1", tooltip = "Tooltip of 'CheckBox 1'.", value = true },
-          { name = "CheckBox 2" },
-          { name = "CheckBox 3", value = true },
-        },
-
-        fields = {
-          { name = "Name", tooltip = "Letters and spaces only.", regex = "^[%a ]+$", minChars = 4, maxChars = 10, value = "Lorem" },
-          { name = "Text" },
-          { name = "Password", tooltip = "Numbers only.", regex = "^[0-9]+$", maxChars = 20, hidden = true },
-        },
-
-        buttons = {
-          { name = "Cancel" },
-          { name = "Ok", tooltip = "Tooltip of 'Ok' button." },
-        },
-      }
-    end
   end
 
   function GameModalDialog.terminate()
     ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeModalDialog)
 
     disconnect(g_game, {
-      onGameEnd = GameModalDialog.onGameEnd,
+      onGameStart = GameModalDialog.onGameStart,
+      onGameEnd   = GameModalDialog.onGameEnd,
     })
 
     disconnect(LocalPlayer, {
@@ -829,6 +797,7 @@ do
       buttons[id].id      = id
       buttons[id].name    = msg:getString()
       buttons[id].tooltip = msg:getString()
+      buttons[id].close   = msg:getU8() == 1
     end
 
     local enterButton  = msg:getU8()
@@ -861,10 +830,6 @@ do
   end
 
   function GameModalDialog.sendAnswer(id, spectatorUid, buttonId, buttonText, choiceId, choiceText, checkBoxes, fields, playerData)
-    if not g_game.canPerformGameAction() then
-      return
-    end
-
     local msg = OutputMessage.create()
     msg:addU8(ClientOpcodes.ClientOpcodeAnswerModalDialog)
 
@@ -898,6 +863,50 @@ do
 
   function GameModalDialog.onPositionChange(creature, pos, oldPos)
     ModalDialog.destroy() -- Destroy all dialogs
+  end
+
+  function GameModalDialog.onGameStart()
+    if debugging then
+      addEvent(function()
+        ModalDialog.destroy() -- Destroy all dialogs
+        ModalDialog:new{
+          id           = 0,
+          spectatorUid = 0,
+
+          title   = 'Lorem ipsum dolor',
+          message = 'Lorem ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet ipsum dolor sit amet.',
+
+          width  = 0,
+          height = 0,
+
+          priority = false,
+
+          choices = {
+            { name = "Choice 1", tooltip = "Tooltip of 'Choice 1'." },
+            { name = "Choice 2", info = "Extra info.", selected = true },
+            { name = "Choice 3", info = "Additional information.", infoColor = '#e6db74', tooltip = "Tooltip of 'Choice 3'." },
+          },
+
+          checkBoxes = {
+            { name = "CheckBox 1", tooltip = "Tooltip of 'CheckBox 1'.", value = true },
+            { name = "CheckBox 2" },
+            { name = "CheckBox 3", value = true },
+          },
+
+          fields = {
+            { name = "Name", tooltip = "Letters and spaces only.", regex = "^[%a ]+$", minChars = 4, maxChars = 10, value = "Lorem" },
+            { name = "Text" },
+            { name = "Password", tooltip = "Numbers only.", regex = "^[0-9]+$", maxChars = 20, hidden = true },
+          },
+
+          buttons = {
+            { name = "Cancel" },
+            { name = "Do nothing", close = false },
+            { name = "Ok", tooltip = "Tooltip of 'Ok' button." },
+          },
+        }
+      end)
+    end
   end
 
   function GameModalDialog.onGameEnd()

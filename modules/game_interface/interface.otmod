@@ -23,6 +23,7 @@ Module
     // Base windows
     - game_textwindow
     - game_npctrade
+    - game_playershop
     - game_playertrade
     - game_playermount
     - game_playerdeath

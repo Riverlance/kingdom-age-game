@@ -4,27 +4,27 @@ g_locales.addTranslations{
   -- lua
 
   GameTextWindowReadWrittenBy = {
-    en = "You read the following, written by \n%s\n",
-    pt = "Você lê o seguinte, escrito por \n%s\n",
-    es = "Lees lo siguiente, escrito por \n%s\n",
-    de = "Du liest das Folgende, geschrieben von \n%s\n",
-    sv = "Du läser följande, skrivet av \n%s\n",
+    en = "You read the following, written by\n%s",
+    pt = "Você lê o seguinte, escrito por\n%s",
+    es = "Lees lo siguiente, escrito por\n%s",
+    de = "Du liest das Folgende, geschrieben von\n%s",
+    sv = "Du läser följande, skrivet av\n%s",
   },
 
   GameTextWindowReadWrittenByOn = {
-    en = "on %s.\n",
-    pt = "em %s.\n",
-    es = "en %s.\n",
-    de = "am %s.\n",
-    sv = "den %s.\n",
+    en = " on %s.\n",
+    pt = " em %s.\n",
+    es = " en %s.\n",
+    de = " am %s.\n",
+    sv = " den %s.\n",
   },
 
   GameTextWindowReadWrittenOn = {
-    en = "You read the following, written on \n%s.\n",
-    pt = "Você lê o seguinte, escrito em \n%s.\n",
-    es = "Lees lo siguiente, escrito el \n%s.\n",
-    de = "Du liest das Folgende, geschrieben am \n%s.\n",
-    sv = "Du läser följande, skrivet den \n%s.\n",
+    en = "You read the following, written on %s.\n",
+    pt = "Você lê o seguinte, escrito em %s.\n",
+    es = "Lees lo siguiente, escrito el %s.\n",
+    de = "Du liest das Folgende, geschrieben am %s.\n",
+    sv = "Du läser följande, skrivet den %s.\n",
   },
 
   GameTextWindowInfoItsEmpty = {

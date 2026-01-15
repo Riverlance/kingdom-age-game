@@ -4,15 +4,15 @@ g_locales.addTranslations({
   -- lua
 
   GameTextWindowReadWrittenBy = {
-    pl = "Czytasz nastêpuj¹cy tekst, napisany przez \n%s\n",
+    pl = "Czytasz nastêpuj¹cy tekst, napisany przez\n%s",
   },
 
   GameTextWindowReadWrittenByOn = {
-    pl = "na %s.\n",
+    pl = " na %s.\n",
   },
 
   GameTextWindowReadWrittenOn = {
-    pl = "Czytasz nastêpuj¹cy tekst, napisany \n%s.\n",
+    pl = "Czytasz nastêpuj¹cy tekst, napisany %s.\n",
   },
 
   GameTextWindowInfoItsEmpty = {

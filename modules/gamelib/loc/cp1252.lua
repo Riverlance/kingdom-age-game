@@ -471,6 +471,14 @@ g_locales.addTranslations{
     sv = "Målet är utanför räckhåll.",
   },
 
+  GamelibInfoNoOpenedPanel = {
+    en = "Open a side panel first.",
+    pt = "Abra um painel lateral primeiro.",
+    es = "Abra un panel lateral primero.",
+    de = "Öffnen Sie zuerst ein Seitenpanel.",
+    sv = "Öppna en sidopanel först.",
+  },
+
   GamelibInfoOptionEditMark = {
     en = "Edit mark",
     pt = "Editar marca",

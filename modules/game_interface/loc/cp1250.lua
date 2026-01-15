@@ -15,6 +15,10 @@ g_locales.addTranslations({
     pl = "OdwiedŸ sklep VIP na naszej stronie internetowej",
   },
 
+  GameInterfaceButtonJobSkillsTooltip = {
+    pl = "Umiejêtnoœci Zawodowe",
+  },
+
   GameInterfaceButtonDealsTooltip = {
     pl = "Oferty",
   },

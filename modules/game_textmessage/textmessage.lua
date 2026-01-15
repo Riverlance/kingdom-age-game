@@ -25,8 +25,6 @@ MessageSettings = {
 }
 
 MessageTypes = {
-  [MessageModes.MonsterSay] = MessageSettings.consoleOrange,
-  [MessageModes.MonsterYell] = MessageSettings.consoleOrange,
   [MessageModes.BarkLow] = MessageSettings.consoleOrange,
   [MessageModes.BarkLoud] = MessageSettings.consoleOrange,
   [MessageModes.Failure] = MessageSettings.statusSmall,
@@ -36,8 +34,6 @@ MessageTypes = {
   [MessageModes.Warning] = MessageSettings.centerRed,
   [MessageModes.Look] = MessageSettings.centerGreen,
   [MessageModes.Loot] = MessageSettings.loot,
-  [MessageModes.Red] = MessageSettings.consoleRed,
-  [MessageModes.Blue] = MessageSettings.consoleBlue,
   [MessageModes.PrivateFrom] = MessageSettings.consoleBlue,
 
   [MessageModes.GamemasterBroadcast] = MessageSettings.consoleRed,
@@ -56,7 +52,6 @@ MessageTypes = {
   [MessageModes.Party] = MessageSettings.centerGreen,
   [MessageModes.PartyManagement] = MessageSettings.centerWhite,
   [MessageModes.TutorialHint] = MessageSettings.centerWhite,
-  [MessageModes.BeyondLast] = MessageSettings.centerWhite,
   [MessageModes.Report] = MessageSettings.consoleRed,
   [MessageModes.HotkeyUse] = MessageSettings.centerGreen,
 

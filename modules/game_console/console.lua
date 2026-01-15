@@ -11,6 +11,7 @@ NpcChannelName = 'NPCs' -- Do not translate it!
 SpeakTypesSettings = {
   none = { },
   say = { speakType = MessageModes.Say, color = '#E0E000' },
+  gamemasterSay = { speakType = MessageModes.GamemasterSay, color = '#A144FF' },
   whisper = { speakType = MessageModes.Whisper, color = '#E0E0E0' },
   yell = { speakType = MessageModes.Yell, color = '#FFAA00' },
   broadcast = { speakType = MessageModes.GamemasterBroadcast, color = '#F55E5E' },
@@ -23,12 +24,13 @@ SpeakTypesSettings = {
   channelWhite = { speakType = MessageModes.ChannelManagement, color = '#FFFFFF' },
   channelRed = { speakType = MessageModes.GamemasterChannel, color = '#F55E5E' },
   channelOrange = { speakType = MessageModes.ChannelHighlight, color = '#FE6500' },
-  monsterSay = { speakType = MessageModes.MonsterSay, color = '#FE6500', hideInConsole = true},
-  monsterYell = { speakType = MessageModes.MonsterYell, color = '#FE6500', hideInConsole = true},
+  barkLow = { speakType = MessageModes.BarkLow, color = '#FE6500', hideInConsole = true},
+  barkLoud = { speakType = MessageModes.BarkLoud, color = '#FE6500', hideInConsole = true},
 }
 
 SpeakTypes = {
   [MessageModes.Say] = SpeakTypesSettings.say,
+  [MessageModes.GamemasterSay] = SpeakTypesSettings.gamemasterSay,
   [MessageModes.Whisper] = SpeakTypesSettings.whisper,
   [MessageModes.Yell] = SpeakTypesSettings.yell,
   [MessageModes.GamemasterBroadcast] = SpeakTypesSettings.broadcast,
@@ -41,14 +43,12 @@ SpeakTypes = {
   [MessageModes.ChannelManagement] = SpeakTypesSettings.channelWhite,
   [MessageModes.GamemasterChannel] = SpeakTypesSettings.channelRed,
   [MessageModes.ChannelHighlight] = SpeakTypesSettings.channelOrange,
-  [MessageModes.MonsterSay] = SpeakTypesSettings.monsterSay,
-  [MessageModes.MonsterYell] = SpeakTypesSettings.monsterYell,
+  [MessageModes.BarkLow] = SpeakTypesSettings.barkLow,
+  [MessageModes.BarkLoud] = SpeakTypesSettings.barkLoud,
   [MessageModes.NpcFromStartBlock] = SpeakTypesSettings.privateNpcToPlayer,
 
   -- ignored types
   [MessageModes.Spell] = SpeakTypesSettings.none,
-  [MessageModes.BarkLow] = SpeakTypesSettings.none,
-  [MessageModes.BarkLoud] = SpeakTypesSettings.none,
 }
 
 SayModes = {
@@ -599,6 +599,7 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
     text = f('%.2d:%.2d %s', h, m, text)
   end
 
+  local characterName = g_game.getCharacterName()
   local panel = clone and cloneTabBar:getTabPanel(tab) or consoleTabBar:getTabPanel(tab)
   local consoleBuffer = panel:getChildById('consoleBuffer')
   local label = g_ui.createWidget('ConsoleLabel', consoleBuffer)
@@ -609,7 +610,7 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
 
   -- Overlay for consoleBuffer which shows highlighted words only
 
-  if speaktype.npcChat and (g_game.getCharacterName() ~= creatureName or g_game.getCharacterName() == 'Account Manager') then
+  if speaktype.npcChat and (characterName ~= creatureName or characterName == 'Account Manager') then
     local highlightData = GameConsole.getHighlightedText(text)
     if #highlightData > 0 then
       local labelHighlight = g_ui.createWidget('ConsolePhantomLabel', label)
@@ -1233,10 +1234,11 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
     end
   end
 
-  if (mode == MessageModes.Say or mode == MessageModes.Whisper or mode == MessageModes.Yell or
-      mode == MessageModes.Spell or mode == MessageModes.MonsterSay or mode == MessageModes.MonsterYell or
+  if (mode == MessageModes.Say or mode == MessageModes.GamemasterSay or mode == MessageModes.Whisper or mode == MessageModes.Yell or
+      mode == MessageModes.Spell or
       mode == MessageModes.NpcFrom or mode == MessageModes.BarkLow or mode == MessageModes.BarkLoud or
-      mode == MessageModes.NpcFromStartBlock) and creaturePos then
+      mode == MessageModes.NpcFromStartBlock) and creaturePos
+  then
     local staticText = StaticText.create()
     -- Remove curly braces from screen message
     local staticMessage = message
@@ -1248,14 +1250,16 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
           staticMessage = staticMessage:gsub('{'..dataBlock.words..'}', dataBlock.words)
         end
       end
-      staticText:setColor(speaktype.color)
     end
 
+    if speaktype.color then
+      staticText:setColor(speaktype.color)
+    end
     staticText:addMessage(name, mode, staticMessage)
     g_map.addStaticText(staticText, creaturePos)
   end
 
-  local defaultMessage = mode <= 3 and true or false
+  local defaultMessage = mode <= 3 or mode == MessageModes.GamemasterSay
 
   if speaktype == SpeakTypesSettings.none then
     return

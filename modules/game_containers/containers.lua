@@ -126,8 +126,8 @@ function GameContainers.refreshContainerSize(containerWindow, resetToMaxHeight)
   containerWindow:setContentMaximumHeight(maxContentHeight)
 
   -- Set window height
-  -- Opened on new window (if is not resetToMaxHeight) or containerHeight (actual window size) exceeds the minHeight and maxHeight limits of internal opened container
-  if not resetToMaxHeight and not containerWindow.previousContainer or containerHeight < minHeight or containerHeight > maxHeight then
+  -- not resetToMaxHeight or actual window size (containerHeight) exceeded the minHeight--maxHeight range of internal opened container
+  if not resetToMaxHeight --[[and not containerWindow.previousContainer]] or containerHeight < minHeight or containerHeight > maxHeight then
     local newContentHeight
 
     -- On change the panel's width
@@ -145,6 +145,16 @@ function GameContainers.refreshContainerSize(containerWindow, resetToMaxHeight)
 end
 
 function GameContainers.onContainerOpen(container, previousContainer)
+  local panel, panelKey = GameInterface.getAvailablePanel()
+  if not panel then
+    -- Send close container
+    g_game.close(container)
+
+    -- Send error message
+    GameTextMessage.displayStatusMessage(loc'${GamelibInfoNoOpenedPanel}')
+    return
+  end
+
   local containerWindow
   if previousContainer then -- Opened on same window
     containerWindow = previousContainer.window
@@ -183,10 +193,6 @@ function GameContainers.onContainerOpen(container, previousContainer)
   local contentsPanel = containerWindow:getChildById('contentsPanel')
   connect(contentsPanel, {
     onGeometryChange = function(self)
-      local minimizeButton = containerWindow:getChildById('minimizeButton')
-      if minimizeButton:isOn() then
-        return
-      end
       GameContainers.refreshContainerSize(containerWindow, true)
     end
   })
@@ -243,6 +249,8 @@ function GameContainers.onContainerOpen(container, previousContainer)
 
 
   -- Setup window
+  containerWindow:setup()
+
   GameInterface.onContainerMiniWindowOpen(containerWindow, previousContainer)
 
   -- Update size
