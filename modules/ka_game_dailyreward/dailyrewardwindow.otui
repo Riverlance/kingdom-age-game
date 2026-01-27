@@ -57,7 +57,6 @@ DailyRewardWindow < MainWindow
   id: dailyRewardWindow
   &loc: '${GameDailyRewardWindowTitle}'
   size: 500 280
-  focusable: false
 
   @onEscape: |
     GameDailyReward.hide()
@@ -72,24 +71,31 @@ DailyRewardWindow < MainWindow
     id: rewardItem1
     anchors.top: prev.outsideBottom
     margin-top: 10
+    focusable: false
 
   RewardItem
     id: rewardItem2
+    focusable: false
 
   RewardItem
     id: rewardItem3
+    focusable: false
 
   RewardItem
     id: rewardItem4
+    focusable: false
 
   RewardItem
     id: rewardItem5
+    focusable: false
 
   RewardItem
     id: rewardItem6
+    focusable: false
 
   RewardItem
     id: rewardItem7
+    focusable: false
 
   RewardProgressBar
     id: claimRewardsBar
