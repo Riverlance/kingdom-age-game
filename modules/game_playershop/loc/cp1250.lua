@@ -11,10 +11,6 @@ g_locales.addTranslations({
     pl = "Kup",
   },
 
-  GamePlayerShopButtonSellAll = {
-    pl = "Sprzedaj wszystko",
-  },
-
   GamePlayerShopSearchLabel = {
     pl = "Szukaj",
   },
@@ -136,10 +132,6 @@ g_locales.addTranslations({
 
   GamePlayerShopTrustRemainingXpMax = {
     pl = "Jesteœ na maksymalnym poziomie zaufania%s.",
-  },
-
-  GamePlayerShopContextMenuLook = {
-    pl = "Zobacz",
   },
 
   GamePlayerShopTrustXp = {

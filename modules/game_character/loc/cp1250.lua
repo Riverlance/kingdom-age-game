@@ -76,4 +76,12 @@ g_locales.addTranslations({
   CharacterInventoryWindowHide = {
     pl = "Ukryj ekwipunek",
   },
+
+  CharacterButtonShopTooltip = {
+    pl = "Odwiedü sklep VIP na naszej stronie internetowej",
+  },
+
+  CharacterButtonDealsTooltip = {
+    pl = "Oferty",
+  },
 }, false)

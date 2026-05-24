@@ -1,6 +1,6 @@
 PartyLevelCalculatorWindow < MainWindow
   id: partyLevelCalculatorWindow
-  &loc: '${GamePartyListLevelCalculatorWindowTitle}'
+  &loc: '${ClientOptionsPartyListLevelCalculatorWindowTitle}'
   size: 250 150
   @onEscape: |
     GamePartyList.partyLevelCalculatorWindowHide()

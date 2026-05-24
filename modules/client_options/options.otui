@@ -16,6 +16,7 @@ OptionScrollbar < HorizontalScrollBar
   anchors.right: parent.right
   step: 1
   show-value: true
+  mouse-scroll: false
   @onValueChange: ClientOptions.setOption(self:getId(), self:getValue())
 
   $first:
@@ -24,6 +25,11 @@ OptionScrollbar < HorizontalScrollBar
   $!first:
     anchors.top: prev.outsideBottom
     margin-top: 2
+
+OptionComboBox < ComboBox
+  anchors.left: parent.left
+  anchors.right: parent.right
+  mouse-scroll: false
 
 OptionCheckBox < CheckBox
   height: 16
@@ -55,6 +61,7 @@ OptionButton < Button
   anchors.left: parent.left
   text-auto-resize: true
   @onClick: ClientOptions.setOption(self:getId(), true)
+  padding: 7 14 7 14
 
   $first:
     anchors.top: parent.top
@@ -74,7 +81,7 @@ OptionHorizontalSeparator < HorizontalSeparator
 MainWindow
   id: optionsWindow
   &loc: '${ClientOptionsTitle}'
-  size: 620 600
+  size: 700 450
   &save: true
 
   @onEnter: ClientOptions.hide()
@@ -88,14 +95,25 @@ MainWindow
     width: 100
     step: 10
 
-  Panel
-    id: optionsTabContent
+  VerticalScrollBar
+    id: optionsTabContentScrollBar
     anchors.top: parent.top
-    anchors.left: optionsTabBar.outsideRight
     anchors.right: parent.right
     anchors.bottom: okButton.outsideTop
     margin-bottom: 10
+    step: 20
+    pixels-scroll: true
+
+  ScrollablePanel
+    id: optionsTabContent
+    anchors.top: parent.top
+    anchors.left: optionsTabBar.outsideRight
+    anchors.right: optionsTabContentScrollBar.left
+    anchors.bottom: okButton.outsideTop
+    margin-bottom: 10
     margin-left: 10
+    margin-right: 4
+    vertical-scrollbar: optionsTabContentScrollBar
 
   Button
     id: okButton

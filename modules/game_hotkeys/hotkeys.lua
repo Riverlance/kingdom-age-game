@@ -12,13 +12,10 @@ HotkeyColors = {
   Power = '#cd4eff',
 }
 
-local GameHotkeysActionKey = 'Ctrl+K'
-
 
 
 hotkeysManagerLoaded = false
 hotkeysWindow = nil
-hotkeysButton = nil
 assignWindow = nil
 hotkeysOverwriteWindow = nil
 currentHotkeyLabel = nil
@@ -46,7 +43,6 @@ function GameHotkeys.init()
 
   g_ui.importStyle('hotkeylabel.otui')
 
-  hotkeysButton = ClientTopMenu.addLeftGameButton('hotkeysButton', { loct = '${GameHotkeysWindowTitle} (${GameHotkeysActionKey})', locpar = { GameHotkeysActionKey = GameHotkeysActionKey } }, '/images/ui/top_menu/hotkeys', GameHotkeys.toggle)
   hotkeysWindow = g_ui.displayUI('hotkeys')
   hotkeysWindow:setVisible(false)
   g_keyboard.bindKeyDown(GameHotkeysActionKey, GameHotkeys.toggle)
@@ -96,6 +92,10 @@ function GameHotkeys.init()
 end
 
 function GameHotkeys.terminate()
+  if g_game.isOnline() then
+    GameHotkeys.offline()
+  end
+
   disconnect(GamePowers, {
     onUpdatePowerList = GameHotkeys.updateHotkeyList
   })
@@ -105,14 +105,41 @@ function GameHotkeys.terminate()
     onGameEnd   = GameHotkeys.offline
   })
 
-  if g_game.isOnline() then
-    GameHotkeys.offline()
-  end
-
   g_keyboard.unbindKeyDown(GameHotkeysActionKey)
 
+  if useRadioGroup then
+    useRadioGroup:destroy()
+    useRadioGroup = nil
+  end
+
+  if assignWindow then
+    assignWindow:destroy()
+    assignWindow = nil
+  end
+
+  if hotkeysOverwriteWindow then
+    hotkeysOverwriteWindow:destroy()
+    hotkeysOverwriteWindow = nil
+  end
+
   hotkeysWindow:destroy()
-  hotkeysButton:destroy()
+
+  hotkeyList = { }
+
+  hotkeysWindow      = nil
+  currentHotkeyLabel = nil
+  hotkeyItemLabel    = nil
+  currentItemPreview = nil
+  useOnSelf          = nil
+  useOnTarget        = nil
+  useWith            = nil
+  addHotkeyButton    = nil
+  removeHotkeyButton = nil
+  hotkeyTextLabel    = nil
+  hotkeyText         = nil
+  sendAutomatically  = nil
+  defaultComboKeys   = nil
+  currentHotkeys     = nil
 
   _G.GameHotkeys = nil
 end
@@ -146,7 +173,6 @@ function GameHotkeys.show()
   if firstChild then
     firstChild:focus()
   end
-  hotkeysButton:setOn(true)
 
   if not wasOpened then
     g_sounds.getChannel(AudioChannels.Gui):play(f('%s/hotkeys_open.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
@@ -157,7 +183,6 @@ function GameHotkeys.hide()
   local wasOpened = hotkeysWindow:isVisible()
 
   hotkeysWindow:hide()
-  hotkeysButton:setOn(false)
 
   if assignWindow then
     signalcall(GameHotkeys.onAssignHotkey, assignWindow.keySettings, false)

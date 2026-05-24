@@ -4,12 +4,7 @@ _G.GamePartyList = { }
 
 
 
-local GamePartyListActionKey = 'Ctrl+P'
-
-
-
 partyTopMenuButton = nil
-partyLevelCalculatorButton = nil
 partyWindow = nil
 partyHeader = nil
 contentsPanel = nil
@@ -130,6 +125,26 @@ local function getCid(data)
   return type(data) == 'userdata' and not isWidget(data) and data:getId() or type(data) == 'table' and data.cid or type(data) == 'number' and data or nil
 end
 
+function GamePartyList.updateTopMenuButtonVisibility()
+  if not partyTopMenuButton then
+    return
+  end
+
+  local localPlayer = g_game.getLocalPlayer()
+  local isInParty = localPlayer and localPlayer:isPartyMember() or false
+  local shouldShowButton = g_game.isOnline() and isInParty
+
+  if shouldShowButton then
+    partyTopMenuButton:show()
+  else
+    partyTopMenuButton:hide()
+
+    if partyWindow then
+      partyWindow:close()
+    end
+  end
+end
+
 
 
 function GamePartyList.init()
@@ -149,13 +164,12 @@ function GamePartyList.init()
   g_ui.importStyle('partylevelcalculatorwindow')
 
   partyWindow = g_ui.loadUI('partylist')
-  partyTopMenuButton = ClientTopMenu.addRightGameToggleButton('partyTopMenuButton', { loct = '${GamePartyListWindowTitle} (${GamePartyListActionKey})', locpar = { GamePartyListActionKey = GamePartyListActionKey } }, '/images/ui/top_menu/party_list', GamePartyList.toggle)
+  partyTopMenuButton = ClientTopMenu.addRightGameToggleButton('partyTopMenuButton', { loct = '${GamePartyListWindowTitle}' }, '/images/ui/top_menu/party_list', GamePartyList.toggle)
 
   partyWindow.topMenuButton = partyTopMenuButton
+  partyTopMenuButton:hide()
 
   partyHeader = partyWindow:getChildById('miniWindowHeader')
-
-  g_keyboard.bindKeyDown(GamePartyListActionKey, GamePartyList.toggle)
 
   partyWindow:setScrollBarAutoHiding(false)
 
@@ -213,13 +227,13 @@ function GamePartyList.init()
   GamePartyList.onClickFilterWizardPlayers(filterWizardPlayersButton)
   GamePartyList.onClickFilterBardPlayers(filterBardPlayersButton)
 
-  partyLevelCalculatorButton = ClientTopMenu.addLeftButton('partyLevelCalculatorButton', loc'${GamePartyListLevelCalculatorWindowTitle}', '/images/ui/top_menu/party_level_calculator', GamePartyList.partyLevelCalculatorWindowToggle)
   GamePartyList.partyLevelCalculatorWindowHide()
 
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodePartyList, GamePartyList.parsePartyList)
 
   connect(Creature, {
-    onWalk = GamePartyList.onWalk,
+    onWalk         = GamePartyList.onWalk,
+    onShieldChange = GamePartyList.onShieldChange,
   })
 
   connect(g_game, {
@@ -243,17 +257,13 @@ function GamePartyList.terminate()
   })
 
   disconnect(Creature, {
-    onWalk = GamePartyList.onWalk,
+    onWalk         = GamePartyList.onWalk,
+    onShieldChange = GamePartyList.onShieldChange,
   })
 
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodePartyList)
 
-  partyLevelCalculatorButton:destroy()
-  partyLevelCalculatorButton = nil
-
   -- Window
-
-  g_keyboard.unbindKeyDown(GamePartyListActionKey)
 
   partyTopMenuButton:destroy()
   partyWindow:destroy()
@@ -295,6 +305,7 @@ end
 function GamePartyList.online()
   partyWindow:setup(partyTopMenuButton)
   GamePartyList.refreshList()
+  GamePartyList.updateTopMenuButtonVisibility()
 end
 
 function GamePartyList.offline()
@@ -305,6 +316,10 @@ function GamePartyList.offline()
 end
 
 function GamePartyList.toggle()
+  if not partyTopMenuButton:isVisible() then
+    return
+  end
+
   GameInterface.toggleMiniWindow(partyWindow)
 end
 
@@ -416,6 +431,8 @@ function GamePartyList.add(data, isInvitee)
     GamePartyList.updateMemberList()
   end
 
+  GamePartyList.updateTopMenuButtonVisibility()
+
   return button, true
 end
 
@@ -496,6 +513,8 @@ function GamePartyList.remove(data)
 
     GamePartyList.updateInviteeList() -- Necessary to disable invitee widgets when invitee is empty
   end
+
+  GamePartyList.updateTopMenuButtonVisibility()
 
   return true -- Found and removed
 end
@@ -886,6 +905,7 @@ function GamePartyList.clearList()
   GamePartyList.updateInviteeList() -- Necessary to disable invitee widgets when invitee is empty
 
   infoButton:setTooltip(loc'${GamePartyListInfoNotInParty}', TooltipType.textBlock)
+  GamePartyList.updateTopMenuButtonVisibility()
 end
 
 function GamePartyList.refreshList()
@@ -928,6 +948,14 @@ function GamePartyList.onWalk(creature, oldPosition, newPosition)
   if table.contains({ SortTypeDistance, SortTypeHierarchy }, GamePartyList.getSortType()) then
     GamePartyList.tryUpdateMemberList(memberButton, newPosition, oldPosition)
   end
+end
+
+function GamePartyList.onShieldChange(creature)
+  if not creature:isLocalPlayer() then
+    return
+  end
+
+  GamePartyList.updateTopMenuButtonVisibility()
 end
 
 function GamePartyList.updateLocalPlayerPing(ping)
@@ -1272,13 +1300,11 @@ end
 function GamePartyList.partyLevelCalculatorWindowShow()
   partyLevelCalculatorWindow:show()
   partyLevelCalculatorWindow:focus()
-  partyLevelCalculatorButton:setOn(true)
 end
 
 function GamePartyList.partyLevelCalculatorWindowHide()
   partyLevelCalculatorWindow:hide()
   GamePartyList.partyLevelCalculatorWindowClear()
-  partyLevelCalculatorButton:setOn(false)
 end
 
 function GamePartyList.partyLevelCalculatorWindowToggle()

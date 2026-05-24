@@ -156,7 +156,12 @@ function Client.loadFiles()
 
     if #errorMessage > 0 then
       local messageBox = displayErrorBox(loc'${CorelibInfoError}', errorMessage)
-      addEvent(function() messageBox:raise() messageBox:focus() end)
+      addEvent(function()
+        if isWidgetAlive(messageBox) then
+          messageBox:raise()
+          messageBox:focus()
+        end
+      end)
       g_game.setClientVersion(0)
       g_game.setProtocolVersion(0)
     end

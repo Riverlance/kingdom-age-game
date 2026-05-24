@@ -193,14 +193,6 @@ g_locales.addTranslations{
 
 
 
-  EnterGameTitle = {
-    en = "Login",
-    pt = "Login",
-    es = "Iniciar Sesión",
-    de = "Anmelden",
-    sv = "Logga In",
-  },
-
   EnterGameMotdTitle = {
     en = "Message of the Day",
     pt = "Mensagem do Dia",

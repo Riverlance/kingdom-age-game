@@ -111,24 +111,6 @@ CombatBox < ButtonBoxRounded
   size: 20 20
   icon-source: /images/ui/combat_mode/control
 
-FightOffensiveBox < CombatBox
-  icon-clip: 0 0 20 20
-
-  $checked:
-    icon-clip: 0 20 20 20
-
-FightBalancedBox < CombatBox
-  icon-clip: 20 0 20 20
-
-  $checked:
-    icon-clip: 20 20 20 20
-
-FightDefensiveBox < CombatBox
-  icon-clip: 40 0 20 20
-
-  $checked:
-    icon-clip: 40 20 20 20
-
 ChaseModeBox < CombatBox
   icon-clip: 60 0 20 20
 
@@ -157,7 +139,7 @@ MiniWindow
   icon: /images/ui/top_menu/healthinfo
   // Mini window height is set in Lua
   &save: true
-  &defaultHeight: 279
+  &defaultHeight: 278
 
   BallMenuButton
     id: ballButton
@@ -274,84 +256,105 @@ MiniWindow
       padding: 1
       creature-size: 107
 
-    HeadSlot
+    Button
+      id: skillsButton
+      icon: /images/ui/top_menu/skills
+      &loct: '${CorelibSkillsWindowTitle}'
+      size: 34 18
       anchors.top: outfitCreatureBox.top
       anchors.horizontalCenter: leftPanel.horizontalCenter
+
+    HeadSlot
+      anchors.top: prev.outsideBottom
+      anchors.horizontalCenter: leftPanel.horizontalCenter
+      margin-top: 1
 
     BodySlot
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
-      margin-top: 2
+      margin-top: 1
 
     LegSlot
-      anchors.top: prev.bottom
+      anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
-      margin-top: 2
+      margin-top: 1
 
     FeetSlot
-      anchors.top: prev.bottom
+      anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
-      margin-top: 2
+      margin-top: 1
 
-    BackSlot
+    Button
+      id: conditionsButton
+      icon: /images/ui/top_menu/conditions
+      &loct: '${CorelibConditionsWindowTitle}'
+      height: 18
+      anchors.top: prev.outsideBottom
+      anchors.left: prev.left
+      anchors.right: prev.right
+      margin-top: 1
+
+    Button
+      icon: /images/ui/top_menu/shop
+      &loct: '${CharacterButtonShopTooltip}'
+      size: 34 18
       anchors.top: outfitCreatureBox.top
       anchors.horizontalCenter: rightPanel.horizontalCenter
+      @onClick: g_platform.openUrl('https://kingdomageonline.com')
+
+    BackSlot
+      anchors.top: prev.outsideBottom
+      anchors.horizontalCenter: rightPanel.horizontalCenter
+      margin-top: 1
 
     NeckSlot
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
-      margin-top: 2
+      margin-top: 1
 
     FingerSlot
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
-      margin-top: 2
+      margin-top: 1
 
     AmmoSlot
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
-      margin-top: 2
+      margin-top: 1
 
-    InboxSlot
+    Button
+      icon: /images/ui/top_menu/deals
+      &loct: '${CharacterButtonDealsTooltip}'
+      height: 18
       anchors.top: prev.outsideBottom
-      anchors.horizontalCenter: prev.horizontalCenter
-      margin-top: 2
+      anchors.left: prev.left
+      anchors.right: prev.right
+      margin-top: 1
+      @onClick: GameInterface.toggleDealsButton()
 
     LeftSlot
       anchors.top: outfitCreatureBox.outsideBottom
       anchors.left: centerPanel.left
-      margin-top: 4
+      margin-top: 5
 
     RightSlot
       anchors.top: outfitCreatureBox.outsideBottom
       anchors.right: centerPanel.right
-      margin-top: 4
+      margin-top: 5
 
     GameLabel
       id: combatControls
-      size: 64 42
+      size: 64 20
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: parent.horizontalCenter
-      margin-top: 4
+      margin-top: 5
 
       layout:
         type: grid
         cell-size: 20 20
         cell-spacing: 2
         num-columns: 3
-        num-lines: 2
-
-      FightOffensiveBox
-        id: fightOffensiveBox
-        &loct: '${CharacterFightOffensiveBox}'
-
-      FightBalancedBox
-        id: fightBalancedBox
-        &loct: '${CharacterFightBalancedBox}'
-
-      FightDefensiveBox
-        id: fightDefensiveBox
-        &loct: '${CharacterFightDefensiveBox}'
+        num-lines: 1
 
       ChaseModeBox
         id: chaseModeBox
@@ -364,3 +367,8 @@ MiniWindow
       MountButton
         id: mountButton
         &loct: '${CharacterMountButton}'
+
+    InboxSlot
+      anchors.top: combatControls.outsideBottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      margin-top: 6

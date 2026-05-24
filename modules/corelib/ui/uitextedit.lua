@@ -1,6 +1,10 @@
 function UITextEdit:setVerticalScrollBar(scrollbar)
   self.verticalScrollBar = scrollbar
   self.verticalScrollBar.onValueChange = function(scrollbar, value)
+    if not isWidgetAlive(self) then
+      return
+    end
+
     local virtualOffset = self:getTextVirtualOffset()
     virtualOffset.y = value
     self:setTextVirtualOffset(virtualOffset)
@@ -11,6 +15,10 @@ end
 function UITextEdit:setHorizontalScrollBar(scrollbar)
   self.horizontalScrollBar = scrollbar
   self.horizontalScrollBar.onValueChange = function(scrollbar, value)
+    if not isWidgetAlive(self) then
+      return
+    end
+
     local virtualOffset = self:getTextVirtualOffset()
     virtualOffset.x = value
     self:setTextVirtualOffset(virtualOffset)
@@ -79,17 +87,35 @@ function UITextEdit:onStyleApply(styleName, styleNode)
   for name, value in pairs(styleNode) do
     if name == 'vertical-scrollbar' then
       addEvent(function()
-        self:setVerticalScrollBar(self:getParent():getChildById(value))
+        if not isWidgetAlive(self) then
+          return
+        end
+
+        local parent = self:getParent()
+        if parent then
+          self:setVerticalScrollBar(parent:getChildById(value))
+        end
       end)
 
     elseif name == 'horizontal-scrollbar' then
       addEvent(function()
-        self:setHorizontalScrollBar(self:getParent():getChildById(value))
+        if not isWidgetAlive(self) then
+          return
+        end
+
+        local parent = self:getParent()
+        if parent then
+          self:setHorizontalScrollBar(parent:getChildById(value))
+        end
       end)
 
     -- Placeholder
     elseif name == 'placeholdertext' then
       addEvent(function()
+        if not isWidgetAlive(self) then
+          return
+        end
+
         local placeholder = self.placeholder
         if placeholder then
           placeholder:setText(value)

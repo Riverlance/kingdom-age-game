@@ -27,7 +27,8 @@ UIWindow
       flow: true
 
   Label
-    !text: 'Select your language'
+    !text: 'Select your language\nPress \'Esc\' to close'
+    text-align: center
     font: sans-11px
     color: white
     anchors.bottom: prev.outsideTop

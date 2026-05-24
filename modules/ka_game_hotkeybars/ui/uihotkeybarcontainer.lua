@@ -1,5 +1,12 @@
 _G.UIHotkeyBarContainer = extends(UIWidget, 'UIHotkeyBarContainer')
 
+local powerEffectDelay = 1000
+local powerEffectStyle = {
+  [1] = 'PowerSendingParticlesBoost1',
+  [2] = 'PowerSendingParticlesBoost2',
+  [3] = 'PowerSendingParticlesBoost3',
+}
+
 function UIHotkeyBarContainer:onSetup()
   self.cbChargePower = function(powerId, boost) self:onChargePower(powerId, boost) end
   self.cbCastPower   = function(powerId, exhaustTime, boost) self:onCastPower(powerId, exhaustTime, boost) end
@@ -18,6 +25,18 @@ function UIHotkeyBarContainer:onDestroy()
     onCastPower   = self.cbCastPower,
     onCancelPower = self.cbCancelPower
   })
+
+  if self.powerProgressEvent then
+    removeEvent(self.powerProgressEvent)
+    self.powerProgressEvent = nil
+  end
+
+  self:clearPowerEffect()
+
+  self.cbChargePower = nil
+  self.cbCastPower   = nil
+  self.cbCancelPower = nil
+  self.settings      = nil
 end
 
 function UIHotkeyBarContainer:getParentBar()
@@ -42,6 +61,14 @@ function UIHotkeyBarContainer:updateLook()
 
   local powerWidget = self:getChildById('power')
   powerWidget:setVisible(false)
+
+  if not keySettings.powerId then
+    if self.powerProgressEvent then
+      removeEvent(self.powerProgressEvent)
+      self.powerProgressEvent = nil
+    end
+    self:clearPowerEffect()
+  end
 
   -- update look
 
@@ -173,6 +200,16 @@ function UIHotkeyBarContainer:onCancelPower()
   if powerId then
     self:setPowerIcon(powerId, false)
   end
+
+  if self.powerProgressEvent then
+    removeEvent(self.powerProgressEvent)
+    self.powerProgressEvent = nil
+  end
+
+  local powerWidget = self:getChildById('power')
+  if powerWidget then
+    powerWidget:setShader('Widget - None')
+  end
 end
 
 --[[ Power Effects ]]
@@ -182,10 +219,41 @@ function UIHotkeyBarContainer:setPowerIcon(powerId, enabled)
   self:getChildById('power'):setImageSource(path)
 end
 
+function UIHotkeyBarContainer:clearPowerEffect()
+  if self.powerEffectDestroyEvent then
+    removeEvent(self.powerEffectDestroyEvent)
+    self.powerEffectDestroyEvent = nil
+  end
+
+  if self.powerEffectWidget then
+    self.powerEffectWidget:destroy()
+    self.powerEffectWidget = nil
+  end
+end
+
 function UIHotkeyBarContainer:setPowerEffect(boostLevel)
+  local style = powerEffectStyle[tonumber(boostLevel) or 0]
+  if not style then
+    return
+  end
+
   local powerWidget = self:getChildById('power')
-  local particle    = g_ui.createWidget(f('PowerSendingParticlesBoost%d', boostLevel), powerWidget)
-  scheduleEvent(function() particle:destroy() end, 1000)
+  if not powerWidget or not powerWidget:isVisible() then
+    return
+  end
+
+  -- Avoid destroying an unfinished effect; wait for it to finish naturally.
+  if self.powerEffectWidget then
+    return
+  end
+
+  local particle = g_ui.createWidget(style, powerWidget)
+  self.powerEffectWidget = particle
+  self.powerEffectDestroyEvent = scheduleEvent(function()
+    self.powerEffectDestroyEvent = nil
+    self.powerEffectWidget = nil
+    particle:destroy()
+  end, powerEffectDelay)
 end
 
 function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
@@ -193,6 +261,11 @@ function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
   if not powerWidget then
     print_traceback("UIHotkeyBarContainer:setPowerProgressShader - Power widget not found")
     return
+  end
+
+  if self.powerProgressEvent then
+    removeEvent(self.powerProgressEvent)
+    self.powerProgressEvent = nil
   end
 
   powerWidget:setShader('Widget - Angular')
@@ -210,10 +283,11 @@ function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
     widget:setShaderUniform(ShaderUniforms.Progress, percent)
     if percent > 1 then
       widget:setShader('Widget - None')
+      self.powerProgressEvent = nil
     else
-      scheduleEvent(function() updateShader() end, 50)
+      self.powerProgressEvent = scheduleEvent(function() updateShader() end, 50)
     end
   end
 
-  scheduleEvent(function() updateShader() end, 50)
+  self.powerProgressEvent = scheduleEvent(function() updateShader() end, 50)
 end

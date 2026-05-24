@@ -64,6 +64,8 @@ function UIProgressBar:setValueDelayed(value, minimum, maximum, delayDuration, d
   -- Stop previous animation
   removeEvent(self.valueDelayedStartEventId)
   removeEvent(self.valueDelayedEventId)
+  self.valueDelayedStartEventId = nil
+  self.valueDelayedEventId = nil
 
   local changeMinimum = minimum and minimum ~= self.minimum
   if changeMinimum then
@@ -75,7 +77,8 @@ function UIProgressBar:setValueDelayed(value, minimum, maximum, delayDuration, d
     self:setMaximum(maximum)
   end
 
-  local valueDiff = value - self.value -- final - initial
+  local targetValue = math.max(math.min(value, self.maximum), self.minimum)
+  local valueDiff = targetValue - self.value -- final - initial
 
   if changeMinimum or changeMaximum or -- Changed minimum or maximum
      not positiveChanges and not negativeChanges or -- No animation enabled
@@ -93,27 +96,37 @@ function UIProgressBar:setValueDelayed(value, minimum, maximum, delayDuration, d
 
   local valuePerTicks = (valueDiff * delayTicks) / delayDuration
 
-  local function onSetValueDelayed()
-    local nextValue = math.max(math.min(self.value + valuePerTicks, self.maximum), self.minimum)
+  local function onSetValueDelayed(widget)
+    local nextValue = math.max(math.min(widget.value + valuePerTicks, widget.maximum), widget.minimum)
 
     -- If next value difference is less than valuePerTicks
-    if math.abs(nextValue - value) < math.abs(valuePerTicks) then
-      self.value = value
-      self:updateBackground()
+    if math.abs(nextValue - targetValue) < math.abs(valuePerTicks) then
+      widget.value = targetValue
+      widget:updateBackground()
+      widget.valueDelayedEventId = nil
       return
     end
 
-    if self.value == value then
+    if widget.value == targetValue then
+      widget.valueDelayedEventId = nil
       return
     end
 
-    self.value = nextValue
-    self:updateBackground()
+    widget.value = nextValue
+    widget:updateBackground()
 
-    self.valueDelayedEventId = scheduleEvent(onSetValueDelayed, delayTicks)
+    widget.valueDelayedEventId = scheduleEvent(function()
+      if isWidgetAlive(widget) then
+        onSetValueDelayed(widget)
+      end
+    end, delayTicks)
   end
 
-  self.valueDelayedStartEventId = scheduleEvent(onSetValueDelayed, delayStartDuration)
+  self.valueDelayedStartEventId = scheduleEvent(function()
+    if isWidgetAlive(self) then
+      onSetValueDelayed(self)
+    end
+  end, delayStartDuration)
 end
 
 function UIProgressBar:setPercent(percent)
@@ -214,6 +227,7 @@ function UIProgressBar:updateBackground()
   if self:isOn() then
     -- Remove old widgets
     self:destroyChildren()
+    self.fillerBackgroundWidget = nil
 
     -- Background area
     self:setBackgroundColor(self.bgAreaColor)
@@ -230,6 +244,15 @@ end
 
 function UIProgressBar:onSetup()
   self:updateBackground()
+end
+
+function UIProgressBar:onDestroy()
+  removeEvent(self.valueDelayedStartEventId)
+  removeEvent(self.valueDelayedEventId)
+
+  self.fillerBackgroundWidget = nil
+  self.valueDelayedStartEventId = nil
+  self.valueDelayedEventId = nil
 end
 
 function UIProgressBar:onStyleApply(name, node)

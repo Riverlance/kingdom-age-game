@@ -89,14 +89,6 @@ g_locales.addTranslations({
 
 
 
-  -- otui - party level calculator
-
-  GamePartyListLevelCalculatorWindowTitle = {
-    pl = "Kalkulator poziomu dru¿yny",
-  },
-
-
-
   -- lua - party list
 
   GamePartyListSortTypeHierarchy = {

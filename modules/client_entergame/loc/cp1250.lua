@@ -101,10 +101,6 @@ g_locales.addTranslations({
 
 
 
-  EnterGameTitle = {
-    pl = "Logowanie",
-  },
-
   EnterGameMotdTitle = {
     pl = "Wiadomoœæ dnia",
   },

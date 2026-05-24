@@ -75,8 +75,8 @@ ServerOpcodes = {
   ServerOpcodeCreateContainer         = 112,
   ServerOpcodeChangeInContainer       = 113,
   ServerOpcodeDeleteInContainer       = 114,
-  ServerOpcodeOpenShop                = 115, -- KA - Open shop
-  ServerOpcodeCloseShop               = 116, -- KA - Close shop
+  ServerOpcodePlayerShop              = 115, -- KA - Player shop actions
+  ServerOpcodeCreatureSpeechBubble    = 116, -- KA - Creature speech bubble
   -- Free                               117 to 119
   ServerOpcodeSetInventory            = 120,
   ServerOpcodeDeleteInventory         = 121,
@@ -207,12 +207,8 @@ ClientOpcodes = {
   -- Free                                 62
   ClientOpcodeTracking                  = 63,
   ClientOpcodePowerCast                 = 64,
-  ClientOpcodeAddShopItem               = 65, -- KA - Add shop item
-  ClientOpcodeRemoveShopItem            = 66, -- KA - Remove shop item
-  ClientOpcodeConfigShopItem            = 67, -- KA - Configure shop item
-  ClientOpcodeMoveShopItem              = 68, -- KA - Move shop item
-  ClientOpcodeCloseShop                 = 69, -- KA - Close shop
-  -- Free                                 70 to 99
+  ClientOpcodePlayerShop                = 65, -- KA - Player shop actions
+  -- Free                                 66 to 99
   ClientOpcodeAutoWalk                  = 100,
   ClientOpcodeWalkNorth                 = 101,
   ClientOpcodeWalkEast                  = 102,
@@ -321,8 +317,7 @@ ClientExtOpcodes = {
   ClientExtOpcodeGreetNpc            = 12,
   ClientExtOpcodeGoldLootAutoDeposit = 13,
   ClientExtOpcodeDeals               = 14,
-  ClientExtOpcodeJobsModalDialog     = 15,
-  -- Free                              16 to 65535
+  -- Free                              15 to 65535
 }
 
 ClientActions = {

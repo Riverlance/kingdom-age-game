@@ -168,7 +168,10 @@ end
 
 function UIResizeBorder:checkBoundary(size)
   size = size or self:getParentSize()
-  if self.maximum == self.minimum and size == self.maximum then
+  local parent = self:getParent()
+  if parent and parent:getClassName() == 'UIMiniWindow' and parent:isOn() or -- Miniwindow is minimized
+     self.maximum == self.minimum and size == self.maximum -- Fixed size
+  then
     self:hide()
   else
     self:show()

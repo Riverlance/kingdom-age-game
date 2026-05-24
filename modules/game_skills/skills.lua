@@ -4,12 +4,7 @@ _G.GameSkills = { }
 
 
 
-local GameSkillsActionKey = 'Ctrl+T'
-
-
-
 skillsWindow = nil
-skillsTopMenuButton = nil
 
 contentsPanel = nil
 
@@ -33,13 +28,8 @@ function GameSkills.init()
   })
 
   skillsWindow = g_ui.loadUI('skills')
-  skillsTopMenuButton = ClientTopMenu.addRightGameToggleButton('skillsTopMenuButton', { loct = '${GameSkillsWindowTitle} (${GameSkillsActionKey})', locpar = { GameSkillsActionKey = GameSkillsActionKey } }, '/images/ui/top_menu/skills', GameSkills.toggle)
-
-  skillsWindow.topMenuButton = skillsTopMenuButton
 
   contentsPanel = skillsWindow:getChildById('contentsPanel')
-
-  g_keyboard.bindKeyDown(GameSkillsActionKey, GameSkills.toggle)
 
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeFocusPoints, GameSkills.updateFocusPoints)
 
@@ -64,13 +54,10 @@ function GameSkills.terminate()
     onGameEnd   = GameSkills.offline
   })
 
-  g_keyboard.unbindKeyDown(GameSkillsActionKey)
-  skillsTopMenuButton:destroy()
   skillsWindow:destroy()
 
   contentsPanel = nil
   skillsWindow = nil
-  skillsTopMenuButton = nil
 
   _G.GameSkills = nil
 end
@@ -192,7 +179,7 @@ function GameSkills.update()
 end
 
 function GameSkills.online()
-  skillsWindow:setup(skillsTopMenuButton)
+  skillsWindow:setup()
 
   local player = g_game.getLocalPlayer()
 
@@ -281,7 +268,7 @@ function GameSkills.onStaminaChange(localPlayer, stamina)
   GameSkills.setSkillPercent('stamina', percent, text)
 end
 
-function GameSkills.onRegenerationChange(localPlayer, time)
+function GameSkills.onRegenerationChange(localPlayer, time, oldTime)
   if not g_game.getFeature(GamePlayerRegenerationTime) or time < 0 then
     return
   end

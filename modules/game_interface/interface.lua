@@ -25,13 +25,11 @@ gameRightThirdPanelContainer = nil
 gameLeftFirstPanelContainer = nil
 gameLeftSecondPanelContainer = nil
 gameLeftThirdPanelContainer = nil
+leftPanelAddButton = nil
+leftPanelRemoveButton = nil
+rightPanelAddButton = nil
+rightPanelRemoveButton = nil
 gameBottomPanel = nil
-discordButton = nil
-linksButton = nil
-shopButton = nil
-logoutButton = nil
-dealsButton = nil
-jobsButton = nil
 mouseGrabberWidget = nil
 countWindow = nil
 logoutWindow = nil
@@ -55,9 +53,375 @@ gamePanelsContainer = { }
 local _gamePanels = { }
 local _gamePanelsContainer = { }
 
+
+
+-- Transposed view
+
+local function mapWalkDirectionByCurrentView(dir)
+  if not gameMapPanel or not gameMapPanel.isTransposedView or not gameMapPanel:isTransposedView() then
+    return dir
+  end
+
+  return Position.transposeDirection(dir)
+end
+
+
+
+-- Look hover
+
+local hoverLookTargetSourceUnknown    = 0
+local hoverLookTargetSourceHud        = 1
+local hoverLookTargetSourceGameScreen = 2
+
+local hoverLookRefreshInterval    = 250
+local hoverLookTickInterval       = 100
+local hoverLookCycleEvent         = nil
+local hoverLookTooltipWidget      = nil
+local hoverLookTargetKey          = nil
+local hoverLookTargetSource       = hoverLookTargetSourceUnknown
+local hoverLookLastRequestAt      = 0
+local hoverLookCurrentTooltipKey  = nil
+local hoverLookCurrentTooltipText = nil
+local hoverLookWasEnabled         = false
+
 local function getDistanceBetween(p1, p2)
   return math.max(math.abs(p1.x - p2.x), math.abs(p1.y - p2.y))
 end
+
+local function isHoverLookEnabled()
+  if g_platform.isMobile() then
+    return false
+  end
+  if not g_game.isOnline() or not gameRootPanel or not gameRootPanel:isVisible() then
+    return false
+  end
+  local keyMods = g_window.getKeyboardModifiers()
+  if keyMods ~= KeyboardShiftModifier or g_ui.isMouseGrabbed() then
+    return false
+  end
+  if g_mouse.isPressed(MouseLeftButton) or g_mouse.isPressed(MouseRightButton) or g_mouse.isPressed(MouseMidButton) then
+    return false
+  end
+  return true
+end
+
+local function getHoverLookTooltipType()
+  return TooltipType.lookHover
+end
+
+local function getHoverLookTargetKey(thing)
+  local thingId = thing:getId() or 0
+
+  if thing:isCreature() then
+    return f('creature:%d', thingId)
+  end
+
+  local pos = thing:getPosition()
+  local posX = pos and pos.x or 0
+  local posY = pos and pos.y or 0
+  local posZ = pos and pos.z or 0
+
+  local stackPos = thing.getStackPos and thing:getStackPos() or 0
+
+  return f('item:%d:%d:%d:%d:%d', thingId, stackPos, posX, posY, posZ)
+end
+
+local function buildHoverLookTarget(thing, source, options)
+  if not thing then
+    return nil
+  end
+
+  if not thing:isItem() and not thing:isCreature() then
+    return nil
+  end
+
+  options = options or {}
+
+  return {
+    thing = thing,
+    source = source or hoverLookTargetSourceUnknown,
+    key = getHoverLookTargetKey(thing),
+    inspectNpcTrade = options.inspectNpcTrade == true
+  }
+end
+
+local function hideHoverLookTooltip()
+  local tooltip = Tooltip(TooltipType.lookHover)
+  if tooltip then
+    tooltip:hide()
+  end
+
+  if hoverLookTooltipWidget then
+    hoverLookTooltipWidget:removeTooltip()
+  end
+
+  hoverLookCurrentTooltipKey = nil
+  hoverLookCurrentTooltipText = nil
+end
+
+local function clearHoverLookTargetState()
+  hoverLookTargetKey = nil
+  hoverLookTargetSource = hoverLookTargetSourceUnknown
+  hoverLookLastRequestAt = 0
+  hideHoverLookTooltip()
+end
+
+local function resetHoverLookState()
+  clearHoverLookTargetState()
+end
+
+local function getHoverLookCreatureFromWidget(widget)
+  if not widget then
+    return nil
+  end
+
+  if widget:getClassName() == 'UICreatureButton' then
+    if widget.creature then
+      return widget.creature
+    end
+
+    if widget.cid then
+      return g_map.getCreatureById(widget.cid)
+    end
+  end
+
+  if widget:getClassName() == 'UICreature' and widget.getCreature then
+    local parent = widget:getParent()
+    if parent and parent:getClassName() == 'UICreatureButton' then
+      local creature = widget:getCreature()
+      if creature then
+        return creature
+      end
+
+      if parent:getClassName() == 'UICreatureButton' and parent.cid then
+        return g_map.getCreatureById(parent.cid)
+      end
+    end
+  end
+
+  return nil
+end
+
+local function getHoverLookTarget(mousePos)
+  if not mousePos or not rootWidget then
+    return nil
+  end
+
+  local hoveredWidget = rootWidget:recursiveGetChildByPos(mousePos, false)
+  local parentWidget = hoveredWidget
+  local isGameRootBranch = false
+
+  while parentWidget do
+    if gameRootPanel and parentWidget == gameRootPanel then
+      isGameRootBranch = true
+    end
+
+    local className = parentWidget:getClassName()
+    local styleName = parentWidget:getStyleName()
+
+    local creature = getHoverLookCreatureFromWidget(parentWidget)
+    if creature then
+      return buildHoverLookTarget(creature, hoverLookTargetSourceHud)
+    end
+
+    -- Do not fallback to gamescreen behind creature widgets when they do not resolve a creature
+    if className == 'UICreatureButton' or styleName == 'CreatureButtonMinimapWidget' then
+      return nil
+    end
+
+    if className == 'UIItem' then
+      local allowVirtualHoverLook = not parentWidget:isVirtual() or parentWidget.hoverLookAllowVirtual
+      if allowVirtualHoverLook then
+        local item = parentWidget:getItem()
+        if item then
+          return buildHoverLookTarget(item, hoverLookTargetSourceHud, {
+            inspectNpcTrade = parentWidget.hoverLookNpcTrade == true
+          })
+        end
+        break
+      end
+    end
+
+    parentWidget = parentWidget:getParent()
+  end
+
+  if not isGameRootBranch or not gameMapPanel or not gameMapPanel:containsPoint(mousePos) then
+    return nil
+  end
+
+  local tile = gameMapPanel:getTile(mousePos)
+  if not tile then
+    return nil
+  end
+
+  local target = buildHoverLookTarget(tile:getTopLookThing(), hoverLookTargetSourceGameScreen)
+  if target then
+    return target
+  end
+
+  target = buildHoverLookTarget(tile:getTopCreature(), hoverLookTargetSourceGameScreen)
+  if target then
+    return target
+  end
+
+  return buildHoverLookTarget(tile:getTopUseThing(), hoverLookTargetSourceGameScreen)
+end
+
+local function startHoverLookCycle()
+  if g_platform.isMobile() or hoverLookCycleEvent then
+    return
+  end
+
+  hoverLookCycleEvent = cycleEvent(GameInterface.updateHoverLook, hoverLookTickInterval)
+end
+
+local function stopHoverLookCycle()
+  if hoverLookCycleEvent then
+    removeEvent(hoverLookCycleEvent)
+    hoverLookCycleEvent = nil
+  end
+
+  resetHoverLookState()
+end
+
+function GameInterface.getHoverLookTooltipType()
+  return getHoverLookTooltipType()
+end
+
+function GameInterface.isHoverLookTooltipOnlyMode()
+  return isHoverLookEnabled()
+end
+
+function GameInterface.getHoverLookConsoleKey()
+  if isHoverLookEnabled() then
+    return hoverLookTargetKey
+  end
+  return nil
+end
+
+function GameInterface.updateHoverLook()
+  local hoverLookEnabled = isHoverLookEnabled()
+  if not hoverLookEnabled then
+    hoverLookWasEnabled = false
+    if hoverLookTargetKey or hoverLookCurrentTooltipKey then
+      resetHoverLookState()
+    end
+    return
+  end
+
+  if not hoverLookWasEnabled then
+    hoverLookWasEnabled = true
+    Tooltip.hide()
+  end
+
+  local now = g_clock.millis()
+
+  local target = getHoverLookTarget(g_window.getMousePosition())
+  if not target then
+    if hoverLookTargetKey or hoverLookCurrentTooltipKey then
+      clearHoverLookTargetState()
+    end
+    return
+  end
+
+  local targetChanged = target.key ~= hoverLookTargetKey
+  if targetChanged then
+    local isHudTransition = hoverLookTargetSource == hoverLookTargetSourceHud or target.source == hoverLookTargetSourceHud
+    if isHudTransition then
+      hideHoverLookTooltip()
+    end
+    hoverLookTargetKey = target.key
+    hoverLookTargetSource = target.source
+    hoverLookLastRequestAt = 0
+  elseif hoverLookCurrentTooltipKey == target.key and string.exists(hoverLookCurrentTooltipText) and hoverLookTooltipWidget then
+    local tooltipObject = hoverLookTooltipWidget:getTooltipObject()
+    if tooltipObject and tooltipObject.widget and (not tooltipObject.widget:isVisible() or tooltipObject.widget:getOpacity() < 0.1) then
+      hoverLookTooltipWidget:setTooltip(hoverLookCurrentTooltipText, GameInterface.getHoverLookTooltipType())
+      tooltipObject:show(hoverLookTooltipWidget)
+    end
+  end
+
+  if now - hoverLookLastRequestAt < hoverLookRefreshInterval then
+    return
+  end
+
+  if g_game.lookHover(target.thing, target.inspectNpcTrade == true) then
+    hoverLookLastRequestAt = now
+  end
+end
+
+function GameInterface.handleHoverLookMessage(text)
+  if not string.exists(text) then
+    return
+  end
+
+  if not isHoverLookEnabled() or not hoverLookTargetKey then
+    return
+  end
+
+  local targetKey = hoverLookTargetKey
+
+  if hoverLookTooltipWidget then
+    local tooltipObject = hoverLookTooltipWidget:getTooltipObject()
+    local tooltipHidden = tooltipObject and tooltipObject.widget and (not tooltipObject.widget:isVisible() or tooltipObject.widget:getOpacity() < 0.1)
+    if tooltipObject and (hoverLookCurrentTooltipKey ~= targetKey or hoverLookCurrentTooltipText ~= text or tooltipHidden) then
+      hoverLookTooltipWidget:setTooltip(text, GameInterface.getHoverLookTooltipType())
+      tooltipObject:show(hoverLookTooltipWidget)
+      hoverLookCurrentTooltipKey = targetKey
+      hoverLookCurrentTooltipText = text
+    end
+  end
+end
+
+
+
+-- Side panel resize border
+
+function GameInterface.clampSidePanelWidthSlots(value)
+  return math.min(math.max(math.round(tonumber(value) or GameSidePanelWidthMinimumSlots), GameSidePanelWidthMinimumSlots), GameSidePanelWidthMaximumSlots)
+end
+
+function GameInterface.getSidePanelWidthFromSlots(value)
+  return GameInterface.clampSidePanelWidthSlots(value) * GameSidePanelWidthFactor + GameSidePanelWidthOffset
+end
+
+function GameInterface.getSidePanelWidthSlotsFromPixels(width)
+  local value = (width - GameSidePanelWidthOffset) / GameSidePanelWidthFactor
+  return GameInterface.clampSidePanelWidthSlots(value)
+end
+
+local function setupSidePanelResizeBorder(panel, borderId, optionKey)
+  local resizeBorder = panel:getChildById(borderId)
+  if not resizeBorder then
+    return
+  end
+
+  resizeBorder:setMinimum(GameInterface.getSidePanelWidthFromSlots(GameSidePanelWidthMinimumSlots))
+  resizeBorder:setMaximum(GameInterface.getSidePanelWidthFromSlots(GameSidePanelWidthMaximumSlots))
+  resizeBorder.vertical = false
+
+  resizeBorder.onMouseMove = function(self, mousePos, mouseMoved)
+    local moved = UIResizeBorder.onMouseMove(self, mousePos, mouseMoved)
+    if not moved then
+      return false
+    end
+
+    local slots = GameInterface.getSidePanelWidthSlotsFromPixels(panel:getWidth())
+    local width = GameInterface.getSidePanelWidthFromSlots(slots)
+
+    if panel:getWidth() ~= width then
+      panel:setWidth(width)
+    end
+
+    if ClientOptions.getOption(optionKey) ~= slots then
+      ClientOptions.setOption(optionKey, slots)
+    end
+
+    return true
+  end
+end
+
+
 
 function GameInterface.init()
   -- Alias
@@ -93,7 +457,25 @@ function GameInterface.init()
   gameLeftFirstPanelContainer = gameLeftFirstPanel:getChildById('gameLeftFirstPanelContainer')
   gameLeftSecondPanelContainer = gameLeftSecondPanel:getChildById('gameLeftSecondPanelContainer')
   gameLeftThirdPanelContainer = gameLeftThirdPanel:getChildById('gameLeftThirdPanelContainer')
+  leftPanelAddButton = gameRootPanel:getChildById('leftPanelAddButton')
+  leftPanelRemoveButton = gameRootPanel:getChildById('leftPanelRemoveButton')
+  rightPanelAddButton = gameRootPanel:getChildById('rightPanelAddButton')
+  rightPanelRemoveButton = gameRootPanel:getChildById('rightPanelRemoveButton')
   gameBottomPanel = gameRootPanel:getChildById('gameBottomPanel')
+
+  -- Look hover
+  -- Helper for positioning
+  g_ui.importStyle('styles/hoverlooktooltip')
+  hoverLookTooltipWidget = g_ui.createWidget('HoverLookTooltip', gameRootPanel)
+
+  ClientOptions.setupPanelAddRemoveButtons()
+
+  setupSidePanelResizeBorder(gameLeftFirstPanel, 'leftFirstPanelResizeBorder', 'leftFirstPanelWidth')
+  setupSidePanelResizeBorder(gameLeftSecondPanel, 'leftSecondPanelResizeBorder', 'leftSecondPanelWidth')
+  setupSidePanelResizeBorder(gameLeftThirdPanel, 'leftThirdPanelResizeBorder', 'leftThirdPanelWidth')
+  setupSidePanelResizeBorder(gameRightFirstPanel, 'rightFirstPanelResizeBorder', 'rightFirstPanelWidth')
+  setupSidePanelResizeBorder(gameRightSecondPanel, 'rightSecondPanelResizeBorder', 'rightSecondPanelWidth')
+  setupSidePanelResizeBorder(gameRightThirdPanel, 'rightThirdPanelResizeBorder', 'rightThirdPanelWidth')
 
   _gamePanels = {
     gameRightFirstPanel,
@@ -112,6 +494,7 @@ function GameInterface.init()
     gameLeftThirdPanelContainer,
   }
 
+  UIMiniWindow.initDropPreviewSingleton()
   GameInterface.setupPanels()
 
   -- Call load AFTER game window has been created and
@@ -129,7 +512,6 @@ function GameInterface.init()
     onLoginAdvice             = GameInterface.onLoginAdvice,
     onAttackingCreatureChange = GameInterface.onAttackingCreatureChange,
     onFollowingCreatureChange = GameInterface.onFollowingCreatureChange,
-    onFightModeChange         = GameInterface.onFightModeChange,
     onTrackCreature           = GameInterface.onTrackCreature,
     onTrackCreatureEnd        = GameInterface.onTrackCreature,
     onTrackPosition           = GameInterface.onTrackPosition,
@@ -140,16 +522,17 @@ function GameInterface.init()
   connect(gameRootPanel, {
     onGeometryChange = GameInterface.updateStretchShrink,
     onFocusChange    = GameInterface.stopSmartWalk,
+    onMouseMove      = GameInterface.updateHoverLook,
   })
 
   connect(gameMapPanel, {
-    onGeometryChange = updateTrackArrows,
-    onViewModeChange = updateTrackArrows,
-    onZoomChange     = updateTrackArrows,
+    onGeometryChange = GameInterface.updateTrackArrows,
+    onViewModeChange = GameInterface.updateTrackArrows,
+    onZoomChange     = GameInterface.updateTrackArrows,
   })
 
   connect(gameScreenArea, {
-    onGeometryChange = updateTrackArrows,
+    onGeometryChange = GameInterface.updateTrackArrows,
   })
 
   connect(mouseGrabberWidget, {
@@ -170,13 +553,7 @@ function GameInterface.init()
 
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeCreatureOutline, GameInterface.setCreatureOutline)
 
-  discordButton = ClientTopMenu.addLeftButton('discordButton', loc'${GameInterfaceButtonDiscordTooltip}', '/images/ui/top_menu/discord', function() g_platform.openUrl('https://discord.gg/vZjxdwp') end, true)
-  linksButton = ClientTopMenu.addLeftButton('linksButton', loc'${GameInterfaceButtonLinksTooltip}', '/images/ui/top_menu/links', function() g_platform.openUrl('https://linktr.ee/kingdomage') end, true)
-  shopButton = ClientTopMenu.addLeftButton('shopButton', loc'${GameInterfaceButtonShopTooltip}', '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end, true)
-  shopButton:setOn(true)
-  logoutButton = ClientTopMenu.addLeftButton('logoutButton', loc'${CorelibInfoExit}', '/images/ui/top_menu/logout', GameInterface.tryLogout, true)
-  dealsButton = ClientTopMenu.addRightGameToggleButton('dealsButton', loc'${GameInterfaceButtonDealsTooltip}', '/images/ui/top_menu/deals', GameInterface.toggleDealsButton)
-  jobsButton = ClientTopMenu.addRightGameToggleButton('jobsButton', loc'${GameInterfaceButtonJobSkillsTooltip}', '/images/ui/top_menu/jobs', GameInterface.toggleJobsButton)
+  ClientEnterGame.createEnterGameButton()
 
   GameInterface.bindKeys()
 
@@ -204,7 +581,8 @@ function GameInterface.bindTurnKey(key, dir, checkConsole)
     end
 
     if g_clock.millis() - lastDirTime >= ClientOptions.getOption('turnDelay') then
-      g_game.turn(dir)
+      local mappedDir = mapWalkDirectionByCurrentView(dir)
+      g_game.turn(mappedDir)
       GameInterface.changeWalkDir(dir)
       lastDirTime = g_clock.millis()
     end
@@ -263,7 +641,6 @@ function GameInterface.bindKeys()
   g_keyboard.bindKeyDown('Ctrl+Shift+W', function() ClientOptions.setOption('showChat', not ClientOptions.getOption('showChat')) end)
   g_keyboard.bindKeyDown('Ctrl+Shift+A', function() ClientOptions.setOption('showLeftPanel', not ClientOptions.getOption('showLeftPanel')) end)
   g_keyboard.bindKeyDown('Ctrl+Shift+S', function() ClientOptions.setOption('showRightPanel', not ClientOptions.getOption('showRightPanel')) end)
-
   GameInterface.bindActionKeyUp('Insert')
   GameInterface.bindActionKeyUp('Delete')
   GameInterface.bindActionKeyUp('Home')
@@ -303,18 +680,19 @@ function GameInterface.terminate()
   })
 
   disconnect(gameScreenArea, {
-    onGeometryChange = updateTrackArrows,
+    onGeometryChange = GameInterface.updateTrackArrows,
   })
 
   disconnect(gameMapPanel, {
-    onGeometryChange = updateTrackArrows,
-    onViewModeChange = updateTrackArrows,
-    onZoomChange     = updateTrackArrows,
+    onGeometryChange = GameInterface.updateTrackArrows,
+    onViewModeChange = GameInterface.updateTrackArrows,
+    onZoomChange     = GameInterface.updateTrackArrows,
   })
 
   disconnect(gameRootPanel, {
     onGeometryChange = GameInterface.updateStretchShrink,
     onFocusChange    = GameInterface.stopSmartWalk,
+    onMouseMove      = GameInterface.updateHoverLook,
   })
 
   disconnect(g_game, {
@@ -323,7 +701,6 @@ function GameInterface.terminate()
     onLoginAdvice             = GameInterface.onLoginAdvice,
     onAttackingCreatureChange = GameInterface.onAttackingCreatureChange,
     onFollowingCreatureChange = GameInterface.onFollowingCreatureChange,
-    onFightModeChange         = GameInterface.onFightModeChange,
     onTrackCreature           = GameInterface.onTrackCreature,
     onTrackCreatureEnd        = GameInterface.onTrackCreature,
     onTrackPosition           = GameInterface.onTrackPosition,
@@ -341,22 +718,11 @@ function GameInterface.terminate()
   gamePanelsContainer  = { }
   gamePanels           = { }
 
-  discordButton:destroy()
-  linksButton:destroy()
-  shopButton:destroy()
-  logoutButton:destroy()
-  dealsButton:destroy()
-  jobsButton:destroy()
+  -- Look hover
+  hoverLookTooltipWidget:destroy()
+  hoverLookTooltipWidget = nil
 
   gameRootPanel:destroy()
-
-  discordButton = nil
-  linksButton   = nil
-  shopButton    = nil
-  logoutButton  = nil
-  dealsButton   = nil
-  jobsButton    = nil
-
   gameRootPanel = nil
 
   _G.GameInterface = nil
@@ -420,6 +786,9 @@ function GameInterface.onGameStart()
 end
 
 function GameInterface.onGameEnd()
+  -- Release dragging
+  g_ui.resetDraggingWidget()
+
   local localPlayer = g_game.getLocalPlayer()
 
   disconnect(localPlayer, {
@@ -442,20 +811,25 @@ function GameInterface.show()
   gameRootPanel:focus()
   gameMapPanel:followCreature(g_game.getLocalPlayer())
   GameInterface.updateStretchShrink()
-  logoutButton:setTooltip(loc'${CorelibInfoLogout}')
 
   GameInterface.updateManaBar()
 
   -- Update panels
   GameInterface.setLeftPanels()
   GameInterface.setRightPanels()
+
+  -- Look hover
+  startHoverLookCycle()
+  GameInterface.updateHoverLook()
 end
 
 function GameInterface.hide()
+  -- Look hover
+  stopHoverLookCycle()
+
   disconnect(g_app, {
     onClose = GameInterface.tryExit
   })
-  logoutButton:setTooltip(loc'${CorelibInfoExit}')
 
   if logoutWindow then
     logoutWindow:destroy()
@@ -537,7 +911,6 @@ function GameInterface.tryLogout(prompt)
       if logoutWindow then
         logoutWindow:destroy()
         logoutWindow=nil
-        logoutButton:setOn(false)
       end
     end
   else
@@ -548,7 +921,6 @@ function GameInterface.tryLogout(prompt)
       if logoutWindow then
         logoutWindow:destroy()
         logoutWindow=nil
-        logoutButton:setOn(false)
       end
     end
   end
@@ -556,7 +928,6 @@ function GameInterface.tryLogout(prompt)
   local noCallback = function()
     logoutWindow:destroy()
     logoutWindow=nil
-    logoutButton:setOn(false)
   end
 
   if prompt then
@@ -565,7 +936,6 @@ function GameInterface.tryLogout(prompt)
       { text = loc'${CorelibInfoNo}', callback = noCallback },
       anchor = AnchorHorizontalCenter
     }, yesCallback, noCallback)
-    logoutButton:setOn(true)
   else
      yesCallback()
   end
@@ -587,6 +957,8 @@ function GameInterface.onWalkKeyDown(dir)
 end
 
 function GameInterface.changeWalkDir(dir, pop)
+  dir = mapWalkDirectionByCurrentView(dir)
+
   while table.removevalue(smartWalkDirs, dir) do end
   if pop then
     if #smartWalkDirs == 0 then
@@ -622,7 +994,7 @@ function GameInterface.smartWalk(dir)
     return false
   end
 
-  local _dir = smartWalkDir or dir
+  local _dir = smartWalkDir or mapWalkDirectionByCurrentView(dir)
   g_game.walk(_dir, firstStep)
   firstStep = false
   return true
@@ -638,7 +1010,7 @@ function GameInterface.updateStretchShrink()
 
   ClientOptions.setOption('gameScreenSize', 19) -- Height of 19 SQMs
 
-  local gameMapMargin = gameMapPanel:getPaddingTop() + gameMapPanel:getPaddingBottom() + 2 -- 2 because of black border line of game screen
+  local gameMapMargin = gameMapPanel:getHeight() - gameMapPanel:getMapHeight()
   bottomSplitter:setMarginBottom(bottomSplitter:getMarginBottom() + gameMapPanel:getHeight() - (32 * 19 + gameMapMargin))
 end
 
@@ -902,11 +1274,7 @@ function GameInterface.onContainerMiniWindowOpen(containerWindow, previousContai
 end
 
 function GameInterface.toggleMiniWindow(miniWindow) -- To use on each top menu mini window
-  if not miniWindow.topMenuButton then
-    return
-  end
-
-  if miniWindow.topMenuButton:isOn() then
+  if miniWindow:isVisible() then
     miniWindow:close()
   else
     if not miniWindow:getSettings(true) or not miniWindow:getParent() then -- Opened for the first time or has not parent
@@ -954,21 +1322,21 @@ function GameInterface.setRightPanels(on)
 
   if on and GameInterface.isPanelEnabled(gameRightFirstPanel) then
     gameRightFirstPanel:setVisible(true)
-    gameRightFirstPanel:setWidth(ClientOptions.getOption('rightFirstPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+    gameRightFirstPanel:setWidth(GameInterface.getSidePanelWidthFromSlots(ClientOptions.getOption('rightFirstPanelWidth')))
   else
     gameRightFirstPanel:setVisible(false)
   end
 
   if on and GameInterface.isPanelEnabled(gameRightSecondPanel) then
     gameRightSecondPanel:setVisible(true)
-    gameRightSecondPanel:setWidth(ClientOptions.getOption('rightSecondPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+    gameRightSecondPanel:setWidth(GameInterface.getSidePanelWidthFromSlots(ClientOptions.getOption('rightSecondPanelWidth')))
   else
     gameRightSecondPanel:setVisible(false)
   end
 
   if on and GameInterface.isPanelEnabled(gameRightThirdPanel) then
     gameRightThirdPanel:setVisible(true)
-    gameRightThirdPanel:setWidth(ClientOptions.getOption('rightThirdPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+    gameRightThirdPanel:setWidth(GameInterface.getSidePanelWidthFromSlots(ClientOptions.getOption('rightThirdPanelWidth')))
   else
     gameRightThirdPanel:setVisible(false)
   end
@@ -983,21 +1351,21 @@ function GameInterface.setLeftPanels(on)
 
   if on and GameInterface.isPanelEnabled(gameLeftFirstPanel) then
     gameLeftFirstPanel:setVisible(true)
-    gameLeftFirstPanel:setWidth(ClientOptions.getOption('leftFirstPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+    gameLeftFirstPanel:setWidth(GameInterface.getSidePanelWidthFromSlots(ClientOptions.getOption('leftFirstPanelWidth')))
   else
     gameLeftFirstPanel:setVisible(false)
   end
 
   if on and GameInterface.isPanelEnabled(gameLeftSecondPanel) then
     gameLeftSecondPanel:setVisible(true)
-    gameLeftSecondPanel:setWidth(ClientOptions.getOption('leftSecondPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+    gameLeftSecondPanel:setWidth(GameInterface.getSidePanelWidthFromSlots(ClientOptions.getOption('leftSecondPanelWidth')))
   else
     gameLeftSecondPanel:setVisible(false)
   end
 
   if on and GameInterface.isPanelEnabled(gameLeftThirdPanel) then
     gameLeftThirdPanel:setVisible(true)
-    gameLeftThirdPanel:setWidth(ClientOptions.getOption('leftThirdPanelWidth') * GameSidePanelWidthFactor + GameSidePanelWidthOffset)
+    gameLeftThirdPanel:setWidth(GameInterface.getSidePanelWidthFromSlots(ClientOptions.getOption('leftThirdPanelWidth')))
   else
     gameLeftThirdPanel:setVisible(false)
   end
@@ -1162,16 +1530,6 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
   local shortcut = nil
 
   if not classic then
-    shortcut = '(Shift)'
-  else
-    shortcut = nil
-  end
-
-  if lookThing then
-    menu:addOption(loc'${GameInterfaceContextMenuLook}', function() g_game.look(lookThing) end, shortcut)
-  end
-
-  if not classic then
     shortcut = '(Ctrl)'
   else
     shortcut = nil
@@ -1254,7 +1612,6 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
         menu:addSeparator()
 
         menu:addOption(loc'${GameInterfaceContextMenuRuleViolations}', function() if modules.game_ruleviolation then GameRuleViolation.showViewWindow() end end)
-        menu:addOption(loc'${GameInterfaceContextMenuViewBugs}', function() if modules.game_bugreport then GameBugReport.showViewWindow() end end)
       end
 
     else
@@ -1453,11 +1810,6 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
       GameTracker.toggleTracking(creatureThing)
       return true
 
-    -- Look
-    elseif lookThing and (keyShift and mouseLeftOrRight or mouseLeftAndRight) then
-      g_game.look(lookThing)
-      return true
-
     -- Context menu
     elseif useThing and keyCtrl and mouseLeftOrRight then
       GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatureThing, wrapThing)
@@ -1509,10 +1861,6 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
       g_game.use(useThing)
       return true
 
-    -- Look
-    elseif lookThing and keyShift and mouseLeftOrRight then
-      g_game.look(lookThing)
-      return true
     end
   end
 
@@ -1556,64 +1904,109 @@ function GameInterface.moveStackableItem(item, toPos)
   spinbox:focus()
   spinbox.firstEdit = true
 
-  local spinBoxValueChange = function(self, value)
+  local spinBoxValueChange = function(_, value)
+    if not isWidgetAlive(spinbox) then
+      return
+    end
     spinbox.firstEdit = false
     scrollbar:setValue(value)
   end
   spinbox.onValueChange = spinBoxValueChange
 
-  local check = function()
-    if spinbox.firstEdit then
-      spinbox:setValue(spinbox:getMaximum())
-      spinbox.firstEdit = false
+  local check = function(widget)
+    if widget.firstEdit then
+      widget:setValue(widget:getMaximum())
+      widget.firstEdit = false
     end
   end
-  g_keyboard.bindKeyPress('Up', function() check() spinbox:up() end, spinbox)
-  g_keyboard.bindKeyPress('Right', function() check() spinbox:up() end, spinbox)
-  g_keyboard.bindKeyPress('Down', function() check() spinbox:down() end, spinbox)
-  g_keyboard.bindKeyPress('Left', function() check() spinbox:down() end, spinbox)
-  g_keyboard.bindKeyPress('PageUp', function() check() spinbox:setValue(spinbox:getValue() + 10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Up', function() check() spinbox:setValue(spinbox:getValue() + 10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Right', function() check() spinbox:setValue(spinbox:getValue() + 10) end, spinbox)
-  g_keyboard.bindKeyPress('PageDown', function() check() spinbox:setValue(spinbox:getValue() - 10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Down', function() check() spinbox:setValue(spinbox:getValue() - 10) end, spinbox)
-  g_keyboard.bindKeyPress('Shift+Left', function() check() spinbox:setValue(spinbox:getValue() - 10) end, spinbox)
+  g_keyboard.bindKeyPress('Up', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:up() end end, spinbox)
+  g_keyboard.bindKeyPress('Right', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:up() end end, spinbox)
+  g_keyboard.bindKeyPress('Down', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:down() end end, spinbox)
+  g_keyboard.bindKeyPress('Left', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:down() end end, spinbox)
+  g_keyboard.bindKeyPress('PageUp', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:setValue(spinbox:getValue() + 10) end end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Up', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:setValue(spinbox:getValue() + 10) end end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Right', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:setValue(spinbox:getValue() + 10) end end, spinbox)
+  g_keyboard.bindKeyPress('PageDown', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:setValue(spinbox:getValue() - 10) end end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Down', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:setValue(spinbox:getValue() - 10) end end, spinbox)
+  g_keyboard.bindKeyPress('Shift+Left', function() if isWidgetAlive(spinbox) then check(spinbox) spinbox:setValue(spinbox:getValue() - 10) end end, spinbox)
 
-  scrollbar.onValueChange = function(self, value)
-    itembox:setItemCount(value)
-    spinbox.onValueChange = nil
-    spinbox:setValue(value)
-    spinbox.onValueChange = spinBoxValueChange
+  scrollbar.onValueChange = function(_, value)
+    if not isWidgetAlive(countWindow) then
+      return
+    end
+
+    local window = countWindow
+    window.item:setItemCount(value)
+
+    local currentSpinbox = window.spinBox
+    if not isWidgetAlive(currentSpinbox) then
+      return
+    end
+
+    currentSpinbox.onValueChange = nil
+    currentSpinbox:setValue(value)
+    currentSpinbox.onValueChange = spinBoxValueChange
   end
 
   scrollbar.onClick = function()
+    if not isWidgetAlive(countWindow) then
+      return
+    end
+
+    local window = countWindow
     local mousePos = g_window.getMousePosition()
-    local slider = scrollbar:getChildById('sliderButton')
-    check()
+    local currentScrollbar = window.countScrollBar
+    local currentSpinbox = window.spinBox
+
+    if not isWidgetAlive(currentScrollbar) then
+      return
+    end
+
+    if not isWidgetAlive(currentSpinbox) then
+      return
+    end
+
+    local slider = currentScrollbar:getChildById('sliderButton')
+    check(currentSpinbox)
     if slider:getPosition().x > mousePos.x then
-      spinbox:setValue(spinbox:getValue() - 10)
+      currentSpinbox:setValue(currentSpinbox:getValue() - 10)
     elseif slider:getPosition().x < mousePos.x then
-      spinbox:setValue(spinbox:getValue() + 10)
+      currentSpinbox:setValue(currentSpinbox:getValue() + 10)
     end
   end
 
-  local okButton = countWindow:getChildById('buttonOk')
   local moveFunc = function()
-    g_game.move(item, toPos, itembox:getItemCount())
-    okButton:getParent():destroy()
-    countWindow = nil
+    if not isWidgetAlive(countWindow) then
+      return
+    end
+
+    local window = countWindow
+    local moveCount = math.floor(tonumber(window.countScrollBar:getValue()) or 1)
+    moveCount = math.max(1, math.min(moveCount, count))
+
+    g_game.move(item, toPos, moveCount)
+    window:destroy()
+    if countWindow == window then
+      countWindow = nil
+    end
   end
-  local cancelButton = countWindow:getChildById('buttonCancel')
   local cancelFunc = function()
-    cancelButton:getParent():destroy()
-    countWindow = nil
+    if not isWidgetAlive(countWindow) then
+      return
+    end
+
+    local window = countWindow
+    window:destroy()
+    if countWindow == window then
+      countWindow = nil
+    end
   end
 
   countWindow.onEnter = moveFunc
   countWindow.onEscape = cancelFunc
 
-  okButton.onClick = moveFunc
-  cancelButton.onClick = cancelFunc
+  countWindow:getChildById('buttonOk').onClick = moveFunc
+  countWindow:getChildById('buttonCancel').onClick = cancelFunc
 end
 
 function GameInterface.getRootPanel()
@@ -1674,6 +2067,22 @@ end
 
 function GameInterface.getLeftThirdPanelContainer()
   return gameLeftThirdPanelContainer
+end
+
+function GameInterface.getLeftPanelAddButton()
+  return leftPanelAddButton
+end
+
+function GameInterface.getLeftPanelRemoveButton()
+  return leftPanelRemoveButton
+end
+
+function GameInterface.getRightPanelAddButton()
+  return rightPanelAddButton
+end
+
+function GameInterface.getRightPanelRemoveButton()
+  return rightPanelRemoveButton
 end
 
 function GameInterface.getBottomPanel()
@@ -1836,7 +2245,12 @@ function GameInterface.onTrackPosition(posNode, remove)
     g_game.sendMagicEffect(g_game.getLocalPlayer():getPosition(), 347)
   end
 
-  addEvent(function() updateTrackArrow(posNode) end, 1)
+  local trackWidget = posNode.widget
+  addEvent(withWeakWidget(trackWidget, function(widget)
+    if posNode.widget == widget then
+      updateTrackArrow(posNode)
+    end
+  end))
 end
 
 function GameInterface.onTrackPositionEnd(posNode)
@@ -1852,6 +2266,9 @@ function GameInterface.onTrackPositionEnd(posNode)
   posNode.widget = nil
 end
 
+-- Tracker widget orbit radius around the local player in SQMs.
+local trackerWidgetOrbitRadiusSqm = 3
+
 function updateTrackArrow(trackNode)
   if not trackNode.widget then
     return
@@ -1860,11 +2277,10 @@ function updateTrackArrow(trackNode)
   local playerPos = g_game.getLocalPlayer():getPosition()
   local trackPos = trackNode.position
 
-  local isInRange = Position.isInRange(playerPos, trackPos, ScreenRangeX, ScreenRangeY)
-  trackNode.widget:setVisible(not isInRange)
+  trackNode.widget:setVisible(not Position.isInRange(playerPos, trackPos, trackerWidgetOrbitRadiusSqm - 1, trackerWidgetOrbitRadiusSqm - 1))
 
   if not trackNode.id then -- only on track position
-    if isInRange and playerPos.z == trackPos.z then
+    if Position.isInRange(playerPos, trackPos, ScreenRangeX, ScreenRangeY) and playerPos.z == trackPos.z then
       if not trackNode.cycleEvent then
         g_game.sendMagicEffect(trackPos, 346)
         trackNode.cycleEvent = cycleEvent(function()
@@ -1890,7 +2306,15 @@ function updateTrackArrow(trackNode)
   trackerLabel:setText(f('%d m', _distance))
   trackerLabel:setVisible(_distance > 0)
 
-  local orientation = math.atan2(trackPos.y - playerPos.y, trackPos.x - playerPos.x)
+  local dx = trackPos.x - playerPos.x
+  local dy = trackPos.y - playerPos.y
+
+  if gameMapPanel:isTransposedView() then
+    -- Match transposed map orientation for tracker vectors
+    dx, dy = dy, dx
+  end
+
+  local orientation = math.atan2(dy, dx)
   local trackerArrow = trackNode.widget:getChildById('arrow')
   trackerArrow:setRotation(_distance > 0 and math.deg(orientation) or (trackPos.z < playerPos.z and -135 or trackPos.z > playerPos.z and 45) or 0)
 
@@ -1900,8 +2324,8 @@ function updateTrackArrow(trackNode)
   end
 
   trackerLabel:breakAnchors()
-  local xDiff = playerPos.x - trackPos.x
-  local yDiff = playerPos.y - trackPos.y
+  local xDiff = -dx
+  local yDiff = -dy
   if yDiff < 0 then
     trackerLabel:addAnchor(AnchorBottom, 'arrow', AnchorOutsideTop)
   elseif yDiff > 0 then
@@ -1918,21 +2342,33 @@ function updateTrackArrow(trackNode)
   end
 
   local mapSize = gameMapPanel:getVisibleDimension()
-  local tileX = gameMapPanel:getMapWidth() / mapSize.width
-  local tileY = gameMapPanel:getMapHeight() / mapSize.height
+  local viewWidth = mapSize.width
+  local viewHeight = mapSize.height
+  if gameMapPanel:isTransposedView() then
+    -- MapView swaps source target size in transposed mode.
+    viewWidth = mapSize.height
+    viewHeight = mapSize.width
+  end
 
-  local px = gameMapPanel:getX() + (gameMapPanel:getWidth() - gameMapPanel:getMapWidth()) / 2 + (tileX * (mapSize.width - 1) / 2)
-  local py = gameMapPanel:getY() + (gameMapPanel:getHeight() - gameMapPanel:getMapHeight()) / 2 + (tileY * (mapSize.height - 1) / 2)
+  local tileX = gameMapPanel:getMapWidth() / viewWidth
+  local tileY = gameMapPanel:getMapHeight() / viewHeight
 
-  local rx = ( (distance - 1) * tileX - trackNode.widget:getWidth()  ) * math.cos(orientation)
-  local ry = ( (distance - 1) * tileY - trackNode.widget:getHeight() ) * math.sin(orientation)
+  local px = gameMapPanel:getX() + (gameMapPanel:getWidth() - gameMapPanel:getMapWidth()) / 2 + (tileX * (viewWidth - 1) / 2)
+  local py = gameMapPanel:getY() + (gameMapPanel:getHeight() - gameMapPanel:getMapHeight()) / 2 + (tileY * (viewHeight - 1) / 2)
 
-  trackNode.widget:setX(px + rx)
-  trackNode.widget:setY(py + ry)
-  trackNode.widget:bindRectToParent()
+  local orbitDistance = math.min(distance, trackerWidgetOrbitRadiusSqm)
+  local orbitSteps = math.max(orbitDistance - 1, 0)
+  local radiusX = orbitSteps * tileX
+  local radiusY = orbitSteps * tileY
+
+  local centerX = px + (radiusX * math.cos(orientation))
+  local centerY = py + (radiusY * math.sin(orientation))
+
+  trackNode.widget:setX(centerX - trackNode.widget:getWidth() / 2)
+  trackNode.widget:setY(centerY - trackNode.widget:getHeight() / 2)
 end
 
-function updateTrackArrows()
+function GameInterface.updateTrackArrows()
   for _, trackNode in pairs(GameTracker.getTrackList()) do
     updateTrackArrow(trackNode)
   end
@@ -2038,13 +2474,6 @@ function GameInterface.onFollowingCreatureChange(creature, prevCreature)
   end
 end
 
-function GameInterface.onFightModeChange(fightMode)
-  local creature = g_game.getAttackingCreature()
-  if creature then
-    creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().notHovered)
-  end
-end
-
 function GameInterface.toggleDealsButton()
   if not g_game.canPerformGameAction() then
     return
@@ -2058,23 +2487,6 @@ function GameInterface.toggleDealsButton()
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
   msg:addU16(ClientExtOpcodes.ClientExtOpcodeDeals)
-
-  protocolGame:send(msg)
-end
-
-function GameInterface.toggleJobsButton()
-  if not g_game.canPerformGameAction() then
-    return
-  end
-
-  local protocolGame = g_game.getProtocolGame()
-  if not protocolGame then
-    return
-  end
-
-  local msg = OutputMessage.create()
-  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
-  msg:addU16(ClientExtOpcodes.ClientExtOpcodeJobsModalDialog)
 
   protocolGame:send(msg)
 end

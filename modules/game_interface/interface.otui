@@ -94,6 +94,12 @@ UIWidget
     GameSideContainer
       id: gameLeftFirstPanelContainer
 
+    ResizeBorder
+      id: leftFirstPanelResizeBorder
+      anchors.right: parent.right
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+
   GameSidePanel
     id: gameLeftSecondPanel
     anchors.left: prev.outsideRight
@@ -102,6 +108,12 @@ UIWidget
     GameSideContainer
       id: gameLeftSecondPanelContainer
 
+    ResizeBorder
+      id: leftSecondPanelResizeBorder
+      anchors.right: parent.right
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+
   GameSidePanel
     id: gameLeftThirdPanel
     anchors.left: prev.outsideRight
@@ -109,6 +121,12 @@ UIWidget
 
     GameSideContainer
       id: gameLeftThirdPanelContainer
+
+    ResizeBorder
+      id: leftThirdPanelResizeBorder
+      anchors.right: parent.right
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
 
   GameSidePanel
     id: gameRightFirstPanel
@@ -121,6 +139,13 @@ UIWidget
     GameSideContainer
       id: gameRightFirstPanelContainer
 
+    ResizeBorder
+      id: rightFirstPanelResizeBorder
+      anchors.left: parent.left
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      invert: true
+
   GameSidePanel
     id: gameRightSecondPanel
     anchors.right: prev.outsideLeft
@@ -129,6 +154,13 @@ UIWidget
     GameSideContainer
       id: gameRightSecondPanelContainer
 
+    ResizeBorder
+      id: rightSecondPanelResizeBorder
+      anchors.left: parent.left
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      invert: true
+
   GameSidePanel
     id: gameRightThirdPanel
     anchors.right: prev.outsideLeft
@@ -136,6 +168,13 @@ UIWidget
 
     GameSideContainer
       id: gameRightThirdPanelContainer
+
+    ResizeBorder
+      id: rightThirdPanelResizeBorder
+      anchors.left: parent.left
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      invert: true
 
   // Used also for lock widgets by server
   GameBottomPanel
@@ -274,6 +313,44 @@ UIWidget
       image-clip: 7 40 7 20
 
   UIButton
+    id: leftPanelAddButton
+    size: 7 11
+    anchors.bottom: leftPanelButton.outsideTop
+    anchors.left: gameLeftThirdPanel.outsideRight
+    image-source: /images/ui/_button/sidebar_amount
+    !tooltip: f(loc'${GameInterfacePanelAddButton}')
+
+    $hidden:
+      size: 0 0
+
+    image-clip: 0 0 7 11
+
+    $hover:
+      image-clip: 0 11 7 11
+
+    $pressed:
+      image-clip: 0 22 7 11
+
+  UIButton
+    id: leftPanelRemoveButton
+    size: 7 11
+    anchors.top: leftPanelButton.outsideBottom
+    anchors.left: gameLeftThirdPanel.outsideRight
+    image-source: /images/ui/_button/sidebar_amount
+    !tooltip: f(loc'${GameInterfacePanelRemoveButton}')
+
+    $hidden:
+      size: 0 0
+
+    image-clip: 14 0 7 11
+
+    $hover:
+      image-clip: 14 11 7 11
+
+    $pressed:
+      image-clip: 14 22 7 11
+
+  UIButton
     id: rightPanelButton
     size: 7 20
     anchors.verticalCenter: gameScreenArea.verticalCenter
@@ -305,6 +382,44 @@ UIWidget
 
     $!on pressed:
       image-clip: 21 40 7 20
+
+  UIButton
+    id: rightPanelAddButton
+    size: 7 11
+    anchors.bottom: rightPanelButton.outsideTop
+    anchors.right: gameRightThirdPanel.outsideLeft
+    image-source: /images/ui/_button/sidebar_amount
+    !tooltip: f(loc'${GameInterfacePanelAddButton}')
+
+    $hidden:
+      size: 0 0
+
+    image-clip: 7 0 7 11
+
+    $hover:
+      image-clip: 7 11 7 11
+
+    $pressed:
+      image-clip: 7 22 7 11
+
+  UIButton
+    id: rightPanelRemoveButton
+    size: 7 11
+    anchors.top: rightPanelButton.outsideBottom
+    anchors.right: gameRightThirdPanel.outsideLeft
+    image-source: /images/ui/_button/sidebar_amount
+    !tooltip: f(loc'${GameInterfacePanelRemoveButton}')
+
+    $hidden:
+      size: 0 0
+
+    image-clip: 22 0 7 11
+
+    $hover:
+      image-clip: 22 11 7 11
+
+    $pressed:
+      image-clip: 22 22 7 11
 
   UIButton
     id: chatButton

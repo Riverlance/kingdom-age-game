@@ -54,11 +54,19 @@ function GameContainers.clean()
 end
 
 function GameContainers.destroy(container)
-  if container.window then
-    container.window:destroy()
-    container.window = nil
-    container.itemsPanel = nil
+  local containerWindow = container.window
+  if not containerWindow then
+    return
   end
+
+  -- Drop strong Lua references before destroy to avoid leaked-reference warnings
+  container.window = nil
+  container.itemsPanel = nil
+
+  containerWindow.container = nil
+  containerWindow.previousContainer = nil
+  containerWindow.onContentsPanelGeometryChange = nil
+  containerWindow:destroy()
 end
 
 function GameContainers.refreshContainerItems(container)
@@ -82,6 +90,7 @@ end
 function GameContainers.refreshContainerPages(container)
   local miniWindowHeader = container.window:getChildById('miniWindowHeader')
   local pagePanel        = miniWindowHeader:getChildById('pagePanel')
+  local containerId      = container:getId()
 
   local currentPage = 1 + math.floor(container:getFirstIndex() / container:getCapacity())
   local pages       = 1 + math.floor(math.max(0, (container:getSize() - 1)) / container:getCapacity())
@@ -92,7 +101,12 @@ function GameContainers.refreshContainerPages(container)
     prevPageButton:setEnabled(false)
   else
     prevPageButton:setEnabled(true)
-    prevPageButton.onClick = function() g_game.seekInContainer(container:getId(), container:getFirstIndex() - container:getCapacity()) end
+    prevPageButton.onClick = function()
+      local _container = g_game.getContainer(containerId)
+      if _container then
+        g_game.seekInContainer(containerId, _container:getFirstIndex() - _container:getCapacity())
+      end
+    end
   end
 
   local nextPageButton = pagePanel:getChildById('nextPageButton')
@@ -100,7 +114,12 @@ function GameContainers.refreshContainerPages(container)
     nextPageButton:setEnabled(false)
   else
     nextPageButton:setEnabled(true)
-    nextPageButton.onClick = function() g_game.seekInContainer(container:getId(), container:getFirstIndex() + container:getCapacity()) end
+    nextPageButton.onClick = function()
+      local _container = g_game.getContainer(containerId)
+      if _container then
+        g_game.seekInContainer(containerId, _container:getFirstIndex() + _container:getCapacity())
+      end
+    end
   end
 end
 
@@ -164,7 +183,8 @@ function GameContainers.onContainerOpen(container, previousContainer)
     containerWindow = g_ui.createWidget('ContainerWindow')
   end
 
-  containerWindow:setId('container' .. container:getId())
+  local containerId = container:getId()
+  containerWindow:setId('container' .. containerId)
   containerWindow.container = container
   containerWindow.previousContainer = previousContainer
 
@@ -175,7 +195,10 @@ function GameContainers.onContainerOpen(container, previousContainer)
   -- onClose callback
   connect(containerWindow, {
     onClose = function(self)
-      g_game.close(container)
+      local _container = g_game.getContainer(containerId)
+      if _container then
+        g_game.close(_container)
+      end
       self:hide()
     end
   })
@@ -183,24 +206,29 @@ function GameContainers.onContainerOpen(container, previousContainer)
   -- Refresh container size on change panel of container
   connect(containerWindow, {
     onChangeWindowPanel = function(self, newParent)
-      if newParent:getWidth() == self.lastPanel:getWidth() then
+      local lastPanel = self.lastPanel
+      if lastPanel and newParent:getWidth() == lastPanel:getWidth() then
         return
       end
-      GameContainers.refreshContainerSize(containerWindow)
+      GameContainers.refreshContainerSize(self)
     end
   })
 
   local contentsPanel = containerWindow:getChildById('contentsPanel')
+  containerWindow.onContentsPanelGeometryChange = withWeakWidget(containerWindow, function(window)
+    GameContainers.refreshContainerSize(window, true)
+  end)
   connect(contentsPanel, {
-    onGeometryChange = function(self)
-      GameContainers.refreshContainerSize(containerWindow, true)
-    end
+    onGeometryChange = containerWindow.onContentsPanelGeometryChange
   })
 
   -- upArrowMenuButton callback
   local upArrowMenuButton = containerWindow:getChildById('upArrowMenuButton')
   upArrowMenuButton.onClick = function()
-    g_game.openParent(container)
+    local _container = g_game.getContainer(containerId)
+    if _container then
+      g_game.openParent(_container)
+    end
   end
   upArrowMenuButton:setVisible(container:hasParent())
   upArrowMenuButton:setTooltip(loc'${GameContainersArrowUpButton}')

@@ -5,8 +5,11 @@ _G.ClientBackground = { }
 
 
 local background
--- local particles
+local particles
+local logo
 local clientVersionLabel
+local logoBaseSize
+local logoScaleRetryEvent
 
 local musicFilename = '/audios/music/quest/nox/shell'
 local musicChannel
@@ -16,6 +19,16 @@ if g_sounds then
   g_sounds.preload()
 end
 
+local function playBackgroundMusic()
+  if not musicChannel then
+    return
+  end
+
+  musicChannel:stopAudioGroup(musicFilename)
+  musicChannel:clearAudioGroup(musicFilename)
+  musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+end
+
 function ClientBackground.init()
   -- Alias
   ClientBackground.m = modules.client_background
@@ -23,7 +36,10 @@ function ClientBackground.init()
   background = g_ui.displayUI('background')
   background:lower()
 
-  -- particles = background:getChildById('particles')
+  particles = background:getChildById('particles')
+
+  logo = background.logo
+  logoBaseSize = nil
 
   clientVersionLabel = background:getChildById('clientVersionLabel')
   clientVersionLabel:setText(f('%s\n%s', g_app.getName(), f(loc'${BackgroundClientVersion}', CLIENT_VERSION)))
@@ -32,11 +48,11 @@ function ClientBackground.init()
   --                            'Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch() .. '\n' ..
   --                            g_app.getBuildCompiler())
 
-  if musicChannel then
-    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
-  end
+  playBackgroundMusic()
 
-  if not g_game.isOnline() then
+  if g_game.isOnline() then
+    ClientBackground.hide()
+  else
     addEvent(function()
       ClientBackground.show()
     end)
@@ -46,6 +62,12 @@ function ClientBackground.init()
     onGameStart = ClientBackground.onGameStart,
     onGameEnd = ClientBackground.onGameEnd,
   })
+
+  connect(background, {
+    onGeometryChange = ClientBackground.onGeometryChange,
+  })
+
+  addEvent(ClientBackground.updateLogoScaleByWindowFactor)
 end
 
 function ClientBackground.terminate()
@@ -53,15 +75,23 @@ function ClientBackground.terminate()
     onGameEnd = ClientBackground.onGameEnd,
     onGameStart = ClientBackground.onGameStart,
   })
+  disconnect(background, {
+    onGeometryChange = ClientBackground.onGeometryChange,
+  })
 
+  g_effects.cancelFade(logo)
   g_effects.cancelFade(clientVersionLabel)
-  -- g_effects.cancelFade(particles)
+  g_effects.cancelFade(particles)
+  removeEvent(logoScaleRetryEvent)
+  logoScaleRetryEvent = nil
 
   background:destroy()
 
   background = nil
-  -- particles = nil
+  particles = nil
+  logo = nil
   clientVersionLabel = nil
+  logoBaseSize = nil
 
   _G.ClientBackground = nil
 end
@@ -73,29 +103,79 @@ end
 
 function ClientBackground.onGameEnd()
   ClientAudio.clearAudios()
-  if musicChannel then
-    musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
-  end
+  playBackgroundMusic()
   ClientBackground.show()
+end
+
+function ClientBackground.onGeometryChange()
+  ClientBackground.updateLogoScaleByWindowFactor()
+end
+
+local function rememberLogoBaseSize()
+  if logoBaseSize then
+    return true
+  end
+
+  if not logo then
+    return false
+  end
+
+  local currentSize = logo:getSize()
+  if currentSize.width <= 0 or currentSize.height <= 0 then
+    return false
+  end
+
+  logoBaseSize = {
+    width = currentSize.width,
+    height = currentSize.height
+  }
+  return true
+end
+
+function ClientBackground.updateLogoScaleByWindowFactor()
+  if not logo then
+    return
+  end
+
+  if not rememberLogoBaseSize() then
+    removeEvent(logoScaleRetryEvent)
+    logoScaleRetryEvent = scheduleEvent(ClientBackground.updateLogoScaleByWindowFactor, 30)
+    return
+  end
+
+  local windowHeight = g_window.getSize().height
+  local displayHeight = g_window.getDisplaySize().height
+  if windowHeight <= 0 or displayHeight <= 0 then
+    return
+  end
+
+  local factor = windowHeight / displayHeight
+  local scaledWidth = math.max(1, math.floor(logoBaseSize.width * factor + 0.5))
+  local scaledHeight = math.max(1, math.floor(logoBaseSize.height * factor + 0.5))
+  logo:setSize({
+    width = scaledWidth,
+    height = scaledHeight
+  })
 end
 
 
 
 function ClientBackground.show()
   background:show()
-  -- ClientBackground.showParticles()
+  ClientBackground.showParticles()
+  ClientBackground.showLogo()
   ClientBackground.showVersionLabel()
 end
 
 function ClientBackground.hide()
   ClientBackground.hideVersionLabel()
-  -- ClientBackground.hideParticles()
+  ClientBackground.hideLogo()
+  ClientBackground.hideParticles()
   background:hide()
 end
 
 -- Particles
 
---[=[
 function ClientBackground.showParticles()
   particles:show()
   g_effects.fadeIn(particles, 3000)
@@ -105,7 +185,18 @@ function ClientBackground.hideParticles()
   g_effects.cancelFade(particles)
   particles:hide()
 end
-]=]
+
+-- Logo
+
+function ClientBackground.showLogo()
+  logo:show()
+  g_effects.fadeIn(logo, 3000)
+end
+
+function ClientBackground.hideLogo()
+  g_effects.cancelFade(logo)
+  logo:hide()
+end
 
 -- Version label
 

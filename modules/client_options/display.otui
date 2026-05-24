@@ -12,10 +12,9 @@ Panel
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
-  ComboBox
+  OptionComboBox
     id: crosshair
     anchors.top: prev.outsideBottom
-    anchors.left: parent.left
     anchors.right: prev.right
     margin-top: 2
 
@@ -26,10 +25,9 @@ Panel
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
-  ComboBox
+  OptionComboBox
     id: floorViewMode
     anchors.top: prev.outsideBottom
-    anchors.left: parent.left
     anchors.right: prev.right
     margin-top: 2
 
@@ -66,8 +64,9 @@ Panel
   OptionScrollbar
     id: creatureInformationScale
     anchors.right: prev.right
-    minimum: 1
+    minimum: 0
     maximum: 9
+    minimum-text: Auto
 
   OptionLabel
     &loc: '${ClientOptionsStaticTextScale}'
@@ -80,8 +79,9 @@ Panel
     id: staticTextScale
     anchors.top: prev.outsideBottom
     anchors.left: prev.left
-    minimum: 1
+    minimum: 0
     maximum: 9
+    minimum-text: Auto
 
   OptionLabel
     &loc: '${ClientOptionsAnimatedTextScale}'
@@ -91,8 +91,9 @@ Panel
   OptionScrollbar
     id: animatedTextScale
     anchors.right: prev.right
-    minimum: 1
+    minimum: 0
     maximum: 9
+    minimum-text: Auto
 
   OptionCheckBox
     id: dontStretchShrink

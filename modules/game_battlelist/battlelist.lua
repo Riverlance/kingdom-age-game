@@ -356,13 +356,6 @@ function GameBattleList.onBattleButtonMouseRelease(self, mousePosition, mouseBut
   end
   if mouseButton == MouseLeftButton and g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed() then
     g_game.follow(self.creature)
-  elseif g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton or g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton then
-    mouseWidget.cancelNextRelease = true
-    g_game.look(self.creature, true)
-    return true
-  elseif mouseButton == MouseLeftButton and g_keyboard.isShiftPressed() then
-    g_game.look(self.creature, true)
-    return true
   elseif mouseButton == MouseRightButton and not g_mouse.isPressed(MouseLeftButton) then
     GameInterface.createThingMenu(mousePosition, nil, nil, self.creature)
     return true
@@ -435,7 +428,7 @@ function GameBattleList.filterButtons()
        not creaturePos or
        playerPos.z ~= creaturePos.z or
        not creature:canBeSeen() or -- Handles invisible state also
-       not mapPanel:isInRange(creature:getPosition())
+       not mapPanel:isInRange(creaturePos)
     then
       on = false
     end
@@ -716,10 +709,11 @@ end
 
 function GameBattleList.onPositionChange(creature, pos, oldPos)
   local button = battleList[creature:getId()]
+  local mapPanel = GameInterface.getMapPanel()
   local posCheck = g_clock.millis()
   local diffTime = posCheck - lastPosCheck
 
-  if creature:isLocalPlayer() or (GameBattleList.getSortType() == SortType.Distance and diffTime > posUpdateDelay) or (button and not button:isOn() and GameInterface.getMapPanel():isInRange(pos)) then
+  if creature:isLocalPlayer() or (GameBattleList.getSortType() == SortType.Distance and diffTime > posUpdateDelay) or (button and not button:isOn() and mapPanel and mapPanel:isInRange(pos)) then
     GameBattleList.updateList()
     lastPosCheck = posCheck
   end

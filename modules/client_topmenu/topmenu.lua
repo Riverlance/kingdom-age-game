@@ -113,13 +113,13 @@ end
 function ClientTopMenu.online()
   ClientTopMenu.showGameButtons()
 
-  addEvent(function()
+  addEvent(withWeakWidget(pingLabel, function(widget)
     if ClientOptions.getOption('showPing') and g_game.getFeature(GameClientPing) then
-      pingLabel:show()
+      widget:show()
     else
-      pingLabel:hide()
+      widget:hide()
     end
-  end)
+  end))
 end
 
 function ClientTopMenu.offline()

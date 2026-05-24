@@ -54,7 +54,14 @@ end
 
 function GameLevelUp.terminate()
   if levelUpWidget then
+    removeEvent(levelUpWidget.shrinkInEvent)
+    removeEvent(levelUpWidget.shrinkOutEvent)
+    removeEvent(levelUpWidget.ensurePositionEvent)
+    levelUpWidget.shrinkInEvent       = nil
+    levelUpWidget.shrinkOutEvent      = nil
+    levelUpWidget.ensurePositionEvent = nil
     levelUpWidget:destroy()
+    levelUpWidget = nil
   end
 
   disconnect(GameInterface.getMapPanel(), {
@@ -91,7 +98,7 @@ function GameLevelUp.updatePosition()
     margin = margin + tmpLootbar:getHeight() + GameLootbar.getBaseMargin()
   end
 
-  addEvent(function() levelUpWidget:setMarginTop(margin) end)
+  addEvent(withWeakWidget(levelUpWidget, function(widget) widget:setMarginTop(margin) end))
 end
 
 function GameLevelUp.onGeometryChange(self)
@@ -135,12 +142,20 @@ function GameLevelUp.shrinkOut(time)
   levelUpWidget:setOpacity(opacity)
   GameLevelUp.updatePosition()
 
-  levelUpWidget.shrinkOutEvent = scheduleEvent(function() GameLevelUp.shrinkOut(time - config.shrinkInterval) end, config.shrinkInterval)
+  levelUpWidget.shrinkOutEvent = scheduleEvent(withWeakWidget(levelUpWidget, function(widget)
+    if widget == levelUpWidget then
+      GameLevelUp.shrinkOut(time - config.shrinkInterval)
+    end
+  end), config.shrinkInterval)
 end
 
 function GameLevelUp.ensurePosition()
   GameLevelUp.updatePosition()
-  levelUpWidget.ensurePositionEvent = scheduleEvent(function() GameLevelUp.ensurePosition() end, config.ensurePositionInterval)
+  levelUpWidget.ensurePositionEvent = scheduleEvent(withWeakWidget(levelUpWidget, function(widget)
+    if widget == levelUpWidget then
+      GameLevelUp.ensurePosition()
+    end
+  end), config.ensurePositionInterval)
 end
 
 function GameLevelUp.addWidget(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
@@ -162,7 +177,11 @@ function GameLevelUp.addWidget(localPlayer, level, levelPercent, oldLevel, oldLe
   levelUpWidget:setOpacity(1)
   GameLevelUp.ensurePosition()
 
-  levelUpWidget.shrinkInEvent = scheduleEvent(function() GameLevelUp.shrinkOut(config.shrinkTime) end, config.showingTime)
+  levelUpWidget.shrinkInEvent = scheduleEvent(withWeakWidget(levelUpWidget, function(widget)
+    if widget == levelUpWidget then
+      GameLevelUp.shrinkOut(config.shrinkTime)
+    end
+  end), config.showingTime)
 end
 
 function GameLevelUp.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)

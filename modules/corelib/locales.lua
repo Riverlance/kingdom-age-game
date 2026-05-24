@@ -140,6 +140,12 @@ function g_locales.createWindow()
 
     widget.onClick = function()
       g_locales.destroyWindow()
+
+      -- If chose current locale
+      if id == CurrentLocaleId then
+        return
+      end
+
       g_locales.setLocale(id)
 
       restart()
@@ -151,10 +157,10 @@ function g_locales.createWindow()
   count = math.max(1, math.min(count, 3)) -- Display 3 per line
   localesPanel:setWidth(size.width * count + spacing * (count - 1))
 
-  addEvent(function()
-    localesWindow:raise()
-    localesWindow:focus()
-  end)
+  addEvent(withWeakWidget(localesWindow, function(widget)
+    widget:raise()
+    widget:focus()
+  end))
 end
 
 function g_locales.destroyWindow()

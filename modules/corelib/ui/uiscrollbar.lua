@@ -57,9 +57,13 @@ local function updateValueDisplay(widget)
   end
 
   if widget:getShowValue() then
-    local value  = widget:getValue()
-    local symbol = widget:getSymbol()
-    local minMax = value >= widget:getMaximum() and loc' (${CorelibInfoMax})' or value <= widget:getMinimum() and loc' (${CorelibInfoMin})' or ''
+    local value       = widget:getValue()
+    local symbol      = widget:getSymbol()
+    local isAtMaximum = value >= widget:getMaximum()
+    local isAtMinimum = value <= widget:getMinimum()
+    local maximumText = widget:getMaximumText()
+    local minimumText = widget:getMinimumText()
+    local minMax      = isAtMaximum and (maximumText and f(' (%s)', maximumText) or loc' (${CorelibInfoMax})') or isAtMinimum and (minimumText and f(' (%s)', minimumText) or loc' (${CorelibInfoMin})') or ''
 
     widget:setText(f('%d%s%s', value, symbol and f('%s%s', symbol:find('[%w]') and ' ' or '', symbol) or '', minMax))
   end
@@ -90,10 +94,6 @@ local function updateSlider(self)
 end
 
 local function parseSliderPos(self, slider, pos, move)
-  if not self.pixelsScroll then
-    return
-  end
-
   local delta, hotDistance
   if self.orientation == 'vertical' then
     delta = move.y
@@ -104,10 +104,31 @@ local function parseSliderPos(self, slider, pos, move)
   end
 
   if (delta > 0 and hotDistance + delta > self.hotDistance) or
-     (delta < 0 and hotDistance + delta < self.hotDistance) then
+     (delta < 0 and hotDistance + delta < self.hotDistance)
+  then
+    -- Calculate the new value based on the slider movement
     local range, pxrange, px, offset, center = calcValues(self)
-    local newvalue = self.value + delta * (range / (pxrange - px))
-    self:setValue(newvalue)
+
+    -- Denominator for the value change calculation, ensuring we don't divide by zero
+    local denominator = (pxrange - px)
+    if denominator == 0 then
+      return
+    end
+
+    local newRange = math.max(range - 1, 1)
+    local newValue = self.value + delta * (newRange / denominator)
+
+    -- If not in pixel scroll mode, round to the nearest step value
+    if not self.pixelsScroll then
+      local step = math.max(self.step or 1, 1)
+      if step > 1 then
+        local min         = self.minimum
+        local stepsAmount = math.round((newValue - min) / step)
+        newValue          = min + stepsAmount * step
+      end
+    end
+
+    self:setValue(newValue)
   end
 end
 
@@ -131,6 +152,8 @@ function UIScrollBar.create()
   scrollbar.pixelsScroll = false
   scrollbar.showValue = false
   scrollbar.symbol = nil
+  scrollbar.maximumText = nil
+  scrollbar.minimumText = nil
   scrollbar.mouseScroll = true
   return scrollbar
 end
@@ -164,6 +187,10 @@ function UIScrollBar:onStyleApply(styleName, styleNode)
       self.showValue = value
     elseif name == 'symbol' then
       self.symbol = value
+    elseif name == 'maximum-text' then
+      self.maximumText = value
+    elseif name == 'minimum-text' then
+      self.minimumText = value
     elseif name == 'mouse-scroll' then
       self.mouseScroll = value
     end
@@ -339,6 +366,24 @@ end
 
 function UIScrollBar:getSymbol()
   return self.symbol
+end
+
+function UIScrollBar:getMaximumText()
+  return self.maximumText
+end
+
+function UIScrollBar:setMaximumText(text)
+  self.maximumText = text
+  updateValueDisplay(self)
+end
+
+function UIScrollBar:getMinimumText()
+  return self.minimumText
+end
+
+function UIScrollBar:setMinimumText(text)
+  self.minimumText = text
+  updateValueDisplay(self)
 end
 
 function UIScrollBar:getMouseScroll()

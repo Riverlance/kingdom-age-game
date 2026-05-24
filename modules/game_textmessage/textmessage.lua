@@ -18,10 +18,11 @@ MessageSettings = {
   status          = { color = TextColors.white,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showStatusMessagesInConsole' },
   statusSmall     = { color = TextColors.white,                                                    screenTarget = 'statusLabel' },
   loot            = { color = TextColors.green,     consoleTab = loc'${GameConsoleTabNameServer}' },
-  private         = { color = TextColors.lightblue,                                                screenTarget = 'privateLabel' },
+  private         = { color = TextColors.lightblue,                                                  screenTarget = 'privateLabel' },
   statusBigTop    = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'privateLabel',      consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
   statusBigCenter = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'middleCenterLabel', consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
   statusBigBottom = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
+  look            = { color = '#e6db74',            consoleTab = loc'${GameConsoleTabNameServer}',                                     consoleOption = 'showInfoMessagesInConsole' },
 }
 
 MessageTypes = {
@@ -32,7 +33,6 @@ MessageTypes = {
   [MessageModes.Game] = MessageSettings.centerWhite,
   [MessageModes.Status] = MessageSettings.status,
   [MessageModes.Warning] = MessageSettings.centerRed,
-  [MessageModes.Look] = MessageSettings.centerGreen,
   [MessageModes.Loot] = MessageSettings.loot,
   [MessageModes.PrivateFrom] = MessageSettings.consoleBlue,
 
@@ -59,11 +59,17 @@ MessageTypes = {
   [MessageModes.GameBigCenter] = MessageSettings.statusBigCenter,
   [MessageModes.GameBigBottom] = MessageSettings.statusBigBottom,
 
+  [MessageModes.Look] = MessageSettings.look,
+
   [254] = MessageSettings.private
 }
 
 messagesPanel = nil
 statusLabel = nil
+
+-- Look hover
+lookLastConsoleKey  = nil
+lookLastConsoleText = nil
 
 
 
@@ -145,7 +151,7 @@ function GameTextMessage.onZoomChange(self, oldZoom, newZoom)
     return
   end
 
-  addEvent(function() updateStatusLabelPosition(statusLabel) end)
+  addEvent(withWeakWidget(statusLabel, function(widget) updateStatusLabelPosition(widget) end))
 end
 
 function GameTextMessage.calculateVisibleTime(text)
@@ -166,9 +172,29 @@ function GameTextMessage.displayMessage(mode, text)
     return
   end
 
-  if msgtype.consoleTab ~= nil and (msgtype.consoleOption == nil or ClientOptions.getOption(msgtype.consoleOption)) then
+  local skipConsole = false
+
+  -- Look hover
+  if mode == MessageModes.Look then
+    GameInterface.handleHoverLookMessage(text)
+
+    -- If the text is the same as the last one, skip the console
+    local lookConsoleKey = GameInterface.getHoverLookConsoleKey()
+    if lookConsoleKey then
+      skipConsole = lookLastConsoleKey == lookConsoleKey and lookLastConsoleText == text
+
+      if not skipConsole then
+        lookLastConsoleKey  = lookConsoleKey
+        lookLastConsoleText = text
+      end
+    else
+      lookLastConsoleKey  = nil
+      lookLastConsoleText = nil
+    end
+  end
+
+  if not skipConsole and msgtype.consoleTab ~= nil and (msgtype.consoleOption == nil or ClientOptions.getOption(msgtype.consoleOption)) then
     GameConsole.addText(text, msgtype, msgtype.consoleTab)
-    --TODO move to game_console
   end
 
   if msgtype.screenTarget then
@@ -181,7 +207,11 @@ function GameTextMessage.displayMessage(mode, text)
       updateStatusLabelPosition(label)
     end
     removeEvent(label.hideEvent)
-    label.hideEvent = scheduleEvent(function() label:setVisible(false) end, GameTextMessage.calculateVisibleTime(text))
+    label.hideEvent = scheduleEvent(function()
+      if isWidgetAlive(label) then
+        label:setVisible(false)
+      end
+    end, GameTextMessage.calculateVisibleTime(text))
   end
 end
 
@@ -206,6 +236,10 @@ function GameTextMessage.displayBroadcastMessage(text)
 end
 
 function GameTextMessage.clearMessages()
+  -- Look hover
+  lookLastConsoleKey  = nil
+  lookLastConsoleText = nil
+
   for _i,child in pairs(messagesPanel:recursiveGetChildren()) do
     if child:getId():match('Label') then
       child:hide()

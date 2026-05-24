@@ -12,7 +12,11 @@ function UIRadioGroup:destroy()
   for k,widget in pairs(self.widgets) do
     widget.onClick = nil
   end
+
   self.widgets = { }
+
+  self.selectedWidget    = nil
+  self.onSelectionChange = nil
 end
 
 function UIRadioGroup:addWidget(widget)

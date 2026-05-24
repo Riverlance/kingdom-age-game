@@ -35,7 +35,7 @@ SkillPercentPanel < ProgressBar
 
 MiniWindow
   id: skillWindow
-  &loc: '${GameSkillsWindowTitle}'
+  &loc: '${CorelibSkillsWindowTitle}'
   icon: /images/ui/top_menu/skills
   &save: true
   &contentMinimumHeight: 40

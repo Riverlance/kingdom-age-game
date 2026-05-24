@@ -218,16 +218,18 @@ function ClientTerminal.terminate()
 
   removeEvent(flushEvent)
 
-  if poped then
-    oldPos = terminalWindow:getPosition()
-    oldSize = terminalWindow:getSize()
+  if firstShown then
+    if poped then
+      oldPos = terminalWindow:getPosition()
+      oldSize = terminalWindow:getSize()
+    end
+    local settings = {
+      size = oldSize,
+      pos = oldPos,
+      poped = poped
+    }
+    g_settings.setNode('terminal-window', settings)
   end
-  local settings = {
-    size = oldSize,
-    pos = oldPos,
-    poped = poped
-  }
-  g_settings.setNode('terminal-window', settings)
 
   g_keyboard.unbindKeyDown('Ctrl+Shift+T')
   g_logger.setOnLog(nil)
@@ -248,7 +250,8 @@ function ClientTerminal.popWindow(force)
   if force == true or not isForceBool and poped then
     oldPos = terminalWindow:getPosition()
     -- oldSize = terminalWindow:getSize()
-    oldSize = { width = g_window.getWidth()/2.5, height = g_window.getHeight()/4 }
+    local rootSize = rootWidget:getSize()
+    oldSize = { width = rootSize.width / 2.5, height = rootSize.height / 4 }
     terminalWindow:fill('parent')
     terminalWindow:setOn(false)
     terminalWindow:getChildById('bottomResizeBorder'):disable()
@@ -264,10 +267,11 @@ function ClientTerminal.popWindow(force)
   elseif force == false or not isForceBool and not poped then
     terminalWindow:breakAnchors()
     terminalWindow:setOn(true)
-    local size = oldSize or { width = g_window.getWidth()/2.5, height = g_window.getHeight()/4 }
+    local rootSize = rootWidget:getSize()
+    local size = oldSize or { width = rootSize.width / 2.5, height = rootSize.height / 4 }
     terminalWindow:setSize(size)
-    -- local pos = oldPos or { x = 0, y = g_window.getHeight() }
-    local pos = oldPos or { x = 0, y = g_window.getHeight() / 2 }
+    -- local pos = oldPos or { x = 0, y = rootSize.height }
+    local pos = oldPos or { x = 0, y = rootSize.height / 2 }
     terminalWindow:setPosition(pos)
     terminalWindow:getChildById('bottomResizeBorder'):enable()
     terminalWindow:getChildById('rightResizeBorder'):enable()
@@ -283,27 +287,33 @@ function ClientTerminal.popWindow(force)
   end
 end
 
+local function ensureWindowSettingsLoaded()
+  if firstShown then
+    return
+  end
+
+  local settings = g_settings.getNode('terminal-window')
+  if settings then
+    if settings.size then
+      oldSize = settings.size
+    end
+
+    if settings.pos then
+      oldPos = settings.pos
+    end
+
+    if settings.poped then
+      ClientTerminal.popWindow(false)
+    end
+  end
+
+  firstShown = true
+end
+
 function ClientTerminal.toggle()
   if terminalWindow:isVisible() then
     ClientTerminal.hide()
   else
-    if not firstShown then
-      local settings = g_settings.getNode('terminal-window')
-      if settings then
-        if settings.size then
-          oldSize = settings.size
-        end
-
-        if settings.pos then
-          oldPos = settings.pos
-        end
-
-        if settings.poped then
-          ClientTerminal.popWindow()
-        end
-      end
-      firstShown = true
-    end
     ClientTerminal.show()
   end
 end
@@ -313,6 +323,8 @@ function ClientTerminal.isVisible()
 end
 
 function ClientTerminal.show()
+  ensureWindowSettingsLoaded()
+
   local hasAccess = commandTextEdit:isEnabled() or g_game.isOnline() and g_game.getAccountType() > ACCOUNT_TYPE_NORMAL
   if hasAccess then
     commandTextEdit:setEnabled(true)

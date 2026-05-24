@@ -47,7 +47,10 @@ function Timer:start()
 end
 
 function Timer:stop()
-    self.event:cancel()
+    if self.event then
+        removeEvent(self.event)
+        self.event = nil
+    end
 end
 
 function Timer:destroy()
@@ -68,4 +71,3 @@ function Timer:update()
         self:onUpdate()
     end
 end
-

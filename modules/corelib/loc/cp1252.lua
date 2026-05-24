@@ -466,4 +466,28 @@ g_locales.addTranslations{
     de = "min",
     sv = "min",
   },
+
+
+
+  -- Skills miniwindow
+
+  CorelibSkillsWindowTitle = {
+    en = "Stats",
+    pt = "Estatísticas",
+    es = "Estadísticas",
+    de = "Werte",
+    sv = "Statistik",
+  },
+
+
+
+  -- Conditions miniwindow
+
+  CorelibConditionsWindowTitle = {
+    en = "Conditions",
+    pt = "Condições",
+    es = "Condiciones",
+    de = "Bedingungen",
+    sv = "Förhållanden",
+  },
 }

@@ -118,18 +118,18 @@ local function removeSingleImage(index, fadeOut)
   else
     g_effects.fadeOut(image, fadeOut)
 
-    image.destroyEvent = scheduleEvent(function()
-      if image.fadeEvent then
-        g_effects.cancelFade(image)
+    image.destroyEvent = scheduleEvent(withWeakWidget(image, function(widget)
+      if widget.fadeEvent then
+        g_effects.cancelFade(widget)
       end
       for i = #screenImages, 1, -1 do
-        if screenImages[i] == image then
+        if screenImages[i] == widget then
           table.remove(screenImages, i)
           break
         end
       end
-      image:destroy()
-    end, fadeOut)
+      widget:destroy()
+    end), fadeOut)
   end
 
   return true
@@ -311,10 +311,14 @@ local function adjustScale(image)
     image:addAnchor(AnchorBottom, 'parent', AnchorBottom)
 
   elseif image.scale == ScreenImageScale.Fit or image.scale == ScreenImageScale.Inside then
-    local width     = image:getWidth()
-    local height    = image:getHeight()
-    local mapWidth  = mapWidget:getMapWidth() + 2 -- 2 is map black line border
-    local mapHeight = mapWidget:getMapHeight() + 2 -- 2 is map black line border
+    local width  = image:getWidth()
+    local height = image:getHeight()
+
+    local borderLeft = mapWidget:getMapLeftSide() - (mapWidget:getLeftSide() + mapWidget:getPaddingLeft())
+    local borderTop  = mapWidget:getMapTopSide() - (mapWidget:getTopSide() + mapWidget:getPaddingTop())
+
+    local mapWidth  = mapWidget:getMapWidth() + (borderLeft * 2)
+    local mapHeight = mapWidget:getMapHeight() + (borderTop * 2)
 
     -- Scale inside - If inside already, keep it its original size; else, decrease as ScreenImageScale.Fit
     if image.scale == ScreenImageScale.Inside and width <= mapWidth and height <= mapHeight then
@@ -372,11 +376,11 @@ end
 
 function GameScreenImage.updateGeometry(image) -- ([image])
   for _, _image in ipairs(image and { image } or screenImages) do
-    addEvent(function()
-      adjustPosition(_image)
-      adjustSize(_image)
-      adjustScale(_image)
-    end)
+    addEvent(withWeakWidget(_image, function(widget)
+      adjustPosition(widget)
+      adjustSize(widget)
+      adjustScale(widget)
+    end))
   end
 end
 

@@ -199,7 +199,11 @@ local function tabBlink(tab, step)
 
   removeEvent(tab.blinkEvent)
   if step < 4 then
-    tab.blinkEvent = scheduleEvent(function() tabBlink(tab, step+1) end, 500)
+    tab.blinkEvent = scheduleEvent(function()
+      if isWidgetAlive(tab) then
+        tabBlink(tab, step + 1)
+      end
+    end, 500)
   else
     tab:setOn(true)
     tab.blinkEvent = nil
@@ -516,10 +520,18 @@ function UIMoveableTabBar:setNavigation(prevButton, nextButton)
   self.nextNavigation = nextButton
 
   if self.prevNavigation then
-    self.prevNavigation.onClick = function() self:selectPrevTab() end
+    self.prevNavigation.onClick = function()
+      if isWidgetAlive(self) then
+        self:selectPrevTab()
+      end
+    end
   end
   if self.nextNavigation then
-    self.nextNavigation.onClick = function() self:selectNextTab() end
+    self.nextNavigation.onClick = function()
+      if isWidgetAlive(self) then
+        self:selectNextTab()
+      end
+    end
   end
   updateNavigation(self)
 end

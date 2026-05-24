@@ -480,7 +480,22 @@ do
 end
 
 function table.unserialize(str)
-  return loadstring(f('return %s', str))()
+  assert(type(str) == 'string', 'Expected a string to unserialize.')
+
+  local chunk, compileError = loadstring(string.format('return %s', str))
+  if not chunk then
+    return nil, compileError
+  end
+
+  -- Sandbox chunk: prevents access to globals while evaluating serialized table text.
+  setfenv(chunk, { })
+
+  local ok, value = pcall(chunk)
+  if not ok then
+    return nil, value
+  end
+
+  return value
 end
 
 

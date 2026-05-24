@@ -72,7 +72,7 @@ function GameLootbar.updatePosition()
     margin = margin + topHotkeyBar:getHeight()
   end
 
-  addEvent(function() lootWidget:setMarginTop(margin) end)
+  addEvent(withWeakWidget(lootWidget, function(widget) widget:setMarginTop(margin) end))
 end
 
 function GameLootbar.onGeometryChange(self)
@@ -155,7 +155,11 @@ function GameLootbar.shrinkOut(widget, time)
   widget:setWidth(width)
   GameLootbar.updatePosition()
 
-  widget.shrinkOutEvent = scheduleEvent(function() GameLootbar.shrinkOut(widget, time - config.shrinkInterval) end, config.shrinkInterval)
+  widget.shrinkOutEvent = scheduleEvent(function()
+    if isWidgetAlive(widget) then
+      GameLootbar.shrinkOut(widget, time - config.shrinkInterval)
+    end
+  end, config.shrinkInterval)
 
   GameLootbar.updateLootWidget()
 end
@@ -193,7 +197,11 @@ function GameLootbar.addItem(id, count, name, pos)
   item:setItemId(id)
   item:setItemCount(count)
 
-  widget.shrinkInEvent = scheduleEvent(function() GameLootbar.shrinkOut(widget, config.shrinkTime) end, config.showingTime)
+  widget.shrinkInEvent = scheduleEvent(function()
+    if isWidgetAlive(widget) then
+      GameLootbar.shrinkOut(widget, config.shrinkTime)
+    end
+  end, config.showingTime)
 
   GameLootbar.updateLootWidget()
 end

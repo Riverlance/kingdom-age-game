@@ -1,6 +1,85 @@
 -- @docclass
 UIMiniWindow = extends(UIWindow, 'UIMiniWindow')
 
+
+
+-- Drop preview singleton (shared by all miniwindows)
+
+local _dropPreviewWidget = nil
+
+local function ensureDropPreview()
+  if _dropPreviewWidget and isWidgetAlive(_dropPreviewWidget) then
+    return _dropPreviewWidget
+  end
+
+  _dropPreviewWidget = g_ui.createWidget('MiniWindowDropPreviewPanel', rootWidget)
+  _dropPreviewWidget:hide()
+  _dropPreviewWidget:breakAnchors()
+  _dropPreviewWidget:setPosition({ x = 0, y = 0 })
+  _dropPreviewWidget:setSize({ width = 0, height = 0 })
+
+  return _dropPreviewWidget
+end
+
+local function resetDropPreview()
+  local preview = ensureDropPreview()
+  local parent = preview:getParent()
+  if parent and parent ~= rootWidget then
+    parent:removeChild(preview)
+    rootWidget:addChild(preview)
+  end
+
+  preview:hide()
+  preview:breakAnchors()
+  preview:setPosition({ x = 0, y = 0 })
+  preview:setSize({ width = 0, height = 0 })
+end
+
+local function placeDropPreview(self, container, index)
+  local preview = ensureDropPreview()
+  local targetIndex = index
+
+  if preview:getParent() ~= container then
+    preview:getParent():removeChild(preview)
+    container:addChild(preview)
+  end
+
+  local currentIndex = container:getChildIndex(preview)
+  if currentIndex and currentIndex > 0 then
+    container:removeChild(preview)
+  end
+
+  local childCount = container:getChildCount()
+  targetIndex = math.max(1, math.min(targetIndex, childCount + 1))
+  container:insertChild(targetIndex, preview)
+
+  preview:show()
+  preview:setHeight(self:getHeight())
+  preview:setWidth(math.max(1, container:getWidth()))
+end
+
+local function findHoveredContainer(mousePos)
+  local widgets = rootWidget:recursiveGetChildrenByMarginPos(mousePos)
+  for i = 1, #widgets do
+    local current = widgets[i]
+    while current do
+      if current:getClassName() == 'UIMiniWindowContainer' then
+        return current
+      end
+      current = current:getParent()
+    end
+  end
+
+  return nil
+end
+
+function UIMiniWindow.initDropPreviewSingleton()
+  ensureDropPreview()
+  resetDropPreview()
+end
+
+
+
 function UIMiniWindow.create()
   local miniwindow = UIMiniWindow.internalCreate()
   miniwindow.minimizedHeight = 32
@@ -220,10 +299,18 @@ function UIMiniWindow:setup(button)
 
   if self.save then
     if oldParent and oldParent:getClassName() == 'UIMiniWindowContainer' then
-      addEvent(function() oldParent:order() end)
+      addEvent(function()
+        if isWidgetAlive(oldParent) then
+          oldParent:order()
+        end
+      end)
     end
     if newParent and newParent:getClassName() == 'UIMiniWindowContainer' and newParent ~= oldParent then
-      addEvent(function() newParent:order() end)
+      addEvent(function()
+        if isWidgetAlive(newParent) then
+          newParent:order()
+        end
+      end)
     end
   end
 
@@ -248,6 +335,8 @@ function UIMiniWindow:onDragEnter(mousePos)
     return false
   end
 
+  resetDropPreview()
+
   if parent:getClassName() == 'UIMiniWindowContainer' then
     -- Save last panel on miniwindow
     self.lastPanel = parent
@@ -266,6 +355,8 @@ function UIMiniWindow:onDragEnter(mousePos)
 end
 
 function UIMiniWindow:onDragLeave(droppedWidget, mousePos)
+  resetDropPreview()
+
   if droppedWidget and droppedWidget:getClassName() ~= 'UIMiniWindowContainer' then
     return false
   end
@@ -273,20 +364,21 @@ function UIMiniWindow:onDragLeave(droppedWidget, mousePos)
   if self:getParent() == rootWidget and self.lastPanel then
     if self.movedWidget then
       local index = self.lastPanel:getChildIndex(self.movedWidget)
-      self.lastPanel:insertChild(index + self.movedIndex, self)
+      if index then
+        self.lastPanel:insertChild(index + self.movedIndex, self)
+      else
+        self.lastPanel:addChild(self)
+      end
     else
       self.lastPanel:addChild(self)
     end
     signalcall(self.lastPanel.onFitAll, self.lastPanel, self)
   end
 
-  if self.movedWidget then
-    self.setMovedChildMargin(self.movedOldMargin or 0)
-    self.movedWidget = nil
-    self.setMovedChildMargin = nil
-    self.movedOldMargin = nil
-    self.movedIndex = nil
-  end
+  self.movedWidget = nil
+  self.setMovedChildMargin = nil
+  self.movedOldMargin = nil
+  self.movedIndex = nil
 
   local newParent = self:getParent()
   self:saveParent(newParent)
@@ -300,42 +392,103 @@ end
 
 function UIMiniWindow:onDragMove(mousePos, mouseMoved)
   local oldMousePosY = mousePos.y - mouseMoved.y
-  local children = rootWidget:recursiveGetChildrenByMarginPos(mousePos)
-  local overAnyWidget = false
-  for i=1,#children do
-    local child = children[i]
-    if child:getParent():getClassName() == 'UIMiniWindowContainer' then
-      overAnyWidget = true
 
-      local childCenterY = child:getY() + child:getHeight() / 2
-      if child == self.movedWidget and mousePos.y < childCenterY and oldMousePosY < childCenterY then
+  -- Drop preview
+  -- Detach preview before hit-test to avoid oscillation caused by layout changes
+  local preview = ensureDropPreview()
+  if preview:getParent() ~= rootWidget then
+    preview:getParent():removeChild(preview)
+    rootWidget:addChild(preview)
+    preview:hide()
+  end
+
+  local children = rootWidget:recursiveGetChildrenByMarginPos(mousePos)
+  local hoveredContainer = nil
+  local targetWidget = nil
+  local slotIndex = nil
+
+  for i = 1, #children do
+    local current = children[i]
+    if current ~= preview and current ~= self then
+      local candidate = current
+      while candidate do
+        local parent = candidate:getParent()
+        if parent and parent:getClassName() == 'UIMiniWindowContainer' then
+          hoveredContainer = parent
+          if candidate ~= preview and candidate ~= self then
+            targetWidget = candidate
+          end
+          break
+        end
+        candidate = parent
+      end
+
+      if targetWidget and hoveredContainer then
         break
       end
-
-      if self.movedWidget then
-        self.setMovedChildMargin(self.movedOldMargin or 0)
-        self.setMovedChildMargin = nil
-      end
-
-      if mousePos.y < childCenterY then
-        self.movedOldMargin = child:getMarginTop()
-        self.setMovedChildMargin = function(v) child:setMarginTop(v) end
-        self.movedIndex = 0
-      else
-        self.movedOldMargin = child:getMarginBottom()
-        self.setMovedChildMargin = function(v) child:setMarginBottom(v) end
-        self.movedIndex = 1
-      end
-
-      self.movedWidget = child
-      self.setMovedChildMargin(self:getHeight())
-      break
     end
   end
 
-  if not overAnyWidget and self.movedWidget then
-    self.setMovedChildMargin(self.movedOldMargin or 0)
+  hoveredContainer = hoveredContainer or findHoveredContainer(mousePos)
+  if not hoveredContainer then
+    self.previewTargetWidget = nil
     self.movedWidget = nil
+    self.movedIndex = nil
+    resetDropPreview()
+    return UIWindow.onDragMove(self, mousePos, mouseMoved)
+  end
+
+  local childCount = hoveredContainer:getChildCount()
+  if targetWidget and targetWidget:getParent() == hoveredContainer then
+    local targetCenterY = targetWidget:getY() + targetWidget:getHeight() / 2
+    local targetIndex = hoveredContainer:getChildIndex(targetWidget)
+    local placeBelow = mousePos.y >= targetCenterY
+
+    if self.previewTargetWidget == targetWidget and mousePos.y < targetCenterY and oldMousePosY < targetCenterY then
+      placeBelow = (self.movedIndex or 0) == 1
+    end
+
+    self.previewTargetWidget = targetWidget
+    self.movedWidget = targetWidget
+    self.movedIndex = placeBelow and 1 or 0
+    slotIndex = targetIndex + self.movedIndex
+  else
+    self.previewTargetWidget = nil
+    slotIndex = childCount + 1
+
+    local lastRealChild = nil
+    for i = 1, childCount do
+      local child = hoveredContainer:getChildByIndex(i)
+      if child ~= preview then
+        lastRealChild = child
+        local centerY = child:getY() + child:getHeight() / 2
+        if mousePos.y < centerY then
+          slotIndex = i
+          break
+        end
+      end
+    end
+
+    if childCount > 0 then
+      if slotIndex <= childCount then
+        local ref = hoveredContainer:getChildByIndex(slotIndex)
+        self.movedWidget = ref
+        self.movedIndex = 0
+      else
+        self.movedWidget = lastRealChild
+        self.movedIndex = lastRealChild and 1 or nil
+      end
+    else
+      self.movedWidget = nil
+      self.movedIndex = nil
+    end
+  end
+
+  -- Drop preview
+  if slotIndex then
+    placeDropPreview(self, hoveredContainer, slotIndex)
+  else
+    resetDropPreview()
   end
 
   return UIWindow.onDragMove(self, mousePos, mouseMoved)

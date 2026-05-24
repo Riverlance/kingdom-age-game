@@ -83,6 +83,7 @@ function GameTracker.sendTrack(trackNode)
   if not protocolGame then
     return
   end
+
   local msg = OutputMessage.create()
   msg:addU8(ClientOpcodes.ClientOpcodeTracking)
   msg:addU8(trackNode.status)
@@ -93,6 +94,7 @@ function GameTracker.sendTrack(trackNode)
     msg:addU8(TrackingInfo.Position)
     msg:addPosition(trackNode.position)
   end
+
   protocolGame:send(msg)
 end
 

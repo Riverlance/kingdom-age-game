@@ -24,18 +24,12 @@ blackSkullSkullWidget = nil
 
 updateMainLabelEvent = nil
 
-local function updateMainLabelEventFunction()
-  if not skullTimeLabel or not skullTimeLabel.data or skullTimeLabel.data.remainingTime <= 0 then
-    return
-  end
-
-  local data = skullTimeLabel.data
-
-  local remainingTime = data.remainingTime - updateTime
-  if remainingTime >= 0 then
-    GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, data.fragsToRedSkull, data.fragsToBlackSkull, data.timeToRemoveFrag)
-  end
-end
+local unjustifiedData = {
+  remainingTime = 0,
+  fragsToRedSkull = 0,
+  fragsToBlackSkull = 0,
+  timeToRemoveFrag = 1
+}
 
 local function getColorByKills(kills, fragsTo)
   local ratio = kills / fragsTo
@@ -44,6 +38,20 @@ local function getColorByKills(kills, fragsTo)
   end
 
   return ratio < 0.334 and 'green' or ratio < 0.667 and 'yellow' or ratio >= 0.667 and 'red' or 'white'
+end
+
+local function updateMainLabelEventFunction()
+  if not g_game.isOnline() or unjustifiedData.remainingTime <= 0 then
+    GameUnjustifiedPoints.stopUpdateEvent()
+    return
+  end
+
+  unjustifiedData.remainingTime = math.max(0, unjustifiedData.remainingTime - updateTime)
+  GameUnjustifiedPoints.refreshUI()
+
+  if unjustifiedData.remainingTime <= 0 then
+    GameUnjustifiedPoints.stopUpdateEvent()
+  end
 end
 
 
@@ -71,7 +79,8 @@ function GameUnjustifiedPoints.init()
   redSkullSkullWidget = contentsPanel:getChildById('redSkullSkullWidget')
   blackSkullSkullWidget = contentsPanel:getChildById('blackSkullSkullWidget')
 
-  GameUnjustifiedPoints.onUnjustifiedPoints()
+  GameUnjustifiedPoints.resetData()
+  GameUnjustifiedPoints.refreshUI()
 
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeUnjustifiedPoints, GameUnjustifiedPoints.parseUnjustifiedPoints)
 
@@ -88,8 +97,7 @@ function GameUnjustifiedPoints.init()
 end
 
 function GameUnjustifiedPoints.terminate()
-  removeEvent(updateMainLabelEvent)
-  updateMainLabelEvent = nil
+  GameUnjustifiedPoints.stopUpdateEvent()
 
   disconnect(g_game, {
     onGameStart = GameUnjustifiedPoints.online,
@@ -111,53 +119,90 @@ function GameUnjustifiedPoints.onMiniWindowOpen()
     return
   end
 
-  updateMainLabelEvent = cycleEvent(updateMainLabelEventFunction, updateTime * 1000)
+  GameUnjustifiedPoints.updateWindowUI()
   g_game.sendUnjustifiedPointsBuffer()
 end
 
 function GameUnjustifiedPoints.onMiniWindowClose()
-  removeEvent(updateMainLabelEvent)
-  updateMainLabelEvent = nil
 end
 
 function GameUnjustifiedPoints.toggle()
+  if not unjustifiedPointsTopMenuButton:isVisible() then
+    return
+  end
+
   GameInterface.toggleMiniWindow(unjustifiedPointsWindow)
 end
 
 function GameUnjustifiedPoints.online()
   if g_game.getFeature(GameUnjustifiedPointsPacket) then
     unjustifiedPointsWindow:setup(unjustifiedPointsTopMenuButton)
-    unjustifiedPointsTopMenuButton:show()
+    GameUnjustifiedPoints.refreshUI()
     g_game.sendUnjustifiedPointsBuffer()
+  else
+    GameUnjustifiedPoints.resetData()
+    GameUnjustifiedPoints.stopUpdateEvent()
+    GameUnjustifiedPoints.refreshUI()
+  end
+end
 
-    if unjustifiedPointsWindow:isVisible() then
-      updateMainLabelEvent = cycleEvent(updateMainLabelEventFunction, updateTime * 1000)
-    end
+function GameUnjustifiedPoints.offline()
+  GameUnjustifiedPoints.resetData()
+  GameUnjustifiedPoints.stopUpdateEvent()
+  GameUnjustifiedPoints.refreshUI()
+end
+
+function GameUnjustifiedPoints.startUpdateEvent()
+  if updateMainLabelEvent or not g_game.isOnline() or unjustifiedData.remainingTime <= 0 then
+    return
+  end
+
+  updateMainLabelEvent = cycleEvent(updateMainLabelEventFunction, updateTime * 1000)
+end
+
+function GameUnjustifiedPoints.stopUpdateEvent()
+  removeEvent(updateMainLabelEvent)
+  updateMainLabelEvent = nil
+end
+
+function GameUnjustifiedPoints.hasFragTime()
+  return unjustifiedData.remainingTime > 0
+end
+
+function GameUnjustifiedPoints.resetData()
+  unjustifiedData = {
+    remainingTime = 0,
+    fragsToRedSkull = 0,
+    fragsToBlackSkull = 0,
+    timeToRemoveFrag = 1
+  }
+end
+
+function GameUnjustifiedPoints.updateTopMenuButtonVisibility()
+  local shouldShowButton = g_game.isOnline() and g_game.getFeature(GameUnjustifiedPointsPacket) and GameUnjustifiedPoints.hasFragTime()
+
+  if shouldShowButton then
+    unjustifiedPointsTopMenuButton:show()
   else
     unjustifiedPointsTopMenuButton:hide()
     unjustifiedPointsWindow:close()
   end
 end
 
-function GameUnjustifiedPoints.offline()
-  removeEvent(updateMainLabelEvent)
-  updateMainLabelEvent = nil
-end
-
-function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkull, fragsToBlackSkull, timeToRemoveFrag)
+function GameUnjustifiedPoints.updateWindowUI()
   if not g_game.isOnline() or not unjustifiedPointsWindow:isVisible() then
     return
   end
 
   local localPlayer = g_game.getLocalPlayer()
-  if not localPlayer:isLocalPlayer() then
+  if not localPlayer or not localPlayer:isLocalPlayer() then
     return
   end
 
-  remainingTime     = remainingTime or 0
-  fragsToRedSkull   = fragsToRedSkull or 0
-  fragsToBlackSkull = fragsToBlackSkull or 0
-  timeToRemoveFrag  = timeToRemoveFrag or 1
+  local remainingTime = unjustifiedData.remainingTime
+  local fragsToRedSkull = unjustifiedData.fragsToRedSkull
+  local fragsToBlackSkull = unjustifiedData.fragsToBlackSkull
+  local timeToRemoveFrag = unjustifiedData.timeToRemoveFrag
   local fragsCount  = math.ceil(remainingTime / timeToRemoveFrag)
   local skull       = localPlayer:getSkull()
 
@@ -169,14 +214,6 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
 
   local nextFragRemainingTimeTooltip = f(loc'${GameUnjustifiedPointsInfoNextFragTime}: %.2d:%.2d:%.2d', math.floor(nextFragRemainingTime / (60 * 60)), math.floor(nextFragRemainingTime / 60) % 60, nextFragRemainingTime % 60)
   skullTimeLabel:setTooltip(f(loc'${GameUnjustifiedPointsInfoTotalFrags}: %d\n%s\n${GameUnjustifiedPointsInfoFragsRemainingTime}: %.2d:%.2d:%.2d', fragsCount, nextFragRemainingTimeTooltip, math.floor(remainingTime / (60 * 60)), math.floor(remainingTime / 60) % 60, remainingTime % 60))
-
-  skullTimeLabel.data = {
-    remainingTime         = remainingTime,
-    fragsToRedSkull       = fragsToRedSkull,
-    fragsToBlackSkull     = fragsToBlackSkull,
-    timeToRemoveFrag      = timeToRemoveFrag,
-    nextFragRemainingTime = nextFragRemainingTime
-  }
 
   if remainingTime >= 1 and table.contains({SkullWhite, SkullRed, SkullBlack}, skull) then
     currentSkullWidget:setIcon(getSkullImagePath(skull))
@@ -201,6 +238,26 @@ function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkul
     blackSkullProgressBar:setValue(0, 0, 1)
   end
   blackSkullProgressBar:setTooltip(loc'${GameUnjustifiedPointsInfoFragsUntilSkullBlack}: ' .. math.max(0, fragsToBlackSkull - fragsCount))
+end
+
+function GameUnjustifiedPoints.refreshUI()
+  GameUnjustifiedPoints.updateTopMenuButtonVisibility()
+  GameUnjustifiedPoints.updateWindowUI()
+end
+
+function GameUnjustifiedPoints.onUnjustifiedPoints(remainingTime, fragsToRedSkull, fragsToBlackSkull, timeToRemoveFrag)
+  unjustifiedData.remainingTime = math.max(0, math.floor(remainingTime or 0))
+  unjustifiedData.fragsToRedSkull = math.max(0, math.floor(fragsToRedSkull or 0))
+  unjustifiedData.fragsToBlackSkull = math.max(0, math.floor(fragsToBlackSkull or 0))
+  unjustifiedData.timeToRemoveFrag = math.max(1, math.floor(timeToRemoveFrag or 1))
+
+  if g_game.isOnline() and g_game.getFeature(GameUnjustifiedPointsPacket) and GameUnjustifiedPoints.hasFragTime() then
+    GameUnjustifiedPoints.startUpdateEvent()
+  else
+    GameUnjustifiedPoints.stopUpdateEvent()
+  end
+
+  GameUnjustifiedPoints.refreshUI()
 end
 
 function GameUnjustifiedPoints.parseUnjustifiedPoints(protocolGame, opcode, msg)

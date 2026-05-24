@@ -17,7 +17,7 @@ BackpackWeight = 18
 ItemMaxAmount  = 100
 
 ConstSlotFirst = 1 -- Server CONST_SLOT_FIRST
-ConstSlotLast  = 10 -- Server CONST_SLOT_LAST
+ConstSlotLast  = 11 -- Server CONST_SLOT_LAST
 
 IgnoreInventory = true -- Old checkbox which now we use as a flag constant to ignore inventory when selling items
 
@@ -166,8 +166,6 @@ end
 function GameNpcTrade.terminate()
   initialized = false
 
-  npcWindow:destroy()
-
   disconnect(g_game, {
     onGameEnd       = GameNpcTrade.hide,
     onOpenNpcTrade  = GameNpcTrade.onOpenNpcTrade,
@@ -179,6 +177,44 @@ function GameNpcTrade.terminate()
     onFreeCapacityChange = GameNpcTrade.onFreeCapacityChange,
     onInventoryChange    = GameNpcTrade.onInventoryChange
   })
+
+  if radioItems then
+    radioItems:destroy()
+    radioItems = nil
+  end
+
+  if radioTabs then
+    radioTabs:destroy()
+    radioTabs = nil
+  end
+
+  npcWindow:destroy()
+  npcWindow = nil
+
+  itemsPanelListScrollBar = nil
+  itemsPanel              = nil
+  searchText              = nil
+  setupPanel              = nil
+  quantityScroll          = nil
+  nameLabel               = nil
+  priceLabel              = nil
+  moneyLabel              = nil
+  kapsLabel               = nil
+  weightDesc              = nil
+  weightLabel             = nil
+  capacityDesc            = nil
+  capacityLabel           = nil
+  trustDesc               = nil
+  trustLabel              = nil
+  tradeButton             = nil
+  buyTab                  = nil
+  sellTab                 = nil
+  bankTrade               = nil
+  buyWithBackpack         = nil
+  ignoreCapacity          = nil
+  showAllItems            = nil
+  sellAllButton           = nil
+  selectedItem            = nil
 
   _G.GameNpcTrade = nil
 end
@@ -380,10 +416,6 @@ function GameNpcTrade.refreshPlayerGoods()
     local showAllItemsCondition = currentTradeType == TradeType.Buy or showAllItems:isChecked() or currentTradeType == TradeType.Sell and not showAllItems:isChecked() and canTrade
     npcItemBox:setVisible(searchCondition and showAllItemsCondition)
 
-    -- Update info button tooltip
-    local infoWidget = npcItemBox.infoButton
-    infoWidget:setTooltip(f('%s%s', infoWidget.tooltipText, canTradeRet ~= TradeNoError and TradeErrorStr[canTradeRet] and f('\n\n%s', TradeErrorStr[canTradeRet]) or ''), TooltipType.textBlock)
-
     if not foundSelectedItem and selectedItem == tradeItem and npcItemBox:isVisible() and itemBox:isEnabled() then
       foundSelectedItem = true
     end
@@ -401,40 +433,6 @@ function GameNpcTrade.refreshPlayerGoods()
 end
 
 do
-  local function onItemMouseRelease(self, mousePosition, mouseButton)
-    if cancelNextPopupRelease then
-      cancelNextPopupRelease = false
-      return false
-    end
-
-    local function onLook()
-      return g_game.inspectNpcTrade(self:getItem())
-    end
-
-    -- Look
-    if g_mouse.isPressed(MouseLeftButton) and mouseButton == MouseRightButton or
-       g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton or
-       mouseButton == MouseLeftButton and g_keyboard.isShiftPressed()
-    then
-      cancelNextPopupRelease = true
-      onLook()
-
-      return true
-
-    -- Context menu
-    elseif mouseButton == MouseRightButton then
-      local menu = g_ui.createWidget('PopupMenu')
-
-      menu:setGameMenu(true)
-      menu:addOption(loc'${GameNpcTradeContextMenuLook}', onLook, '(Shift)')
-      menu:display(mousePosition)
-
-      return true
-    end
-
-    return false
-  end
-
   function GameNpcTrade.refreshTradeItems()
     local layout                = itemsPanel:getLayout()
     local localPlayer           = g_game.getLocalPlayer()
@@ -474,13 +472,6 @@ do
       trustStr       = string.exists(trustStr) and (tradeType == TradeType.Buy and f('\n%s %s', (loc'${GameNpcTradeTrust}'):lower(), trustStr:lower()) or tradeType == TradeType.Sell and loc'\n+ ${GameNpcTradeTrustXp}') or ''
       itemBox:setText(f('%s\n%s%s\n%.2f %s', tradeItem.name, GameNpcTrade.formattedPrice(tradeItem), trustStr, tradeItem.weight, WeightUnit))
 
-      -- Update info widget text
-      local infoWidget       = npcItemBox.infoButton
-      local infoTrustStr     = GameNpcTrade.formattedTrust(tradeItem)
-      infoTrustStr           = string.exists(infoTrustStr) and f(loc'\n${GameNpcTradeTrust}: %s', infoTrustStr) or ''
-      infoWidget.tooltipText = f(loc'%s\n\n${CorelibInfoName}: %s\n${GameNpcTradeInfoPrice}: %s%s\n${GameNpcTradeInfoWeight}: %.2f %s', tradeItem.description, tradeItem.name, GameNpcTrade.formattedPrice(tradeItem), infoTrustStr, tradeItem.weight, WeightUnit)
-      infoWidget:setTooltip(infoWidget.tooltipText, TooltipType.textBlock)
-
       -- Item
       if tradeItem.maskOutfitType == 0 and tradeItem.maskOutfitMount == 0 then
         -- Hide outfit
@@ -488,7 +479,8 @@ do
 
         -- Update item
         boxItem:setItem(tradeItem.maskptr or tradeItem.ptr)
-        boxItem.onMouseRelease = onItemMouseRelease
+        boxItem.hoverLookAllowVirtual = true
+        boxItem.hoverLookNpcTrade = true
 
       -- Outfit
       else
@@ -503,6 +495,7 @@ do
           localPlayerOutfit.type  = localPlayerOutfitType
           localPlayerOutfit.mount = tradeItem.maskOutfitMount
         end
+        localPlayerOutfit.auxType = 0
         boxOutfit:setOutfit(localPlayerOutfit)
       end
 

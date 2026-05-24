@@ -138,27 +138,6 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
   return ret
 end
 
-function UIGameMap:onDoubleClick(mousePosition)
-  local lookThing
-
-  local tile = self:getTile(mousePosition)
-  if tile then
-    lookThing = tile:getTopLookThing()
-  end
-
-  local ret = false
-  if lookThing and g_keyboard.getModifiers() == KeyboardNoModifier then
-    g_game.look(lookThing)
-    ret = true
-  end
-
-  if ret then
-    self.allowNextRelease = false
-  end
-
-  return ret
-end
-
 function UIGameMap:onMouseWheel(mousePos, direction)
   if g_keyboard.getModifiers() == KeyboardCtrlModifier then
     if direction == MouseWheelUp then

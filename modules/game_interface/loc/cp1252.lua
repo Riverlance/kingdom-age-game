@@ -3,44 +3,12 @@
 g_locales.addTranslations{
   -- interface
 
-  GameInterfaceButtonDiscordTooltip = {
-    en = "Found a bug? Do you have a suggestion or feedback? Join our Discord Server!",
-    pt = "Encontrou um bug? Tem uma sugestão ou feedback? Junte-se ao nosso servidor do Discord!",
-    es = "¿Encontraste un error? ¿Tienes una sugerencia o comentario? ¡Únete a nuestro servidor de Discord!",
-    de = "Einen Fehler gefunden? Hast du eine Anregung oder Feedback? Tritt unserem Discord-Server bei!",
-    sv = "Hittade du en bugg? Har du ett förslag eller feedback? Gå med i vår Discord-server!",
-  },
-
-  GameInterfaceButtonLinksTooltip = {
-    en = "Access our links",
-    pt = "Acesse nossos links",
-    es = "Accede a nuestros enlaces",
-    de = "Greife auf unsere Links zu",
-    sv = "Få åtkomst till våra länkar",
-  },
-
-  GameInterfaceButtonShopTooltip = {
-    en = "Visit the VIP shop on our Website",
-    pt = "Visite a loja VIP no nosso site",
-    es = "Visita la tienda VIP en nuestro sitio web",
-    de = "Besuche den VIP-Shop auf unserer Website",
-    sv = "Besök VIP-butiken på vår webbplats",
-  },
-
   GameInterfaceButtonJobSkillsTooltip = {
     en = "Job Skills",
     pt = "Habilidades de Trabalho",
     es = "Habilidades de Oficio",
     de = "Berufsfertigkeiten",
     sv = "Jobbfärdigheter",
-  },
-
-  GameInterfaceButtonDealsTooltip = {
-    en = "Deals",
-    pt = "Ofertas",
-    es = "Ofertas",
-    de = "Angebote",
-    sv = "Erbjudanden",
   },
 
   GameInterfaceFYI = {
@@ -84,14 +52,6 @@ g_locales.addTranslations{
   },
 
 
-
-  GameInterfaceContextMenuLook = {
-    en = "Look",
-    pt = "Olhar",
-    es = "Mirar",
-    de = "Ansehen",
-    sv = "Titta",
-  },
 
   GameInterfaceContextMenuUnwrap = {
     en = "Unwrap",
@@ -213,14 +173,6 @@ g_locales.addTranslations{
     es = "Ver infracciones de reglas",
     de = "Regelverstöße anzeigen",
     sv = "Visa regelöverträdelser",
-  },
-
-  GameInterfaceContextMenuViewBugs = {
-    en = "View bugs",
-    pt = "Ver erros",
-    es = "Ver errores",
-    de = "Fehler anzeigen",
-    sv = "Visa buggar",
   },
 
 
@@ -453,6 +405,22 @@ g_locales.addTranslations{
     es = "Mostrar paneles derechos habilitados (%s)",
     de = "Aktivierte rechte Panels anzeigen (%s)",
     sv = "Visa aktiverade högra paneler (%s)",
+  },
+
+  GameInterfacePanelAddButton = {
+    en = "Add panel",
+    pt = "Adicionar painel",
+    es = "Agregar panel",
+    de = "Panel hinzufügen",
+    sv = "Lägg till panel",
+  },
+
+  GameInterfacePanelRemoveButton = {
+    en = "Remove panel",
+    pt = "Remover painel",
+    es = "Eliminar panel",
+    de = "Panel entfernen",
+    sv = "Ta bort panel",
   },
 
   GameInterfaceChatButtonHide = {

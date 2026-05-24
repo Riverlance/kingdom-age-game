@@ -6,9 +6,11 @@ local alpha = 'AA' -- Alpha
 local creatureButtonColors = {
   onIdle = { notHovered = '#888888'..alpha, hovered = '#FFFFFF'..alpha }, -- Update label default color on 10-creaturebuttons.otui as onIdle.notHovered
 
-  onTargetedOffensive = { notHovered = '#FF0000'..alpha, hovered = '#FF8888'..alpha },
-  onTargetedBalanced  = { notHovered = '#FFFF00'..alpha, hovered = '#FFFF88'..alpha },
-  onTargetedDefensive = { notHovered = '#00FFFF'..alpha, hovered = '#88FFFF'..alpha },
+  onTargeted = { notHovered = '#FF0000'..alpha, hovered = '#FF8888'..alpha },
+
+  -- onTargetedOffensive = { notHovered = '#FF0000'..alpha, hovered = '#FF8888'..alpha },
+  -- onTargetedBalanced  = { notHovered = '#FFFF00'..alpha, hovered = '#FFFF88'..alpha },
+  -- onTargetedDefensive = { notHovered = '#00FFFF'..alpha, hovered = '#88FFFF'..alpha },
 
   onFollowed = { notHovered = '#00FF00'..alpha, hovered = '#88FF88'..alpha }
 }
@@ -59,17 +61,7 @@ function UICreatureButton:onDestroy()
 end
 
 function UICreatureButton.getStaticCircleTargetColor()
-  local fightMode = g_game.getFightMode()
-
-  if fightMode == FightOffensive then
-    return creatureButtonColors.onTargetedOffensive
-  elseif fightMode == FightBalanced then
-    return creatureButtonColors.onTargetedBalanced
-  elseif fightMode == FightDefensive then
-    return creatureButtonColors.onTargetedDefensive
-  end
-
-  return creatureButtonColors.onTargetedOffensive
+  return creatureButtonColors.onTargeted
 end
 
 function UICreatureButton.getStaticCircleFollowColor()

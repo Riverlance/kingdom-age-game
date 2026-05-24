@@ -14,6 +14,10 @@ function UIScrollArea:onStyleApply(styleName, styleNode)
   for name, value in pairs(styleNode) do
     if name == 'vertical-scrollbar' then
       addEvent(function()
+        if not isWidgetAlive(self) then
+          return
+        end
+
         local parent = self:getParent()
         if parent then
           self:setVerticalScrollBar(parent:getChildById(value))
@@ -21,9 +25,13 @@ function UIScrollArea:onStyleApply(styleName, styleNode)
       end)
     elseif name == 'horizontal-scrollbar' then
       addEvent(function()
+        if not isWidgetAlive(self) then
+          return
+        end
+
         local parent = self:getParent()
         if parent then
-          self:setHorizontalScrollBar(self:getParent():getChildById(value))
+          self:setHorizontalScrollBar(parent:getChildById(value))
         end
       end)
     elseif name == 'inverted-scroll' then
@@ -73,26 +81,36 @@ end
 
 function UIScrollArea:setVerticalScrollBar(scrollbar)
   self.verticalScrollBar = scrollbar
-  connect(self.verticalScrollBar, {
-    onValueChange = function(scrollbar, value)
-      local virtualOffset = self:getVirtualOffset()
-      virtualOffset.y = value
-      self:setVirtualOffset(virtualOffset)
-      signalcall(self.onScrollChange, self, virtualOffset)
+  local callback = function(scrollbar, value)
+    if not isWidgetAlive(self) then
+      return
     end
+
+    local virtualOffset = self:getVirtualOffset()
+    virtualOffset.y = value
+    self:setVirtualOffset(virtualOffset)
+    signalcall(self.onScrollChange, self, virtualOffset)
+  end
+  connect(self.verticalScrollBar, {
+    onValueChange = callback
   })
   self:updateScrollBars()
 end
 
 function UIScrollArea:setHorizontalScrollBar(scrollbar)
   self.horizontalScrollBar = scrollbar
-  connect(self.horizontalScrollBar, {
-    onValueChange = function(scrollbar, value)
-      local virtualOffset = self:getVirtualOffset()
-      virtualOffset.x = value
-      self:setVirtualOffset(virtualOffset)
-      signalcall(self.onScrollChange, self, virtualOffset)
+  local callback = function(scrollbar, value)
+    if not isWidgetAlive(self) then
+      return
     end
+
+    local virtualOffset = self:getVirtualOffset()
+    virtualOffset.x = value
+    self:setVirtualOffset(virtualOffset)
+    signalcall(self.onScrollChange, self, virtualOffset)
+  end
+  connect(self.horizontalScrollBar, {
+    onValueChange = callback
   })
   self:updateScrollBars()
 end
@@ -149,27 +167,60 @@ function UIScrollArea:onMouseWheel(mousePos, mouseWheel)
 end
 
 function UIScrollArea:ensureChildVisible(child)
-  if child then
-    local paddingRect = self:getPaddingRect()
-    if self.verticalScrollBar then
-      local deltaY = paddingRect.y - child:getY()
+  if not child or not self:hasChild(child) then
+    return
+  end
+
+  local paddingRect = self:getPaddingRect()
+  if self.verticalScrollBar then
+    local viewTop     = paddingRect.y
+    local viewHeight  = paddingRect.height
+    local viewBottom  = viewTop + viewHeight
+    local childTop    = child:getY()
+    local childHeight = child:getHeight()
+    local childBottom = childTop + childHeight
+
+    if childHeight > viewHeight then
+      -- Avoid jumping to the end for oversized focus targets (e.g. tab content containers).
+      if childTop < viewTop then
+        self.verticalScrollBar:decrement(viewTop - childTop)
+      elseif childTop > viewTop then
+        self.verticalScrollBar:increment(childTop - viewTop)
+      end
+    else
+      local deltaY = viewTop - childTop
       if deltaY > 0 then
         self.verticalScrollBar:decrement(deltaY)
+      else
+        deltaY = childBottom - viewBottom
+        if deltaY > 0 then
+          self.verticalScrollBar:increment(deltaY)
+        end
       end
+    end
+  elseif self.horizontalScrollBar then
+    local viewLeft   = paddingRect.x
+    local viewWidth  = paddingRect.width
+    local viewRight  = viewLeft + viewWidth
+    local childLeft  = child:getX()
+    local childWidth = child:getWidth()
+    local childRight = childLeft + childWidth
 
-      deltaY = (child:getY() + child:getHeight()) - (paddingRect.y + paddingRect.height)
-      if deltaY > 0 then
-        self.verticalScrollBar:increment(deltaY)
+    if childWidth > viewWidth then
+      if childLeft < viewLeft then
+        self.horizontalScrollBar:decrement(viewLeft - childLeft)
+      elseif childLeft > viewLeft then
+        self.horizontalScrollBar:increment(childLeft - viewLeft)
       end
-    elseif self.horizontalScrollBar then
-      local deltaX = paddingRect.x - child:getX()
+    else
+      local deltaX = viewLeft - childLeft
       if deltaX > 0 then
         self.horizontalScrollBar:decrement(deltaX)
-      end
-
-      deltaX = (child:getX() + child:getWidth()) - (paddingRect.x + paddingRect.width)
-      if deltaX > 0 then
-        self.horizontalScrollBar:increment(deltaX)
+      else
+        deltaX = childRight - viewRight
+        if deltaX > 0 then
+          self.horizontalScrollBar:increment(deltaX)
+        end
       end
     end
   end

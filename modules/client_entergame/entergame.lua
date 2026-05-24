@@ -18,7 +18,7 @@ local motdWindow
 local motdButton
 local clientBox
 local protocolLogin
-local motdEnabled = true
+local motdEnabled = false
 
 
 
@@ -130,7 +130,6 @@ function ClientEnterGame.init()
   ClientEnterGame.m = modules.client_entergame
 
   enterGame = g_ui.displayUI('entergame')
-  enterGameButton = ClientTopMenu.addLeftButton('enterGameButton', { loct = '${EnterGameTitle} (${EnterGameActionKey})', locpar = { EnterGameActionKey = EnterGameActionKey } }, '/images/ui/top_menu/login', ClientEnterGame.openWindow)
   motdButton = ClientTopMenu.addLeftButton('motdButton', loc'${EnterGameMotdTitle}', '/images/ui/top_menu/motd', ClientEnterGame.toggleMotd)
   motdButton:setOn(false)
   motdButton:hide()
@@ -181,27 +180,39 @@ function ClientEnterGame.terminate()
   g_keyboard.unbindKeyDown(EnterGameActionKey)
   enterGame:destroy()
   enterGame = nil
-  enterGameButton:destroy()
-  enterGameButton = nil
+
   clientBox = nil
+
+  if enterGameButton then
+    enterGameButton:destroy()
+    enterGameButton = nil
+  end
+
   if motdWindow then
     motdWindow:destroy()
     motdWindow = nil
   end
+
   if motdButton then
     motdButton:destroy()
     motdButton = nil
   end
+
   if loadBox then
     loadBox:destroy()
     loadBox = nil
   end
+
   if protocolLogin then
     protocolLogin:cancelLogin()
     protocolLogin = nil
   end
 
   _G.ClientEnterGame = nil
+end
+
+function ClientEnterGame.createEnterGameButton()
+  enterGameButton = ClientTopMenu.addLeftButton('enterGameButton', { loct = '${CharacterListTitle} (${EnterGameActionKey})', locpar = { EnterGameActionKey = EnterGameActionKey } }, '/images/ui/top_menu/login', ClientEnterGame.openWindow, true)
 end
 
 function ClientEnterGame.toggleLoginButton(on)
@@ -241,17 +252,23 @@ function ClientEnterGame.openWindow()
     if not ClientCharacterList.isVisible() then
       ClientEnterGame.hide()
       ClientCharacterList.show()
-      enterGameButton:setOn(true)
+      if enterGameButton then
+        enterGameButton:setOn(true)
+      end
     else
       ClientEnterGame.hide()
       ClientCharacterList.hide(false)
-      enterGameButton:setOn(false)
+      if enterGameButton then
+        enterGameButton:setOn(false)
+      end
     end
   else
     if not g_game.isLogging() then
       ClientEnterGame.show()
       ClientCharacterList.hide()
-      enterGameButton:setOn(false)
+      if enterGameButton then
+        enterGameButton:setOn(false)
+      end
     end
   end
 end
@@ -337,11 +354,13 @@ function ClientEnterGame.doLogin()
 end
 
 function ClientEnterGame.displayMotd()
-  if not motdWindow then
-    motdWindow = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)
-    motdButton:setOn(true)
-    motdWindow.onOk = function() motdButton:setOn(false) motdWindow = nil end
+  if not motdEnabled or motdWindow then
+    return
   end
+
+  motdWindow      = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)
+  motdWindow.onOk = function() motdButton:setOn(false) motdWindow = nil end
+  motdButton:setOn(true)
 end
 
 function ClientEnterGame.toggleMotd()

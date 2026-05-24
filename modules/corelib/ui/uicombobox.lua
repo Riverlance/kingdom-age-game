@@ -113,13 +113,13 @@ end
 function UIComboBox:onMousePress(mousePos, mouseButton)
   local menu
   if self.menuScroll then
-    menu = g_ui.createWidget(self:getStyleName() .. 'PopupScrollMenu')
+    menu = g_ui.createWidget('ComboBoxPopupScrollMenu')
     menu:setHeight(self.menuHeight)
     if self.menuScrollStep > 0 then
       menu:setScrollbarStep(self.menuScrollStep)
     end
   else
-    menu = g_ui.createWidget(self:getStyleName() .. 'PopupMenu')
+    menu = g_ui.createWidget('ComboBoxPopupMenu')
   end
   menu:setId(self:getId() .. 'PopupMenu')
   for _, v in ipairs(self.options) do

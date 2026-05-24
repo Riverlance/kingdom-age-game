@@ -47,7 +47,6 @@ Module
     - game_viplist
 
     // Top menu left buttons
-    - game_bugreport
     - game_hotkeys
     - ka_game_hotkeybars
     - game_questlog

@@ -1,8 +1,9 @@
 DrawCoordFilterShaderFlags = { -- setDrawCoordFilterShaders
   None         = 0,
-  _2xSaILevel2 = 2 ^ 0,
-  _2XSaI       = 2 ^ 1,
-  Painting     = 2 ^ 2,
+  _XBR4x       = 2 ^ 0,
+  _2xSaILevel2 = 2 ^ 1,
+  _2XSaI       = 2 ^ 2,
+  Painting     = 2 ^ 3,
 }
 
 DrawCoordEffectShaderFlags = { -- setDrawCoordEffectShaders
@@ -39,6 +40,7 @@ ShaderUniforms = {
 }
 
 MapShaders = {
+  { name = 'XBR4x',               antiAliasing = AntiAliasing.disabled, onEnable = function(map, enable) map:setDrawCoordFilterShaders(DrawCoordFilterShaderFlags._XBR4x, enable) end },
   { name = '2xSaI Level 2',       antiAliasing = AntiAliasing.disabled, onEnable = function(map, enable) map:setDrawCoordFilterShaders(DrawCoordFilterShaderFlags._2xSaILevel2, enable) end },
   { name = '2xSaI',               antiAliasing = AntiAliasing.disabled, onEnable = function(map, enable) map:setDrawCoordFilterShaders(DrawCoordFilterShaderFlags._2XSaI, enable) end },
   { name = 'Anti-Aliasing Retro', antiAliasing = AntiAliasing.smoothRetro },
@@ -111,6 +113,16 @@ do
   -- Map
   for _, shaderData in ipairs(MapShaders) do
     registerShader(shaderData, 'Map', 'setupMapShader')
+  end
+end
+
+do
+  local name = 'Minimap - Clouds'
+  local fragmentShaderPath = 'shader/fragment/clouds.frag'
+  if resolvepath(fragmentShaderPath) then
+    g_shaders.createFragmentShader(name, fragmentShaderPath)
+    g_shaders.addMultiTexture(name, resolvepath('shader/images/minimap_clouds'))
+    g_shaders.setupMapShader(name)
   end
 end
 

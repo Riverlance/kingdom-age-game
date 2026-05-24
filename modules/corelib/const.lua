@@ -389,6 +389,14 @@ function Creature:isSage()
   return isSage(self:getVocation())
 end
 
+-- Character list
+
+ClientLogoutKey = 'Ctrl+L'
+
+-- Hotkey
+
+GameHotkeysActionKey = 'Ctrl+K' -- Note: In corelib because it is in use on client_options
+
 -- Audio
 
 AudioChannels = {
@@ -456,6 +464,7 @@ TooltipType = {
   image           = 3,
   conditionButton = 4,
   powerButton     = 5,
+  lookHover       = 6,
 }
 
 -- ViewModes
@@ -469,8 +478,12 @@ ViewModes = {
 
 -- Panel
 
-GameSidePanelWidthFactor = 34 -- Width per slot
-GameSidePanelWidthOffset = 19 -- Minimum width
+GameSidePanelWidthFactor       = 34 -- Width per slot
+GameSidePanelWidthOffset       = 19 -- Minimum width
+GameSidePanelWidthMinimumSlots = 4
+GameSidePanelWidthMaximumSlots = 10
+GameSidePanelAmountMinimum     = 0
+GameSidePanelAmountMaximum     = 3
 
 -- PanelStickers
 

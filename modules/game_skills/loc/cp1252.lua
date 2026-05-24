@@ -3,14 +3,6 @@
 g_locales.addTranslations{
   -- otui
 
-  GameSkillsWindowTitle = {
-    en = "Stats",
-    pt = "Estatísticas",
-    es = "Estadísticas",
-    de = "Werte",
-    sv = "Statistik",
-  },
-
   GameSkillsInfoXP = {
     en = "XP",
   },

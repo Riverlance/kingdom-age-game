@@ -27,7 +27,7 @@ PopupMenuSeparator < UIWidget
   margin-left: 2
   margin-right: 2
   margin-bottom: 1
-  image-source: /images/ui/_background/menu_box
+  image-source: /images/ui/_background/panel_rounded
   image-border-left: 1
   image-border-right: 1
   image-clip: 0 0 32 1
@@ -36,7 +36,7 @@ PopupMenuSeparator < UIWidget
 
 PopupMenu < UIPopupMenu
   width: 50
-  image-source: /images/ui/_background/menu_box
+  image-source: /images/ui/_background/panel_rounded
   image-border: 1
   padding: 3
 
@@ -69,7 +69,7 @@ PopupScrollMenuSeparator < UIWidget
   margin-left: 2
   margin-right: 2
   margin-bottom: 1
-  image-source: /images/ui/_background/menu_box
+  image-source: /images/ui/_background/panel_rounded
   image-border-left: 1
   image-border-right: 1
   image-clip: 0 0 32 1
@@ -78,6 +78,6 @@ PopupScrollMenuSeparator < UIWidget
 
 PopupScrollMenu < UIPopupScrollMenu
   width: 50
-  image-source: /images/ui/_background/menu_box
+  image-source: /images/ui/_background/panel_rounded
   image-border: 1
   padding: 3

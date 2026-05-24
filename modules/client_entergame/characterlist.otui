@@ -107,7 +107,17 @@ MainWindow
     anchors.bottom: next.top
     margin-bottom: 10
 
-  Button
+  LightButton
+    id: buttonLogout
+    &loc: '${CorelibInfoLogout}'
+    &loct: '${CorelibInfoLogout} (${ClientLogoutKey})'
+    @locpar: return { ClientLogoutKey = ClientLogoutKey }
+    width: 64
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    @onClick: GameInterface.tryLogout()
+
+  LightButton
     id: buttonOk
     &loc: '${CorelibInfoOk}'
     width: 64
@@ -116,7 +126,7 @@ MainWindow
     margin-right: 10
     @onClick: ClientCharacterList.doLogin()
 
-  Button
+  LightButton
     id: buttonCancel
     &loc: '${CorelibInfoCancel}'
     width: 64

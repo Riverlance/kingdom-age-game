@@ -47,7 +47,9 @@ function UISplitter:onMouseMove(mousePos, mouseMoved)
         self.currentMargin = newMargin
         if not self.event or self.event:isExecuted() then
           self.event = addEvent(function()
-            self:setMarginBottom(self.currentMargin)
+            if isWidgetAlive(self) then
+              self:setMarginBottom(self.currentMargin)
+            end
           end)
         end
       end
@@ -60,7 +62,9 @@ function UISplitter:onMouseMove(mousePos, mouseMoved)
         self.currentMargin = newMargin
         if not self.event or self.event:isExecuted() then
           self.event = addEvent(function()
-            self:setMarginRight(self.currentMargin)
+            if isWidgetAlive(self) then
+              self:setMarginRight(self.currentMargin)
+            end
           end)
         end
       end

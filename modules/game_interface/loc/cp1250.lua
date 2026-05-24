@@ -3,24 +3,8 @@
 g_locales.addTranslations({
   -- interface
 
-  GameInterfaceButtonDiscordTooltip = {
-    pl = "Znalaz³eœ b³¹d? Masz sugestiê lub opiniê? Do³¹cz do naszego serwera Discord!",
-  },
-
-  GameInterfaceButtonLinksTooltip = {
-    pl = "Uzyskaj dostêp do naszych linków",
-  },
-
-  GameInterfaceButtonShopTooltip = {
-    pl = "OdwiedŸ sklep VIP na naszej stronie internetowej",
-  },
-
   GameInterfaceButtonJobSkillsTooltip = {
     pl = "Umiejêtnoœci Zawodowe",
-  },
-
-  GameInterfaceButtonDealsTooltip = {
-    pl = "Oferty",
   },
 
   GameInterfaceFYI = {
@@ -44,10 +28,6 @@ g_locales.addTranslations({
   },
 
 
-
-  GameInterfaceContextMenuLook = {
-    pl = "Spojrzeæ",
-  },
 
   GameInterfaceContextMenuUnwrap = {
     pl = "Rozpakowaæ",
@@ -109,10 +89,6 @@ g_locales.addTranslations({
 
   GameInterfaceContextMenuRuleViolations = {
     pl = "Zobacz naruszenia zasad",
-  },
-
-  GameInterfaceContextMenuViewBugs = {
-    pl = "Zobacz b³êdy",
   },
 
 
@@ -233,6 +209,14 @@ g_locales.addTranslations({
 
   GameInterfaceRightPanelButtonShow = {
     pl = "Poka¿ w³¹czone prawe panele (%s)",
+  },
+
+  GameInterfacePanelAddButton = {
+    pl = "Dodaj panel",
+  },
+
+  GameInterfacePanelRemoveButton = {
+    pl = "Usuñ panel",
   },
 
   GameInterfaceChatButtonHide = {

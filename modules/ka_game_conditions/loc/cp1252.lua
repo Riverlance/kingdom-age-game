@@ -3,14 +3,6 @@
 g_locales.addTranslations{
   -- otui
 
-  GameConditionsWindowTitle = {
-    en = "Conditions",
-    pt = "Condições",
-    es = "Condiciones",
-    de = "Bedingungen",
-    sv = "Förhållanden",
-  },
-
   GameConditionsTabFilterDefaultTooltipShow = {
     en = "Show default conditions",
     pt = "Mostrar condições padrão",

@@ -73,6 +73,7 @@ local defaultOptions = {
   shaderFilter = 1,
   showClouds = true,
   viewMode = 3,
+  transposedView = false,
   leftSticker = 1,
   rightSticker = 1,
   leftStickerOpacityScrollbar = 50,
@@ -89,11 +90,14 @@ local defaultOptions = {
   creatureInformationScale = 0,
   staticTextScale = 0,
   animatedTextScale = 0,
+  uiScale = 0,
 }
 
 local optionsWindow
 local optionsButton
 local optionsTabBar
+local optionsTabContent
+local optionsTabContentScrollBar
 local options = { }
 
 local gamePanel
@@ -103,7 +107,6 @@ local graphicPanel
 local displayPanel
 local panelOptionsPanel
 local consolePanel
-local audioButton
 
 local leftStickerComboBox
 local rightStickerComboBox
@@ -111,8 +114,79 @@ local shaderFilterComboBox
 local viewModeComboBox
 local crosshairComboBox
 local floorViewModeComboBox
+local uiScaleComboBox
 
 local sidePanelsRadioGroup
+local autoDependentScaleRefreshEvent
+
+
+
+-- Side panels amount change
+
+local function clampSidePanelsCount(value)
+  return math.min(math.max(math.round(tonumber(value) or GameSidePanelAmountMinimum), GameSidePanelAmountMinimum), GameSidePanelAmountMaximum)
+end
+
+local function updatePanelAddRemoveButtons()
+  local leftPanelsCount  = clampSidePanelsCount(ClientOptions.getOption('enabledLeftPanels'))
+  local rightPanelsCount = clampSidePanelsCount(ClientOptions.getOption('enabledRightPanels'))
+
+  local leftPanelAddButton = GameInterface.getLeftPanelAddButton()
+  if leftPanelAddButton then
+    leftPanelAddButton:setVisible(leftPanelsCount < GameSidePanelAmountMaximum)
+  end
+
+  local leftPanelRemoveButton = GameInterface.getLeftPanelRemoveButton()
+  if leftPanelRemoveButton then
+    leftPanelRemoveButton:setVisible(leftPanelsCount > GameSidePanelAmountMinimum)
+  end
+
+  local rightPanelAddButton = GameInterface.getRightPanelAddButton()
+  if rightPanelAddButton then
+    rightPanelAddButton:setVisible(rightPanelsCount < GameSidePanelAmountMaximum)
+  end
+
+  local rightPanelRemoveButton = GameInterface.getRightPanelRemoveButton()
+  if rightPanelRemoveButton then
+    rightPanelRemoveButton:setVisible(rightPanelsCount > GameSidePanelAmountMinimum)
+  end
+end
+
+function ClientOptions.setupPanelAddRemoveButtons()
+  local leftPanelAddButton = GameInterface.getLeftPanelAddButton()
+  if leftPanelAddButton then
+    leftPanelAddButton.onClick = function()
+      local value = clampSidePanelsCount((ClientOptions.getOption('enabledLeftPanels') or GameSidePanelAmountMinimum) + 1)
+      ClientOptions.setOption('enabledLeftPanels', value)
+    end
+  end
+
+  local leftPanelRemoveButton = GameInterface.getLeftPanelRemoveButton()
+  if leftPanelRemoveButton then
+    leftPanelRemoveButton.onClick = function()
+      local value = clampSidePanelsCount((ClientOptions.getOption('enabledLeftPanels') or GameSidePanelAmountMinimum) - 1)
+      ClientOptions.setOption('enabledLeftPanels', value)
+    end
+  end
+
+  local rightPanelAddButton = GameInterface.getRightPanelAddButton()
+  if rightPanelAddButton then
+    rightPanelAddButton.onClick = function()
+      local value = clampSidePanelsCount((ClientOptions.getOption('enabledRightPanels') or GameSidePanelAmountMinimum) + 1)
+      ClientOptions.setOption('enabledRightPanels', value)
+    end
+  end
+
+  local rightPanelRemoveButton = GameInterface.getRightPanelRemoveButton()
+  if rightPanelRemoveButton then
+    rightPanelRemoveButton.onClick = function()
+      local value = clampSidePanelsCount((ClientOptions.getOption('enabledRightPanels') or GameSidePanelAmountMinimum) - 1)
+      ClientOptions.setOption('enabledRightPanels', value)
+    end
+  end
+
+  updatePanelAddRemoveButtons()
+end
 
 
 
@@ -159,6 +233,77 @@ local function setupSidePanelsPriority()
   end
 end
 
+local function refreshOptionsTabHeight(tab)
+  if not optionsTabContent then
+    return
+  end
+
+  local currentTab = tab or (optionsTabBar and optionsTabBar:getCurrentTab())
+  if not currentTab then
+    return
+  end
+
+  local panel = currentTab.tabPanel
+  if not panel then
+    return
+  end
+
+  panel:breakAnchors()
+  panel:addAnchor(AnchorTop, 'parent', AnchorTop)
+  panel:addAnchor(AnchorLeft, 'parent', AnchorLeft)
+  panel:addAnchor(AnchorRight, 'parent', AnchorRight)
+
+  panel:updateLayout()
+  local contentHeight = panel:getContentsSize().height + panel:getPaddingTop() + panel:getPaddingBottom() + 1
+  panel:setHeight(math.max(contentHeight, optionsTabContent:getHeight()))
+  panel:updateLayout()
+  optionsTabContent:updateLayout()
+  optionsTabContent:updateScrollBars()
+end
+
+local function resetOptionsTabScroll()
+  if optionsTabContentScrollBar then
+    optionsTabContentScrollBar:setValue(optionsTabContentScrollBar:getMinimum())
+  end
+end
+
+local function requestOptionsTabRefresh(tab, resetScroll)
+  local function runRefresh(targetTab)
+    refreshOptionsTabHeight(targetTab)
+    if resetScroll then
+      resetOptionsTabScroll()
+    end
+  end
+
+  if isWidget(tab) then
+    addEvent(function()
+      if not isWidgetAlive(tab) then
+        return
+      end
+
+      runRefresh(tab)
+
+      -- Run one extra cycle after layout settles to avoid intermittent disabled scrollbar state.
+      addEvent(function()
+        if not isWidgetAlive(tab) then
+          return
+        end
+
+        runRefresh(tab)
+      end)
+    end)
+  else
+    addEvent(function()
+      runRefresh(tab)
+
+      -- Run one extra cycle after layout settles to avoid intermittent disabled scrollbar state.
+      addEvent(function()
+        runRefresh(tab)
+      end)
+    end)
+  end
+end
+
 local clientSettingUp = true
 function ClientOptions.setup()
   local mapPanel = GameInterface.getMapPanel()
@@ -186,6 +331,59 @@ end
 
 
 
+-- Scaling
+
+local function getResolvedAutoDependentScale(value)
+  local _value          = tonumber(value) or 0
+  local displayDensity  = math.max(tonumber(g_window.getDisplayDensity()) or 1, 1)
+  local resolvedUiScale = math.max(tonumber(g_app.getResolvedUiScale and g_app.getResolvedUiScale() or 1) or 1, 1)
+  local autoScale       = math.max(displayDensity * resolvedUiScale, 1)
+  local manualScale     = math.max((_value / 2) + 0.5, 1)
+
+  return _value == 0 and autoScale or manualScale
+end
+
+function ClientOptions.refreshAutoDependentScales()
+  local creatureInformationScale = ClientOptions.getOption('creatureInformationScale')
+  if creatureInformationScale ~= nil then
+    g_app.setCreatureInformationScale(getResolvedAutoDependentScale(creatureInformationScale))
+  end
+
+  local staticTextScale = ClientOptions.getOption('staticTextScale')
+  if staticTextScale ~= nil then
+    g_app.setStaticTextScale(getResolvedAutoDependentScale(staticTextScale))
+  end
+
+  local animatedTextScale = ClientOptions.getOption('animatedTextScale')
+  if animatedTextScale ~= nil then
+    g_app.setAnimatedTextScale(getResolvedAutoDependentScale(animatedTextScale))
+  end
+end
+
+function ClientOptions.shouldRefreshAutoDependentScales()
+  return ClientOptions.getOption('creatureInformationScale') == 0
+      or ClientOptions.getOption('staticTextScale') == 0
+      or ClientOptions.getOption('animatedTextScale') == 0
+end
+
+function ClientOptions.onRootGeometryChange()
+  if not ClientOptions.shouldRefreshAutoDependentScales() then
+    return
+  end
+
+  if autoDependentScaleRefreshEvent then
+    return
+  end
+
+  autoDependentScaleRefreshEvent = addEvent(function()
+    autoDependentScaleRefreshEvent = nil
+
+    ClientOptions.refreshAutoDependentScales()
+  end)
+end
+
+
+
 function ClientOptions.init()
   -- Alias
   ClientOptions.m = modules.client_options
@@ -199,7 +397,17 @@ function ClientOptions.init()
   optionsWindow:hide()
 
   optionsTabBar = optionsWindow:getChildById('optionsTabBar')
-  optionsTabBar:setContentWidget(optionsWindow:getChildById('optionsTabContent'))
+  optionsTabContent = optionsWindow:getChildById('optionsTabContent')
+  optionsTabContentScrollBar = optionsWindow:getChildById('optionsTabContentScrollBar')
+  optionsTabBar:setContentWidget(optionsTabContent)
+
+  optionsTabBar.onTabChange = function(self, tab)
+    requestOptionsTabRefresh(tab, true)
+  end
+
+  optionsTabContent.onGeometryChange = function()
+    requestOptionsTabRefresh(nil, false)
+  end
 
   gamePanel         = g_ui.loadUI('game')
   controlPanel      = g_ui.loadUI('control')
@@ -218,12 +426,12 @@ function ClientOptions.init()
   optionsTabBar:addTab(loc'${ClientOptionsTabTitleDisplay}', displayPanel, '/images/ui/options/display')
   optionsTabBar:addTab(loc'${ClientOptionsTabTitlePanel}', panelOptionsPanel, '/images/ui/options/panel')
   optionsTabBar:addTab(loc'${ClientOptionsTabTitleConsole}', consolePanel, '/images/ui/options/console')
+  requestOptionsTabRefresh(nil, true)
 
   g_keyboard.bindKeyDown(ClientOptionsFullscreenActionKey, function() ClientOptions.toggleOption('fullscreen') end)
 
   optionsButton = ClientTopMenu.addLeftButton('optionsButton', { loct = '${ClientOptionsTitle} (${ClientOptionsActionKey})', locpar = { ClientOptionsActionKey = ClientOptionsActionKey } }, '/images/ui/top_menu/options', ClientOptions.toggle)
   g_keyboard.bindKeyDown(ClientOptionsActionKey, ClientOptions.toggle)
-  audioButton = ClientTopMenu.addLeftButton('audioButton', { loct = '${ClientOptionsAudioTitle} (${ClientOptionsAudioActionKey})', locpar = { ClientOptionsAudioActionKey = ClientOptionsAudioActionKey } }, '/images/ui/top_menu/audio', function() ClientOptions.toggleOption('enableAudio') end)
   g_keyboard.bindKeyDown(ClientOptionsAudioActionKey, function() ClientOptions.toggleOption('enableAudio') end)
 
   -- Mouse item icon example
@@ -287,6 +495,16 @@ function ClientOptions.init()
   floorViewModeComboBox:addOption(loc'${ClientOptionsFloorViewModeValueAlwaysVisible}', 3)
   floorViewModeComboBox:addOption(loc'${ClientOptionsFloorViewModeValueSpy}', 4)
 
+  -- UI scale
+
+  uiScaleComboBox = graphicPanel.uiScale
+
+  uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValueAuto}', 0)
+  uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValue1x}', 1)
+  uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValue2x}', 2)
+  uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValue4x}', 4)
+  uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValue8x}', 8)
+
   addEvent(function()
     ClientOptions.setup()
 
@@ -314,24 +532,67 @@ function ClientOptions.init()
     floorViewModeComboBox.onOptionChange = function(comboBox, option)
       ClientOptions.setOption('floorViewMode', comboBox:getCurrentOption().data)
     end
+
+    uiScaleComboBox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('uiScale', comboBox:getCurrentOption().data)
+    end
   end)
+
+  connect(g_app, {
+    onRun = ClientOptions.onAppRun,
+  })
 
   connect(g_game, {
     onGameStart = ClientOptions.online,
   })
+
+  connect(rootWidget, {
+    onGeometryChange = ClientOptions.onRootGeometryChange,
+  })
 end
 
 function ClientOptions.terminate()
+  if autoDependentScaleRefreshEvent then
+    autoDependentScaleRefreshEvent:cancel()
+    autoDependentScaleRefreshEvent = nil
+  end
+
+  disconnect(rootWidget, {
+    onGeometryChange = ClientOptions.onRootGeometryChange,
+  })
+
   disconnect(g_game, {
     onGameStart = ClientOptions.online,
+  })
+
+  disconnect(g_app, {
+    onRun = ClientOptions.onAppRun,
   })
 
   g_keyboard.unbindKeyDown(ClientOptionsActionKey)
   g_keyboard.unbindKeyDown(ClientOptionsAudioActionKey)
   g_keyboard.unbindKeyDown(ClientOptionsFullscreenActionKey)
+
+  if sidePanelsRadioGroup then
+    sidePanelsRadioGroup:destroy()
+    sidePanelsRadioGroup = nil
+  end
+
   optionsWindow:destroy()
   optionsButton:destroy()
-  audioButton:destroy()
+
+  optionsWindow              = nil
+  optionsButton              = nil
+  optionsTabBar              = nil
+  optionsTabContent          = nil
+  optionsTabContentScrollBar = nil
+  gamePanel                  = nil
+  controlPanel               = nil
+  audioPanel                 = nil
+  graphicPanel               = nil
+  displayPanel               = nil
+  panelOptionsPanel          = nil
+  consolePanel               = nil
 
   _G.ClientOptions = nil
 end
@@ -349,6 +610,7 @@ function ClientOptions.show()
   optionsWindow:raise()
   optionsWindow:focus()
   optionsButton:setOn(true)
+  requestOptionsTabRefresh(nil, false)
 end
 
 function ClientOptions.hide()
@@ -404,11 +666,30 @@ function ClientOptions.setOption(key, value, force)
     end
 
   elseif key == 'showClouds' then
-    GameInterface.getMapPanel():setCloudsVisible(value)
+    local mapPanel = GameInterface.getMapPanel()
+    if mapPanel and mapPanel.setDrawEffectShaders then
+      mapPanel:setDrawEffectShaders(DrawEffectShaderFlags.Clouds, value)
+    end
+    g_minimap.setCloudsShaderEnabled(value)
 
   elseif key == 'viewMode' then
     if modules.game_interface then
       GameInterface.setupViewMode(g_app.isScaled() and ViewModes[2].id or value)
+    end
+
+  elseif key == 'transposedView' then
+    if modules.game_interface then
+      local mapPanel = GameInterface.getMapPanel()
+      if mapPanel and mapPanel.setTransposedView then
+        mapPanel:setTransposedView(value)
+      end
+      GameInterface.updateTrackArrows()
+    end
+
+    if modules.game_minimap then
+      local minimapWidget = GameMinimap.getMinimapWidget()
+      minimapWidget:setTransposedView(value)
+      minimapWidget:refreshAlternativesPosition()
     end
 
   elseif key == 'enableAudio' then
@@ -419,13 +700,6 @@ function ClientOptions.setOption(key, value, force)
       g_sounds.getChannel(AudioChannels.Effect):setEnabled(value and ClientOptions.getOption('enableSoundEffect'))
       g_sounds.getChannel(AudioChannels.Voice):setEnabled(value and ClientOptions.getOption('enableSoundVoice'))
       g_sounds.getChannel(AudioChannels.Gui):setEnabled(value and ClientOptions.getOption('enableSoundGui'))
-      if value then
-        audioButton:setIcon('/images/ui/top_menu/audio')
-        audioButton:setOn(true)
-      else
-        audioButton:setIcon('/images/ui/top_menu/audio_mute')
-        audioButton:setOn(false)
-      end
     end
 
   elseif key == 'enableMusic' then
@@ -479,6 +753,7 @@ function ClientOptions.setOption(key, value, force)
     end
 
   elseif modules.game_interface and key == 'enabledLeftPanels' then
+    value = clampSidePanelsCount(value)
     addEvent(function()
       local hasEnabled = value > 0
       if not wasClientSettingUp then
@@ -492,21 +767,11 @@ function ClientOptions.setOption(key, value, force)
       GameInterface.moveHiddenPanelMiniWindows()
 
       GameInterface.m.leftPanelButton:setVisible(hasEnabled)
-
-      panelOptionsPanel:getChildById('leftFirstPanelWidthLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('leftFirstPanelWidth'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('leftSecondPanelWidthLabel'):setEnabled(value >= 2)
-      panelOptionsPanel:getChildById('leftSecondPanelWidth'):setEnabled(value >= 2)
-      panelOptionsPanel:getChildById('leftThirdPanelWidthLabel'):setEnabled(value >= 3)
-      panelOptionsPanel:getChildById('leftThirdPanelWidth'):setEnabled(value >= 3)
-
-      panelOptionsPanel:getChildById('leftStickerLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('leftSticker'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('leftStickerOpacityLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('leftStickerOpacityScrollbar'):setEnabled(value >= 1)
+      updatePanelAddRemoveButtons()
     end)
 
   elseif modules.game_interface and key == 'enabledRightPanels' then
+    value = clampSidePanelsCount(value)
     addEvent(function()
       local hasEnabled = value > 0
       if not wasClientSettingUp then
@@ -520,18 +785,7 @@ function ClientOptions.setOption(key, value, force)
       GameInterface.moveHiddenPanelMiniWindows()
 
       GameInterface.m.rightPanelButton:setVisible(hasEnabled)
-
-      panelOptionsPanel:getChildById('rightFirstPanelWidthLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('rightFirstPanelWidth'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('rightSecondPanelWidthLabel'):setEnabled(value >= 2)
-      panelOptionsPanel:getChildById('rightSecondPanelWidth'):setEnabled(value >= 2)
-      panelOptionsPanel:getChildById('rightThirdPanelWidthLabel'):setEnabled(value >= 3)
-      panelOptionsPanel:getChildById('rightThirdPanelWidth'):setEnabled(value >= 3)
-
-      panelOptionsPanel:getChildById('rightStickerLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('rightSticker'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('rightStickerOpacityLabel'):setEnabled(value >= 1)
-      panelOptionsPanel:getChildById('rightStickerOpacityScrollbar'):setEnabled(value >= 1)
+      updatePanelAddRemoveButtons()
     end)
 
   elseif modules.game_interface and key == 'panelsPriority' then
@@ -549,7 +803,8 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.setRightPanels(value)
 
   elseif modules.game_interface and table.contains({ 'leftFirstPanelWidth', 'rightFirstPanelWidth', 'leftSecondPanelWidth', 'rightSecondPanelWidth', 'leftThirdPanelWidth', 'rightThirdPanelWidth' }, key) then
-    local width = value * GameSidePanelWidthFactor + GameSidePanelWidthOffset
+    value       = GameInterface.clampSidePanelWidthSlots(value)
+    local width = GameInterface.getSidePanelWidthFromSlots(value)
 
     if key == 'leftFirstPanelWidth' and GameInterface.m.gameLeftFirstPanel:isVisible() then
       GameInterface.m.gameLeftFirstPanel:setWidth(width)
@@ -575,7 +830,7 @@ function ClientOptions.setOption(key, value, force)
     GameInterface.getBottomPanel():setVisible(value)
     GameInterface.getSplitter():setVisible(value)
     GameInterface.getChatButton():setOn(value)
-  
+
   elseif modules.game_interface and key == "enableChat" then
     GameConsole.m.consoleToggleChat:setOn(value)
 
@@ -690,13 +945,22 @@ function ClientOptions.setOption(key, value, force)
     end
 
   elseif key == 'creatureInformationScale' then
-    g_app.setCreatureInformationScale(math.max((value == 0 and g_window.getDisplayDensity() - 0.5 or value / 2) + 0.5, 1))
+    g_app.setCreatureInformationScale(getResolvedAutoDependentScale(value))
 
   elseif key == 'staticTextScale' then
-    g_app.setStaticTextScale(math.max((value == 0 and g_window.getDisplayDensity() - 0.5 or value / 2) + 0.5, 1))
+    g_app.setStaticTextScale(getResolvedAutoDependentScale(value))
 
   elseif key == 'animatedTextScale' then
-    g_app.setAnimatedTextScale(math.max((value == 0 and g_window.getDisplayDensity() - 0.5 or value / 2) + 0.5, 1))
+    g_app.setAnimatedTextScale(getResolvedAutoDependentScale(value))
+
+  elseif key == 'uiScale' then
+    value = tonumber(value) or 0
+    if value ~= 0 and value ~= 1 and value ~= 2 and value ~= 4 and value ~= 8 then
+      value = 0
+    end
+
+    g_app.setUiScale(value)
+    ClientOptions.refreshAutoDependentScales()
   end
 
   -- change value for keybind updates
@@ -783,7 +1047,15 @@ end
 
 -- Event
 
+function ClientOptions.onAppRun()
+  -- First stable point where final window size/density are available
+  ClientOptions.refreshAutoDependentScales()
+end
+
 function ClientOptions.online()
   -- Gold loot auto deposit
   g_game.sendGoldLootAutoDepositState(ClientOptions.getOption('goldLootAutoDeposit'))
+
+  -- Ensure auto dependent scales are re-applied with final runtime window/ui scale
+  ClientOptions.refreshAutoDependentScales()
 end

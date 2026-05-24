@@ -3,8 +3,8 @@ Panel
   OptionCheckBox
     id: enableAudio
     &loc: '${ClientOptionsEnableAudio}'
-    &loct: '${ClientOptionsEnableAudioTooltip}'
-    !tooltip-type: TooltipType.textBlock
+    &loct: '${ClientOptionsAudioTitle} (${ClientOptionsAudioActionKey})'
+    @locpar: return { ClientOptionsAudioActionKey = ClientOptionsAudioActionKey }
 
   OptionHorizontalSeparator
 

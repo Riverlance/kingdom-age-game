@@ -60,7 +60,6 @@ fightDefensiveBox = nil
 chaseModeButton = nil
 safeFightButton = nil
 mountButton = nil
-fightModeRadioGroup = nil
 
 
 
@@ -96,7 +95,6 @@ function GameCharacter.init()
     -- Combat controls
     onChaseModeChange = GameCharacter.updateCombatControls,
     onSafeFightChange = GameCharacter.updateCombatControls,
-    onFightModeChange = GameCharacter.updateCombatControls,
     onWalk            = GameCharacter.check,
     onAutoWalk        = GameCharacter.check
   })
@@ -141,19 +139,10 @@ function GameCharacter.init()
   local combatControls = contentsPanel:getChildById('combatControls')
 
   -- Combat controls
-  fightOffensiveBox = combatControls:getChildById('fightOffensiveBox')
-  fightBalancedBox = combatControls:getChildById('fightBalancedBox')
-  fightDefensiveBox = combatControls:getChildById('fightDefensiveBox')
   chaseModeButton = combatControls:getChildById('chaseModeBox')
   safeFightButton = combatControls:getChildById('safeFightBox')
   mountButton = combatControls:getChildById('mountButton')
   mountButton.onClick = GameCharacter.onMountButtonClick
-
-  -- Combat controls
-  fightModeRadioGroup = UIRadioGroup.create()
-  fightModeRadioGroup:addWidget(fightOffensiveBox)
-  fightModeRadioGroup:addWidget(fightBalancedBox)
-  fightModeRadioGroup:addWidget(fightDefensiveBox)
 
   -- Combat controls
   connect(chaseModeButton, {
@@ -162,9 +151,24 @@ function GameCharacter.init()
   connect(safeFightButton, {
     onCheckChange = GameCharacter.onSetSafeFight
   })
-  connect(fightModeRadioGroup, {
-    onSelectionChange = GameCharacter.onSetFightMode
-  })
+
+  addEvent(function()
+    if not isWidgetAlive(contentsPanel) then
+      return
+    end
+
+    -- Skills button
+    local skillsButton = contentsPanel.skillsButton
+    if skillsButton then
+      skillsButton.onClick = GameSkills.toggle
+    end
+
+    -- Conditions button
+    local conditionsButton = contentsPanel.conditionsButton
+    if conditionsButton then
+      conditionsButton.onClick = GameConditions.toggle
+    end
+  end)
 
   if g_game.isOnline() then
     GameCharacter.online()
@@ -182,9 +186,6 @@ function GameCharacter.terminate()
   })
   disconnect(safeFightButton, {
     onCheckChange = GameCharacter.onSetSafeFight
-  })
-  disconnect(fightModeRadioGroup, {
-    onSelectionChange = GameCharacter.onSetFightMode
   })
 
   disconnect(LocalPlayer, {
@@ -215,7 +216,6 @@ function GameCharacter.terminate()
     -- Combat controls
     onChaseModeChange = GameCharacter.updateCombatControls,
     onSafeFightChange = GameCharacter.updateCombatControls,
-    onFightModeChange = GameCharacter.updateCombatControls,
     onWalk            = GameCharacter.check,
     onAutoWalk        = GameCharacter.check
   })
@@ -223,20 +223,12 @@ function GameCharacter.terminate()
   g_keyboard.unbindKeyDown(CharacterWindowActionKey)
 
   -- Combat controls
-  fightOffensiveBox:destroy()
-  fightBalancedBox:destroy()
-  fightDefensiveBox:destroy()
   chaseModeButton:destroy()
   safeFightButton:destroy()
   mountButton:destroy()
-  fightModeRadioGroup:destroy()
-  fightOffensiveBox = nil
-  fightBalancedBox = nil
-  fightDefensiveBox = nil
   chaseModeButton = nil
   safeFightButton = nil
   mountButton = nil
-  fightModeRadioGroup = nil
 
   outfitCreatureBox:destroy()
   outfitCreatureBox = nil
@@ -285,15 +277,6 @@ function GameCharacter.updateCombatControls()
 
   local safeFight = g_game.isSafeFight()
   safeFightButton:setChecked(not safeFight)
-
-  local fightMode = g_game.getFightMode()
-  if fightMode == FightOffensive then
-    fightModeRadioGroup:selectWidget(fightOffensiveBox)
-  elseif fightMode == FightBalanced then
-    fightModeRadioGroup:selectWidget(fightBalancedBox)
-  else
-    fightModeRadioGroup:selectWidget(fightDefensiveBox)
-  end
 end
 
 function GameCharacter.check()
@@ -301,34 +284,6 @@ function GameCharacter.check()
     if g_game.isAttacking() and g_game.getChaseMode() == ChaseOpponent then
       g_game.setChaseMode(false, DontChase)
     end
-  end
-end
-
-function GameCharacter.onSetFightMode(self, selectedFightButton)
-  if not g_app.isOnInputEvent() then --just check the option
-    return
-  end
-  if not selectedFightButton then
-    return
-  end
-
-  local buttonId = selectedFightButton:getId()
-  local fightMode
-  if buttonId == 'fightOffensiveBox' then
-    fightMode = FightOffensive
-  elseif buttonId == 'fightBalancedBox' then
-    fightMode = FightBalanced
-  else
-    fightMode = FightDefensive
-  end
-  g_game.setFightMode(false, fightMode)
-
-  if g_game.isOnline() then
-    scheduleEvent(function()
-      if modules.game_battlelist then
-        GameBattleList.updateBattleButtons()
-      end
-    end, 0)
   end
 end
 
@@ -519,7 +474,7 @@ function GameCharacter.online()
 
   addEvent(function()
     local _player = g_game.getLocalPlayer()
-    if _player then
+    if _player and isWidgetAlive(outfitCreatureBox) then
       GameCharacter.updateOutfitCreatureBox(_player:getOutfit())
     end
   end)
@@ -542,7 +497,6 @@ function GameCharacter.online()
 
   g_game.setChaseMode(true, lastCombatControls.chaseMode)
   g_game.setSafeFight(true, lastCombatControls.safeFight)
-  g_game.setFightMode(true, lastCombatControls.fightMode)
 
   if lastCombatControls.pvpMode then
     g_game.setPVPMode(true, lastCombatControls.pvpMode)
@@ -575,7 +529,6 @@ function GameCharacter.offline()
   lastCombatControls = {
     chaseMode = g_game.getChaseMode(),
     safeFight = g_game.isSafeFight(),
-    fightMode = g_game.getFightMode()
   }
 
   -- KA - Removed GamePVPMode
@@ -686,7 +639,11 @@ function GameCharacter.getInventoryHeight()
     return 0
   end
 
-  return 186
+  return 185
+end
+
+function GameCharacter.getWindow()
+  return inventoryWindow
 end
 
 function GameCharacter.getMiniWindowHeight()

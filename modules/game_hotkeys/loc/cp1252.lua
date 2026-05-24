@@ -27,14 +27,6 @@ g_locales.addTranslations{
     sv = "Aktuellt snabbkommando att lägga till",
   },
 
-  GameHotkeysWindowTitle = {
-    en = "Hotkeys",
-    pt = "Atalhos",
-    es = "Teclas rápidas",
-    de = "Tastenkürzel",
-    sv = "Snabbkommandon",
-  },
-
   GameHotkeysWindowTip = {
     en = "Drag and drop a row below into any hotkey bar",
     pt = "Arraste e solte uma linha abaixo em qualquer barra de atalhos",

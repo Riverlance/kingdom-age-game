@@ -149,6 +149,10 @@ function UIMinimap:load()
 end
 
 function UIMinimap:move(x, y)
+  if self.isTransposedView and self:isTransposedView() then
+    x, y = y, x
+  end
+
   local cameraPos = self:getCameraPosition()
   local scale     = self:getScale()
   if scale > 1 then
@@ -159,6 +163,14 @@ function UIMinimap:move(x, y)
   local dy = y / scale
   local pos = { x = cameraPos.x - dx, y = cameraPos.y - dy, z = cameraPos.z }
   self:setCameraPosition(pos)
+end
+
+function UIMinimap:refreshAlternativesPosition()
+  for _, widget in pairs(self.alternatives) do
+    if widget.pos then
+      self:centerInPosition(widget, widget.pos)
+    end
+  end
 end
 
 function UIMinimap:reset()
@@ -464,6 +476,8 @@ function UIMinimap:onCameraPositionChange(cameraPos)
   if self.cross then
     self:setCrossPosition(self.cross.pos)
   end
+
+  self:refreshAlternativesPosition()
 end
 
 function UIMinimap:onZoomChange(zoom) -- zoom is from maxZoom -5 (far) to minZoom 5 (near)
@@ -480,6 +494,8 @@ function UIMinimap:onZoomChange(zoom) -- zoom is from maxZoom -5 (far) to minZoo
       widget:hide()
     end
   end
+
+  self:refreshAlternativesPosition()
 end
 
 function UIMinimap:onMouseWheel(mousePos, direction)
@@ -550,6 +566,11 @@ function UIMinimap:onDragMove(pos, moved)
   local scale = self:getScale()
   local dx = (self.dragReference.x - pos.x) / scale
   local dy = (self.dragReference.y - pos.y) / scale
+
+  if self.isTransposedView and self:isTransposedView() then
+    dx, dy = dy, dx
+  end
+
   local pos = { x = self.dragCameraReference.x + dx, y = self.dragCameraReference.y + dy, z = self.dragCameraReference.z }
   self:setCameraPosition(pos)
   return true

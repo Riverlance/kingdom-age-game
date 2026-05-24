@@ -31,8 +31,19 @@ function UIHotkeyBar:onSetup()
 end
 
 function UIHotkeyBar:unload()
+  -- Clear previous hotkeys
+  if self.hotkeyList then
+    for keyCombo, widget in pairs(self.hotkeyList) do
+      if isWidgetAlive(widget) then
+        widget.settings = nil
+      end
+      self.hotkeyList[keyCombo] = nil
+    end
+  end
+
   self.hotkeyList = { }
   self.tempContainer = nil
+
   local hotkeyList = self:getHotkeyList()
   hotkeyList:destroyChildren()
   hotkeyList:updateLayout()

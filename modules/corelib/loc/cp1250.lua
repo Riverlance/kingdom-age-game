@@ -250,4 +250,20 @@ g_locales.addTranslations({
   CorelibInfoMin = {
     pl = "min",
   },
+
+
+
+  -- Skills miniwindow
+
+  CorelibSkillsWindowTitle = {
+    pl = "Statystyki",
+  },
+
+
+
+  -- Conditions miniwindow
+
+  CorelibConditionsWindowTitle = {
+    pl = "Warunki",
+  },
 }, false)

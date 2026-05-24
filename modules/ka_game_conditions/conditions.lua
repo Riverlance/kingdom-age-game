@@ -4,10 +4,6 @@ _G.GameConditions = { }
 
 
 
-local GameConditionsActionKey = 'Ctrl+Shift+C'
-
-
-
 local CONDITION_ATTR_REMAININGTIME = 1
 local CONDITION_ATTR_TURNS         = 2
 local CONDITION_ATTR_ITEM          = 3
@@ -28,7 +24,6 @@ conditionList = { }
 
 
 
-conditionTopMenuButton = nil
 conditionWindow = nil
 conditionHeader = nil
 conditionFooter = nil
@@ -110,14 +105,10 @@ function GameConditions.init()
   conditionList = { }
 
   g_ui.importStyle('conditionbutton')
-  g_keyboard.bindKeyDown(GameConditionsActionKey, GameConditions.toggle)
 
-  conditionWindow        = g_ui.loadUI('conditions')
-  conditionHeader        = conditionWindow:getChildById('miniWindowHeader')
-  conditionFooter        = conditionWindow:getChildById('miniWindowFooter')
-  conditionTopMenuButton = ClientTopMenu.addRightGameToggleButton('conditionTopMenuButton', { loct = '${GameConditionsWindowTitle} (${GameConditionsActionKey})', locpar = { GameConditionsActionKey = GameConditionsActionKey } }, '/images/ui/top_menu/conditions', GameConditions.toggle)
-
-  conditionWindow.topMenuButton = conditionTopMenuButton
+  conditionWindow = g_ui.loadUI('conditions')
+  conditionHeader = conditionWindow:getChildById('miniWindowHeader')
+  conditionFooter = conditionWindow:getChildById('miniWindowFooter')
 
   for k,v in pairs(Icons) do
     g_textures.preload(v.path)
@@ -169,8 +160,6 @@ function GameConditions.init()
 end
 
 function GameConditions.terminate()
-  conditionList = { }
-
   disconnect(LocalPlayer, {
     onStatesChange = GameConditions.onStatesChange
   })
@@ -181,10 +170,25 @@ function GameConditions.terminate()
 
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeConditionsList)
 
-  conditionTopMenuButton:destroy()
+  GameConditions.clearList()
+
   conditionWindow:destroy()
 
-  g_keyboard.unbindKeyDown(GameConditionsActionKey)
+  conditionList = { }
+
+  conditionWindow           = nil
+  conditionHeader           = nil
+  conditionFooter           = nil
+  sortMenuButton            = nil
+  arrowMenuButton           = nil
+  filterPanel               = nil
+  filterDefaultButton       = nil
+  filterSelfPowersButton    = nil
+  filterOtherPowersButton   = nil
+  filterAggressiveButton    = nil
+  filterNonAggressiveButton = nil
+  defaultConditionPanel     = nil
+  conditionPanel            = nil
 
   _G.GameConditions = nil
 end
@@ -213,11 +217,31 @@ function GameConditions.removeCondition(condition)
   local index = GameConditions.getConditionIndex(condition.id, condition.subId)
   if index then
     if conditionList[index] then
-      conditionList[index].button:destroy()
-      conditionList[index].button = nil
+      if conditionList[index].button then
+        local button = conditionList[index].button
+
+        if button.removeTooltip then
+          button:removeTooltip()
+        end
+
+        if button.clock then
+          button.clock:destroy()
+          button.clock = nil
+        end
+
+        button.condition      = nil
+        button.onHoverChange  = nil
+        button.onMouseRelease = nil
+        button.onClick        = nil
+        button:destroy()
+        button = nil
+
+        conditionList[index].button = nil
+      end
     end
     table.remove(conditionList, index)
     GameConditions.updateConditionList()
+
   -- else
   --   print('Trying to remove invalid condition')
   end
@@ -285,7 +309,8 @@ end
 
 
 function GameConditions.online()
-  conditionWindow:setup(conditionTopMenuButton)
+  conditionWindow:setup()
+
   local localPlayer = g_game.getLocalPlayer()
   if localPlayer then
     GameConditions.onStatesChange(localPlayer, localPlayer:getStates(), 0)
@@ -323,7 +348,9 @@ end
 
 function GameConditions.filterConditionButtons()
   for _, condition in pairs(conditionList) do
-    condition.button:setOn(not GameConditions.conditionButtonFilter(condition))
+    if condition.button then
+      condition.button:setOn(not GameConditions.conditionButtonFilter(condition))
+    end
   end
 end
 
@@ -430,12 +457,12 @@ function GameConditions.sortConditions()
 
     elseif sortType == CONDITION_SORT_PERCENTAGE then
       sortFunction = function(a,b)
-        return (a.button.clock and a.button.clock:getPercent() or 0) < (b.button.clock and b.button.clock:getPercent() or 0)
+        return (a.button and a.button.clock and a.button.clock:getPercent() or 0) < (b.button and b.button.clock and b.button.clock:getPercent() or 0)
       end
 
     elseif sortType == CONDITION_SORT_REMAININGTIME then
       sortFunction = function(a,b)
-        return (a.button.clock and a.button.clock:getRemainingTime() or 0) < (b.button.clock and b.button.clock:getRemainingTime() or 0)
+        return (a.button and a.button.clock and a.button.clock:getRemainingTime() or 0) < (b.button and b.button.clock and b.button.clock:getRemainingTime() or 0)
       end
     end
 
@@ -452,12 +479,12 @@ function GameConditions.sortConditions()
 
     elseif sortType == CONDITION_SORT_PERCENTAGE then
       sortFunction = function(a,b)
-        return (a.button.clock and a.button.clock:getPercent() or 0) > (b.button.clock and b.button.clock:getPercent() or 0)
+        return (a.button and a.button.clock and a.button.clock:getPercent() or 0) > (b.button and b.button.clock and b.button.clock:getPercent() or 0)
       end
 
     elseif sortType == CONDITION_SORT_REMAININGTIME then
       sortFunction = function(a,b)
-        return (a.button.clock and a.button.clock:getRemainingTime() or 0) > (b.button.clock and b.button.clock:getRemainingTime() or 0)
+        return (a.button and a.button.clock and a.button.clock:getRemainingTime() or 0) > (b.button and b.button.clock and b.button.clock:getRemainingTime() or 0)
       end
     end
   end
@@ -470,18 +497,55 @@ end
 function GameConditions.updateConditionList()
   GameConditions.sortConditions()
   for i = 1, #conditionList do
-    conditionPanel:moveChildToIndex(conditionList[i].button, i)
+    if conditionList[i].button then
+      conditionPanel:moveChildToIndex(conditionList[i].button, i)
+    end
   end
   GameConditions.filterConditionButtons()
 end
 
 function GameConditions.clearListConditionPanel()
+  -- Tooltip
+  if Tooltip and Tooltip.hide then
+    Tooltip.hide()
+  end
+
+  -- Condition buttons
+  for _, condition in pairs(conditionList) do
+    if condition.button then
+      local button = condition.button
+
+      if button.removeTooltip then
+        button:removeTooltip()
+      end
+
+      if button.clock then
+        button.clock:destroy()
+        button.clock = nil
+      end
+
+      button.condition      = nil
+      button.onHoverChange  = nil
+      button.onMouseRelease = nil
+      button.onClick        = nil
+      button:destroy()
+      button = nil
+
+      condition.button = nil
+    end
+  end
+
   conditionList = { }
-  conditionPanel:destroyChildren()
+
+  if conditionPanel then
+    conditionPanel:destroyChildren()
+  end
 end
 
 function GameConditions.clearListDefaultConditionPanel()
-  defaultConditionPanel:destroyChildren()
+  if defaultConditionPanel then
+    defaultConditionPanel:destroyChildren()
+  end
 end
 
 function GameConditions.clearList()

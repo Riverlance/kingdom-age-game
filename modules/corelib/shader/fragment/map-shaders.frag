@@ -23,25 +23,27 @@ varying vec2 v_TexCoord;
 uniform float u_Time;
 uniform vec2 u_Resolution;
 uniform vec2 u_WalkOffset;
+uniform vec2 u_MapFramebufferResolution;
+uniform vec2 u_MapOutputResolution;
 
 uniform int u_DrawCoordFilterShadersFlags;
 uniform int u_DrawCoordEffectShadersFlags;
 uniform int u_DrawEffectShadersFlags;
-uniform bool u_DrawClouds;
 
 // DrawCoordFilterShaderFlags_t
-const int DRAWCOORDFILTERSHADER_2XSAILEVEL2 = 1 << 0;
-const int DRAWCOORDFILTERSHADER_2XSAI       = 1 << 1;
-const int DRAWCOORDFILTERSHADER_PAINTING    = 1 << 2;
+const int DRAWCOORDFILTERSHADER_XBR4X       = 1 << 0;
+const int DRAWCOORDFILTERSHADER_2XSAILEVEL2 = 1 << 1;
+const int DRAWCOORDFILTERSHADER_2XSAI       = 1 << 2;
+const int DRAWCOORDFILTERSHADER_PAINTING    = 1 << 3;
 
 
 // DrawCoordEffectShaderFlags_t
-const int DRAWCOORDEFFECTSHADER_HEAT     = 1 << 0;
-const int DRAWCOORDEFFECTSHADER_NOISE    = 1 << 1;
-const int DRAWCOORDEFFECTSHADER_PAL      = 1 << 2;
-const int DRAWCOORDEFFECTSHADER_PULSE    = 1 << 3;
-const int DRAWCOORDEFFECTSHADER_WATER    = 1 << 4;
-const int DRAWCOORDEFFECTSHADER_ZOMG     = 1 << 5;
+const int DRAWCOORDEFFECTSHADER_HEAT  = 1 << 0;
+const int DRAWCOORDEFFECTSHADER_NOISE = 1 << 1;
+const int DRAWCOORDEFFECTSHADER_PAL   = 1 << 2;
+const int DRAWCOORDEFFECTSHADER_PULSE = 1 << 3;
+const int DRAWCOORDEFFECTSHADER_WATER = 1 << 4;
+const int DRAWCOORDEFFECTSHADER_ZOMG  = 1 << 5;
 
 // DrawEffectShaderFlags_t
 const int DRAWEFFECTSHADER_GRAYSCALE  = 1 << 0;
@@ -67,6 +69,171 @@ const int DRAWEFFECTSHADER_SNOW       = 1 << 9;
   #define COMPAT_PRECISION
 #endif
 
+vec2 getMapFramebufferResolution()
+{
+  if (u_MapFramebufferResolution.x > 0.0 && u_MapFramebufferResolution.y > 0.0)
+    return u_MapFramebufferResolution;
+  return max(u_Resolution, vec2(1.0, 1.0));
+}
+
+vec2 getMapOutputResolution()
+{
+  if (u_MapOutputResolution.x > 0.0 && u_MapOutputResolution.y > 0.0)
+    return u_MapOutputResolution;
+  return max(u_Resolution, vec2(1.0, 1.0));
+}
+
+
+
+/* XBR4x */
+
+// Based on libretro xBR-lv2 single-pass:
+// https://github.com/libretro/glsl-shaders/blob/master/xbr/shaders/xbr-lv2.glsl
+
+const vec3 XBR4X_RGBW = vec3(14.352, 28.176, 5.472);
+const vec4 XBR4X_EQ_THRESHOLD = vec4(15.0, 15.0, 15.0, 15.0);
+const float XBR4X_LV2_COEFFICIENT = 2.0;
+const float XBR4X_FILTER_SCALE = 3.0;
+
+vec4 xbr4x_df(vec4 a, vec4 b)
+{
+  return abs(a - b);
+}
+
+vec4 xbr4x_diff(vec4 a, vec4 b)
+{
+  return step(vec4(0.00001, 0.00001, 0.00001, 0.00001), abs(a - b));
+}
+
+vec4 xbr4x_eq(vec4 a, vec4 b)
+{
+  return step(abs(a - b), XBR4X_EQ_THRESHOLD);
+}
+
+vec4 xbr4x_neq(vec4 a, vec4 b)
+{
+  return vec4(1.0, 1.0, 1.0, 1.0) - xbr4x_eq(a, b);
+}
+
+vec4 xbr4x_wd(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e, vec4 f, vec4 g, vec4 h)
+{
+  return xbr4x_df(a, b) + xbr4x_df(a, c) + xbr4x_df(d, e) + xbr4x_df(d, f) + 4.0 * xbr4x_df(g, h);
+}
+
+float xbr4x_cdf(vec3 c1, vec3 c2)
+{
+  vec3 d = abs(c1 - c2);
+  return d.r + d.g + d.b;
+}
+
+vec4 getXBR4xColor()
+{
+  vec2 sourceSize = max(getMapFramebufferResolution(), vec2(1.0, 1.0));
+  vec2 invSourceSize = 1.0 / sourceSize;
+
+  float dx = invSourceSize.x;
+  float dy = invSourceSize.y;
+  vec2 tex = v_TexCoord;
+
+  vec3 A1 = texture2D(u_Tex0, tex + vec2(-dx, -2.0 * dy)).xyz;
+  vec3 B1 = texture2D(u_Tex0, tex + vec2(0.0, -2.0 * dy)).xyz;
+  vec3 C1 = texture2D(u_Tex0, tex + vec2(dx, -2.0 * dy)).xyz;
+  vec3 A = texture2D(u_Tex0, tex + vec2(-dx, -dy)).xyz;
+  vec3 B = texture2D(u_Tex0, tex + vec2(0.0, -dy)).xyz;
+  vec3 C = texture2D(u_Tex0, tex + vec2(dx, -dy)).xyz;
+  vec3 D = texture2D(u_Tex0, tex + vec2(-dx, 0.0)).xyz;
+  vec3 E = texture2D(u_Tex0, tex).xyz;
+  vec3 F = texture2D(u_Tex0, tex + vec2(dx, 0.0)).xyz;
+  vec3 G = texture2D(u_Tex0, tex + vec2(-dx, dy)).xyz;
+  vec3 H = texture2D(u_Tex0, tex + vec2(0.0, dy)).xyz;
+  vec3 I = texture2D(u_Tex0, tex + vec2(dx, dy)).xyz;
+  vec3 G5 = texture2D(u_Tex0, tex + vec2(-dx, 2.0 * dy)).xyz;
+  vec3 H5 = texture2D(u_Tex0, tex + vec2(0.0, 2.0 * dy)).xyz;
+  vec3 I5 = texture2D(u_Tex0, tex + vec2(dx, 2.0 * dy)).xyz;
+  vec3 A0 = texture2D(u_Tex0, tex + vec2(-2.0 * dx, -dy)).xyz;
+  vec3 D0 = texture2D(u_Tex0, tex + vec2(-2.0 * dx, 0.0)).xyz;
+  vec3 G0 = texture2D(u_Tex0, tex + vec2(-2.0 * dx, dy)).xyz;
+  vec3 C4 = texture2D(u_Tex0, tex + vec2(2.0 * dx, -dy)).xyz;
+  vec3 F4 = texture2D(u_Tex0, tex + vec2(2.0 * dx, 0.0)).xyz;
+  vec3 I4 = texture2D(u_Tex0, tex + vec2(2.0 * dx, dy)).xyz;
+
+  vec4 b = vec4(dot(B, XBR4X_RGBW), dot(D, XBR4X_RGBW), dot(H, XBR4X_RGBW), dot(F, XBR4X_RGBW));
+  vec4 c = vec4(dot(C, XBR4X_RGBW), dot(A, XBR4X_RGBW), dot(G, XBR4X_RGBW), dot(I, XBR4X_RGBW));
+  vec4 d = b.yzwx;
+  vec4 e = vec4(dot(E, XBR4X_RGBW));
+  vec4 f = b.wxyz;
+  vec4 g = c.zwxy;
+  vec4 h = b.zwxy;
+  vec4 i = c.wxyz;
+  vec4 i4 = vec4(dot(I4, XBR4X_RGBW), dot(C1, XBR4X_RGBW), dot(A0, XBR4X_RGBW), dot(G5, XBR4X_RGBW));
+  vec4 i5 = vec4(dot(I5, XBR4X_RGBW), dot(C4, XBR4X_RGBW), dot(A1, XBR4X_RGBW), dot(G0, XBR4X_RGBW));
+  vec4 h5 = vec4(dot(H5, XBR4X_RGBW), dot(F4, XBR4X_RGBW), dot(B1, XBR4X_RGBW), dot(D0, XBR4X_RGBW));
+  vec4 f4 = h5.yzwx;
+
+  vec2 fp = fract(tex * sourceSize);
+
+  vec4 delta = vec4(1.0 / XBR4X_FILTER_SCALE);
+  vec4 delta_l = vec4(0.5 / XBR4X_FILTER_SCALE, 1.0 / XBR4X_FILTER_SCALE, 0.5 / XBR4X_FILTER_SCALE, 1.0 / XBR4X_FILTER_SCALE);
+  vec4 delta_u = delta_l.yxwz;
+
+  const vec4 Ao = vec4(1.0, -1.0, -1.0, 1.0);
+  const vec4 Bo = vec4(1.0, 1.0, -1.0, -1.0);
+  const vec4 Co = vec4(1.5, 0.5, -0.5, 0.5);
+  const vec4 Ax = vec4(1.0, -1.0, -1.0, 1.0);
+  const vec4 Bx = vec4(0.5, 2.0, -0.5, -2.0);
+  const vec4 Cx = vec4(1.0, 1.0, -0.5, 0.0);
+  const vec4 Ay = vec4(1.0, -1.0, -1.0, 1.0);
+  const vec4 By = vec4(2.0, 0.5, -2.0, -0.5);
+  const vec4 Cy = vec4(2.0, 0.0, -1.0, 0.5);
+  const vec4 Ci = vec4(0.25, 0.25, 0.25, 0.25);
+
+  vec4 fx = Ao * fp.y + Bo * fp.x;
+  vec4 fx_l = Ax * fp.y + Bx * fp.x;
+  vec4 fx_u = Ay * fp.y + By * fp.x;
+
+  vec4 irlv0 = xbr4x_diff(e, f) * xbr4x_diff(e, h);
+  vec4 irlv1 = irlv0 * (
+    xbr4x_neq(f, b) * xbr4x_neq(f, c) +
+    xbr4x_neq(h, d) * xbr4x_neq(h, g) +
+    xbr4x_eq(e, i) * (xbr4x_neq(f, f4) * xbr4x_neq(f, i4) + xbr4x_neq(h, h5) * xbr4x_neq(h, i5)) +
+    xbr4x_eq(e, g) + xbr4x_eq(e, c)
+  );
+  vec4 irlv2l = xbr4x_diff(e, g) * xbr4x_diff(d, g);
+  vec4 irlv2u = xbr4x_diff(e, c) * xbr4x_diff(b, c);
+
+  vec4 fx45i = clamp((fx + delta - Co - Ci) / (2.0 * delta), 0.0, 1.0);
+  vec4 fx45 = clamp((fx + delta - Co) / (2.0 * delta), 0.0, 1.0);
+  vec4 fx30 = clamp((fx_l + delta_l - Cx) / (2.0 * delta_l), 0.0, 1.0);
+  vec4 fx60 = clamp((fx_u + delta_u - Cy) / (2.0 * delta_u), 0.0, 1.0);
+
+  vec4 wd1 = xbr4x_wd(e, c, g, i, h5, f4, h, f);
+  vec4 wd2 = xbr4x_wd(h, d, i5, f, i4, b, e, i);
+
+  vec4 edri = step(wd1, wd2) * irlv0;
+  vec4 edr = step(wd1 + vec4(0.1, 0.1, 0.1, 0.1), wd2) * step(vec4(0.5, 0.5, 0.5, 0.5), irlv1);
+  vec4 edr_l = step(XBR4X_LV2_COEFFICIENT * xbr4x_df(f, g), xbr4x_df(h, c)) * irlv2l * edr;
+  vec4 edr_u = step(XBR4X_LV2_COEFFICIENT * xbr4x_df(h, c), xbr4x_df(f, g)) * irlv2u * edr;
+
+  fx45 = edr * fx45;
+  fx30 = edr_l * fx30;
+  fx60 = edr_u * fx60;
+  fx45i = edri * fx45i;
+
+  vec4 px = step(xbr4x_df(e, f), xbr4x_df(e, h));
+  vec4 maximos = max(max(fx30, fx60), max(fx45, fx45i));
+
+  vec3 res1 = E;
+  res1 = mix(res1, mix(H, F, px.x), maximos.x);
+  res1 = mix(res1, mix(B, D, px.z), maximos.z);
+
+  vec3 res2 = E;
+  res2 = mix(res2, mix(F, B, px.y), maximos.y);
+  res2 = mix(res2, mix(D, H, px.w), maximos.w);
+
+  vec3 res = mix(res1, res2, step(xbr4x_cdf(E, res1), xbr4x_cdf(E, res2)));
+  return vec4(res, 1.0);
+}
+
 
 
 /* 2xSaI - Level 2 */
@@ -75,15 +242,21 @@ const int DRAWEFFECTSHADER_SNOW       = 1 << 9;
 
 float _2xSaILevel2_intensity = 1.0;
 
-#define _2xSaILevel2_InputSize u_Resolution * _2xSaILevel2_intensity // Width and height in pixels of game screen // textureSize(u_Tex0, 0)
-#define _2xSaILevel2_SourceSize vec4(_2xSaILevel2_InputSize, 1.0 / _2xSaILevel2_InputSize) //either TextureSize or _2xSaILevel2_InputSize
+float get2xSaIFilterStrength()
+{
+  vec2 source = getMapFramebufferResolution();
+  vec2 output = getMapOutputResolution();
+  // Keep full filter when upscaling, and reduce it when downscaling to avoid excess blur.
+  return clamp(min(output.x / source.x, output.y / source.y), 0.35, 1.0);
+}
 
 vec4 get2xSaILevel2Color()
 {
   vec2 tex = v_TexCoord;
-  //vec2 texsize = IN.texture_size;
-  float dx = 0.25*_2xSaILevel2_SourceSize.z;
-  float dy = 0.25*_2xSaILevel2_SourceSize.w;
+  vec2 sourceSize = max(getMapFramebufferResolution() * _2xSaILevel2_intensity, vec2(1.0, 1.0));
+  vec2 invSourceSize = 1.0 / sourceSize;
+  float dx = 0.25 * invSourceSize.x;
+  float dy = 0.25 * invSourceSize.y;
   vec3  dt = vec3(1.0, 1.0, 1.0);
 
   vec4 yx = vec4(dx, dy, -dx, -dy);
@@ -123,7 +296,8 @@ vec4 get2xSaILevel2Color()
   float k2 = 1.0/(dot(abs(t2 - c11), dt) + 0.00001);
   float k3 = 1.0/(dot(abs(t3 - c11), dt) + 0.00001);
 
-  return vec4((k1*t1 + k2*t2 + k3*t3)/(k1 + k2 + k3), 1.0);
+  vec3 filtered = (k1*t1 + k2*t2 + k3*t3)/(k1 + k2 + k3);
+  return vec4(mix(c11, filtered, get2xSaIFilterStrength()), 1.0);
 }
 
 
@@ -134,14 +308,11 @@ vec4 get2xSaILevel2Color()
 
 float _2xSaI_intensity = 1.0;
 
-#define _2xSaI_InputSize u_Resolution * _2xSaI_intensity // Width and height in pixels of game screen
-#define _2xSaI_SourceSize vec4(_2xSaI_InputSize, 1.0 / _2xSaI_InputSize) //either TextureSize or _2xSaI_InputSize
-
 vec4 get2xSaIColor()
 {
-  vec2 texsize = _2xSaI_SourceSize.xy;
-  float dx     = pow(texsize.x, -1.0) * 0.25;
-  float dy     = pow(texsize.y, -1.0) * 0.25;
+  vec2 texsize = max(getMapFramebufferResolution() * _2xSaI_intensity, vec2(1.0, 1.0));
+  float dx     = (1.0 / texsize.x) * 0.25;
+  float dy     = (1.0 / texsize.y) * 0.25;
   vec3  dt     = vec3(1.0, 1.0, 1.0);
 
   vec2 UL = v_TexCoord + vec2(-dx, -dy);
@@ -157,7 +328,9 @@ vec4 get2xSaIColor()
   float m1 = dot(abs(c00 - c22), dt) + 0.001;
   float m2 = dot(abs(c02 - c20), dt) + 0.001;
 
-  return vec4((m1*(c02 + c20) + m2*(c22 + c00))/(2.0*(m1 + m2)), 1.0);
+  vec3 filtered = (m1*(c02 + c20) + m2*(c22 + c00))/(2.0*(m1 + m2));
+  vec3 base = texture2D(u_Tex0, v_TexCoord).xyz;
+  return vec4(mix(base, filtered, get2xSaIFilterStrength()), 1.0);
 }
 
 
@@ -203,20 +376,47 @@ vec4 getBloomColor(vec4 startColor)
 
 /* Clouds */
 
-vec2 clouds_direction = vec2(1.1, -1.0);
 float clouds_speed = 0.01;
-float clouds_pressure = 1.1; // Positive gives a light effect; Negative gives a darken effect
+float clouds_time_scale = 0.05; // Multiplies cyclic clouds time to reduce peak movement speed
+float clouds_cycle_time = 18000.0; // Seconds for a full 360-degree direction rotation
+float clouds_inverse_direction_time = 3600.0; // Seconds for smooth direction inversion cycle
 float clouds_zoom = 1.5;
+float clouds_alpha = 1.0; // 0.0 = invisible, 1.0 = full clouds effect
+float clouds_shadow_strength = 0.85; // 0.0 = no shading, 1.0 = maximum shadow contribution
+vec3 clouds_shadow_tint = vec3(0.40, 0.45, 0.55); // Shadow color tint
+float clouds_eps = 0.0001;
+
+vec2 getCloudsDynamicDirection()
+{
+  float cycleTime = max(clouds_cycle_time, clouds_eps);
+  float inverseTime = max(clouds_inverse_direction_time, clouds_eps);
+
+  float theta = 2.0 * PI * fract(u_Time / cycleTime);
+  vec2 dir = vec2(sin(theta), -cos(theta));
+
+  float inverseFactor = sin(2.0 * PI * u_Time / inverseTime);
+  return dir * inverseFactor;
+}
 
 vec4 getCloudsColor(vec4 startColor)
 {
   vec3 bgcol = startColor.xyz;
+  vec2 clouds_direction = getCloudsDynamicDirection();
+  float inverseTime = max(clouds_inverse_direction_time, clouds_eps);
+  // Cyclic time without hard reset: 0 -> peak -> 0 in each inverse cycle
+  float phase = 2.0 * PI * u_Time / inverseTime;
+  float clouds_time = (0.5 * inverseTime * (1.0 - cos(phase))) * clouds_time_scale;
+  vec2 cloudsHandler = (v_TexCoord + vec2(u_WalkOffset.x, u_WalkOffset.y) + (clouds_direction * clouds_time * clouds_speed)) / clouds_zoom;
 
-  vec2 cloudsHandler = (v_TexCoord + vec2(u_WalkOffset.x, u_WalkOffset.y) + (clouds_direction * u_Time * clouds_speed)) / clouds_zoom;
-  vec3 cloudscol = texture2D(u_Tex1, cloudsHandler).xyz;
-  cloudscol = 1.0 - cloudscol.rgb; // negative
+  vec3 cloudsSample = texture2D(u_Tex1, cloudsHandler).xyz;
+  float cloudMaskRaw = clamp((cloudsSample.r + cloudsSample.g + cloudsSample.b) / 3.0, 0.0, 1.0);
+  float cloudMask = smoothstep(0.05, 0.65, cloudMaskRaw);
 
-  vec3 col = bgcol * cloudscol * clouds_pressure;
+  float shadowStrength = clamp(clouds_shadow_strength, 0.0, 1.0);
+  float alpha = clamp(clouds_alpha, 0.0, 1.0);
+  float shadowAmount = cloudMask * shadowStrength * alpha;
+  vec3 shadowedBg = bgcol * clouds_shadow_tint;
+  vec3 col = mix(bgcol, shadowedBg, shadowAmount);
   return vec4(col, 1.0);
 }
 
@@ -406,8 +606,8 @@ vec4 getOldTvColor(vec4 startColor)
 #define PAINTING_STEEP_DIRECTION_THRESHOLD 2.2
 #define PAINTING_DOMINANT_DIRECTION_THRESHOLD 3.6
 
-#define painting_InputSize vec2(u_Resolution / 2.0) // vec2(800.0, 600.0) // Width and height in pixels of game screen
-#define painting_OutputSize painting_InputSize // Width and height in pixels of game screen
+#define painting_InputSize max(getMapFramebufferResolution() * 0.5, vec2(1.0, 1.0)) // Width and height in pixels of map framebuffer
+#define painting_OutputSize max(getMapOutputResolution() * 0.5, vec2(1.0, 1.0)) // Width and height in pixels of map on screen
 #define painting_SourceSize vec4(painting_InputSize, 1.0 / painting_InputSize) //either TextureSize or painting_InputSize
 
 #define painting_P(x,y) texture2D(u_Tex0, coord + painting_SourceSize.zw * vec2(x, y)).rgb
@@ -1091,8 +1291,13 @@ void main(void)
     // Filters (choose a single one only!)
 
     if (u_DrawCoordFilterShadersFlags != 0) {
+      // XBR4x
+      if ((u_DrawCoordFilterShadersFlags & DRAWCOORDFILTERSHADER_XBR4X) == DRAWCOORDFILTERSHADER_XBR4X) {
+        isFirstChosenCoordShader = false;
+        color = getXBR4xColor();
+
       // 2xSaI Level 2
-      if ((u_DrawCoordFilterShadersFlags & DRAWCOORDFILTERSHADER_2XSAILEVEL2) == DRAWCOORDFILTERSHADER_2XSAILEVEL2) {
+      } else if ((u_DrawCoordFilterShadersFlags & DRAWCOORDFILTERSHADER_2XSAILEVEL2) == DRAWCOORDFILTERSHADER_2XSAILEVEL2) {
         isFirstChosenCoordShader = false;
         color = get2xSaILevel2Color();
 
@@ -1129,12 +1334,12 @@ void main(void)
     if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_PARTY) == DRAWEFFECTSHADER_PARTY) color = getPartyColor(color);
 
     // Effects
-    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_BLOOM) == DRAWEFFECTSHADER_BLOOM)                   color = getBloomColor(color);
-    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_CLOUDS) == DRAWEFFECTSHADER_CLOUDS && u_DrawClouds) color = getCloudsColor(color);
-    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_FOG) == DRAWEFFECTSHADER_FOG)                       color = getFogColor(color);
-    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_OLDTV) == DRAWEFFECTSHADER_OLDTV)                   color = getOldTvColor(color);
-    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_RADIALBLUR) == DRAWEFFECTSHADER_RADIALBLUR)         color = getRadialBlurColor(color);
-    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_SNOW) == DRAWEFFECTSHADER_SNOW)                     color = getSnowColor(color);
+    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_BLOOM) == DRAWEFFECTSHADER_BLOOM)           color = getBloomColor(color);
+    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_CLOUDS) == DRAWEFFECTSHADER_CLOUDS)         color = getCloudsColor(color);
+    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_FOG) == DRAWEFFECTSHADER_FOG)               color = getFogColor(color);
+    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_OLDTV) == DRAWEFFECTSHADER_OLDTV)           color = getOldTvColor(color);
+    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_RADIALBLUR) == DRAWEFFECTSHADER_RADIALBLUR) color = getRadialBlurColor(color);
+    if ((u_DrawEffectShadersFlags & DRAWEFFECTSHADER_SNOW) == DRAWEFFECTSHADER_SNOW)             color = getSnowColor(color);
   }
 
   gl_FragColor = color;

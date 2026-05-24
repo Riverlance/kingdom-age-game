@@ -37,7 +37,6 @@ MiniWindow
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: minimapBar.outsideLeft
-      margin: 1
       background-color: #000000bb
       color: #ffffff
       text-align: center

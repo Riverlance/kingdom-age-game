@@ -15,10 +15,6 @@ g_locales.addTranslations({
     pl = "Obecny skrót do dodania",
   },
 
-  GameHotkeysWindowTitle = {
-    pl = "Skróty klawiszowe",
-  },
-
   GameHotkeysWindowTip = {
     pl = "Przeci¹gnij i upuœæ wiersz poni¿ej do dowolnego paska skrótów klawiszowych",
   },

@@ -2,37 +2,55 @@ g_mouseicon = { }
 
 -- private variables
 local fadeOutTime = 50
+local mouseMoveDelay = 25
 local defaultSize = { width = 32, height = 32 }
 local defaultIconOpacity = 30 -- %
 local defaultItemIconOpacity = 30 -- %
 local mouseIcon
+local mouseMoveEvent
+local lastMouseIconPosX = -1
+local lastMouseIconPosY = -1
 
 -- private functions
-local function moveIcon(firstDisplay)
-  if not firstDisplay and not mouseIcon:isVisible() then
+local function moveIcon(mousePos, isFirstDisplay)
+  if not mouseIcon or not isFirstDisplay and not mouseIcon:isVisible() then
     return
   end
 
-  local pos        = g_window.getMousePosition()
-  local windowSize = g_window.getSize()
-  local labelSize  = mouseIcon:getSize()
+  local pos       = mousePos and { x = mousePos.x, y = mousePos.y } or g_window.getMousePosition()
+  local rootSize  = rootWidget:getSize()
+  local labelSize = mouseIcon:getSize()
+  local uiScale   = math.max(1, g_app.getResolvedUiScale())
 
-  pos.x = pos.x + 1
-  pos.y = pos.y + 1
+  local probeOffset = math.max(1, math.round(1 / uiScale))
+  local sideOffset  = math.max(1, math.round(10 / uiScale))
+  local hoverOffset = math.max(1, math.round(10 / uiScale))
 
-  if windowSize.width - (pos.x + labelSize.width) < 10 then
-    pos.x = pos.x - labelSize.width - 10
+  pos.x = pos.x + probeOffset
+  pos.y = pos.y + probeOffset
+
+  if rootSize.width - (pos.x + labelSize.width) < hoverOffset then
+    pos.x = pos.x - labelSize.width - sideOffset
   else
-    pos.x = pos.x + 10
+    pos.x = pos.x + hoverOffset
   end
 
-  if windowSize.height - (pos.y + labelSize.height) < 10 then
+  if rootSize.height - (pos.y + labelSize.height) < hoverOffset then
     pos.y = pos.y - labelSize.height
-  -- else
-    -- pos.y = pos.y
+  end
+
+  local maxX = math.max(0, rootSize.width - labelSize.width)
+  local maxY = math.max(0, rootSize.height - labelSize.height)
+  pos.x = math.max(0, math.min(pos.x, maxX))
+  pos.y = math.max(0, math.min(pos.y, maxY))
+
+  if pos.x == lastMouseIconPosX and pos.y == lastMouseIconPosY then
+    return
   end
 
   mouseIcon:setPosition(pos)
+  lastMouseIconPosX = pos.x
+  lastMouseIconPosY = pos.y
 end
 
 local function onWidgetMouseRelease(widget, mousePos, mouseButton)
@@ -65,6 +83,8 @@ function g_mouseicon.terminate()
     onMouseRelease = onWidgetMouseRelease
   })
 
+  removeEvent(mouseMoveEvent)
+  mouseMoveEvent = nil
   mouseIcon:destroy()
   mouseIcon = nil
 
@@ -95,11 +115,12 @@ function g_mouseicon.display(filePath, opacity, size, subType, text) -- (filePat
   mouseIcon:show()
   mouseIcon:enable()
 
-  moveIcon(true)
-
-  connect(rootWidget, {
-    onMouseMove = moveIcon,
-  })
+  lastMouseIconPosX = -1
+  lastMouseIconPosY = -1
+  moveIcon(g_window.getMousePosition(), true)
+  if not mouseMoveEvent then
+    mouseMoveEvent = cycleEvent(moveIcon, mouseMoveDelay)
+  end
 end
 
 function g_mouseicon.displayItem(item, opacity, size, subType) -- (item[, opacity = option or defaultItemIconOpacity[, size = defaultSize[, subType = 1]]])
@@ -117,9 +138,10 @@ function g_mouseicon.hide()
   g_effects.cancelFade(mouseIcon) -- Because g_mouseicon.hide() can be called multiple times in a row
   g_effects.fadeOut(mouseIcon, fadeOutTime)
 
-  disconnect(rootWidget, {
-    onMouseMove = moveIcon,
-  })
+  removeEvent(mouseMoveEvent)
+  mouseMoveEvent = nil
+  lastMouseIconPosX = -1
+  lastMouseIconPosY = -1
 end
 
 g_mouseicon.init()

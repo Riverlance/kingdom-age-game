@@ -31,7 +31,7 @@ NPCItemBox < Panel
 
     Item
       id: item
-      phantom: true
+      virtual: true
       anchors.verticalCenter: prev.verticalCenter
       anchors.horizontalCenter: parent.horizontalCenter
       image-color: #ffffffff
@@ -49,13 +49,6 @@ NPCItemBox < Panel
       border-color: #7b6e4c88
       image-color: #ffffff88
       color: #aaaaaa88
-
-  InfoMenuButton
-    anchors.top: prev.top
-    anchors.right: prev.right
-    anchors.verticalCenter: none
-    margin-top: 5
-    margin-right: 5
 
 MainWindow
   id: npcWindow

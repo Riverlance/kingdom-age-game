@@ -67,3 +67,37 @@ function Position.parse(pos)
   if not pos then return nil end
   return {x = pos.x, y = pos.y, z = pos.z}
 end
+
+function Position.directionToVector(direction)
+  if direction == Directions.North then return 0, -1 end
+  if direction == Directions.East then return 1, 0 end
+  if direction == Directions.South then return 0, 1 end
+  if direction == Directions.West then return -1, 0 end
+  if direction == Directions.NorthEast then return 1, -1 end
+  if direction == Directions.SouthEast then return 1, 1 end
+  if direction == Directions.SouthWest then return -1, 1 end
+  if direction == Directions.NorthWest then return -1, -1 end
+  return nil, nil
+end
+
+function Position.vectorToDirection(dx, dy)
+  if dx == 0 and dy == -1 then return Directions.North end
+  if dx == 1 and dy == 0 then return Directions.East end
+  if dx == 0 and dy == 1 then return Directions.South end
+  if dx == -1 and dy == 0 then return Directions.West end
+  if dx == 1 and dy == -1 then return Directions.NorthEast end
+  if dx == 1 and dy == 1 then return Directions.SouthEast end
+  if dx == -1 and dy == 1 then return Directions.SouthWest end
+  if dx == -1 and dy == -1 then return Directions.NorthWest end
+  return nil
+end
+
+function Position.transposeDirection(direction)
+  local dx, dy = Position.directionToVector(direction)
+  if not dx or not dy then
+    return direction
+  end
+
+  local mappedDirection = Position.vectorToDirection(dy, dx)
+  return mappedDirection or direction
+end

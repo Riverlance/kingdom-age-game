@@ -47,10 +47,6 @@ g_locales.addTranslations({
     pl = "W³¹cz dŸwiêk",
   },
 
-  ClientOptionsEnableAudioTooltip = {
-    pl = "Pozwala na w³¹czenie muzyki i dŸwiêków otoczenia/efektów/g³osu/interfejsu.",
-  },
-
   ClientOptionsEnableMusic = {
     pl = "W³¹cz muzykê",
   },
@@ -185,6 +181,10 @@ g_locales.addTranslations({
 
   ClientOptionsCycleWalkTooltip = {
     pl = "Cyklicznie chodŸ, przytrzymuj¹c œrodkowy przycisk myszy.",
+  },
+
+  GameHotkeysWindowTitle = {
+    pl = "Skróty klawiszowe",
   },
 
 
@@ -327,6 +327,18 @@ g_locales.addTranslations({
     pl = "Z³ote monety z ³upów trafiaj¹ na twoje konto bankowe. Ta funkcja jest dostêpna dla graczy premium lub do poziomu %d.",
   },
 
+  ClientOptionsButtonLinksTooltip = {
+    pl = "Uzyskaj dostêp do naszych linków!",
+  },
+
+  ClientOptionsButtonDiscordTooltip = {
+    pl = "Znalaz³eœ b³¹d? Masz sugestiê lub opiniê? Do³¹cz do naszego serwera Discord!",
+  },
+
+  ClientOptionsPartyListLevelCalculatorWindowTitle = {
+    pl = "Kalkulator poziomu dru¿yny",
+  },
+
 
 
   -- otui - graphic
@@ -345,6 +357,10 @@ g_locales.addTranslations({
 
   ClientOptionsViewMode = {
     pl = "Tryb widoku",
+  },
+
+  ClientOptionsTransposedView = {
+    pl = "Wlacz widok transponowany",
   },
 
   ClientOptionsShowClouds = {
@@ -385,6 +401,10 @@ g_locales.addTranslations({
 
   ClientOptionsShowMouseItemIconTooltip = {
     pl = "Pokazuje przeci¹gniêty przedmiot podczas przeci¹gania i upuszczania przedmiotów.",
+  },
+
+  ClientOptionsTransposedViewTooltip = {
+    pl = "To nie jest tylko prosta rotacja. Transponuje layout ekranu gry. Jêzyk jest przydatny, gdy okno klienta jest w orientacji portretowej (wysokoœæ okna jest mniejsza od szerokoœci).\n\nUwaga: To jest funkcja eksperymentalna.",
   },
 
 
@@ -482,4 +502,23 @@ g_locales.addTranslations({
   ClientOptionsFloorViewModeValueSpy = {
     pl = "Szpieg",
   },
+  ClientOptionsUiScale = {
+    pl = "Skala UI",
+  },
+
+  ClientOptionsUiScaleValueAuto = {
+    pl = "Domytut (<= 1440p)",
+  },
+
+  -- ClientOptionsUiScaleValue1x = {
+  -- },
+
+  -- ClientOptionsUiScaleValue2x = {
+  -- },
+
+  -- ClientOptionsUiScaleValue4x = {
+  -- },
+
+  -- ClientOptionsUiScaleValue8x = {
+  -- },
 }, false)

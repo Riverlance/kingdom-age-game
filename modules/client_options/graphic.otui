@@ -20,36 +20,51 @@ Panel
     symbol: SQMs
 
   OptionLabel
+    &loc: '${ClientOptionsUiScale}'
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionComboBox
+    id: uiScale
+    anchors.top: prev.outsideBottom
+    anchors.right: prev.right
+    margin-top: 2
+
+  OptionLabel
     &loc: '${ClientOptionsShaderFilter}'
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
-  ComboBox
+  OptionComboBox
     id: shaderFilter
     anchors.top: prev.outsideBottom
-    anchors.left: parent.left
     anchors.right: prev.right
     margin-top: 2
 
   OptionLabel
     &loc: '${ClientOptionsViewMode}'
     $!first:
-      anchors.top: gameScreenSize.outsideBottom
+      anchors.top: uiScale.outsideBottom
     anchors.left: parent.horizontalCenter
     margin-left: 10
 
-  ComboBox
+  OptionComboBox
     id: viewMode
     anchors.top: prev.outsideBottom
     anchors.left: prev.left
-    anchors.right: parent.right
     margin-top: 2
+
+  OptionCheckBox
+    id: transposedView
+    &loc: '${ClientOptionsTransposedView}'
+    &loct: '${ClientOptionsTransposedViewTooltip}'
+    !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
 
   OptionCheckBox
     id: showClouds
     &loc: '${ClientOptionsShowClouds}'
-    $!first:
-      margin-top: 10
 
   OptionHorizontalSeparator
 

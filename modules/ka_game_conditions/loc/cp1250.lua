@@ -3,10 +3,6 @@
 g_locales.addTranslations({
   -- otui
 
-  GameConditionsWindowTitle = {
-    pl = "Warunki",
-  },
-
   GameConditionsTabFilterDefaultTooltipShow = {
     pl = "Poka¿ domyœlne warunki",
   },

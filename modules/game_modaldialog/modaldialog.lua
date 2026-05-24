@@ -438,7 +438,8 @@ do
 
           -- Initial value
           if string.exists(fields[fieldId].value) then
-            addEvent(function() field:setText(fields[fieldId].value) end)
+            local fieldValue = fields[fieldId].value
+            addEvent(function() field:setText(fieldValue) end)
           end
         end
 

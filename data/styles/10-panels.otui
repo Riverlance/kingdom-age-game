@@ -15,5 +15,13 @@ ScrollableFlatPanel < ScrollablePanel
   image-border: 1
 
 LightFlatPanel < Panel
-  image-source: /images/ui/_background/panel_lightflat
+  image-source: /images/ui/_background/panel_flat_light
   image-border: 1
+
+MiniWindowDropPreviewPanel < Panel
+  image-source: /images/ui/_background/mini_window_preview
+  image-border: 1
+  size: 0 0
+  visible: false
+  focusable: false
+  phantom: true

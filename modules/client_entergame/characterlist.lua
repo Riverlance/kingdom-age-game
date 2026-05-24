@@ -280,7 +280,13 @@ function ClientCharacterList.create(characters, account, otui)
 
   if focusLabel then
     characterList:focusChild(focusLabel, KeyboardFocusReason)
-    addEvent(function() characterList:ensureChildVisible(focusLabel) end)
+    local focusLabelId = focusLabel:getId()
+    addEvent(withWeakWidget(characterList, function(widget)
+      local focusedWidget = widget:getChildById(focusLabelId)
+      if focusedWidget then
+        widget:ensureChildVisible(focusedWidget)
+      end
+    end))
   end
 
   -- account
@@ -318,6 +324,11 @@ function ClientCharacterList.show()
   charactersWindow:raise()
   charactersWindow:focus()
   ClientEnterGame.toggleLoginButton(true)
+
+  local logoutButton = charactersWindow and charactersWindow.buttonLogout
+  if logoutButton then
+    logoutButton:setVisible(g_game.isOnline())
+  end
 end
 
 function ClientCharacterList.hide(showLogin)

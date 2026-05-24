@@ -7,7 +7,7 @@ Panel
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
-  ComboBox
+  OptionComboBox
     id: leftArcComboBox
     anchors.top: prev.outsideBottom
     anchors.left: prev.left
@@ -31,7 +31,7 @@ Panel
     anchors.left: parent.horizontalCenter
     margin-left: 10
 
-  ComboBox
+  OptionComboBox
     id: rightArcComboBox
     anchors.top: prev.outsideBottom
     anchors.left: prev.left
@@ -52,7 +52,7 @@ Panel
     anchors.right: parent.horizontalCenter
     margin-right: 10
 
-  ComboBox
+  OptionComboBox
     id: topArcComboBox
     anchors.top: prev.outsideBottom
     anchors.left: prev.left
@@ -76,7 +76,7 @@ Panel
     anchors.left: parent.horizontalCenter
     margin-left: 10
 
-  ComboBox
+  OptionComboBox
     id: bottomArcComboBox
     anchors.top: prev.outsideBottom
     anchors.left: prev.left

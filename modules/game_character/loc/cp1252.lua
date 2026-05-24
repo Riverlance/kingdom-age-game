@@ -152,4 +152,20 @@ g_locales.addTranslations{
     de = "Inventar ausblenden",
     sv = "Dölj inventering",
   },
+
+  CharacterButtonShopTooltip = {
+    en = "Visit the VIP shop on our Website",
+    pt = "Visite a loja VIP no nosso site",
+    es = "Visita la tienda VIP en nuestro sitio web",
+    de = "Besuche den VIP-Shop auf unserer Website",
+    sv = "Besök VIP-butiken på vår webbplats",
+  },
+
+  CharacterButtonDealsTooltip = {
+    en = "Deals",
+    pt = "Ofertas",
+    es = "Ofertas",
+    de = "Angebote",
+    sv = "Erbjudanden",
+  },
 }

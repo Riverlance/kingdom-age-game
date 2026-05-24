@@ -1,10 +1,21 @@
 Panel
 
+  OptionButton
+    id: hotkeysButton
+    &loc: '${GameHotkeysWindowTitle}'
+    &loct: '${GameHotkeysWindowTitle} (${GameHotkeysActionKey})'
+    @locpar: return { GameHotkeysActionKey = GameHotkeysActionKey }
+    @onClick: GameHotkeys.toggle()
+
+  OptionHorizontalSeparator
+
   OptionCheckBox
     id: classicControl
     &loc: '${ClientOptionsClassicControl}'
     &loct: '${ClientOptionsClassicControlTooltip}'
     !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
 
   OptionCheckBox
     id: autoChaseOverride

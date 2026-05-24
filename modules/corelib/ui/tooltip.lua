@@ -5,11 +5,15 @@
 
 -- @docclass
 
-local fadeInTime  = 100
+local fadeInTime  = 0
 local fadeOutTime = 100
+local mouseMoveDelay = 25
 
 local currentTooltip
 local currentHoveredWidget
+local tooltipMoveEvent
+local lastTooltipPosX = -1
+local lastTooltipPosY = -1
 
 
 
@@ -54,37 +58,74 @@ Tooltip = createClass({
 
 
 
-local function onTooltipMove(firstShow)
+local function onTooltipMove(mousePos, isFirstShow)
   local currentTooltipWidget = currentTooltip and currentTooltip.widget
-  if not currentTooltipWidget or not firstShow and (not currentTooltipWidget:isVisible() or currentTooltipWidget:getOpacity() < 0.1) then
+  if not currentTooltipWidget or not isFirstShow and (not currentTooltipWidget:isVisible() or currentTooltipWidget:getOpacity() < 0.1) then
     return
   end
 
-  local pos        = g_window.getMousePosition()
-  local windowSize = g_window.getSize()
-  local labelSize  = currentTooltipWidget:getSize()
+  local pos       = mousePos and { x = mousePos.x, y = mousePos.y } or g_window.getMousePosition()
+  local rootSize  = rootWidget:getSize()
+  local labelSize = currentTooltipWidget:getSize()
+  local uiScale   = math.max(1, g_app.getResolvedUiScale())
 
-  pos.x = pos.x + 1
-  pos.y = pos.y + 1
+  -- Keep tooltip spacing visually consistent across UI scales.
+  local probeOffset = math.max(1, math.round(1 / uiScale))
+  local sideOffset  = math.max(1, math.round(3 / uiScale))
+  local hoverOffset = math.max(1, math.round(10 / uiScale))
 
-  if windowSize.width - (pos.x + labelSize.width) < 10 then
-    pos.x = pos.x - labelSize.width - 3
+  pos.x = pos.x + probeOffset
+  pos.y = pos.y + probeOffset
+
+  if rootSize.width - (pos.x + labelSize.width) < hoverOffset then
+    pos.x = pos.x - labelSize.width - sideOffset
   else
-    pos.x = pos.x + 10
+    pos.x = pos.x + hoverOffset
   end
 
-  if windowSize.height - (pos.y + labelSize.height) < 10 then
-    pos.y = pos.y - labelSize.height - 3
+  if rootSize.height - (pos.y + labelSize.height) < hoverOffset then
+    pos.y = pos.y - labelSize.height - sideOffset
   else
-    pos.y = pos.y + 10
+    pos.y = pos.y + hoverOffset
+  end
+
+  -- Never let the tooltip overflow screen bounds (handles very large tooltips too).
+  local maxX = math.max(0, rootSize.width - labelSize.width)
+  local maxY = math.max(0, rootSize.height - labelSize.height)
+  pos.x = math.max(0, math.min(pos.x, maxX))
+  pos.y = math.max(0, math.min(pos.y, maxY))
+
+  if pos.x == lastTooltipPosX and pos.y == lastTooltipPosY then
+    return
   end
 
   currentTooltipWidget:setPosition(pos)
+  lastTooltipPosX = pos.x
+  lastTooltipPosY = pos.y
+end
+
+local function forceHideTooltipObject(tooltipObject)
+  if not tooltipObject or not tooltipObject.widget then
+    return
+  end
+
+  g_effects.cancelFade(tooltipObject.widget)
+  tooltipObject.widget:setOpacity(0)
+  tooltipObject.widget:hide()
 end
 
 function Tooltip:show(hoveredWidget)
   if not hoveredWidget:hasTooltip() then
     return
+  end
+
+  if GameInterface and GameInterface.isHoverLookTooltipOnlyMode and GameInterface.isHoverLookTooltipOnlyMode() and self.type ~= TooltipType.lookHover then
+    return
+  end
+
+  if currentTooltip and currentTooltip ~= self then
+    currentTooltip:hide()
+    forceHideTooltipObject(currentTooltip)
   end
 
   local isDefaultTooltipType = self.type == TooltipType.default
@@ -96,13 +137,17 @@ function Tooltip:show(hoveredWidget)
     self.widget:setText(hoveredWidget['tooltip'])
   end
 
-  onTooltipMove(true) -- Set first position
-
   -- Callback
   self:onTooltipShow(hoveredWidget)
   if hoveredWidget.onTooltipShow then
     hoveredWidget:onTooltipShow(self)
   end
+
+  -- Ensure size is up to date before calculating first position.
+  self.widget:updateLayout()
+  lastTooltipPosX = -1
+  lastTooltipPosY = -1
+  onTooltipMove(g_window.getMousePosition(), true) -- Set first position
 
   self.widget:raise()
   self.widget:show()
@@ -116,23 +161,27 @@ function Tooltip:show(hoveredWidget)
     hoveredWidget:onTooltipShown(self)
   end
 
-  connect(rootWidget, {
-    onMouseMove = onTooltipMove,
-  })
+  if not tooltipMoveEvent then
+    tooltipMoveEvent = cycleEvent(onTooltipMove, mouseMoveDelay)
+  end
 end
 
 function Tooltip:hide() -- Usable as Tooltip.hide() also
   if not self then
     if currentTooltip then
       currentTooltip:hide()
-
-      currentHoveredWidget = nil
-      currentTooltip       = nil
     end
+
+    currentHoveredWidget = nil
+    currentTooltip       = nil
     return
   end
 
   if not self.widget:isVisible() then
+    if currentTooltip == self then
+      currentHoveredWidget = nil
+      currentTooltip       = nil
+    end
     return
   end
 
@@ -144,9 +193,10 @@ function Tooltip:hide() -- Usable as Tooltip.hide() also
 
   g_effects.fadeOut(self.widget, fadeOutTime)
 
-  disconnect(rootWidget, {
-    onMouseMove = onTooltipMove,
-  })
+  removeEvent(tooltipMoveEvent)
+  tooltipMoveEvent = nil
+  lastTooltipPosX = -1
+  lastTooltipPosY = -1
 
   -- Callback
   self:onTooltipHidden(currentHoveredWidget)
@@ -171,17 +221,27 @@ local function onWidgetStyleApply(widget, styleName, styleNode) -- Create from .
   widget:setTooltip(styleNode['tooltip'], styleNode['tooltip-type']) -- tooltip-type can be nil
 end
 
+local function isHoverLookTooltipOnlyMode()
+  return GameInterface and GameInterface.isHoverLookTooltipOnlyMode and GameInterface.isHoverLookTooltipOnlyMode()
+end
+
 local function onWidgetUpdateHover(widget, hovered)
   if widget.onTooltipHoverChange and not widget:onTooltipHoverChange(hovered) then
     return
   end
 
   if hovered then
+    if isHoverLookTooltipOnlyMode() and widget:getTooltipType() ~= TooltipType.lookHover then
+      return
+    end
+
     if widget:hasTooltip() and not g_mouse.isPressed() and widget:isVisible() and widget:isEnabled() then
       widget:getTooltipObject():show(widget)
     end
   else
-    Tooltip.hide()
+    if currentHoveredWidget == widget then
+      Tooltip.hide()
+    end
   end
 end
 
@@ -195,6 +255,7 @@ function g_tooltip.init()
     -- Import tooltip type styles
     g_ui.importStyle('tooltip/default')
     g_ui.importStyle('tooltip/textblock')
+    g_ui.importStyle('tooltip/lookhover')
     g_ui.importStyle('tooltip/image')
     g_ui.importStyle('tooltip/conditionbutton')
     g_ui.importStyle('tooltip/powerbutton')
@@ -211,6 +272,33 @@ function g_tooltip.init()
     Tooltip.__listById[TooltipType.textBlock] = Tooltip:new {
       type   = TooltipType.textBlock,
       widget = g_ui.createWidget('TooltipTextBlock', rootWidget),
+
+      onTooltipShow = function(self, hoveredWidget)
+        local layout = self.widget:getLayout()
+        local label  = self.widget:getChildById('label')
+
+        -- Disable updates
+        layout:disableUpdates()
+
+        -- Update value
+        label:setText(hoveredWidget['tooltip'])
+        label:resizeToText()
+
+        -- Enable updates
+        layout:enableUpdates()
+
+        -- Update layout
+        self.widget:updateLayout()
+
+        -- Update parent height according to child size, then anchor text bottom to parent bottom
+        self.widget:setHeight(label:getHeight() + label:getMarginTop() + label:getMarginBottom())
+      end
+    }
+
+    -- Look hover
+    Tooltip.__listById[TooltipType.lookHover] = Tooltip:new {
+      type   = TooltipType.lookHover,
+      widget = g_ui.createWidget('TooltipLookHover', rootWidget),
 
       onTooltipShow = function(self, hoveredWidget)
         local layout = self.widget:getLayout()
@@ -570,6 +658,9 @@ function g_tooltip.init()
 end
 
 function g_tooltip.terminate()
+  removeEvent(tooltipMoveEvent)
+  tooltipMoveEvent = nil
+
   -- Destroy tooltip types
   for i = #Tooltip.__listById, 1, -1 do
     if Tooltip.__listById[i].widget then
@@ -598,7 +689,9 @@ function g_tooltip.onWidgetMouseRelease(widget, mousePos, mouseButton)
 end
 
 function g_tooltip.onWidgetDestroy(widget)
-  Tooltip.hide()
+  if currentHoveredWidget == widget then
+    Tooltip.hide()
+  end
 end
 
 -- @}

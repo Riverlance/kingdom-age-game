@@ -19,14 +19,6 @@ g_locales.addTranslations{
     sv = "Köp",
   },
 
-  GamePlayerShopButtonSellAll = {
-    en = "Sell All",
-    pt = "Vender Tudo",
-    es = "Vender Todo",
-    de = "Alles verkaufen",
-    sv = "Sälj allt",
-  },
-
   GamePlayerShopSearchLabel = {
     en = "Search",
     pt = "Buscar",
@@ -265,14 +257,6 @@ g_locales.addTranslations{
     es = "Estás en el nivel máximo de confianza%s.",
     de = "Du bist auf dem maximalen Vertrauenslevel%s.",
     sv = "Du är på den maximala förtroendenivån%s.",
-  },
-
-  GamePlayerShopContextMenuLook = {
-    en = "Look",
-    pt = "Olhar",
-    es = "Mirar",
-    de = "Ansehen",
-    sv = "Titta",
   },
 
   GamePlayerShopTrustXp = {

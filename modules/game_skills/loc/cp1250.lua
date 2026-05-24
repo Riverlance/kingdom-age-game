@@ -3,10 +3,6 @@
 g_locales.addTranslations({
   -- otui
 
-  GameSkillsWindowTitle = {
-    pl = "Statystyki",
-  },
-
   -- GameSkillsInfoXP = {
   -- },
 
@@ -23,7 +19,7 @@ g_locales.addTranslations({
   },
 
   GameSkillsInfoFocusPoints = {
-    pl = "Punkty Skupienia", 
+    pl = "Punkty Skupienia",
   },
 
 

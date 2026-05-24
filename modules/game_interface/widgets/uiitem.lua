@@ -128,23 +128,6 @@ function UIItem:onMouseRelease(mousePosition, mouseButton)
   return false
 end
 
-function UIItem:onDoubleClick(mousePosition)
-  if self.cancelNextRelease then
-    self.cancelNextRelease = false
-    return true
-  end
-
-  local item = self:getItem()
-  if not item or not self:containsPoint(mousePosition) then
-    return false
-  end
-
-  if g_keyboard.getModifiers() == KeyboardNoModifier then
-    g_game.look(item)
-  end
-  return true
-end
-
 function UIItem:canAcceptDrop(widget, mousePos)
   if self:isVirtual() or not self:isDraggable() then
     return false

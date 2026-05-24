@@ -18,6 +18,7 @@ ScrollBarValueLabel < Label
   anchors.fill: parent
   color: #dfdfdfaa
   text-align: center
+  phantom: true
 
 VerticalScrollBar < UIScrollBar
   orientation: vertical

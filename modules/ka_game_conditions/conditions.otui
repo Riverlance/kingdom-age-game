@@ -11,7 +11,7 @@ ConditionWidget < UIWidget
 
 MiniWindow
   id: conditionWindow
-  &loc: '${GameConditionsWindowTitle}'
+  &loc: '${CorelibConditionsWindowTitle}'
   icon: /images/ui/top_menu/conditions
   &save: true
   &contentMinimumHeight: 30

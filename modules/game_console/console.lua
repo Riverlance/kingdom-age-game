@@ -612,6 +612,10 @@ function GameConsole.addTabText(text, speaktype, tab, creatureName, clone)
 
   if speaktype.npcChat and (characterName ~= creatureName or characterName == 'Account Manager') then
     local highlightData = GameConsole.getHighlightedText(text)
+
+    -- Rich text messages only for non highlighted messages, as highlights are based on text positions and rich text can change them
+    label:setTextRich(#highlightData < 1)
+
     if #highlightData > 0 then
       local labelHighlight = g_ui.createWidget('ConsolePhantomLabel', label)
       labelHighlight:fill('parent')
@@ -1244,6 +1248,10 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
     local staticMessage = message
     if isNpcMode then
       local highlightData = GameConsole.getHighlightedText(staticMessage)
+
+      -- Rich text messages only for non highlighted messages, as highlights are based on text positions and rich text can change them
+      staticText:setTextRich(#highlightData < 1)
+
       if #highlightData > 0 then
         for i = 1, #highlightData / 3 do
           local dataBlock = { _start = highlightData[(i - 1) * 3 + 1], _end = highlightData[(i - 1) * 3 + 2], words = highlightData[(i - 1) * 3 + 3] }

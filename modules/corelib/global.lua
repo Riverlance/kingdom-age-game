@@ -58,8 +58,27 @@ function removeEvent(event)
   end
 end
 
+local function createWeakRef(value)
+  return setmetatable({ value = value }, { __mode = 'v' })
+end
+
+-- Keep only a weak handle to the widget to avoid retaining destroyed widget references through timer callback closures
+function withWeakWidget(widget, callback)
+  local weakWidget = createWeakRef(widget)
+  return function(...)
+    local currentWidget = weakWidget.value
+    if isWidgetAlive(currentWidget) then
+      return callback(currentWidget, ...)
+    end
+  end
+end
+
 function isWidget(widget)
   return type(widget) == 'userdata' and type(widget.getStyleName) == 'function'
+end
+
+function isWidgetAlive(widget)
+  return widget and not widget:isDestroyed()
 end
 
 dofile 'compat'

@@ -87,14 +87,6 @@ g_locales.addTranslations{
     sv = "Aktivera ljud",
   },
 
-  ClientOptionsEnableAudioTooltip = {
-    en = "Allows music and ambient/effect/voice/GUI sounds to be enabled.",
-    pt = "Permite que música e sons ambiente/efeito/voz/GUI sejam ativados.",
-    es = "Permite activar la música y los sonidos de ambiente/efecto/voz/GUI.",
-    de = "Ermöglicht das Aktivieren von Musik und Umgebungs-/Effekt-/Stimmen-/GUI-Sounds.",
-    sv = "Tillåter att musik och omgivningseffekt/röst/GUI-ljud aktiveras.",
-  },
-
   ClientOptionsEnableMusic = {
     en = "Enable music",
     pt = "Ativar música",
@@ -357,6 +349,14 @@ g_locales.addTranslations{
     es = "Cicla los eventos de caminata manteniendo presionado el botón central del ratón.",
     de = "Zyklisches Gehen durch Halten der mittleren Maustaste.",
     sv = "Cykla gåhändelser genom att hålla nere den mellersta musknappen.",
+  },
+
+  GameHotkeysWindowTitle = {
+    en = "Hotkeys",
+    pt = "Atalhos",
+    es = "Teclas rápidas",
+    de = "Tastenkürzel",
+    sv = "Snabbkommandon",
   },
 
 
@@ -631,6 +631,30 @@ g_locales.addTranslations{
     sv = "Guldmynten från hittade byten går till ditt bankkonto. Denna funktion är för premiumspelare eller upp till nivå %d.",
   },
 
+  ClientOptionsButtonLinksTooltip = {
+    en = "Access our links!",
+    pt = "Acesse nossos links!",
+    es = "Accede a nuestros enlaces!",
+    de = "Greife auf unsere Links zu!",
+    sv = "Få åtkomst till våra länkar!",
+  },
+
+  ClientOptionsButtonDiscordTooltip = {
+    en = "Found a bug? Do you have a suggestion or feedback? Join our Discord Server!",
+    pt = "Encontrou um bug? Tem uma sugestão ou feedback? Junte-se ao nosso servidor do Discord!",
+    es = "¿Encontraste un error? ¿Tienes una sugerencia o comentario? ¡Únete a nuestro servidor de Discord!",
+    de = "Einen Fehler gefunden? Hast du eine Anregung oder Feedback? Tritt unserem Discord-Server bei!",
+    sv = "Hittade du en bugg? Har du ett förslag eller feedback? Gå med i vår Discord-server!",
+  },
+
+  ClientOptionsPartyListLevelCalculatorWindowTitle = {
+    en = "Party Level Calculator",
+    pt = "Calculadora de Nível da Equipe",
+    es = "Calculadora de Nivel de Grupo",
+    de = "Gruppen-Level-Rechner",
+    sv = "Partynivåräknare",
+  },
+
 
 
   -- otui - graphic
@@ -665,6 +689,14 @@ g_locales.addTranslations{
     es = "Modo de vista",
     de = "Ansichtsmodus",
     sv = "Visningsläge",
+  },
+
+  ClientOptionsTransposedView = {
+    en = "Enable transposed view",
+    pt = "Habilitar visualização transposta",
+    es = "Habilitar vista transpuesta",
+    de = "Transponierte Ansicht aktivieren",
+    sv = "Aktivera transponerad visning",
   },
 
   ClientOptionsShowClouds = {
@@ -745,6 +777,14 @@ g_locales.addTranslations{
     es = "Muestra el ítem arrastrado al arrastrar y soltar ítems.",
     de = "Zeigt das gezogene Element an, wenn Elemente gezogen und abgelegt werden.",
     sv = "Visar det dragna föremålet när du drar och släpper föremål.",
+  },
+
+  ClientOptionsTransposedViewTooltip = {
+    en = "This isn't just a simple rotation. It transposes the game screen layout. It's useful when the client window is in portrait orientation (the window's height is greater than its width).\n\nNote: This is an EXPERIMENTAL feature.",
+    pt = "Isso não é apenas uma simples rotação. Ele transposiciona o layout da tela do jogo. Isso é util quando a janela do cliente estiver na orientação retrato (a altura da janela é maior que a largura).\n\nNota: Isso é uma característica EXPERIMENTAL.",
+    es = "No es simplemente una simple rotación. Transpone el layout de la pantalla del juego. Es util cuando la ventana del cliente esté en orientación retrato (la altura de la ventana es mayor que la anchura).\n\nNota: Esto es una característica EXPERIMENTAL.",
+    de = "Dies ist nicht nur eine einfache Rotation. Es transponiert das Spielbildschirm-Layout. Es hilfreich, wenn das Client-Fenster in Portrait-Orientierung (die H—he des Fensters ist größer als die Breite) steht.\n\nHinweis: Dies ist eine experimentelle Funktion.",
+    sv = "Det finns inte bara en enkelt rotation. Det transponerar layouten på spelskärmen. Det finns användbart om klientvyn ligger i retroritning (höjden på vyn är större än bredden).\n\nNotering: Det finns en experimentell funktion.",
   },
 
 
@@ -929,5 +969,36 @@ g_locales.addTranslations{
     es = "Espía",
     de = "Spion",
     sv = "Spion",
+  },
+  ClientOptionsUiScale = {
+    en = "UI scale",
+    pt = "Escala da interface",
+    es = "Escala de la interfaz",
+    de = "UI-Skalierung",
+    sv = "UI-skala",
+  },
+
+  ClientOptionsUiScaleValueAuto = {
+    en = "Auto",
+  },
+
+  ClientOptionsUiScaleValue1x = {
+    en = "Default (<= 1440p)",
+    pt = "Padrão (<= 1440p)",
+    es = "Predeterminado (<= 1440p)",
+    de = "Standard (<= 1440p)",
+    sv = "Standard (<= 1440p)",
+  },
+
+  ClientOptionsUiScaleValue2x = {
+    en = "2x (<= 2160p)",
+  },
+
+  ClientOptionsUiScaleValue4x = {
+    en = "4x (<= 4320p)",
+  },
+
+  ClientOptionsUiScaleValue8x = {
+    en = "8x (> 4320p)",
   },
 }
