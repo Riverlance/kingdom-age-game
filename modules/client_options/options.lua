@@ -1058,4 +1058,7 @@ function ClientOptions.online()
 
   -- Ensure auto dependent scales are re-applied with final runtime window/ui scale
   ClientOptions.refreshAutoDependentScales()
+
+  -- Re-apply clouds visibility after game screen/map panel is recreated on login
+  addEvent(function() ClientOptions.updateOption('showClouds') end)
 end
