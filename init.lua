@@ -33,8 +33,8 @@ if not g_resources.addSearchPath(g_resources.getWorkDir() .. 'modules', true) th
   g_logger.fatal('Unable to add modules directory to the search path.')
 end
 
--- try to add mods path too
-g_resources.addSearchPath(g_resources.getWorkDir() .. 'mods', true)
+-- -- try to add mods path too
+-- g_resources.addSearchPath(g_resources.getWorkDir() .. 'mods', true)
 
 -- setup directory for saving configurations
 if not g_resources.setWriteDir(g_resources.getWorkDir()) or not g_resources.makeDir('config') then
