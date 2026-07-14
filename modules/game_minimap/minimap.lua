@@ -4,7 +4,8 @@ _G.GameMinimap = { }
 
 
 
-local GameMinimapActionKey = 'Ctrl+M'
+local GameMinimapActionKey   = 'Ctrl+M'
+local DefaultMapInstancePath = 'kingdom-age-online.otbm'
 
 
 
@@ -34,6 +35,12 @@ oldPos = nil
 currentMapFilename = ''
 
 local lastMinimapMarkId = 19
+
+
+
+local function isDefaultMapInstancePath(path)
+  return path == DefaultMapInstancePath
+end
 
 
 
@@ -164,9 +171,11 @@ end
 function GameMinimap.offline()
   minimapWindow:setSettings({ hideControllers = ballButton:isOn() })
   GameMinimap.saveMap()
+
   if minimapWidget.fullMapView then
     GameMinimap.toggleFullMap()
   end
+
   currentMapFilename = ''
 end
 
@@ -208,19 +217,32 @@ function GameMinimap.updateCameraPosition()
     return
   end
 
-  if localPlayer:getInstanceId() < 1 then
-    local text = f('%d, %d, %d', pos.x, pos.y, pos.z)
-
-    positionLabel:setText(text)
-    positionLabel:setTooltip(text)
-  end
+  GameMinimap.updatePositionLabel()
 
   if not minimapWidget:isDragging() then
     if not minimapWidget.fullMapView then
-      minimapWidget:setCameraPosition(localPlayer:getPosition())
+      minimapWidget:setCameraPosition(pos)
     end
-    minimapWidget:setCrossPosition(localPlayer:getPosition())
+    minimapWidget:setCrossPosition(pos)
   end
+end
+
+function GameMinimap.updatePositionLabel()
+  local localPlayer = g_game.getLocalPlayer()
+  if not localPlayer then
+    return
+  end
+
+  local pos = localPlayer:getPosition()
+  if not pos then
+    return
+  end
+
+  local minimapName = localPlayer:getInstanceName()
+  local text        = f('%s%s', string.exists(minimapName) and f('%s\n', minimapName) or '', f('%d, %d, %d', pos.x, pos.y, pos.z))
+
+  positionLabel:setText(text)
+  positionLabel:setTooltip(text)
 end
 
 function GameMinimap.toggleFullMap()
@@ -305,6 +327,22 @@ function GameMinimap.toggleFullMap()
   GameMinimap.updateCameraPosition()
 end
 
+function GameMinimap.toggleWorldChannel()
+  if not g_game.canPerformGameAction() then
+    return
+  end
+
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeWorldChannel)
+  protocolGame:send(msg)
+end
+
 function GameMinimap.getMinimapBackgroundWidget()
   return minimapBackgroundWidget
 end
@@ -347,30 +385,20 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
     localPlayer:setInstanceId(instanceId)
     localPlayer:setInstanceName(instanceName)
 
-    local formattedPath    = ''
-    local minimapLabelText = ''
-
     -- Instance map
-    if instanceId > 0 then
-      formattedPath    = instancePath:gsub('.otbm', ''):gsub('/', '  '):gsub('%p', '_'):gsub('  ', '-'):gsub('%s','_'):lower()
-      minimapLabelText = instanceName
-
-    -- Default map
-    else
-      local pos = localPlayer:getPosition()
-      if pos then
-        minimapLabelText = f('%d, %d, %d', pos.x, pos.y, pos.z)
-      end
+    local formattedPath = ''
+    if instanceId > 0 and not isDefaultMapInstancePath(instancePath) then
+      formattedPath = instancePath:gsub('.otbm', ''):gsub('/', '  '):gsub('%p', '_'):gsub('  ', '-'):gsub('%s','_'):lower()
     end
 
-    positionLabel:setText(minimapLabelText)
-    positionLabel:setTooltip(minimapLabelText)
-
+    -- Change minimap
     if formattedPath ~= currentMapFilename then
       GameMinimap.saveMap()
       currentMapFilename = formattedPath
       GameMinimap.loadMap(true)
     end
+
+    GameMinimap.updatePositionLabel()
 
   -- View state
   elseif flag == MinimapFlags.View then
@@ -380,7 +408,7 @@ function GameMinimap.onInstanceInfo(protocolGame, opcode, msg)
     if state then
       minimapBackgroundWidget:removeTooltip()
     else
-      minimapBackgroundWidget:setTooltip('${GameMinimapMinimapNotAvailable}')
+      minimapBackgroundWidget:setTooltip(loc'${GameMinimapMinimapNotAvailable}')
     end
 
     minimapWidget:setVisible(state)

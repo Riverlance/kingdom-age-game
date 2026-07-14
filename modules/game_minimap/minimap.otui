@@ -96,35 +96,6 @@ MiniWindow
         anchors.right: parent.right
 
         UIButton
-          id: extraIconsButton
-          size: 15 15
-          !tooltip: loc'${GameMinimapButtonExtraIconsShow}'
-          !tooltip-type: TooltipType.textBlock
-          anchors.top: parent.top
-          anchors.left: parent.left
-          margin-left: 4
-          image-source: /images/ui/minimap/controllers_extra
-          image-clip: 30 0 15 15
-          @onClick: ClientOptions.toggleOption('showMinimapExtraIcons')
-
-          $hover:
-            image-clip: 30 15 15 15
-
-          $pressed:
-            image-clip: 30 30 15 15
-
-          $on:
-            !tooltip: loc'${GameMinimapButtonExtraIconsShow}'
-            !tooltip-type: TooltipType.textBlock
-            image-clip: 45 0 15 15
-
-          $on hover:
-            image-clip: 45 15 15 15
-
-          $on pressed:
-            image-clip: 45 30 15 15
-
-        UIButton
           id: buttonMoveNorth
           &loct: '${GameMinimapButtonMoveNorth}'
           anchors.top: parent.top
@@ -141,33 +112,6 @@ MiniWindow
             image-clip: 21 24 21 12
 
           @onClick: GameMinimap.getMinimapWidget():move(0,1)
-
-        UIButton
-          id: fullMapButton
-          size: 15 15
-          !tooltip: f(loc'${GameMinimapButtonFullMapShow}', 'Ctrl+Shift+M')
-          anchors.top: parent.top
-          anchors.right: parent.right
-          margin-right: 4
-          image-source: /images/ui/minimap/controllers_extra
-          image-clip: 0 0 15 15
-          @onClick: GameMinimap.toggleFullMap()
-
-          $hover:
-            image-clip: 0 15 15 15
-
-          $pressed:
-            image-clip: 0 30 15 15
-
-          $on:
-            !tooltip: f(loc'${GameMinimapButtonFullMapHide}', 'Ctrl+Shift+M')
-            image-clip: 15 0 15 15
-
-          $on hover:
-            image-clip: 15 15 15 15
-
-          $on pressed:
-            image-clip: 15 30 15 15
 
         UIButton
           id: buttonMoveWest
@@ -244,6 +188,82 @@ MiniWindow
             image-clip: 0 24 21 12
 
           @onClick: GameMinimap.getMinimapWidget():move(0,-1)
+
+        UIButton
+          id: extraIconsButton
+          size: 15 15
+          !tooltip: loc'${GameMinimapButtonExtraIconsShow}'
+          !tooltip-type: TooltipType.textBlock
+          anchors.horizontalCenter: buttonMoveWest.horizontalCenter
+          anchors.verticalCenter: buttonMoveNorth.verticalCenter
+          margin-bottom: 4
+          margin-right: 4
+          image-source: /images/ui/minimap/controllers_extra
+          image-clip: 30 0 15 15
+          @onClick: ClientOptions.toggleOption('showMinimapExtraIcons')
+
+          $hover:
+            image-clip: 30 15 15 15
+
+          $pressed:
+            image-clip: 30 30 15 15
+
+          $on:
+            !tooltip: loc'${GameMinimapButtonExtraIconsShow}'
+            !tooltip-type: TooltipType.textBlock
+            image-clip: 45 0 15 15
+
+          $on hover:
+            image-clip: 45 15 15 15
+
+          $on pressed:
+            image-clip: 45 30 15 15
+
+        UIButton
+          id: fullMapButton
+          size: 15 15
+          !tooltip: f(loc'${GameMinimapButtonFullMapShow}', 'Ctrl+Shift+M')
+          anchors.horizontalCenter: buttonMoveEast.horizontalCenter
+          anchors.verticalCenter: buttonMoveNorth.verticalCenter
+          margin-bottom: 4
+          margin-left: 4
+          image-source: /images/ui/minimap/controllers_extra
+          image-clip: 0 0 15 15
+          @onClick: GameMinimap.toggleFullMap()
+
+          $hover:
+            image-clip: 0 15 15 15
+
+          $pressed:
+            image-clip: 0 30 15 15
+
+          $on:
+            !tooltip: f(loc'${GameMinimapButtonFullMapHide}', 'Ctrl+Shift+M')
+            image-clip: 15 0 15 15
+
+          $on hover:
+            image-clip: 15 15 15 15
+
+          $on pressed:
+            image-clip: 15 30 15 15
+
+        UIButton
+          id: worldChannelButton
+          size: 15 15
+          &loct: '${GameMinimapButtonWorldChannel}'
+          anchors.horizontalCenter: buttonMoveWest.horizontalCenter
+          anchors.verticalCenter: buttonMoveSouth.verticalCenter
+          margin-top: 4
+          margin-right: 4
+          image-source: /images/ui/minimap/controllers_extra
+          image-clip: 60 0 15 15
+          @onClick: GameMinimap.toggleWorldChannel()
+
+          $hover:
+            image-clip: 60 15 15 15
+
+          $pressed:
+            image-clip: 60 30 15 15
 
       UIWidget
         id: controllersArea

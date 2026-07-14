@@ -317,7 +317,8 @@ ClientExtOpcodes = {
   ClientExtOpcodeGreetNpc            = 12,
   ClientExtOpcodeGoldLootAutoDeposit = 13,
   ClientExtOpcodeDeals               = 14,
-  -- Free                              15 to 65535
+  ClientExtOpcodeWorldChannel        = 15,
+  -- Free                              16 to 65535
 }
 
 ClientActions = {

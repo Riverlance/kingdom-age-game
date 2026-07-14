@@ -83,6 +83,14 @@ g_locales.addTranslations{
     sv = "Dölj hela spelkartan (%s)",
   },
 
+  GameMinimapButtonWorldChannel = {
+    en = "Change world channel",
+    pt = "Alterar canal do mundo",
+    es = "Cambiar canal del mundo",
+    de = "Weltkanal wechseln",
+    sv = "Byt världskanal",
+  },
+
   GameMinimapButtonMoveWest = {
     en = "Move to west",
     pt = "Mover para o oeste",

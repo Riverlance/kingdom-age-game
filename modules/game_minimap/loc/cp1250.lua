@@ -43,6 +43,10 @@ g_locales.addTranslations({
     pl = "Ukryj ca³¹ mapê gry (%s)",
   },
 
+  GameMinimapButtonWorldChannel = {
+    pl = "Zmieñ kana³ œwiata",
+  },
+
   GameMinimapButtonMoveWest = {
     pl = "Przesuñ siê na zachód",
   },
