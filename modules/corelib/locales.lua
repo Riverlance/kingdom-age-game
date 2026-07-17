@@ -305,12 +305,6 @@ function g_locales.init()
 
   g_locales.installLocaleFonts() -- See https://github.com/otland/otclient/pull/6
 
-  if not localeId then
-    connect(g_app, {
-      onRun = g_locales.createWindow
-    })
-  end
-
   connect(g_game, {
     onGameStart = g_locales.onGameStart
   })
