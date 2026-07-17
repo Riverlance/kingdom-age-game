@@ -14,6 +14,7 @@ function ClientUpdater.init()
     onUpdateStart    = ClientUpdater.onUpdateStart,
     onUpdateProgress = ClientUpdater.onUpdateProgress,
     onUpdateEnd      = ClientUpdater.onUpdateEnd,
+    onUpdateError    = ClientUpdater.onUpdateError,
   })
 
   updaterWindow = g_ui.displayUI('updater')
@@ -26,6 +27,7 @@ function ClientUpdater.terminate()
     onUpdateStart    = ClientUpdater.onUpdateStart,
     onUpdateProgress = ClientUpdater.onUpdateProgress,
     onUpdateEnd      = ClientUpdater.onUpdateEnd,
+    onUpdateError    = ClientUpdater.onUpdateError,
   })
 
   updaterWindow:destroy()
@@ -45,9 +47,9 @@ function ClientUpdater.onUpdateStart()
 end
 
 function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
-  local percent = (receivedObj/totalObj) * 100
+  local percent = totalObj > 0 and (receivedObj/totalObj) * 100 or 0
   local deltaTime = (g_clock.millis() - startTime) / 1000
-  local avgSpeed = receivedBytes / 1024 / deltaTime
+  local avgSpeed = deltaTime > 0 and receivedBytes / 1024 / deltaTime or 0
   local receivedMB = receivedBytes / 1024 / 1024
 
   updaterWindow:getChildById('topText'):setText(f(loc'${KaClientUpdaterDownloading}', loc(receivedObj), loc(totalObj)))
@@ -57,5 +59,14 @@ function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
 end
 
 function ClientUpdater.onUpdateEnd()
-  displayOkBox(loc'${KaClientUpdaterEndTitle}', loc'${KaClientUpdaterEndMsg}', function() restart() end)
+  displayOkBox(loc'${KaClientUpdaterEndTitle}', loc'${KaClientUpdaterEndMsg}', function()
+    if not g_updater.applyUpdate() then
+      displayErrorBox(loc'${CorelibInfoError}', 'The updater could not be started. The client will remain open. Check the log for details.')
+    end
+  end)
+end
+
+function ClientUpdater.onUpdateError(message)
+  updaterWindow:hide()
+  displayErrorBox(loc'${CorelibInfoError}', message)
 end

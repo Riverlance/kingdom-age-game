@@ -46,8 +46,7 @@ function quit()
 end
 
 function restart()
-  g_platform.spawnProcess('Kingdom Age Online.exe', { })
-  exit()
+  g_app.restart()
 end
 
 function connect(object, arg1, arg2, arg3)
