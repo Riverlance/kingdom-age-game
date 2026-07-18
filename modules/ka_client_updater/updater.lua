@@ -60,9 +60,7 @@ end
 
 function ClientUpdater.onUpdateEnd()
   displayOkBox(loc'${KaClientUpdaterEndTitle}', loc'${KaClientUpdaterEndMsg}', function()
-    if not g_updater.applyUpdate() then
-      displayErrorBox(loc'${CorelibInfoError}', 'The updater could not be started. The client will remain open. Check the log for details.')
-    end
+    g_updater.applyUpdate()
   end)
 end
 
