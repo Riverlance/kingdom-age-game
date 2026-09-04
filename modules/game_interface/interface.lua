@@ -1047,7 +1047,7 @@ end
 local function tryResizeChildList(selfHeight, childrenHeight, _childList, noRemoveChild, resizeCondition)
   local changeValidateCondition = function(child, childOldHeight, otherChildrenHeight)
     local availableHeight = selfHeight - otherChildrenHeight -- Possible child new height
-    return child:isVisible() and child:isResizeable() and child:getMinimumHeight() <= availableHeight and child:getMaximumHeight() >= availableHeight and availableHeight ~= childOldHeight and (not resizeCondition or resizeCondition(child, noRemoveChild))
+    return child:getClassName() == 'UIMiniWindow' and child:isVisible() and child:isResizeable() and child:getMinimumHeight() <= availableHeight and child:getMaximumHeight() >= availableHeight and availableHeight ~= childOldHeight and (not resizeCondition or resizeCondition(child, noRemoveChild))
   end
 
   local changeConditionValidated = function(child, childOldHeight, otherChildrenHeight, childList)

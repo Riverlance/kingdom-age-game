@@ -48,6 +48,18 @@ function ClientUpdater.onUpdateStart()
 end
 
 function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
+  if startTime == 0 then
+    if totalObj and totalObj > 0 then
+      local percent = (receivedObj / totalObj) * 100
+      updaterWindow:getChildById('topText'):setText(string.format('Loading repository: %.2f%%', percent))
+      updaterWindow:getChildById('rightText'):setText(string.format('%.2f%%', percent))
+      updaterWindow:getChildById('bar'):setPercent(percent)
+    else
+      updaterWindow:getChildById('topText'):setText('Loading repository...')
+    end
+    return
+  end
+
   local percent = (receivedObj/totalObj) * 100
   local deltaTime = (g_clock.millis() - startTime) / 1000
   local avgSpeed = receivedBytes / 1024 / deltaTime
