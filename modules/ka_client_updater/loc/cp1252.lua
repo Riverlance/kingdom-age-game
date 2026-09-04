@@ -40,4 +40,36 @@ g_locales.addTranslations{
     de = "Ihr Client wurde aktualisiert. Klicken Sie auf OK, um den Client neu zu starten.",
     sv = "Din klient har uppdaterats. Klicka på Ok för att starta om klienten.",
   },
+
+  KaClientUpdaterLoading = {
+    en = "Loading...",
+    pt = "Carregando...",
+    es = "Cargando...",
+    de = "Laden...",
+    sv = "Laddar...",
+  },
+
+  KaClientUpdaterLoadingRepPercent = {
+    en = "Loading repository: %.2f%%",
+    pt = "Carregando repositório: %.2f%%",
+    es = "Cargando repositorio: %.2f%%",
+    de = "Lade Repository: %.2f%%",
+    sv = "Laddar repository: %.2f%%",
+  },
+
+  KaClientUpdaterLoadingRep = {
+    en = "Loading repository...",
+    pt = "Carregando repositório...",
+    es = "Cargando repositorio...",
+    de = "Lade Repository...",
+    sv = "Laddar repository...",
+  },
+
+  KaClientUpdaterWaiting = {
+    en = "This may take a while%s",
+    pt = "Isso pode levar algum tempo%s",
+    es = "Esto puede tardar un poco%s",
+    de = "Dies kann ein paar Minuten dauern%s",
+    sv = "Det kan ta lite tid%s",
+  },
 }

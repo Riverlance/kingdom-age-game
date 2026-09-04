@@ -20,4 +20,20 @@ g_locales.addTranslations({
   KaClientUpdaterEndMsg = {
     pl = "Twój klient zosta³ zaktualizowany. Kliknij OK, aby zrestartowaæ klienta.",
   },
+
+  KaClientUpdaterLoading = {
+    pl = "£adowanie...",
+  },
+
+  KaClientUpdaterLoadingRepPercent = {
+    pl = "£adowanie repozytorium: %.2f%%",
+  },
+
+  KaClientUpdaterLoadingRep = {
+    pl = "£adowanie repozytorium...",
+  },
+
+  KaClientUpdaterWaiting = {
+    pl = "Mo¿e to zajmie chwile%s",
+  },
 }, false)

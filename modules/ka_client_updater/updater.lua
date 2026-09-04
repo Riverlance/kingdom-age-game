@@ -18,7 +18,7 @@ function ClientUpdater.init()
   })
 
   updaterWindow = g_ui.displayUI('updater')
-  updaterWindow:getChildById('topText'):setText('Loading...')
+  updaterWindow:getChildById('topText'):setText(loc'${KaClientUpdaterLoading}')
   updaterWindow:show()
 end
 
@@ -48,20 +48,26 @@ function ClientUpdater.onUpdateStart()
 end
 
 function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
+  local endTime  = g_clock.millis()
+  local endTimeS = math.floor(endTime / 1000)
+
   if startTime == 0 then
     if totalObj and totalObj > 0 then
       local percent = (receivedObj / totalObj) * 100
-      updaterWindow:getChildById('topText'):setText(string.format('Loading repository: %.2f%%', percent))
+      updaterWindow:getChildById('topText'):setText(string.format(loc'${KaClientUpdaterLoadingRepPercent}', percent))
       updaterWindow:getChildById('rightText'):setText(string.format('%.2f%%', percent))
       updaterWindow:getChildById('bar'):setPercent(percent)
     else
-      updaterWindow:getChildById('topText'):setText('Loading repository...')
+      updaterWindow:getChildById('topText'):setText(loc'${KaClientUpdaterLoadingRep}')
     end
+
+    local dots = ('.'):rep('.', endTimeS % 4)
+    updaterWindow:getChildById('bottomText'):setText(f("This may take a while%s", dots))
     return
   end
 
   local percent = (receivedObj/totalObj) * 100
-  local deltaTime = (g_clock.millis() - startTime) / 1000
+  local deltaTime = (endTime - startTime) / 1000
   local avgSpeed = receivedBytes / 1024 / deltaTime
   local receivedMB = receivedBytes / 1024 / 1024
 
