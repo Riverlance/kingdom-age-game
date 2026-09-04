@@ -12,6 +12,7 @@ function ClientUpdater.init()
   connect(g_updater, {
     onUpdated        = ClientUpdater.onUpdated,
     onUpdateStart    = ClientUpdater.onUpdateStart,
+    onUpdateStatus   = ClientUpdater.onUpdateStatus,
     onUpdateProgress = ClientUpdater.onUpdateProgress,
     onUpdateEnd      = ClientUpdater.onUpdateEnd,
     onUpdateError    = ClientUpdater.onUpdateError,
@@ -26,6 +27,7 @@ function ClientUpdater.terminate()
   disconnect(g_updater, {
     onUpdated        = ClientUpdater.onUpdated,
     onUpdateStart    = ClientUpdater.onUpdateStart,
+    onUpdateStatus   = ClientUpdater.onUpdateStatus,
     onUpdateProgress = ClientUpdater.onUpdateProgress,
     onUpdateEnd      = ClientUpdater.onUpdateEnd,
     onUpdateError    = ClientUpdater.onUpdateError,
@@ -45,6 +47,12 @@ function ClientUpdater.onUpdateStart()
   startTime = g_clock.millis()
   updaterWindow:show()
   updaterWindow:getChildById('topText'):setText(loc'${KaClientUpdaterStarting}')
+end
+
+function ClientUpdater.onUpdateStatus(message)
+  updaterWindow:show()
+  updaterWindow:getChildById('topText'):setText(message)
+  updaterWindow:getChildById('bottomText'):setText("This may take a while.")
 end
 
 function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
