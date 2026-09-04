@@ -271,7 +271,8 @@ GameVipGroups               = 96
 GameItemShader              = 101
 GameCreatureShader          = 102
 GameCreatureAttachedEffect  = 103
-LastGameFeature             = 104
+GameEnterGameShowAppearance = 104
+LastGameFeature             = 105
 
 TextColors = {
   red         = '#f55e5e', --'#c83200'

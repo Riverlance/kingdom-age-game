@@ -172,4 +172,8 @@ function GameFeatures.onClientVersionChange(version)
     g_game.enableFeature(GameIngameStoreHighlights)
     g_game.enableFeature(GameSequencedPackets)
   end
+
+  if version >= 1099 then
+    g_game.enableFeature(GameEnterGameShowAppearance)
+  end
 end

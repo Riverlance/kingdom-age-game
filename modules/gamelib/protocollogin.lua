@@ -215,10 +215,25 @@ function ProtocolLogin:parseCharacterList(msg)
       character.worldId = worldId
       character.name = msg:getString()
       character.loginname = msg:getString()
-      character.worldName = worlds[worldId].worldName
-      character.worldIp = worlds[worldId].worldIp
-      character.worldPort = worlds[worldId].worldPort
-      character.previewState = worlds[worldId].previewState
+      if g_game.getFeature(GameEnterGameShowAppearance) then
+        character.level = msg:getU32()
+        character.vocationId = msg:getU16()
+        character.vocation = VocationStr[character.vocationId] or tostring(character.vocationId)
+        character.outfitid = msg:getU16()
+        character.headcolor = msg:getU8()
+        character.torsocolor = msg:getU8()
+        character.legscolor = msg:getU8()
+        character.detailcolor = msg:getU8()
+        character.addonsflags = msg:getU8()
+        character.online = msg:getU8() ~= 0
+      end
+      local world = worlds[worldId]
+      if world then
+        character.worldName = world.worldName
+        character.worldIp = world.worldIp
+        character.worldPort = world.worldPort
+        character.previewState = world.previewState
+      end
       characters[i] = character
     end
 

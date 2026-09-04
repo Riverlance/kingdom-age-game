@@ -5,6 +5,33 @@ g_locales.addTranslations({
     pl = "Lista postaci",
   },
 
+  CharacterListColumnCharacter = {
+    pl = "Postaæ",
+  },
+
+  CharacterListColumnStatus = {
+    pl = "Status",
+  },
+
+  CharacterListColumnLevel = {
+    pl = "Poziom",
+  },
+
+  CharacterListColumnVocation = {
+    pl = "Profesja",
+  },
+
+  CharacterListColumnWorld = {
+    pl = "Œwiat",
+  },
+
+  CharacterListStatusOnline = {
+    pl = "Online",
+  },
+
+  CharacterListStatusOffline = {
+    pl = "Offline",
+  },
   CharacterListAccountStatusLabel = {
     pl = "Status konta",
   },

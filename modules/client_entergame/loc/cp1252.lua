@@ -9,6 +9,61 @@ g_locales.addTranslations{
     sv = "Karaktärslista",
   },
 
+  CharacterListColumnCharacter = {
+    en = "Character",
+    pt = "Personagem",
+    es = "Personaje",
+    de = "Charakter",
+    sv = "Karaktär",
+  },
+
+  CharacterListColumnStatus = {
+    en = "Status",
+    pt = "Status",
+    es = "Estado",
+    de = "Status",
+    sv = "Status",
+  },
+
+  CharacterListColumnLevel = {
+    en = "Level",
+    pt = "Nível",
+    es = "Nivel",
+    de = "Stufe",
+    sv = "Nivå",
+  },
+
+  CharacterListColumnVocation = {
+    en = "Vocation",
+    pt = "Vocação",
+    es = "Vocación",
+    de = "Beruf",
+    sv = "Yrke",
+  },
+
+  CharacterListColumnWorld = {
+    en = "World",
+    pt = "Mundo",
+    es = "Mundo",
+    de = "Welt",
+    sv = "Värld",
+  },
+
+  CharacterListStatusOnline = {
+    en = "Online",
+    pt = "Online",
+    es = "En linha",
+    de = "Online",
+    sv = "Online",
+  },
+
+  CharacterListStatusOffline = {
+    en = "Offline",
+    pt = "Offline",
+    es = "Desconectado",
+    de = "Offline",
+    sv = "Offline",
+  },
   CharacterListAccountStatusLabel = {
     en = "Account Status",
     pt = "Status da Conta",

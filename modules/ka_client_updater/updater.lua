@@ -62,7 +62,7 @@ function ClientUpdater.onUpdateProgress(receivedObj, totalObj, receivedBytes)
     end
 
     local dots = ('.'):rep(endTimeS % 4)
-    updaterWindow:getChildById('bottomText'):setText(f("This may take a while%s", dots))
+    updaterWindow:getChildById('bottomText'):setText(f(loc'${KaClientUpdaterWaiting}', dots))
     return
   end
 
