@@ -78,11 +78,16 @@ function UIMiniWindow.initDropPreviewSingleton()
   resetDropPreview()
 end
 
+function UIMiniWindow.clearDropPreview()
+  resetDropPreview()
+end
+
 
 
 function UIMiniWindow.create()
   local miniwindow = UIMiniWindow.internalCreate()
   miniwindow.minimizedHeight = 32
+  miniwindow:setBorderColor('#9b9b01')
   return miniwindow
 end
 
@@ -179,6 +184,7 @@ end
 
 function UIMiniWindow:lock(dontSave)
   self:getChildById('lockButton'):setOn(true)
+  self:setBorderWidth(1)
 
   if not dontSave then
     self:setSettings({locked = true})
@@ -189,6 +195,7 @@ end
 
 function UIMiniWindow:unlock(dontSave)
   self:getChildById('lockButton'):setOn(false)
+  self:setBorderWidth(0)
 
   if not dontSave then
     self:setSettings({locked = false})
@@ -224,11 +231,14 @@ function UIMiniWindow:setup(button)
     end
   end
 
-  self:getChildById('lockButton').onClick = function()
-    if self:isLocked() then
-      self:unlock()
-    else
-      self:lock()
+  local lockButton = self:getChildById('lockButton')
+  if lockButton then
+    lockButton.onClick = function()
+      if self:isLocked() then
+        self:unlock()
+      else
+        self:lock()
+      end
     end
   end
 
@@ -285,6 +295,10 @@ function UIMiniWindow:setup(button)
       self:open(true)
     end
   else
+    if self:getId() == 'battleWindow' then
+      self:open(true)
+    end
+
     if isMinimized then
       self:minimize(true)
     else
@@ -335,6 +349,7 @@ function UIMiniWindow:onDragEnter(mousePos)
     return false
   end
 
+  g_playerSettings.cancelSave()
   resetDropPreview()
 
   if parent:getClassName() == 'UIMiniWindowContainer' then
@@ -344,7 +359,7 @@ function UIMiniWindow:onDragEnter(mousePos)
     local containerParent = rootWidget
     parent:removeChild(self)
     containerParent:addChild(self)
-    parent:saveChildren()
+    parent:saveChildren(false)
   end
 
   local oldPos = self:getPosition()
@@ -358,6 +373,7 @@ function UIMiniWindow:onDragLeave(droppedWidget, mousePos)
   resetDropPreview()
 
   if droppedWidget and droppedWidget:getClassName() ~= 'UIMiniWindowContainer' then
+    g_playerSettings.scheduleSave()
     return false
   end
 
@@ -529,7 +545,11 @@ function UIMiniWindow:getSettings(name)
     return nil
   end
 
-  local playerSettings = Client.getPlayerSettings()
+  local playerSettings = g_playerSettings.get()
+  if not playerSettings then
+    return nil
+  end
+
   local settings = playerSettings:getNode('MiniWindows')
 
   if settings then
@@ -542,12 +562,16 @@ function UIMiniWindow:getSettings(name)
   return nil
 end
 
-function UIMiniWindow:setSettings(data)
+function UIMiniWindow:setSettings(data, scheduleSave)
   if not self.save then
     return
   end
 
-  local playerSettings = Client.getPlayerSettings()
+  local playerSettings = g_playerSettings.get()
+  if not playerSettings then
+    return
+  end
+
   local settings = playerSettings:getNode('MiniWindows') or { }
 
   local id = self:getId()
@@ -560,15 +584,21 @@ function UIMiniWindow:setSettings(data)
   end
 
   playerSettings:setNode('MiniWindows', settings)
-  playerSettings:save()
+  if scheduleSave ~= false then
+    g_playerSettings.scheduleSave()
+  end
 end
 
-function UIMiniWindow:eraseSettings(data)
+function UIMiniWindow:eraseSettings(data, scheduleSave)
   if not self.save then
     return
   end
 
-  local playerSettings = Client.getPlayerSettings()
+  local playerSettings = g_playerSettings.get()
+  if not playerSettings then
+    return
+  end
+
   local settings = playerSettings:getNode('MiniWindows') or { }
 
   local id = self:getId()
@@ -581,11 +611,13 @@ function UIMiniWindow:eraseSettings(data)
   end
 
   playerSettings:setNode('MiniWindows', settings)
-  playerSettings:save()
+  if scheduleSave ~= false then
+    g_playerSettings.scheduleSave()
+  end
 end
 
 function UIMiniWindow:saveParent(parent)
-  local parent = self:getParent()
+  parent = parent or self:getParent()
   if parent then
     if parent:getClassName() == 'UIMiniWindowContainer' then
       parent:saveChildren()
@@ -602,11 +634,11 @@ function UIMiniWindow:saveParentPosition(parentId, position)
   self:setSettings(selfSettings)
 end
 
-function UIMiniWindow:saveParentIndex(parentId, index)
+function UIMiniWindow:saveParentIndex(parentId, index, scheduleSave)
   local selfSettings = { }
   selfSettings.parentId = parentId
   selfSettings.index = index
-  self:setSettings(selfSettings)
+  self:setSettings(selfSettings, scheduleSave)
   self.miniIndex = index
 end
 
@@ -693,8 +725,21 @@ function UIMiniWindow:getMaximumHeight()
   return self:getChildById('bottomResizeBorder'):getMaximum()
 end
 
+function UIMiniWindow:modifyMaximumHeight(height)
+  local resizeBorder = self:getChildById('bottomResizeBorder')
+  local newHeight = resizeBorder:getMaximum() + height
+  local curHeight = self:getHeight()
+  resizeBorder:setMaximum(newHeight)
+  if newHeight < curHeight or newHeight - height == curHeight then
+    self:setHeight(newHeight)
+  end
+end
+
 function UIMiniWindow:isResizeable()
   local bottomResizeBorder = self:getChildById('bottomResizeBorder')
+  if not bottomResizeBorder then
+    return false
+  end
   return bottomResizeBorder:isExplicitlyVisible() and bottomResizeBorder:isEnabled()
 end
 

@@ -435,13 +435,11 @@ end
 do
   function GameNpcTrade.refreshTradeItems()
     local layout                = itemsPanel:getLayout()
+    layout:disableUpdates()
     local localPlayer           = g_game.getLocalPlayer()
     local localPlayerOutfit     = localPlayer:getOutfit()
     local localPlayerOutfitType = localPlayerOutfit.type
     local tradeType             = GameNpcTrade.getCurrentTradeType()
-
-    -- Disable layout updates
-    layout:disableUpdates()
 
     -- Clear selected item
     GameNpcTrade.clearSelectedItem()
@@ -479,6 +477,7 @@ do
 
         -- Update item
         boxItem:setItem(tradeItem.maskptr or tradeItem.ptr)
+        ItemsDatabase.setTier(boxItem, tradeItem.maskptr or tradeItem.ptr)
         boxItem.hoverLookAllowVirtual = true
         boxItem.hoverLookNpcTrade = true
 
@@ -503,10 +502,8 @@ do
       radioItems:addWidget(itemBox)
     end
 
-    -- Enable layout updates
-    layout:enableUpdates()
-
     -- Force layout update
+    layout:enableUpdates()
     layout:update()
   end
 end

@@ -61,7 +61,7 @@ OutfitShaders = {
   { name = 'Party', frag = 'shader/fragment/party.frag' },
   { name = 'Radial Blur Grayscale', frag = 'shader/fragment/radialblur.frag', drawColor = false },
   { name = 'Water', frag = 'shader/fragment/water.frag' },
-  { name = 'Outline', frag = 'shader/fragment/outline.frag', uniforms = {
+  { name = 'Outline', useFramebuffer = true, frag = 'shader/fragment/outline.frag', uniforms = {
     [ShaderUniforms.ExternalColor] = 'u_eColor',
     [ShaderUniforms.InternalColor] = 'u_iColor',
     [ShaderUniforms.ContentColor]  = 'u_cColor',
@@ -89,6 +89,16 @@ ItemShaders = {
 WidgetShaders = {
   { name = 'None' }, -- No fragment
   { name = 'Angular', frag = 'shader/fragment/angular.frag', uniforms = { [ShaderUniforms.Progress] = 'u_progress' } },
+  { name = 'Outline - Black', frag = 'shader/fragment/text_black.frag', useFramebuffer = true, text = true },
+  { name = 'Outline - Glow', frag = 'shader/fragment/text_glow.frag', useFramebuffer = true, text = true },
+  { name = 'Outline - Golden', frag = 'shader/fragment/text_golden_bold.frag', vert = 'shader/vertex/text_golden_bold.vert', useFramebuffer = true, text = true },
+}
+
+TextShaders = {
+  { name = 'None' }, -- No fragment
+  { name = 'Outline - Black', frag = 'shader/fragment/text_black.frag', useFramebuffer = true },
+  { name = 'Outline - Glow', frag = 'shader/fragment/text_glow.frag', useFramebuffer = true },
+  { name = 'Outline - Golden', frag = 'shader/fragment/text_golden_bold.frag', vert = 'shader/vertex/text_golden_bold.vert', useFramebuffer = true },
 }
 
 do
@@ -96,7 +106,7 @@ do
     local fragmentShaderPath = 'shader/fragment/map-shaders.frag'
     if resolvepath(fragmentShaderPath) then
       local name = f('%s - %s', namePrefix, shaderData.name)
-      g_shaders.createFragmentShader(name, fragmentShaderPath) -- Always same fragment file
+      g_shaders.createFragmentShader(name, fragmentShaderPath, shaderData.useFramebuffer or false) -- Always same fragment file
 
       -- Texture 1 - Clouds
       g_shaders.addMultiTexture(name, resolvepath('shader/images/clouds'))
@@ -128,11 +138,13 @@ end
 
 do
   local function registerShader(shaderData, namePrefix, setupCallback)
-    -- local vertexShaderPath = resolvepath(shaderData.frag ~= nil and shaderData.vert or "shader/core/vertex/default.vert")
-
     if resolvepath(shaderData.frag) then
       local name = f('%s - %s', namePrefix, shaderData.name)
-      g_shaders.createFragmentShader(name, shaderData.frag)
+      if shaderData.vert and resolvepath(shaderData.vert) then
+        g_shaders.createVertexFragmentShader(name, shaderData.vert, shaderData.frag, shaderData.useFramebuffer or false)
+      else
+        g_shaders.createFragmentShader(name, shaderData.frag, shaderData.useFramebuffer or false)
+      end
 
       -- Add as many textures you want
       local textureId = 1
@@ -143,6 +155,9 @@ do
 
       -- Setup proper uniforms
       g_shaders[setupCallback](name, shaderData.uniforms or { })
+      if shaderData.text then
+        g_shaders.setupTextShader(name)
+      end
     end
   end
 
@@ -164,5 +179,18 @@ do
   -- Widget
   for _, shaderData in ipairs(WidgetShaders) do
     registerShader(shaderData, 'Widget', 'setupWidgetShader')
+  end
+
+  -- Text
+  for _, shaderData in ipairs(TextShaders) do
+    if shaderData.frag and resolvepath(shaderData.frag) then
+      local name = shaderData.name
+      if shaderData.vert and resolvepath(shaderData.vert) then
+        g_shaders.createVertexFragmentShader(name, shaderData.vert, shaderData.frag, shaderData.useFramebuffer or false)
+      else
+        g_shaders.createFragmentShader(name, shaderData.frag, shaderData.useFramebuffer or false)
+      end
+      g_shaders.setupTextShader(name)
+    end
   end
 end

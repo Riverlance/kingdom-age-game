@@ -6,7 +6,8 @@ _G.ClientStyles = { }
 
 local resourceLoaders = {
   ['otui']   = g_ui.importStyle,
-  ['otfont'] = g_fonts.importFont,
+  ['ttf']    = g_fonts.importFont,
+  ['otf']    = g_fonts.importFont,
   ['otps']   = g_particles.importParticle,
 }
 
@@ -18,11 +19,18 @@ function ClientStyles.init()
 
   local device = g_platform.getDevice()
   ClientStyles.importResources('styles', 'otui', device)
-  ClientStyles.importResources('fonts', 'otfont', device)
+  ClientStyles.importResources('fonts', 'ttf', device)
+  ClientStyles.importResources('fonts', 'otf', device)
   ClientStyles.importResources('particles', 'otps', device)
 
   g_mouse.loadCursors('/cursors/cursors')
   g_gameConfig.loadFonts()
+end
+
+function reloadParticles()
+    g_particles.terminate()
+    local device = g_platform.getDevice()
+    importResources("particles", "otps", device)
 end
 
 function ClientStyles.terminate()
@@ -30,11 +38,11 @@ function ClientStyles.terminate()
 end
 
 function ClientStyles.importResources(dir, type, device)
-  local path = '/' .. dir .. '/'
-  local files = g_resources.listDirectoryFiles(path)
-  for _, file in pairs(files) do
+  local path = '/' .. dir
+  local files = g_resources.listDirectoryFiles(path, true, false, true)
+  for _, file in ipairs(files) do
     if g_resources.isFileType(file, type) then
-      resourceLoaders[type](path .. file)
+      resourceLoaders[type](file)
     end
   end
 

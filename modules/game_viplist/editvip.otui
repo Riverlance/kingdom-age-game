@@ -9,6 +9,11 @@ VipListIconButton < ButtonBoxRounded
   $first:
     margin-left: 0
 
+VipGroupBox < CheckBox
+  height: 16
+  text-offset: 15 -1
+  color: #f4ecec
+
 MainWindow
   size: 218 200
   &loc: '${GameVipListWindowTitleEdit}'
@@ -104,6 +109,24 @@ MainWindow
 
     VipListIconButton
       id: icon0
+
+  Label
+    &loc: '${GameVipListGroupInfoMember}'
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    margin-top: 6
+    text-auto-resize: true
+
+  Panel
+    id: groups
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 0
+    margin-top: 4
+    layout:
+      type: verticalBox
+      fit-children: true
 
   HorizontalSeparator
     anchors.left: parent.left

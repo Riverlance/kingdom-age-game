@@ -5,11 +5,13 @@ _G.GameHotkeys = { }
 
 
 HotkeyColors = {
-  Text = '#ffffff44',
-  TextAutoSend = '#ffffff',
-  ItemUse = '#aef2ff',
   ItemUseWith = '#f8e127',
+  ItemUseTarget = '#ff6b6b',
+  ItemUse = '#aef2ff',
+  ItemUseAtCursor = '#ffb300',
   Power = '#cd4eff',
+  Text = '#c9bdab',
+  TextAutoSend = '#fff6c8',
 }
 
 
@@ -24,6 +26,7 @@ currentItemPreview = nil
 useOnSelf = nil
 useOnTarget = nil
 useWith = nil
+useAtCursor = nil
 useRadioGroup = nil
 addHotkeyButton = nil
 removeHotkeyButton = nil
@@ -66,11 +69,13 @@ function GameHotkeys.init()
   useOnSelf = hotkeysWindow:recursiveGetChildById('useOnSelf')
   useOnTarget = hotkeysWindow:recursiveGetChildById('useOnTarget')
   useWith = hotkeysWindow:recursiveGetChildById('useWith')
+  useAtCursor = hotkeysWindow:recursiveGetChildById('useAtCursor')
   useRadioGroupWidget = hotkeysWindow:getChildById('useGroup')
   useRadioGroup = UIRadioGroup.create()
   useRadioGroup:addWidget(useOnSelf)
   useRadioGroup:addWidget(useOnTarget)
   useRadioGroup:addWidget(useWith)
+  useRadioGroup:addWidget(useAtCursor)
   useRadioGroup.onSelectionChange = function(self, selected) GameHotkeys.onChangeUseType(self, selected) end
 
   hotkeyTextLabel = hotkeysWindow:getChildById('hotkeyTextLabel')
@@ -133,6 +138,7 @@ function GameHotkeys.terminate()
   useOnSelf          = nil
   useOnTarget        = nil
   useWith            = nil
+  useAtCursor        = nil
   addHotkeyButton    = nil
   removeHotkeyButton = nil
   hotkeyTextLabel    = nil
@@ -305,7 +311,8 @@ end
 
 function GameHotkeys.load(forceDefaults)
   hotkeysManagerLoaded = false
-  local hotkeySettings = Client.getPlayerSettings():getNode('Hotkeys') or { }
+  local playerSettings = g_playerSettings.get()
+  local hotkeySettings = playerSettings and playerSettings:getNode('Hotkeys') or { }
   if not table.empty(hotkeySettings) then
     for _, settings in pairs(hotkeySettings) do
       local keySettings = { }
@@ -319,7 +326,7 @@ function GameHotkeys.load(forceDefaults)
       GameHotkeys.addKeyCombo(keySettings)
     end
   else --retrocompatibility
-    local hotkeySettings = Client.getPlayerSettings():getNode('hotkeys') or { }
+    local hotkeySettings = playerSettings and playerSettings:getNode('hotkeys') or { }
     if table.empty(hotkeySettings) then
       GameHotkeys.loadDefaultComboKeys()
     end
@@ -335,7 +342,9 @@ function GameHotkeys.load(forceDefaults)
         GameHotkeys.addKeyCombo(keySettings)
       end
     end
-    Client.getPlayerSettings():remove('hotkeys') --remove old config
+    if playerSettings then
+      playerSettings:remove('hotkeys') --remove old config
+    end
   end
   GameHotkeys.sort()
   hotkeysManagerLoaded = true
@@ -364,7 +373,11 @@ function GameHotkeys.reload()
 end
 
 function GameHotkeys.save()
-  local settings = Client.getPlayerSettings()
+  local settings = g_playerSettings.get()
+  if not settings then
+    return
+  end
+
   local hotkeys = { }
 
   GameHotkeys.sort()
@@ -549,6 +562,49 @@ function GameHotkeys.addKeyCombo(keySettings, focus)
   return true
 end
 
+local function useItemAtCursor(keySettings)
+  local itemId = keySettings.itemId
+  local subType = keySettings.subType
+  local mapPanel = GameInterface.getMapPanel()
+  local useThing
+
+  if mapPanel then
+    local mousePosition = g_window.getMousePosition()
+    if mapPanel:containsPoint(mousePosition) then
+      local tile = mapPanel:getTile(mousePosition)
+      if tile then
+        local item = Item.create(itemId)
+        if item:isFluidContainer() or item:isMultiUse() then
+          useThing = tile:getTopMultiUseThing()
+        else
+          useThing = tile:getTopUseThing()
+        end
+      end
+    end
+  end
+
+  if not useThing then
+    local item = Item.create(itemId)
+    if subType then
+      item = g_game.findPlayerItem(itemId, subType or -1)
+      if not item then
+        return
+      end
+    end
+    GameInterface.startUseWith(item)
+    return
+  end
+
+  if subType then
+    local item = g_game.findPlayerItem(itemId, subType or -1)
+    if item then
+      g_game.useWith(item, useThing)
+    end
+  else
+    g_game.useInventoryItemWith(itemId, useThing)
+  end
+end
+
 function GameHotkeys.doAction(keySettings)
   if GameHotkeys.isOpen() then
     return
@@ -590,6 +646,8 @@ function GameHotkeys.doAction(keySettings)
       if attackingCreature:getTile() then g_game.useInventoryItemWith(keySettings.itemId, attackingCreature) end
     elseif keySettings.useType == HotkeyItemUseType.Self then
       g_game.useInventoryItemWith(keySettings.itemId, g_game.getLocalPlayer())
+    elseif keySettings.useType == HotkeyItemUseType.Cursor then
+      useItemAtCursor(keySettings)
     end
   end
 end
@@ -621,10 +679,13 @@ function GameHotkeys.updateHotkeyLabel(hotkeyLabel)
       hotkeyLabel:setColor(HotkeyColors.ItemUseWith)
     elseif keySettings.useType == HotkeyItemUseType.Target then
       hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemTarget}', keySettings.keyCombo))
-      hotkeyLabel:setColor(HotkeyColors.ItemUseWith)
+      hotkeyLabel:setColor(HotkeyColors.ItemUseTarget)
     elseif keySettings.useType == HotkeyItemUseType.Self then
       hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemYourself}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUse)
+    elseif keySettings.useType == HotkeyItemUseType.Cursor then
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemAtCursor}', keySettings.keyCombo))
+      hotkeyLabel:setColor(HotkeyColors.ItemUseAtCursor)
     else
       hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemUse}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUse)
@@ -649,7 +710,7 @@ function GameHotkeys.updateHotkeyList()
   end
 end
 
-function GameHotkeys.updateHotkeyForm(reset)
+function GameHotkeys.updateHotkeyForm(reset, dontUpdateText)
   local enableText = function()
     hotkeyTextLabel:enable()
     hotkeyText:enable()
@@ -681,7 +742,9 @@ function GameHotkeys.updateHotkeyForm(reset)
     local keySettings = currentHotkeyLabel.settings
     if string.exists(keySettings.text) then
       enableText()
-      hotkeyText:setText(keySettings.text)
+      if not dontUpdateText then
+        hotkeyText:setText(keySettings.text)
+      end
       sendAutomatically:setChecked(keySettings.autoSend)
       switchItemPreview(false)
     elseif keySettings.itemId then --TODO: isValidItem
@@ -698,6 +761,8 @@ function GameHotkeys.updateHotkeyForm(reset)
           selectedWidget = useOnTarget
         elseif keySettings.useType == HotkeyItemUseType.Self then
           selectedWidget = useOnSelf
+        elseif keySettings.useType == HotkeyItemUseType.Cursor then
+          selectedWidget = useAtCursor
         else
           selectedWidget = nil
         end
@@ -748,7 +813,7 @@ function GameHotkeys.onHotkeyTextChange(value)
   keySettings.autoSend = string.exists(value) and keySettings.autoSend or nil
   GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
-  GameHotkeys.updateHotkeyForm()
+  GameHotkeys.updateHotkeyForm(false, true)
 end
 
 function GameHotkeys.onSendAutomaticallyChange(autoSend)
@@ -759,7 +824,7 @@ function GameHotkeys.onSendAutomaticallyChange(autoSend)
   keySettings.autoSend = string.exists(keySettings.text) and autoSend or nil
   GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)
-  GameHotkeys.updateHotkeyForm()
+  GameHotkeys.updateHotkeyForm(false, true)
 end
 
 function GameHotkeys.onSelectHotkeyLabel(hotkeyLabel, unfocused)
@@ -806,6 +871,8 @@ function GameHotkeys.onChangeUseType(self, selectedWidget)
     keySettings.useType = HotkeyItemUseType.Target
   elseif selectedWidget == useOnSelf then
     keySettings.useType = HotkeyItemUseType.Self
+  elseif selectedWidget == useAtCursor then
+    keySettings.useType = HotkeyItemUseType.Cursor
   else
     keySettings.useType = HotkeyItemUseType.Default
   end

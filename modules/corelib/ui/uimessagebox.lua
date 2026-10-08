@@ -12,11 +12,31 @@ function UIMessageBox.display(title, message, buttons, onEnterCallback, onEscape
   local messageBox = UIMessageBox.internalCreate()
   rootWidget:addChild(messageBox)
 
+  local rootWidth = rootWidget and rootWidget:getWidth() or 956
+  local rootHeight = rootWidget and rootWidget:getHeight() or 656
+  if rootWidth <= 0 then rootWidth = 956 end
+  if rootHeight <= 0 then rootHeight = 656 end
+
+  local maxWidth = math.min(916, math.max(260, rootWidth - 40))
+  local maxHeight = math.min(616, math.max(120, rootHeight - 40))
+
   messageBox:setStyle('MainWindow')
   messageBox:setText(title)
 
   local messageLabel = g_ui.createWidget('MessageBoxLabel', messageBox)
+  local horizontalPadding = messageBox:getPaddingLeft() + messageBox:getPaddingRight()
+  local maxMessageWidth = math.max(1, maxWidth - horizontalPadding)
+
+  -- Measure short messages naturally; constrain only messages that would
+  -- exceed the available screen width.
+  messageLabel:setTextWrap(false)
   messageLabel:setText(message)
+  local messageWidth = math.max(messageLabel:getWidth(), messageLabel:getTextSize().width)
+  if messageWidth > maxMessageWidth then
+    messageLabel:setWidth(maxMessageWidth)
+    messageLabel:setTextWrap(true)
+    messageLabel:setText(message)
+  end
 
   local buttonHolder
   if buttons then
@@ -33,6 +53,9 @@ function UIMessageBox.display(title, message, buttons, onEnterCallback, onEscape
 
     for i=1,#buttons do
       local button = messageBox:addButton(buttons[i].text, buttons[i].callback)
+      if buttons[i].tooltip then
+        button:setTooltip(buttons[i].tooltip, TooltipType.default)
+      end
       if i == 1 then
         button:setMarginLeft(0)
         button:addAnchor(AnchorBottom, 'parent', AnchorBottom)
@@ -65,8 +88,11 @@ function UIMessageBox.display(title, message, buttons, onEnterCallback, onEscape
     end
   end
 
-  messageBox:setWidth(math.max(messageLabel:getWidth(), messageBox:getTextSize().width, (buttonHolder and buttonHolder:getWidth() or 0)) + messageBox:getPaddingLeft() + messageBox:getPaddingRight())
-  messageBox:setHeight(messageLabel:getHeight() + messageBox:getPaddingTop() + messageBox:getPaddingBottom() + (buttonHolder and buttonHolder:getHeight() + buttonHolder:getMarginTop() or 0))
+  local desiredWidth = math.max(messageLabel:getWidth(), messageBox:getTextSize().width, (buttonHolder and buttonHolder:getWidth() or 0)) + horizontalPadding
+  messageBox:setWidth(math.min(maxWidth, desiredWidth))
+
+  local desiredHeight = messageLabel:getHeight() + messageBox:getPaddingTop() + messageBox:getPaddingBottom() + (buttonHolder and buttonHolder:getHeight() + buttonHolder:getMarginTop() or 0)
+  messageBox:setHeight(math.min(maxHeight, desiredHeight))
 
   return messageBox
 end

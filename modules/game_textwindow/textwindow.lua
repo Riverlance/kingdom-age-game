@@ -41,7 +41,7 @@ end
 function GameTextWindow.onGameEditText(id, itemId, maxLength, text, writer, time)
   local textWindow = g_ui.createWidget('TextWindow', rootWidget)
 
-  local writeable = #text < maxLength and maxLength > 0
+  local writeable = string.utf8Length(text) < maxLength and maxLength > 0
   local textItem = textWindow:getChildById('textItem')
   local description = textWindow:getChildById('description')
   local textEdit = textWindow:getChildById('text')

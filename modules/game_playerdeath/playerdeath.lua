@@ -5,6 +5,7 @@ _G.GamePlayerDeath = { }
 
 
 deathWindow = nil
+local reconnectEvent
 
 local deathTexts = {
   regular = { text = loc'${GamePlayerDeathMsgRegular}' },
@@ -34,6 +35,11 @@ function GamePlayerDeath.terminate()
 
   GamePlayerDeath.reset()
 
+  if reconnectEvent then
+    removeEvent(reconnectEvent)
+    reconnectEvent = nil
+  end
+
   _G.GamePlayerDeath = nil
 end
 
@@ -47,6 +53,7 @@ end
 function GamePlayerDeath.display(deathType, penalty)
   GamePlayerDeath.displayDeadMessage()
   GamePlayerDeath.openWindow(deathType, penalty)
+  GamePlayerDeath.scheduleReconnect()
 end
 
 function GamePlayerDeath.displayDeadMessage()
@@ -82,11 +89,22 @@ function GamePlayerDeath.openWindow(deathType, penalty)
   local cancelButton = deathWindow:getChildById('buttonCancel')
 
   local okFunc = function()
+    if reconnectEvent then
+      removeEvent(reconnectEvent)
+      reconnectEvent = nil
+    end
     ClientCharacterList.doLogin()
     okButton:getParent():destroy()
     deathWindow = nil
   end
   local cancelFunc = function()
+    if reconnectEvent then
+      removeEvent(reconnectEvent)
+      reconnectEvent = nil
+    end
+    if ClientCharacterList then
+      ClientCharacterList.markLogout()
+    end
     g_game.safeLogout()
     cancelButton:getParent():destroy()
     deathWindow = nil
@@ -97,4 +115,25 @@ function GamePlayerDeath.openWindow(deathType, penalty)
 
   okButton.onClick = okFunc
   cancelButton.onClick = cancelFunc
+end
+
+function GamePlayerDeath.scheduleReconnect()
+  if not g_settings.getBoolean('autoReconnect', false) or not ClientCharacterList then
+    return
+  end
+
+  if reconnectEvent then
+    removeEvent(reconnectEvent)
+  end
+
+  reconnectEvent = scheduleEvent(function()
+    reconnectEvent = nil
+
+    if deathWindow then
+      deathWindow:destroy()
+      deathWindow = nil
+    end
+
+    ClientCharacterList.doLogin()
+  end, 2000)
 end

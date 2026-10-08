@@ -12,21 +12,27 @@ G = G or { }
 -- @docfuncs @{
 
 function scheduleEvent(callback, delay)
-  local event = g_dispatcher.scheduleEvent(callback, delay)
+  local ok, info = pcall(debug.getinfo, callback, 'S')
+  local name = ok and info and ((info.short_src or 'lua') .. ':' .. (info.linedefined or 0)) or 'lua'
+  local event = g_dispatcher.scheduleEventEx and g_dispatcher.scheduleEventEx(name, callback, delay) or g_dispatcher.scheduleEvent(callback, delay)
   -- must hold a reference to the callback, otherwise it would be collected
   event._callback = callback
   return event
 end
 
 function addEvent(callback, front)
-  local event = g_dispatcher.addEvent(callback, front)
+  local ok, info = pcall(debug.getinfo, callback, 'S')
+  local name = ok and info and ((info.short_src or 'lua') .. ':' .. (info.linedefined or 0)) or 'lua'
+  local event = g_dispatcher.addEventEx and g_dispatcher.addEventEx(name, callback) or g_dispatcher.addEvent(callback, front)
   -- must hold a reference to the callback, otherwise it would be collected
   event._callback = callback
   return event
 end
 
 function cycleEvent(callback, interval)
-  local event = g_dispatcher.cycleEvent(callback, interval)
+  local ok, info = pcall(debug.getinfo, callback, 'S')
+  local name = ok and info and ((info.short_src or 'lua') .. ':' .. (info.linedefined or 0)) or 'lua'
+  local event = g_dispatcher.cycleEventEx and g_dispatcher.cycleEventEx(name, callback, interval) or g_dispatcher.cycleEvent(callback, interval)
   -- must hold a reference to the callback, otherwise it would be collected
   event._callback = callback
   return event

@@ -80,12 +80,14 @@ end
 function UISpinBox:onStyleApply(styleName, styleNode)
   for name, value in pairs(styleNode) do
     if name == 'maximum' then
+      self.maximum = value
       addEvent(function()
         if isWidgetAlive(self) then
           self:setMaximum(value)
         end
       end)
     elseif name == 'minimum' then
+      self.minimum = value
       addEvent(function()
         if isWidgetAlive(self) then
           self:setMinimum(value)

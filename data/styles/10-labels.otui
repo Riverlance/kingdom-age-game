@@ -1,14 +1,20 @@
 // For put tooltip on labels, use 'phantom: false' on the label widget
 
 Label < UILabel
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
+  height: 16
   color: #dfdfdf
 
   $disabled:
     color: #dfdfdf88
 
 FlatLabel < UILabel
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
+  height: 16
   color: #dfdfdf
   size: 86 20
   text-offset: 3 3
@@ -21,5 +27,8 @@ FlatLabel < UILabel
 MenuLabel < Label
 
 GameLabel < UILabel
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
+  height: 16
   color: #dfdfdf

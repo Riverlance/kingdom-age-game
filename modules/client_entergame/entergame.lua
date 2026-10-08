@@ -4,10 +4,9 @@ _G.ClientEnterGame = { }
 
 
 
-ClientEnterGame.localIp = '127.0.0.1'
-ClientEnterGame.clientIp = 'kingdomageonline.com'
+ClientEnterGame.localIp    = '127.0.0.1'
+ClientEnterGame.clientIp   = 'kingdomageonline.com'
 ClientEnterGame.clientPort = '7171'
-ClientEnterGame.clientProtocolVersion = 1099
 
 EnterGameActionKey = 'Ctrl+G'
 
@@ -161,7 +160,7 @@ function ClientEnterGame.firstShow()
   local account = g_crypt.decrypt(g_settings.get('account'))
   local password = g_crypt.decrypt(g_settings.get('password'))
   local host = g_settings.get('host')
-  if host == '' then
+  if not host or host == '' then
     host = ClientEnterGame.clientIp
   end
   local autologin = g_settings.getBoolean('autologin')
@@ -236,11 +235,6 @@ function ClientEnterGame.show()
   enterGame:raise()
   enterGame:focus()
 
-  local localesWindow = g_locales.getWindow()
-  if localesWindow then
-    localesWindow:raise()
-    localesWindow:focus()
-  end
 end
 
 function ClientEnterGame.hide()
@@ -301,14 +295,14 @@ function ClientEnterGame.doLogin()
   G.host = g_settings.get('host')
   G.port = g_settings.getInteger('port')
   local clientVersion = g_settings.getInteger('client-version')
-  if G.host == '' then
+  if not G.host or G.host == '' then
     G.host = ClientEnterGame.clientIp
   end
   if G.port == 0 then
     G.port = ClientEnterGame.clientPort
   end
   if clientVersion == 0 then
-    clientVersion = ClientEnterGame.clientProtocolVersion
+    clientVersion = DefaultClientVersion
   end
   ClientEnterGame.hide()
 
@@ -341,15 +335,21 @@ function ClientEnterGame.doLogin()
   })
 
   g_game.setClientVersion(clientVersion)
-  g_game.setProtocolVersion(g_game.getClientProtocolVersion(clientVersion))
+  g_game.setProtocolVersion(clientVersion)
   g_game.chooseRsa(G.host)
 
   if Client.isLoaded() then
     protocolLogin:login(G.host, G.port, G.account, G.password, G.authenticatorToken, G.stayLogged)
   else
-    loadBox:destroy()
-    loadBox = nil
-    ClientEnterGame.show()
+    if loadBox then
+      loadBox:destroy()
+      loadBox = nil
+    end
+
+    local errorBox = displayErrorBox(loc'${EnterGameThingsNotLoadedTitle}', string.format(loc'${EnterGameThingsNotLoadedMessage}', clientVersion))
+    connect(errorBox, {
+      onOk = ClientEnterGame.show
+    })
   end
 end
 

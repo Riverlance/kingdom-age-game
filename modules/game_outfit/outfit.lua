@@ -60,7 +60,27 @@ function GameOutfit.updateMount()
   nameMountWidget:setText(mounts[currentMount][2])
 
   mount.type = mounts[currentMount][1]
-  mountCreature:setOutfit(mount)
+  outfitWindow:getChildById('mountCreatureBox'):setOutfit(mount)
+end
+
+function GameOutfit.updateOutfitCreature()
+  if not outfitWindow or not outfit then
+    return
+  end
+  outfitWindow:getChildById('outfitCreatureBox'):setOutfit(outfit)
+end
+
+function GameOutfit.attachPaperdolls(creature)
+  local player = g_game.getLocalPlayer()
+  if not player or not creature then
+    return
+  end
+
+  for _, paperdoll in ipairs(player:getPaperdolls()) do
+    if paperdoll:canDrawOnUI() then
+      creature:attachPaperdoll(paperdoll:clone())
+    end
+  end
 end
 
 function GameOutfit.create(creatureOutfit, outfitList, creatureMount, mountList)
@@ -77,7 +97,9 @@ function GameOutfit.create(creatureOutfit, outfitList, creatureMount, mountList)
   local outfitCreatureBox = outfitWindow:getChildById('outfitCreatureBox')
   if outfitCreature then
     outfit = outfitCreature:getOutfit()
+    outfit.mount = nil
     outfitCreatureBox:setCreature(outfitCreature)
+    GameOutfit.attachPaperdolls(outfitCreature)
   else
     outfitCreatureBox:hide()
     outfitWindow:getChildById('outfitName'):hide()
@@ -250,7 +272,7 @@ function GameOutfit.onAddonCheckChange(addon, value)
   else
     outfit.addons = outfit.addons - value
   end
-  outfitCreature:setOutfit(outfit)
+  GameOutfit.updateOutfitCreature()
 end
 
 function GameOutfit.onColorCheckChange(colorBox)
@@ -275,7 +297,7 @@ function GameOutfit.onColorCheckChange(colorBox)
       outfit.feet = currentColorBox.colorId
     end
 
-    outfitCreature:setOutfit(outfit)
+    GameOutfit.updateOutfitCreature()
   end
 end
 
@@ -330,5 +352,5 @@ function GameOutfit.updateOutfit()
   end
 
   outfit.type = outfits[currentOutfit][1]
-  outfitCreature:setOutfit(outfit)
+  GameOutfit.updateOutfitCreature()
 end

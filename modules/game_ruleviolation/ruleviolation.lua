@@ -308,7 +308,7 @@ function GameRuleViolation.report()
     err = loc'${GameRuleViolationErrorNoStatement}'
   elseif translation and translation:match(textPattern) then
     err = loc'${GameRuleViolationErrorTranslationNotFormatted}'
-  elseif #comment < minimumCommentSize then
+  elseif string.utf8Length(comment) < minimumCommentSize then
     err = f(loc'${GameRuleViolationErrorMinChars}', minimumCommentSize)
   elseif comment:match(textPattern) then
     err = loc'${GameRuleViolationErrorCommentNotFormatted}'
@@ -704,7 +704,7 @@ function GameRuleViolation.updateRowsPerPageLabel(value)
     return
   end
 
-  rvViewRowsPerPageLabel:setText(f(loc'${GameRuleViolationRowsPerPage}: ', value))
+  rvViewRowsPerPageLabel:setText(f(loc'${GameRuleViolationRowsPerPage}', value))
 end
 
 function GameRuleViolation.onViewChangeState(comboBox, option)
@@ -805,7 +805,10 @@ end
 
 
 local function updateReportRowTitle(row)
-  row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. types[row.type] .. '] ' .. row.comment:sub(0, 35) .. (#row.comment > 35 and '...' or ''))
+  local comment = row.comment or ''
+  local truncatedComment = string.utf8Truncate(comment, 35)
+  local suffix = string.utf8Length(comment) > 35 and '...' or ''
+  row:setText(row.id .. '. [' .. states[row.state] .. ' | ' .. types[row.type] .. '] ' .. truncatedComment .. suffix)
 end
 
 function GameRuleViolation.parseRuleViolationsReports(protocolGame, opcode, msg)
@@ -1070,17 +1073,17 @@ function GameRuleViolation.rvViewAction()
   -- Notes
   local notes = ''
   if not row then
-    notes = f(loc'%s\n- GameRuleViolationInfoNeedReport', notes)
+    notes = f(loc'%s\n- ${GameRuleViolationInfoNeedReport}', notes)
   end
   if row then
     if row.state == REPORT_STATE_DONE then
-      notes = f(loc'%s\n- GameRuleViolationMarkedAlready', notes, states[REPORT_STATE_DONE])
+      notes = f(loc'%s\n- ${GameRuleViolationMarkedAlready}', notes, states[REPORT_STATE_DONE])
     end
     if viewActionType ~= row.type then
-      notes = f(loc'%s\n- GameRuleViolationDiffType', notes, types[viewActionType], types[row.type])
+      notes = f(loc'%s\n- ${GameRuleViolationDiffType}', notes, types[viewActionType], types[row.type])
     else
       if viewActionReason ~= row.reasonId then
-        notes = f(loc'%s\n- GameRuleViolationDiffReason', notes)
+        notes = f(loc'%s\n- ${GameRuleViolationDiffReason}', notes)
       end
     end
   end

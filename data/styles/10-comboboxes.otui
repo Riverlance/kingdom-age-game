@@ -1,12 +1,13 @@
 // Combobox Square - Scroll Content Button
 ComboBoxPopupScrollMenuButton < UIButton
-  height: 23
-  font: sans-11px
+  height: 25
+  ttf-font: opensans-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
   text-align: left
-  text-offset: 4 0
+  text-offset: 8 0
   color: #dfdfdf
   background-color: alpha
-  margin: 1
 
   $hover !disabled:
     color: #dfdfdf
@@ -27,9 +28,11 @@ ComboBoxPopupScrollMenu < UIPopupScrollMenu
 // Combobox Square - Content Button
 ComboBoxPopupMenuButton < UIButton
   height: 23
-  font: sans-11px
+  ttf-font: opensans-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
   text-align: left
-  text-offset: 4 0
+  text-offset: 8 0
   color: #dfdfdf
   background-color: alpha
   margin: 1
@@ -52,10 +55,12 @@ ComboBoxPopupMenu < UIPopupMenu
 
 // Combobox Square
 ComboBox < UIComboBox
-  font: sans-11px
+  ttf-font: opensans-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
   color: #dfdfdf
   size: 91 23
-  text-offset: 3 0
+  text-offset: 8 0
   text-align: left
   image-source: /images/ui/combobox_square
   image-border-top: 1
@@ -64,10 +69,8 @@ ComboBox < UIComboBox
   image-border-right: 22
   image-clip: 0 0 91 23
   &menuScroll: true
-  // The correct would be 115 and 23, but it needs 124 31 to work fine and I don't know why
-  // On ComboBoxRounded it works normally
-  &menuHeight: 124
-  &menuScrollStep: 31
+  &menuHeight: 125
+  &menuScrollStep: 25
 
   $hover !disabled:
     image-clip: 0 23 91 23
@@ -86,9 +89,11 @@ ComboBox < UIComboBox
 // Combobox Rounded - Scroll Content Button
 ComboBoxRoundedPopupScrollMenuButton < UIButton
   height: 23
-  font: sans-11px
+  ttf-font: opensans-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
   text-align: left
-  text-offset: 4 0
+  text-offset: 8 0
   color: #dfdfdf
   background-color: alpha
 
@@ -111,9 +116,11 @@ ComboBoxRoundedPopupScrollMenu < UIPopupScrollMenu
 // Combobox Rounded - Content Button
 ComboBoxRoundedPopupMenuButton < UIButton
   height: 23
-  font: sans-11px
+  ttf-font: opensans-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
   text-align: left
-  text-offset: 4 0
+  text-offset: 8 0
   color: #dfdfdf
   background-color: alpha
 
@@ -140,5 +147,5 @@ ComboBoxRounded < ComboBox
   image-border-bottom: 4
   image-border-left: 5
   image-border-right: 22
-  &menuHeight: 115
-  &menuScrollStep: 23
+  &menuHeight: 125
+  &menuScrollStep: 25

@@ -24,7 +24,6 @@ minimapOpacityScrollbar = nil
 positionLabel = nil
 
 ballButton = nil
-infoLabel = nil
 
 extraIconsButton = nil
 fullMapButton = nil
@@ -65,7 +64,6 @@ function GameMinimap.init()
   positionLabel = contentsPanel:getChildById('positionLabel')
 
   ballButton = minimapWindow:getChildById('ballButton')
-  infoLabel = minimapWindow:getChildById('infoButton')
 
   local compassWidget = minimapBar:getChildById('compass')
   extraIconsButton = compassWidget:getChildById('extraIconsButton')
@@ -171,6 +169,7 @@ end
 function GameMinimap.offline()
   minimapWindow:setSettings({ hideControllers = ballButton:isOn() })
   GameMinimap.saveMap()
+  g_minimap.clean()
 
   if minimapWidget.fullMapView then
     GameMinimap.toggleFullMap()
@@ -265,7 +264,6 @@ function GameMinimap.toggleFullMap()
   minimapOpacityScrollbar:setParent(parent)
 
   ballButton:setParent(minimapWidget.fullMapView and rootPanel or minimapWindow)
-  infoLabel:setParent(minimapWidget.fullMapView and rootPanel or minimapWindow)
 
   -- Update anchors and others
 
@@ -292,9 +290,6 @@ function GameMinimap.toggleFullMap()
     fullMapButton:setOn(true)
     ballButton:addAnchor(AnchorTop, 'minimapBar', AnchorTop)
     ballButton:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
-    infoLabel:addAnchor(AnchorTop, 'prev', AnchorBottom)
-    infoLabel:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
-    infoLabel:setMarginTop(3)
 
     minimapWidget:setZoom(minimapWidget.zoomFullmap)
     g_sounds.getChannel(AudioChannels.Gui):play(f('%s/fullmap_open.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
@@ -314,9 +309,6 @@ function GameMinimap.toggleFullMap()
     fullMapButton:setOn(false)
     ballButton:addAnchor(AnchorVerticalCenter, 'lockButton', AnchorVerticalCenter)
     ballButton:addAnchor(AnchorRight, 'lockButton', AnchorOutsideLeft)
-    infoLabel:addAnchor(AnchorVerticalCenter, 'prev', AnchorVerticalCenter)
-    infoLabel:addAnchor(AnchorRight, 'prev', AnchorOutsideLeft)
-    infoLabel:setMarginTop(0)
 
     minimapWidget:setZoom(minimapWidget.zoomMinimap)
     g_sounds.getChannel(AudioChannels.Gui):play(f('%s/fullmap_close.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)

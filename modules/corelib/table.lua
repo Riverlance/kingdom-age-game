@@ -316,6 +316,22 @@ function table.valuesAsKeys(t, keyAsValue)
   return ret
 end
 
+function table.remove_if(t, fnc)
+  local j, n = 1, #t
+  for i = 1, n do
+    if not fnc(i, t[i]) then
+      if i ~= j then
+        t[j] = t[i]
+        t[i] = nil
+      end
+      j = j + 1
+    else
+      t[i] = nil
+    end
+  end
+  return t
+end
+
 function table.insertChild(t, index, value)
   if index then
     table.insert(t, index, value)
@@ -336,8 +352,6 @@ function table.insertall(t, otherTable)
   for _, v in pairs(otherTable) do
     table.insert(t, v)
   end
-
-  return res
 end
 
 function table.collect(t, func)
@@ -502,8 +516,14 @@ end
 
 -- Format
 
-function table.list(t, sep)
-  -- e.g, 'A, B and C'
-  sep = sep or ','
-  return (table.concat(t, f('%s ', sep)):gsub(f('%s ([^%s]+)$', sep, sep), f(' %s %%1', loc'${CorelibInfoAnd}'))) -- Return first value of gsub only
+function table.list(t, sep, locale)
+  locale = locale or g_locales.getLocale()
+  sep = sep or (locale and locale.listSeparator) or ', '
+  local conjunction = locale and locale.listConjunction or ' and '
+
+  if #t < 2 then
+    return table.concat(t)
+  end
+
+  return table.concat(t, sep, 1, #t - 1) .. conjunction .. t[#t]
 end

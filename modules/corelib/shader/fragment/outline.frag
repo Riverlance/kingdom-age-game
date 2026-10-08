@@ -6,8 +6,6 @@ varying vec2 v_TexCoord;
 
 const float alphaEpsilon = 0.01;
 const int maxOutlineRadius = 2;
-// Outline thickness in pixels. Change this value to configure border width.
-const float outlineThickness = 4.0;
 
 float sampleAlpha(vec2 uv)
 {
@@ -24,7 +22,7 @@ float outlinePulse()
 
 float getOutlineThickness()
 {
-	return clamp(outlineThickness, 1.0, float(maxOutlineRadius));
+	return clamp(float(maxOutlineRadius), 1.0, float(maxOutlineRadius));
 }
 
 float hasTransparentNeighbor(vec2 uv, vec2 texel)

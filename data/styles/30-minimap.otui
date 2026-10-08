@@ -1,6 +1,7 @@
 MinimapFlag < UIWidget
   size: 11 11
   focusable: false
+  clipping: true
 
 MinimapCross < UIWidget
   focusable: false
@@ -17,10 +18,13 @@ Minimap < UIMinimap
 MinimapRegionLabel < UIWidget
   focusable: false
   phantom: true
-  font: sans-8px
+  ttf-font: ebgaramond-v-italic
+  ttf-font-weight: 700
+  ttf-font-size: 10
+  ttf-stroke: 2 #000000bb
   text-auto-resize: true
   color: #ffffff
-  background-color: #000000bb
+  //background-color: #000000bb
 
 // Minimap Flag Create Window
 

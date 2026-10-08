@@ -50,6 +50,10 @@ function restart()
 end
 
 function connect(object, arg1, arg2, arg3)
+  if not object then
+    return
+  end
+
   local signalsAndSlots
   local pushFront
   if type(arg1) == 'string' then

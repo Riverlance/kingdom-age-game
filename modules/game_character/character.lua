@@ -349,7 +349,21 @@ function GameCharacter.onInventoryChange(localPlayer, slot, item, oldItem)
     itemWidget:setStyle(InventorySlotStyles[slot])
     itemWidget:setItem(nil)
   end
+  ItemsDatabase.setTier(itemWidget, item)
+  itemWidget:setShowDuration(ClientOptions.getOption('showExpiryInInventory'))
+  itemWidget:setShowCharges(ClientOptions.getOption('showExpiryInInventory'))
   itemWidget:updateBackground()
+end
+
+function GameCharacter.reloadInventory()
+  local player = g_game.getLocalPlayer()
+  if not player then
+    return
+  end
+
+  for slot = InventorySlotFirst, InventorySlotLast do
+    GameCharacter.onInventoryChange(player, slot, player:getInventoryItem(slot))
+  end
 end
 
 function GameCharacter.onBlessingsChange(player, blessings, oldBlessings)
@@ -401,7 +415,7 @@ function GameCharacter.onHealthChange(localPlayer, health, maxHealth)
 
   healthBar:setValue(health, 0, maxHealth)
 
-  healthBarValueLabel:setText(f('%s / %s HP', loc(health), loc(maxHealth)))
+  healthBarValueLabel:setText(f('%s/%s HP', loc(health), loc(maxHealth)))
   healthBarValueLabel:setTooltip(f(loc'${BarHealthTooltip}', loc(health), loc(maxHealth)), TooltipType.textBlock)
 end
 
@@ -412,7 +426,7 @@ function GameCharacter.onManaChange(localPlayer, mana, maxMana)
     manaBar:setValueDelayed(mana, 0, maxMana, 200, 25, 0, true, false)
   end
 
-  manaBarValueLabel:setText(f('%s / %s MP', loc(mana), loc(maxMana)))
+  manaBarValueLabel:setText(f('%s/%s MP', loc(mana), loc(maxMana)))
   manaBarValueLabel:setTooltip(f(loc'${BarManaTooltip}', loc(mana), loc(maxMana)), TooltipType.textBlock)
 end
 
@@ -423,7 +437,7 @@ function GameCharacter.onVigorChange(localPlayer, vigor, maxVigor)
     vigorBar:setValueDelayed(vigor, 0, maxVigor, 200, 25, 0, true, false)
   end
 
-  vigorBarValueLabel:setText(f('%s / %s VP', loc(vigor), loc(maxVigor)))
+  vigorBarValueLabel:setText(f('%s/%s VP', loc(vigor), loc(maxVigor)))
   vigorBarValueLabel:setTooltip(f(loc'${BarVigorTooltip}', loc(vigor), loc(maxVigor)), TooltipType.textBlock)
 end
 
@@ -441,7 +455,7 @@ function GameCharacter.onCapacityChange(localPlayer)
     capacityBar:setValueDelayed(currentWeight, 0, totalCapacity, 200, 25, 0, true, false)
   end
 
-  capacityBarValueLabel:setText(f('%s / %s (%d%%) CAP', loc(currentWeight), loc(totalCapacity), ratio * 100))
+  capacityBarValueLabel:setText(f('%s/%s (%d%%) CAP', loc(currentWeight), loc(totalCapacity), ratio * 100))
   capacityBarValueLabel:setTooltip(f(loc'${BarCapacityTooltip}', loc(currentWeight), loc(totalCapacity), ratio > 1 and loc' (${BarCapacityTooltipOverweight})' or ''), TooltipType.textBlock)
 end
 
@@ -492,8 +506,8 @@ function GameCharacter.online()
 
   -- Combat controls
 
-  local settings = Client.getPlayerSettings()
-  local lastCombatControls = settings:getNode('lastCombatControls') or { }
+  local settings = g_playerSettings.get()
+  local lastCombatControls = settings and settings:getNode('lastCombatControls') or { }
 
   g_game.setChaseMode(true, lastCombatControls.chaseMode)
   g_game.setSafeFight(true, lastCombatControls.safeFight)
@@ -523,8 +537,8 @@ function GameCharacter.offline()
 
   -- Combat controls
 
-  local settings = Client.getPlayerSettings()
-  local lastCombatControls = settings:getNode('lastCombatControls') or { }
+  local settings = g_playerSettings.get()
+  local lastCombatControls = settings and settings:getNode('lastCombatControls') or { }
 
   lastCombatControls = {
     chaseMode = g_game.getChaseMode(),
@@ -537,8 +551,10 @@ function GameCharacter.offline()
   -- end
 
   -- Save last combat control settings
-  settings:setNode('lastCombatControls', lastCombatControls)
-  settings:save()
+  if settings then
+    settings:setNode('lastCombatControls', lastCombatControls)
+    settings:save()
+  end
 end
 
 function GameCharacter.onVocationChange(creature, vocation, oldVocation)

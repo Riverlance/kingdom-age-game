@@ -7,10 +7,6 @@ _G.Client = { }
 local loadingBox
 local isLoaded = false
 
-playerSettingsPath = ''
-
-
-
 function Client.init()
   -- Alias
   Client.m = modules.client
@@ -20,7 +16,19 @@ function Client.init()
     onExit = Client.exit
   })
 
-  g_window.setMinimumSize({ width = 600, height = 480 })
+  local platformType = g_window.getPlatformType()
+  local isX11 = type(platformType) == 'string' and platformType:find('X11', 1, true) == 1
+  local density = (isX11 and g_window.getDisplayDensity()) or 1
+  local displaySize = g_window.getDisplaySize()
+  local metricsSpace = g_settings.getString('window-metrics-space', '')
+  local shouldScaleLegacySavedMetrics = isX11 and density ~= 1 and metricsSpace ~= 'physical-v1'
+
+  local minSize = { width = 600, height = 480 }
+  if isX11 then
+    minSize.width = math.max(1, math.min(minSize.width, displaySize.width))
+    minSize.height = math.max(1, math.min(minSize.height, displaySize.height))
+  end
+  g_window.setMinimumSize(minSize)
 
   -- initialize in fullscreen mode on mobile devices
   if g_window.getPlatformType() == 'X11-EGL' then
@@ -28,15 +36,36 @@ function Client.init()
   else
     -- window size
     local size = { width = 800, height = 600 }
+    local hasSavedWindowSize = g_settings.exists('window-size')
     size = g_settings.getSize('window-size', size)
+    if shouldScaleLegacySavedMetrics and hasSavedWindowSize then
+      size = {
+        width = math.floor((size.width * density) + 0.5),
+        height = math.floor((size.height * density) + 0.5)
+      }
+    end
+
+    if isX11 then
+      size.width = math.max(1, math.min(size.width, displaySize.width))
+      size.height = math.max(1, math.min(size.height, displaySize.height))
+    end
     g_window.resize(size)
 
     -- window position, default is the screen center
-    local displaySize = g_window.getDisplaySize()
     local defaultPos = { x = (displaySize.width - size.width) / 2, y = (displaySize.height - size.height) / 2 }
-    local pos = g_settings.getPoint('window-pos', defaultPos)
-    pos.x = math.max(pos.x, 0)
-    pos.y = math.max(pos.y, 0)
+    local pos = defaultPos
+    if not isX11 then
+      pos = g_settings.getPoint('window-pos', defaultPos)
+    end
+    if isX11 then
+      local maxX = math.max(displaySize.width - size.width, 0)
+      local maxY = math.max(displaySize.height - size.height, 0)
+      pos.x = math.max(0, math.min(pos.x, maxX))
+      pos.y = math.max(0, math.min(pos.y, maxY))
+    else
+      pos.x = math.max(pos.x, 0)
+      pos.y = math.max(pos.y, 0)
+    end
     g_window.move(pos)
 
     -- window maximized?
@@ -68,8 +97,16 @@ function Client.terminate()
   })
 
   -- save window configs
+  local platformType = g_window.getPlatformType()
+  local isX11 = type(platformType) == 'string' and platformType:find('X11', 1, true) == 1
   g_settings.set('window-size', g_window.getUnmaximizedSize())
-  g_settings.set('window-pos', g_window.getUnmaximizedPos())
+  if isX11 then
+    g_settings.remove('window-pos')
+    g_settings.set('window-metrics-space', 'physical-v1')
+  else
+    g_settings.set('window-pos', g_window.getUnmaximizedPos())
+    g_settings.remove('window-metrics-space')
+  end
   g_settings.set('window-maximized', g_window.isMaximized())
 
   _G.Client = nil
@@ -105,7 +142,7 @@ function Client.exit()
     onUpdated = Client.loadFiles
   })
 
-  g_logger.info('Exiting application...')
+  g_logger.info('Exiting application...\n\n\n')
 end
 
 function Client.onRecvOtclientSignal() -- From Server ProtocolGame::onRecvFirstMessage
@@ -123,6 +160,36 @@ function Client.onLoadFiles()
   end
 end
 
+local function tryLoadDatWithFallbacks(datPath)
+  if g_things.loadDat(datPath) then
+    return true
+  end
+
+  local featureFlags = {
+    GameSpritesU32,
+    GameEnhancedAnimations,
+    GameIdleAnimations
+  }
+
+  local combinations = {
+    { 1 }, { 2 }, { 3 },
+    { 1, 2 }, { 1, 3 }, { 2, 3 },
+    { 1, 2, 3 }
+  }
+
+  for _, combo in ipairs(combinations) do
+    for _, index in ipairs(combo) do
+      g_game.enableFeature(featureFlags[index])
+    end
+
+    if g_things.loadDat(datPath) then
+      return true
+    end
+  end
+
+  return false
+end
+
 function Client.loadFiles()
   disconnect(g_updater, {
     onUpdated = Client.loadFiles
@@ -131,8 +198,7 @@ function Client.loadFiles()
   loadingBox = displaySystemBox(loc'${CorelibInfoLoading}', loc'${ClientLoadingBoxMessage}')
 
   -- Client version
-  local version = 1099
-  g_game.setClientVersion(version)
+  g_game.setClientVersion(DefaultClientVersion)
 
   -- New limit of sprites
   g_game.enableFeature(GameSpritesU32) -- Automatically activated on 960+ protocol
@@ -141,13 +207,15 @@ function Client.loadFiles()
   -- New limit of effects
   g_game.enableFeature(GameMagicEffectU16)
   g_game.enableFeature(GameDistanceEffectU16)
-  -- Vip groups (not implemented yet)
-  -- g_game.enableFeature(GameVipGroups)
 
   scheduleEvent(function()
     local path = resolvepath('/things/Kingdom Age')
     local errorMessage = ''
-    if not g_things.loadDat(path) then
+    g_logger.setLevel(5)
+    local datLoaded = tryLoadDatWithFallbacks(path)
+    g_logger.setLevel(1)
+
+    if not datLoaded then
       errorMessage = errorMessage .. f(loc'${ClientUnableToLoadDat}', path) .. '\n'
     end
     if not g_sprites.loadSpr(path) then
@@ -170,25 +238,4 @@ end
 
 function Client.isLoaded()
   return isLoaded
-end
-
-
-
-function Client.getPlayerSettings(fileName) -- ([fileName])
-  if g_game.isOnline() then
-    playerSettingsPath = f('/%s/%s', G.host:gsub('[%W]', '_'):lower(), g_game.getCharacterName():gsub('[%W]', '_'))
-  end
-  if not g_resources.makeDir(playerSettingsPath) then
-    g_logger.error(f('Failed to load path \'%s\'', playerSettingsPath))
-  end
-
-  local playerSettingsFilePath = f('%s/%s.otml', playerSettingsPath, fileName or 'config')
-
-  -- Create or load player settings file
-  local file = g_configs.create(playerSettingsFilePath)
-  if not file then
-    g_logger.error(f('Failed to load file at \'%s\'', playerSettingsFilePath))
-  end
-
-  return file
 end

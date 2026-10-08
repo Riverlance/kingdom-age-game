@@ -5,7 +5,7 @@
 -- Version *.x.x : Major Release - Significant New Systems
 -- Version x.*.x : Minor Release - Improvements
 -- Version x.x.* : Revision Release - Bug/Issue Fixes
-CLIENT_VERSION = '1.0.1' -- [CLIENT VERSION] Here is just the Version Name
+CLIENT_VERSION_NAME = '1.0.1' -- [CLIENT VERSION] Here is just the Version Name
 
 -- Setup application name
 g_app.setName("Kingdom Age Online")
@@ -16,12 +16,18 @@ g_app.setOrganizationName("Vision Games Entertainment")
 math.randomseed(os.time())
 
 -- setup logger
-g_logger.setLogFile(g_resources.getWorkDir() .. g_app.getCompactName() .. '.log')
-g_logger.info(os.date('== application started at %b %d %Y %X'))
--- g_logger.info('== operating system: ' .. g_platform.getOSName())
+g_logger.info('Operating system: ' .. g_platform.getOSName())
 
 -- print first terminal message
-g_logger.info(g_app.getName() .. --[[' ' .. g_app.getVersion() ..]] ' Version ' .. CLIENT_VERSION .. ' Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch())
+g_logger.info(g_app.getName() .. --[[' ' .. g_app.getVersion() ..]] ' Version ' .. CLIENT_VERSION_NAME .. ' Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch())
+
+-- setup lua debugger
+if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+  require("lldebugger").start()
+  g_logger.debug("Started LUA debugger.")
+else
+  g_logger.debug("LUA debugger not started (not launched with VSCode local-lua).")
+end
 
 -- add data directory to the search path
 if not g_resources.addSearchPath(g_resources.getWorkDir() .. 'data', true) then

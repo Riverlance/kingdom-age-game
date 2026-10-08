@@ -1,6 +1,24 @@
+// Put public-facing settings here, such as graphics definitions supported by the client.
+// This section can also expose options intended for modding, including font customization.
+graphics
+
+  // Atlas configuration
+
+  // Hard cap for atlas textures (in pixels).
+  max-atlas-size: 8192
+
+  // Atlas sizes (in pixels):
+  // 0  = auto-detect based on the maximum texture size supported by the GPU
+  // -1 = disable the atlas
+  map-atlas-size: 0
+
+  foreground-atlas-size: 2048
+
 game
   sprite-size: 32
   last-supported-version: 1099
+  draw-typing: true
+  typing-icon: /images/game/console/typing
 
   map
     // KA - Change this to = maxClientViewportX of server map.h
@@ -17,12 +35,19 @@ game
     transparent-floor-view-range: 2
 
   creature
-    force-new-walking-formula: true
+    draw-information-by-widget-beta: false
+    force-new-walking-formula: false
     shield-blink-ticks: 500
     volatile-square-duration: 1000
+    use-crop-size-for-ui-draw: true
+
+    diagonal-walk-speed: 3
+
+  player
+    diagonal-walk-speed: 3
 
   render
-    invisible-ticks-per-frame: 500
+    invisible-ticks-per-frame: 75
     item-ticks-per-frame: 500
     effect-ticks-per-frame: 75
     missile-ticks-per-frame: 75
@@ -31,7 +56,22 @@ game
     min-static-text-duration: 3000
 
 font
-  widget: verdana-11px-antialised
-  static-text: verdana-11px-rounded
-  animated-text: verdana-11px-rounded
-  creature-text: verdana-11px-rounded
+  // TTF/OTF (TrueType/OpenType) font descriptors use:
+  // path|size|stroke-width|stroke-color|weight|width|italic|variations|letter-spacing
+  // eg, /fonts/verdanapro-v.ttf|9|1|black|700
+  // eg, /fonts/verdanapro-v.ttf|9|1|#000000ff|700
+  // eg, /fonts/opensans-v.ttf|12|1|black|700|75|false|wght=700,wdth=75|0.5
+  // letter-spacing is a floating-point pixel value and defaults to 0.
+  widget: opensans-v|11|1|black|800||||0
+  static-text: verdanapro-v|11|1|black|800||||-1
+  animated-text: verdanapro-v|11|1|black|800||||-1
+  creature-text: verdanapro-v|11|1|black|800||||-1
+  item-count: verdanapro-v|10|1|black|700||||0
+  item-duration: verdanapro-v|7|1|black|700||||0
+
+  fallbacks
+    // file|size|stroke-width|stroke-color|weight|width|italic|variations|size-scale
+    // Zero size and inherit values reuse the requesting widget's settings.
+    cjk-sc: notosanssc-v|0|-1|inherit|inherit|inherit|inherit||1.5
+    cjk-jp: notosansjp-v|0|-1|inherit|inherit|inherit|inherit||1.5
+    cjk-kr: notosanskr-v|0|-1|inherit|inherit|inherit|inherit||1.5

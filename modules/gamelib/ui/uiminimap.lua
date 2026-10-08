@@ -487,7 +487,7 @@ function UIMinimap:onZoomChange(zoom) -- zoom is from maxZoom -5 (far) to minZoo
     self.zoomMinimap = zoom
   end
 
-  for _,widget in pairs(self.alternatives) do
+  for _,widget in pairs(self.alternatives or {}) do
     if (not widget.minZoom or widget.minZoom >= zoom) and (widget.maxZoom or 0) <= zoom then
       widget:show()
     else
@@ -531,6 +531,9 @@ function UIMinimap:onMouseRelease(pos, button)
 
   if button == MouseLeftButton then
     local player = g_game.getLocalPlayer()
+    if g_game.getGroupAccess() and g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed() then
+      return g_game.sendGmTeleport(mapPos)
+    end
     if Position.distance(player:getPosition(), mapPos) > 250 then
     	GameTextMessage.displayStatusMessage(loc'${GamelibInfoDestinationOutRange}')
     	return false

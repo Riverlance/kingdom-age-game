@@ -13,12 +13,14 @@ MainWindow
   // Creature Boxes
   Creature
     id: outfitCreatureBox
+    size: 76 76
+    padding-top: 8
+    padding-left: 8
     anchors.top: parent.top
     anchors.left: parent.left
     margin-top: 15
     margin-left: 16
-    padding: 1
-    creature-size: 123
+    creature-size: 64
 
   Label
     id: outfitName
@@ -47,12 +49,14 @@ MainWindow
 
   Creature
     id: mountCreatureBox
+    size: 76 76
+    padding-top: 8
+    padding-left: 8
     anchors.top: parent.top
     anchors.right: parent.right
     margin-top: 15
     margin-right: 16
-    padding: 1
-    creature-size: 123
+    creature-size: 64
 
   Label
     id: mountName

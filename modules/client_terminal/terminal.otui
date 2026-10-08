@@ -1,19 +1,19 @@
-TerminalLabel < UILabel
-  font: terminus-10px
+TerminalLabel < UITextEdit
+  height: 14
+  ttf-font: inconsolata-v
+  ttf-font-weight: 700
+  ttf-font-size: 12
+  text-line-height: auto
+  text-line-min-height: 10
   text-wrap: true
   text-auto-resize: true
-  phantom: true
-
-TerminalSelectText < UITextEdit
-  font: terminus-10px
-  text-wrap: true
-  text-align: bottomLeft
-  editable: false
+  selection-color: #111416
+  selection-background-color: #999999
   change-cursor-image: false
   cursor-visible: false
-  selection-color: black
-  selection-background-color: white
-  color: alpha
+  editable: false
+  draggable: true
+  selectable: false
   focusable: false
   auto-scroll: false
 
@@ -64,14 +64,10 @@ UIWindow
     layout:
       type: verticalBox
       align-bottom: true
+      spacing: 0
     vertical-scrollbar: terminalScroll
     inverted-scroll: true
     margin-left: 2
-
-  TerminalSelectText
-    id: terminalSelectText
-    anchors.fill: terminalBuffer
-    focusable: false
 
   VerticalScrollBar
     id: terminalScroll
@@ -88,20 +84,25 @@ UIWindow
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     margin-left: 2
-    font: terminus-10px
+    ttf-font: inconsolata-v
+    ttf-font-weight: 700
+    ttf-font-size: 12
     text: >
 
   UITextEdit
     id: commandTextEdit
     background: #aaaaaa11
     border-color: #aaaaaa88
-    &baseHeight: 12
+    &baseHeight: 14
     anchors.bottom: parent.bottom
     anchors.left: commandSymbolLabel.right
     anchors.right: terminalScroll.left
     margin-left: 1
     padding-left: 2
-    font: terminus-10px
+    ttf-font: inconsolata-v
+    ttf-font-weight: 700
+    ttf-font-size: 12
+    text-line-spacing: 2
     selection-color: black
     selection-background-color: white
     border-width-left: 0

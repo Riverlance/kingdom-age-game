@@ -144,7 +144,7 @@ function GameEmotes.onResizeConsole(console)
 end
 
 function GameEmotes.toggleWindow(force)
-  if not GameConsole then
+  if not GameConsole or not emoteWindow then
     return
   end
 
@@ -220,7 +220,15 @@ end
 
 -- Settings
 function GameEmotes.loadSettings()
-  local settings      = Client.getPlayerSettings()
+  if not emoteList then
+    return
+  end
+
+  local settings = g_playerSettings.get()
+  if not settings then
+    return
+  end
+
   local emoteSettings = settings:getNode('emotes') or { }
 
   for id, _ in pairs(emoteSettings) do
@@ -234,7 +242,15 @@ function GameEmotes.loadSettings()
 end
 
 function GameEmotes.saveSettings()
-  local settings      = Client.getPlayerSettings()
+  if not emoteList then
+    return
+  end
+
+  local settings = g_playerSettings.get()
+  if not settings then
+    return
+  end
+
   local emoteSettings = { }
 
   for id, emote in pairs(emoteList) do

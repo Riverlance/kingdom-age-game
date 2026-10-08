@@ -137,6 +137,68 @@ function string.exists(self)
   return self and self ~= ''
 end
 
+local function utf8CodepointSize(self, index)
+  local function isContinuation(byte)
+    return byte and byte >= 0x80 and byte <= 0xBF
+  end
+
+  local first = self:byte(index)
+  local second = self:byte(index + 1)
+
+  if first >= 0xC2 and first <= 0xDF then
+    return isContinuation(second) and 2 or 1
+  elseif first == 0xE0 then
+    return second and second >= 0xA0 and second <= 0xBF and isContinuation(self:byte(index + 2)) and 3 or 1
+  elseif (first >= 0xE1 and first <= 0xEC) or (first >= 0xEE and first <= 0xEF) then
+    return isContinuation(second) and isContinuation(self:byte(index + 2)) and 3 or 1
+  elseif first == 0xED then
+    return second and second >= 0x80 and second <= 0x9F and isContinuation(self:byte(index + 2)) and 3 or 1
+  elseif first == 0xF0 then
+    return second and second >= 0x90 and second <= 0xBF and isContinuation(self:byte(index + 2)) and isContinuation(self:byte(index + 3)) and 4 or 1
+  elseif first >= 0xF1 and first <= 0xF3 then
+    return isContinuation(second) and isContinuation(self:byte(index + 2)) and isContinuation(self:byte(index + 3)) and 4 or 1
+  elseif first == 0xF4 then
+    return second and second >= 0x80 and second <= 0x8F and isContinuation(self:byte(index + 2)) and isContinuation(self:byte(index + 3)) and 4 or 1
+  end
+
+  return 1
+end
+
+-- Counts UTF-8 codepoints without converting the string. Invalid bytes count as
+-- one codepoint, matching the client-side UTF-8 decoder used by the C++ UI.
+function string.utf8Length(self)
+  local length = #self
+  local index = 1
+  local count = 0
+
+  while index <= length do
+    index = index + utf8CodepointSize(self, index)
+    count = count + 1
+  end
+
+  return count
+end
+
+-- Truncates at a UTF-8 codepoint boundary without changing valid or invalid
+-- source bytes. Invalid bytes count as one codepoint.
+function string.utf8Truncate(self, maxLength)
+  if maxLength <= 0 then
+    return ''
+  end
+
+  local index = 1
+  local count = 0
+  while index <= #self and count < maxLength do
+    index = index + utf8CodepointSize(self, index)
+    count = count + 1
+  end
+
+  if index > #self then
+    return self
+  end
+  return self:sub(1, index - 1)
+end
+
 function string:split(delim)
   local start = 1
   local results = { }

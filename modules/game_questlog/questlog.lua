@@ -54,6 +54,7 @@ function GameQuestLog.terminate()
 
   GameQuestLog.destroyWindows()
   questLogButton:destroy()
+  questLogButton = nil
 
   _G.GameQuestLog = nil
 end
@@ -69,10 +70,12 @@ end
 function GameQuestLog.destroyWindows()
   if questLogWindow then
     questLogWindow:destroy()
+    questLogWindow = nil
   end
 
   if questLineWindow then
     questLineWindow:destroy()
+    questLineWindow = nil
   end
 end
 
@@ -88,12 +91,16 @@ function GameQuestLog.show()
 
   GameQuestLog.sendLogWindowRequest()
 
-  questLogButton:setOn(true)
+  if questLogButton then
+    questLogButton:setOn(true)
+  end
 end
 
 function GameQuestLog.hide()
   GameQuestLog.destroyWindows()
-  questLogButton:setOn(false)
+  if questLogButton then
+    questLogButton:setOn(false)
+  end
 end
 
 function GameQuestLog.toggle()
@@ -398,6 +405,7 @@ function GameQuestLog.onGameQuestLine(questId, missions)
 
   if questLineWindow then
     questLineWindow:destroy()
+    questLineWindow = nil
   end
 
   questLineWindow = g_ui.createWidget('QuestLineWindow', rootWidget)

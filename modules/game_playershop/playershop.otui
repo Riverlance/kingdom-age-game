@@ -15,7 +15,7 @@ ShopItemBox < Panel
 
     Item
       id: item
-      phantom: true
+      virtual: true
       anchors.top: parent.top
       margin-top: 5
       anchors.horizontalCenter: parent.horizontalCenter
@@ -39,13 +39,6 @@ ShopItemBox < Panel
     id: removeItemButton
     anchors.top: parent.top
     anchors.right: parent.right
-    margin-top: 5
-    margin-right: 5
-
-  InfoMenuButton
-    anchors.top: parent.top
-    anchors.right: prev.right
-    anchors.verticalCenter: none
     margin-top: 5
     margin-right: 5
 
@@ -252,5 +245,4 @@ PriceWindow < MainWindow
     anchors.top: itemValue.bottom
     margin-bottom: 2
     focusable: false
-
 

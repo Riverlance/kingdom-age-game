@@ -1,8 +1,10 @@
 Button < UIButton
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
   color: #f2af4eff
   size: 80 23
-  //text-offset: 0 0
+  text-offset: 0 -1
   image-source: /images/ui/_button/default_square
   image-color: #dfdfdf
   image-clip: 0 0 32 21
@@ -107,212 +109,109 @@ LightButton < Button
 EmptyMenuButton < UIButton
   id: emptyMenuButton
   size: 14 14
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
+  text-offset: 0 -1
   color: #bcbcbc
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 112 0 14 14
-
-  $hover:
-    image-clip: 112 14 14 14
-
-  $pressed:
-    image-clip: 112 28 14 14
-
-  $on:
-    image-clip: 112 28 14 14
-
-InfoMenuButton < UIButton
-  id: infoButton
-  text: ?
-  text-align: center
-  size: 14 14
-  font: verdana-11px-antialised
-  color: #cdc46c
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 112 0 14 14
+  image-source: /images/ui/_button/mini_window_empty
+  image-clip: 0 0 14 14
+  icon-size: 14 14
   phantom: false
 
   $hover:
-    image-clip: 112 14 14 14
+    image-clip: 0 14 14 14
 
   $pressed:
-    image-clip: 112 28 14 14
+    image-clip: 0 28 14 14
 
-  $on:
-    image-clip: 112 28 14 14
+MenuButton < EmptyMenuButton
+  icon-source: /images/ui/_button/mini_window_icon
 
-LockMenuButton < UIButton
-  id: lockButton
-  size: 14 14
-  !tooltip: loc'${ClientStylesButtonLockTooltip}'
+MiniWindowMenuButton < EmptyMenuButton
   anchors.verticalCenter: prev.verticalCenter
   anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 84 0 14 14
+  margin-right: 2
+  size: 12 12
+  icon-offset: -1 -1
 
-  $hover:
-    image-clip: 84 14 14 14
+InfoMenuButton < MiniWindowMenuButton
+  id: infoButton
+  text: ?
+  text-align: center
+  color: #cdc46c
 
-  $pressed:
-    image-clip: 84 28 14 14
+LockMenuButton < MiniWindowMenuButton
+  id: lockButton
+  !tooltip: loc'${ClientStylesButtonLockTooltip}'
+
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 84 0 14 14
 
   $on:
     !tooltip: loc'${ClientStylesButtonUnlockTooltip}'
-    image-clip: 98 0 14 14
+    icon-clip: 98 0 14 14
 
-  $on hover:
-    image-clip: 98 14 14 14
-
-  $on pressed:
-    image-clip: 98 28 14 14
-
-BallMenuButton < UIButton
+BallMenuButton < MiniWindowMenuButton
   id: ballMenuButton
-  size: 14 14
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 70 0 14 14
 
-  $hover:
-    image-clip: 70 14 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 70 0 14 14
 
-  $pressed:
-    image-clip: 70 28 14 14
-
-  $on:
-    image-clip: 70 28 14 14
-
-ArrowMenuButton < UIButton
+ArrowMenuButton < MiniWindowMenuButton
   id: arrowMenuButton
-  size: 14 14
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 56 0 14 14
 
-  $hover:
-    image-clip: 56 14 14 14
-
-  $pressed:
-    image-clip: 56 28 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 56 0 14 14
 
   $on:
-    image-clip: 42 0 14 14
-
-  $on hover:
-    image-clip: 42 14 14 14
-
-  $on pressed:
-    image-clip: 42 28 14 14
+    icon-clip: 42 0 14 14
 
 InvertedArrowMenuButton < ArrowMenuButton
-  image-clip: 42 0 14 14
-
-  $hover:
-    image-clip: 42 14 14 14
-
-  $pressed:
-    image-clip: 42 28 14 14
+  icon-clip: 42 0 14 14
 
   $on:
-    image-clip: 56 0 14 14
+    icon-clip: 56 0 14 14
 
-  $on hover:
-    image-clip: 56 14 14 14
-
-  $on pressed:
-    image-clip: 56 28 14 14
-
-DownArrowMenuButton < UIButton
+DownArrowMenuButton < MiniWindowMenuButton
   id: downArrowMenuButton
-  size: 14 14
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 56 0 14 14
 
-  $hover:
-    image-clip: 56 14 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 56 0 14 14
 
-  $pressed:
-    image-clip: 56 28 14 14
-
-UpArrowMenuButton < UIButton
+UpArrowMenuButton < MiniWindowMenuButton
   id: upArrowMenuButton
-  size: 14 14
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 42 0 14 14
 
-  $hover:
-    image-clip: 42 14 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 42 0 14 14
 
-  $pressed:
-    image-clip: 42 28 14 14
-
-CloseMenuButton < UIButton
+CloseMenuButton < MiniWindowMenuButton
   id: closeButton
-  size: 14 14
-  image-source: /images/ui/_button/mini_window
-  image-clip: 28 0 14 14
 
-  $hover:
-    image-clip: 28 14 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 28 0 14 14
 
-  $pressed:
-    image-clip: 28 28 14 14
-
-MinimizeMenuButton < UIButton
+MinimizeMenuButton < MiniWindowMenuButton
   id: minimizeButton
-  size: 14 14
   !tooltip: loc'${ClientStylesButtonMinimizeTooltip}'
-  anchors.verticalCenter: prev.verticalCenter
-  anchors.right: prev.outsideLeft
-  image-source: /images/ui/_button/mini_window
-  image-clip: 0 0 14 14
 
-  $hover:
-    image-clip: 0 14 14 14
-
-  $pressed:
-    image-clip: 0 28 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 0 0 14 14
 
   $on:
     !tooltip: loc'${ClientStylesButtonMaximizeTooltip}'
-    image-clip: 14 0 14 14
+    icon-clip: 14 0 14 14
 
-  $on hover:
-    image-clip: 14 14 14 14
-
-  $on pressed:
-    image-clip: 14 28 14 14
-
-MoreButton < UIButton
+MoreButton < MiniWindowMenuButton
   id: moreButton
-  size: 14 14
-  image-source: /images/ui/_button/mini_window
-  image-clip: 14 0 14 14
+  size: 16 16
 
-  $hover:
-    image-clip: 14 14 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 14 0 14 14
 
-  $pressed:
-    image-clip: 14 28 14 14
-
-LessButton < UIButton
+LessButton < MiniWindowMenuButton
   id: lessButton
-  size: 14 14
-  image-source: /images/ui/_button/mini_window
-  image-clip: 0 0 14 14
+  size: 16 16
 
-  $hover:
-    image-clip: 0 14 14 14
-
-  $pressed:
-    image-clip: 0 28 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 0 0 14 14

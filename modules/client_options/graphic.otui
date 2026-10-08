@@ -1,72 +1,18 @@
 Panel
 
+  OptionCategoryLabel
+    &loc: '${ClientOptionsGraphicCategoryFrames}'
+    anchors.top: parent.top
+    margin-top: 0
+
   OptionLabel
     &loc: '${ClientOptionsBackgroundFrameRate}'
 
   OptionScrollbar
     id: backgroundFrameRate
-    minimum: 10
-    maximum: 201
+    minimum: 1
+    maximum: 501
     symbol: FPS
-
-  OptionLabel
-    id: gameScreenSizeLabel
-    &loc: '${ClientOptionsGameScreenSize}'
-
-  OptionScrollbar
-    id: gameScreenSize
-    minimum: 11
-    maximum: 19
-    symbol: SQMs
-
-  OptionLabel
-    &loc: '${ClientOptionsUiScale}'
-    anchors.right: parent.horizontalCenter
-    margin-right: 10
-
-  OptionComboBox
-    id: uiScale
-    anchors.top: prev.outsideBottom
-    anchors.right: prev.right
-    margin-top: 2
-
-  OptionLabel
-    &loc: '${ClientOptionsShaderFilter}'
-    anchors.right: parent.horizontalCenter
-    margin-right: 10
-
-  OptionComboBox
-    id: shaderFilter
-    anchors.top: prev.outsideBottom
-    anchors.right: prev.right
-    margin-top: 2
-
-  OptionLabel
-    &loc: '${ClientOptionsViewMode}'
-    $!first:
-      anchors.top: uiScale.outsideBottom
-    anchors.left: parent.horizontalCenter
-    margin-left: 10
-
-  OptionComboBox
-    id: viewMode
-    anchors.top: prev.outsideBottom
-    anchors.left: prev.left
-    margin-top: 2
-
-  OptionCheckBox
-    id: transposedView
-    &loc: '${ClientOptionsTransposedView}'
-    &loct: '${ClientOptionsTransposedViewTooltip}'
-    !tooltip-type: TooltipType.textBlock
-    $!first:
-      margin-top: 10
-
-  OptionCheckBox
-    id: showClouds
-    &loc: '${ClientOptionsShowClouds}'
-
-  OptionHorizontalSeparator
 
   OptionCheckBox
     id: optimizeFps
@@ -82,12 +28,110 @@ Panel
     &loct: '${ClientOptionsVsyncTooltip}'
     !tooltip-type: TooltipType.textBlock
 
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsGraphicCategorySizing}'
+
+  OptionLabel
+    id: viewModeLabel
+    &loc: '${ClientOptionsViewMode}'
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionComboBox
+    id: viewMode
+    anchors.top: prev.outsideBottom
+    anchors.right: prev.right
+    margin-top: 2
+
+  OptionLabel
+    &loc: '${ClientOptionsUiScale}'
+    $!first:
+      anchors.top: viewModeLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  OptionComboBox
+    id: uiScale
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    margin-top: 2
+
   OptionCheckBox
     id: fullscreen
     &loc: '${ClientOptionsFullscreen}'
     &loct: '${ClientOptionsFullscreenTooltip}: ${ClientOptionsFullscreenActionKey}.'
     @locpar: return { ClientOptionsFullscreenActionKey = ClientOptionsFullscreenActionKey }
     !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsGraphicCategoryScreenshot}'
+
+  OptionLabel
+    !text: f(loc'${GameScreenshotShortcut}', 'Ctrl+Alt+S')
+    anchors.left: none
+    anchors.horizontalCenter: parent.horizontalCenter
+    color: #a9a9a9
+
+  OptionCheckBox
+    id: screenshotEnabled
+    &loc: '${GameScreenshotEnable}'
+
+    $!first:
+      margin-top: 10
+
+  OptionCheckBox
+    id: screenshotOnlyCaptureGameWindow
+    &loc: '${GameScreenshotOnlyGameWindow}'
+
+  OptionCheckBox
+    id: screenshotEventLevelUp
+    &loc: '${GameScreenshotEventLevelUp}'
+
+    $!first:
+      margin-top: 10
+
+  OptionCheckBox
+    id: screenshotEventDeath
+    &loc: '${GameScreenshotEventDeath}'
+
+  OptionCheckBox
+    id: screenshotEventLowHealth
+    &loc: '${GameScreenshotEventLowHealth}'
+
+  OptionButton
+    &loc: '${GameScreenshotOpenFolder}'
+    @onClick: GameScreenshot.openFolder()
+
+    $!first:
+      margin-top: 10
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsGraphicCategoryOther}'
+
+  OptionCheckBox
+    id: showClouds
+    &loc: '${ClientOptionsShowClouds}'
 
   OptionCheckBox
     id: showMouseItemIcon

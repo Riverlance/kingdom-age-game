@@ -37,6 +37,11 @@ local terminalLog = { }
 local MAX_LOGLINES = 500
 local MAX_LINES = 128
 
+local function onTerminalDoubleClick()
+  ClientTerminal.popWindow()
+  return true
+end
+
 
 
 local function navigateCommand(step)
@@ -161,7 +166,7 @@ function ClientTerminal.init()
 
   terminalWindow:setVisible(false)
 
-  terminalWindow.onDoubleClick = function() ClientTerminal.popWindow() end
+  terminalWindow.onDoubleClick = onTerminalDoubleClick
 
   g_keyboard.bindKeyDown('Ctrl+Shift+T', ClientTerminal.toggle)
 
@@ -174,11 +179,10 @@ function ClientTerminal.init()
   g_keyboard.bindKeyPress('Down', function() navigateCommand(-1) end, commandTextEdit)
   g_keyboard.bindKeyPress('Ctrl+C',
     function()
-      if commandTextEdit:hasSelection() or not terminalSelectText:hasSelection() then
+      if commandTextEdit:hasSelection() or not terminalBuffer.selectionText then
         return false
       end
-      g_window.setClipboardText(terminalSelectText:getSelection())
-    return true
+      return UITextMessageSelection.copy(terminalBuffer) ~= ''
     end, commandTextEdit)
   g_keyboard.bindKeyDown('Tab', completeCommand, commandTextEdit)
   g_keyboard.bindKeyPress('Shift+Enter', addNewline, commandTextEdit)
@@ -186,10 +190,7 @@ function ClientTerminal.init()
   g_keyboard.bindKeyDown('Escape', ClientTerminal.hide, terminalWindow)
 
   terminalBuffer = terminalWindow:getChildById('terminalBuffer')
-  terminalSelectText = terminalWindow:getChildById('terminalSelectText')
-  terminalSelectText.onDoubleClick = function() ClientTerminal.popWindow() end
-  terminalSelectText.onMouseWheel = function(a,b,c) terminalBuffer:onMouseWheel(b,c) end
-  terminalBuffer.onScrollChange = function(self, value) terminalSelectText:setTextVirtualOffset(value) end
+  terminalBuffer.onDoubleClick = onTerminalDoubleClick
 
   g_logger.setOnLog(onLog)
 
@@ -334,10 +335,16 @@ function ClientTerminal.show()
   terminalWindow:raise()
   terminalWindow:focus()
   commandTextEdit:focus()
+  if ClientDev and ClientDev.setTerminalCheckBoxState then
+    ClientDev.setTerminalCheckBoxState(true)
+  end
 end
 
 function ClientTerminal.hide()
   terminalWindow:hide()
+  if ClientDev and ClientDev.setTerminalCheckBoxState then
+    ClientDev.setTerminalCheckBoxState(false)
+  end
 end
 
 function ClientTerminal.disable()
@@ -347,17 +354,15 @@ end
 
 function ClientTerminal.flushLines()
   local numLines = terminalBuffer:getChildCount() + #cachedLines
-  local fulltext = terminalSelectText:getText()
 
   for _, line in pairs(cachedLines) do
     -- delete old lines if needed
     if numLines > MAX_LINES then
       local firstChild = terminalBuffer:getChildByIndex(1)
       if firstChild then
-        local len = #firstChild:getText()
+        UITextMessageSelection.clear(terminalBuffer)
         firstChild:destroy()
         table.remove(allLines, 1)
-        fulltext = string.sub(fulltext, len)
       end
     end
 
@@ -365,13 +370,11 @@ function ClientTerminal.flushLines()
     label:setId('terminalLabel' .. numLines)
     label:setText(line.text)
     label:setColor(line.color)
+    label.onDoubleClick = onTerminalDoubleClick
+    UITextMessageSelection.attach(terminalBuffer, label)
 
     table.insert(allLines, {text=line.text,color=line.color})
-
-    fulltext = fulltext .. '\n' .. line.text
   end
-
-  terminalSelectText:setText(fulltext)
 
   cachedLines = { }
   removeEvent(flushEvent)
@@ -451,8 +454,8 @@ function ClientTerminal.executeCommand(command)
 end
 
 function ClientTerminal.clear()
+  UITextMessageSelection.clear(terminalBuffer)
   terminalBuffer:destroyChildren()
-  terminalSelectText:setText('')
   cachedLines = { }
   allLines = { }
 end

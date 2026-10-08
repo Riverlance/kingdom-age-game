@@ -4,11 +4,10 @@ _G.GameInterface = { }
 
 
 
-WALK_STEPS_RETRY = 10
-
 Npc.DefaultDistance = 4 -- Check also on server: lib/class/npc.lua
 
 local cycleWalkEvent = nil
+local lastStopAction = 0
 
 gameRootPanel = nil
 gameMapPanel = nil
@@ -35,35 +34,23 @@ countWindow = nil
 logoutWindow = nil
 exitWindow = nil
 bottomSplitter = nil
+-- timestamp of the last manual keyboard walk, refreshed by game_walk and read
+-- by consumers (e.g. game_bot) to pause automation while the player walks;
+-- defined here so it is always present whenever this module is loaded
+lastManualWalk = 0
 gameExpBar = nil
 leftPanelButton = nil
 rightPanelButton = nil
 topMenuButton = nil
 chatButton = nil
 currentViewMode = 0
-smartWalkDirs = { }
-smartWalkDir = nil
-firstStep = false
 hookedMenuOptions = { }
-lastDirTime = g_clock.millis()
 gamePanels = { }
 gamePanelsContainer = { }
 
 -- List of panels, even if panelsPriority is not set
 local _gamePanels = { }
 local _gamePanelsContainer = { }
-
-
-
--- Transposed view
-
-local function mapWalkDirectionByCurrentView(dir)
-  if not gameMapPanel or not gameMapPanel.isTransposedView or not gameMapPanel:isTransposedView() then
-    return dir
-  end
-
-  return Position.transposeDirection(dir)
-end
 
 
 
@@ -85,6 +72,10 @@ local hoverLookCurrentTooltipText = nil
 local hoverLookWasEnabled         = false
 
 local function getDistanceBetween(p1, p2)
+  if p2 == nil then
+    p2 = { x = 0, y = 0 }
+  end
+
   return math.max(math.abs(p1.x - p2.x), math.abs(p1.y - p2.y))
 end
 
@@ -521,7 +512,6 @@ function GameInterface.init()
 
   connect(gameRootPanel, {
     onGeometryChange = GameInterface.updateStretchShrink,
-    onFocusChange    = GameInterface.stopSmartWalk,
     onMouseMove      = GameInterface.updateHoverLook,
   })
 
@@ -562,34 +552,6 @@ function GameInterface.init()
   end
 end
 
-function GameInterface.bindWalkKey(key, dir)
-  g_keyboard.bindKeyDown(key, function() GameInterface.onWalkKeyDown(dir) end, gameRootPanel, true)
-  g_keyboard.bindKeyUp(key, function() GameInterface.changeWalkDir(dir, true) end, gameRootPanel, true)
-  g_keyboard.bindKeyPress(key, function() GameInterface.smartWalk(dir) end, gameRootPanel)
-end
-
-function GameInterface.unbindWalkKey(key)
-  g_keyboard.unbindKeyDown(key, gameRootPanel)
-  g_keyboard.unbindKeyUp(key, gameRootPanel)
-  g_keyboard.unbindKeyPress(key, gameRootPanel)
-end
-
-function GameInterface.bindTurnKey(key, dir, checkConsole)
-  local function callback(widget, code, repeatTicks)
-    if checkConsole and GameConsole and GameConsole.isChatEnabled() then
-      return
-    end
-
-    if g_clock.millis() - lastDirTime >= ClientOptions.getOption('turnDelay') then
-      local mappedDir = mapWalkDirectionByCurrentView(dir)
-      g_game.turn(mappedDir)
-      GameInterface.changeWalkDir(dir)
-      lastDirTime = g_clock.millis()
-    end
-  end
-  g_keyboard.bindKeyPress(key, callback, gameRootPanel)
-end
-
 function GameInterface.bindActionKeyUp(key)
   g_keyboard.bindKeyUp(key, function() if g_game.isOnline() then g_game.sendActionKey(key, true) end end)
 end
@@ -599,35 +561,13 @@ function GameInterface.bindActionKeyDown(key)
 end
 
 function GameInterface.bindKeys()
-  gameRootPanel:setAutoRepeatDelay(50)
-
-  GameInterface.bindWalkKey('Up', North)
-  GameInterface.bindWalkKey('Right', East)
-  GameInterface.bindWalkKey('Down', South)
-  GameInterface.bindWalkKey('Left', West)
-  GameInterface.bindWalkKey('Numpad8', North)
-  GameInterface.bindWalkKey('Numpad9', NorthEast)
-  GameInterface.bindWalkKey('Numpad6', East)
-  GameInterface.bindWalkKey('Numpad3', SouthEast)
-  GameInterface.bindWalkKey('Numpad2', South)
-  GameInterface.bindWalkKey('Numpad1', SouthWest)
-  GameInterface.bindWalkKey('Numpad4', West)
-  GameInterface.bindWalkKey('Numpad7', NorthWest)
-
-  GameInterface.bindTurnKey('Ctrl+Up', North)
-  GameInterface.bindTurnKey('Ctrl+Left', West)
-  GameInterface.bindTurnKey('Ctrl+Down', South)
-  GameInterface.bindTurnKey('Ctrl+Right', East)
-  GameInterface.bindTurnKey('Ctrl+Numpad8', North)
-  GameInterface.bindTurnKey('Ctrl+Numpad4', West)
-  GameInterface.bindTurnKey('Ctrl+Numpad2', South)
-  GameInterface.bindTurnKey('Ctrl+Numpad6', East)
-
   g_keyboard.bindKeyDown('Escape', function()
     if not g_ui.resetDraggingWidget() then
       if selectedThing then
         GameInterface.onMouseGrabberRelease(mouseGrabberWidget)
       elseif not GamePowers.cancelPower() then
+        if lastStopAction + 50 > g_clock.millis() then return end
+        lastStopAction = g_clock.millis()
         g_game.cancelAttackAndFollow()
       end
     end
@@ -659,7 +599,6 @@ function GameInterface.terminate()
   GameInterface.hide()
 
   hookedMenuOptions = { }
-  GameInterface.stopSmartWalk()
 
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeCreatureOutline)
 
@@ -691,7 +630,6 @@ function GameInterface.terminate()
 
   disconnect(gameRootPanel, {
     onGeometryChange = GameInterface.updateStretchShrink,
-    onFocusChange    = GameInterface.stopSmartWalk,
     onMouseMove      = GameInterface.updateHoverLook,
   })
 
@@ -737,8 +675,6 @@ function GameInterface.onGameStart()
 
   g_window.setTitle(g_app.getName() .. (localPlayer and ' - ' .. localPlayer:getName() or ''))
   GameInterface.show()
-
-  g_game.enableFeature(GameForceFirstAutoWalkStep)
 
   -- April Fools'
 
@@ -875,13 +811,26 @@ function GameInterface.tryExit()
     return true
   end
 
-  local exitFunc = function() g_game.safeLogout() GameInterface.forceExit() end
-  local logoutFunc = function() g_game.safeLogout() exitWindow:destroy() exitWindow = nil end
+  local exitFunc = function()
+    if ClientCharacterList then
+      ClientCharacterList.markLogout()
+    end
+    g_game.safeLogout()
+    GameInterface.forceExit()
+  end
+  local logoutFunc = function()
+    if ClientCharacterList then
+      ClientCharacterList.markLogout()
+    end
+    g_game.safeLogout()
+    exitWindow:destroy()
+    exitWindow = nil
+  end
   local cancelFunc = function() exitWindow:destroy() exitWindow = nil end
 
   exitWindow = displayGeneralBox(loc'${CorelibInfoExit}', loc'${GameInterfaceExitWindowMsg}', {
-    { text = loc'${GameInterfaceExitWindowButtonForceExit}', callback = exitFunc },
-    { text = loc'${CorelibInfoLogout}', callback = logoutFunc },
+    { text = loc'${GameInterfaceExitWindowButtonForceExit}', tooltip = loc'${GameInterfaceExitWindowButtonForceExitTooltip}', callback = exitFunc },
+    { text = loc'${CorelibInfoLogout}', tooltip = loc'${CorelibInfoLogoutTooltip}', callback = logoutFunc },
     { text = loc'${CorelibInfoCancel}', callback = cancelFunc },
     anchor = AnchorHorizontalCenter
   }, logoutFunc, cancelFunc, 100)
@@ -907,6 +856,9 @@ function GameInterface.tryLogout(prompt)
     msg = loc'${GameInterfaceLogoutWindowFailingConnectionMsg}'
 
     yesCallback = function()
+      if ClientCharacterList then
+        ClientCharacterList.markLogout()
+      end
       g_game.forceLogout()
       if logoutWindow then
         logoutWindow:destroy()
@@ -917,6 +869,9 @@ function GameInterface.tryLogout(prompt)
     msg = loc'${GameInterfaceLogoutWindowRequestMsg}'
 
     yesCallback = function()
+      if ClientCharacterList then
+        ClientCharacterList.markLogout()
+      end
       g_game.safeLogout()
       if logoutWindow then
         logoutWindow:destroy()
@@ -939,65 +894,6 @@ function GameInterface.tryLogout(prompt)
   else
      yesCallback()
   end
-end
-
-function GameInterface.stopSmartWalk()
-  smartWalkDirs = { }
-  smartWalkDir = nil
-end
-
-function GameInterface.onWalkKeyDown(dir)
-  if ClientOptions.getOption('autoChaseOverride') then
-    if g_game.isAttacking() and g_game.getChaseMode() == ChaseOpponent then
-      g_game.setChaseMode(DontChase)
-    end
-  end
-  firstStep = true
-  GameInterface.changeWalkDir(dir)
-end
-
-function GameInterface.changeWalkDir(dir, pop)
-  dir = mapWalkDirectionByCurrentView(dir)
-
-  while table.removevalue(smartWalkDirs, dir) do end
-  if pop then
-    if #smartWalkDirs == 0 then
-      GameInterface.stopSmartWalk()
-      return
-    end
-  else
-    table.insert(smartWalkDirs, 1, dir)
-  end
-
-  smartWalkDir = smartWalkDirs[1]
-  if ClientOptions.getOption('smartWalk') and #smartWalkDirs > 1 then
-    for _,d in pairs(smartWalkDirs) do
-      if (smartWalkDir == North and d == West) or (smartWalkDir == West and d == North) then
-        smartWalkDir = NorthWest
-        break
-      elseif (smartWalkDir == North and d == East) or (smartWalkDir == East and d == North) then
-        smartWalkDir = NorthEast
-        break
-      elseif (smartWalkDir == South and d == West) or (smartWalkDir == West and d == South) then
-        smartWalkDir = SouthWest
-        break
-      elseif (smartWalkDir == South and d == East) or (smartWalkDir == East and d == South) then
-        smartWalkDir = SouthEast
-        break
-      end
-    end
-  end
-end
-
-function GameInterface.smartWalk(dir)
-  if g_keyboard.getModifiers() ~= KeyboardNoModifier then
-    return false
-  end
-
-  local _dir = smartWalkDir or mapWalkDirectionByCurrentView(dir)
-  g_game.walk(_dir, firstStep)
-  firstStep = false
-  return true
 end
 
 function GameInterface.updateStretchShrink()
@@ -1773,6 +1669,8 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
   local isCreatureNear   = creatureThing and creatureThing:getPosition().z == autoWalkPos.z and creatureDistance > 0
 
   local isMultiUse = useThing:isMultiUse()
+  -- These containers must always be opened, even when quick loot is enabled in the future (see Mehah's quick loot implementation in this module)
+  local isAlwaysOpenContainer = useThing and table.find({3497, 3498, 3499, 3500, 3502, 12902}, useThing:getId())
 
   -- Classic controls
   if ClientOptions.getOption('classicControl') then
@@ -1786,6 +1684,10 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
       return true
 
     -- Open container (same window, or in new window if no parent)
+    elseif useThing and mainShortcut and isAlwaysOpenContainer then
+      g_game.open(useThing, useThing:getParentContainer() or nil)
+      return true
+
     elseif useThing and mainShortcut and useThing:isContainer() then
       g_game.open(useThing, useThing:getParentContainer() or nil)
       return true
@@ -1847,6 +1749,10 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
     -- Open container
     -- Left or Right = same window, or in new window if no parent
     -- Left and Right = new window
+    elseif useThing and (keyCtrl and mouseLeftOrRight or keyNoMods and mouseLeftAndRight) and isAlwaysOpenContainer then
+      g_game.open(useThing, useThing:getParentContainer() or nil)
+      return true
+
     elseif useThing and (keyCtrl and mouseLeftOrRight or keyNoMods and mouseLeftAndRight) and useThing:isContainer() then
       g_game.open(useThing, not mouseLeftAndRight and useThing:getParentContainer() or nil)
       return true
@@ -1875,7 +1781,11 @@ end
 
 function GameInterface.moveStackableItem(item, toPos)
   if countWindow then
-    return
+    if countWindow:isDestroyed() then
+      countWindow = nil
+    else
+      return
+    end
   end
   if g_keyboard.isAltPressed() then
     g_game.move(item, toPos, 1)
@@ -2122,10 +2032,6 @@ function GameInterface.isViewModeFull()
 end
 
 function GameInterface.nextViewMode()
-  if g_app.isScaled() then
-    return
-  end
-
   ClientOptions.setOption('viewMode', (currentViewMode + 1) % table.size(ViewModes))
 end
 
@@ -2133,8 +2039,6 @@ function GameInterface.setupViewMode(mode)
   if mode == currentViewMode then
     return
   end
-
-  g_game.changeMapAwareRange(25, 19) -- Max viewport x & y
 
   local viewMode = ViewModes[mode]
 
@@ -2303,7 +2207,7 @@ function updateTrackArrow(trackNode)
   end
 
   local trackerLabel = trackNode.widget:getChildById('distance')
-  trackerLabel:setText(f('%d m', _distance))
+  trackerLabel:setText(f('%dm', _distance))
   trackerLabel:setVisible(_distance > 0)
 
   local dx = trackPos.x - playerPos.x

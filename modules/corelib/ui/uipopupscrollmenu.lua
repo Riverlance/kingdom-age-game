@@ -33,7 +33,7 @@ function UIPopupScrollMenu:setScrollbarStep(step)
   self.scrollBar:setStep(step)
 end
 
-function UIPopupScrollMenu:display(pos)
+function UIPopupScrollMenu:display(pos, parent)
   -- don't display if not options was added
   if self.scrollArea:getChildCount() == 0 then
     self:destroy()
@@ -53,7 +53,7 @@ function UIPopupScrollMenu:display(pos)
     pos = g_window.getMousePosition()
   end
 
-  rootWidget:addChild(self)
+  (parent or rootWidget):addChild(self)
   self:setPosition(pos)
   self:grabMouse()
   self:focus()
@@ -62,7 +62,7 @@ end
 
 function UIPopupScrollMenu:onGeometryChange(newRect, oldRect)
   local parent = self:getParent()
-  if not parent then
+  if not parent or parent ~= rootWidget then
     return
   end
 

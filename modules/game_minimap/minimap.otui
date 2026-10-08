@@ -5,16 +5,16 @@ MiniWindow
   &save: true
   &contentMinimumHeight: 117
 
+  MiniWindowIconTooltipArea
+    !tooltip: f(loc'${GameMinimapTitle}\n\n${GameMinimapButtonInfo}', loc'${GameMinimapButtonInfoArrowKeys}', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
+    !tooltip-type: TooltipType.textBlock
+
   BallMenuButton
     id: ballButton
     !tooltip: loc'${GameMinimapButtonHideControllers}'
     anchors.verticalCenter: lockButton.verticalCenter
     anchors.right: lockButton.outsideLeft
     @onClick: GameMinimap.toggleControllers()
-
-  InfoMenuButton
-    !tooltip: f(loc'${GameMinimapButtonInfo}', loc'${GameMinimapButtonInfoArrowKeys}', 'Alt', 'Ctrl', 'Ctrl+Shift+M')
-    !tooltip-type: TooltipType.textBlock
 
   MiniWindowContents
 
@@ -37,11 +37,14 @@ MiniWindow
       anchors.bottom: parent.bottom
       anchors.left: parent.left
       anchors.right: minimapBar.outsideLeft
-      background-color: #000000bb
+      background-color: #00000088
       color: #ffffff
       text-align: center
       text-auto-resize: true
-      font: sans-8px
+      ttf-font: opensans-v
+      ttf-font-weight: 700
+      ttf-font-size: 7
+      ttf-stroke: 2 black
       text-wrap: true
       phantom: false
 
@@ -78,7 +81,7 @@ MiniWindow
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        background-color: #98885e
+        background-color: $uiColorBorder
 
       UIWidget
         id: minimapBarBackground

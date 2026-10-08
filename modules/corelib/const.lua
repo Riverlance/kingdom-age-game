@@ -1,5 +1,9 @@
 -- @docconsts @{
 
+EVENT_TEXT_NONE = 0
+EVENT_TEXT_CLICK = 1
+EVENT_TEXT_HOVER = 2
+
 OsUnknown = 0
 OsWindows = 1
 OsLinux = 2
@@ -201,6 +205,8 @@ ExtendedParticles = 2
 
 -- @}
 
+DefaultClientVersion = 1099
+
 KeyCodeDescs = {
   [KeyUnknown] = 'Unknown',
   [KeyEscape] = 'Escape',
@@ -378,15 +384,15 @@ function isSage(vocationId)
 end
 
 function Creature:isWarrior()
-  return isWarrior(self:getVocation())
+  return self:isPlayer() and isWarrior(self:getVocation()) or false
 end
 
 function Creature:isHunter()
-  return isHunter(self:getVocation())
+  return self:isPlayer() and isHunter(self:getVocation()) or false
 end
 
 function Creature:isSage()
-  return isSage(self:getVocation())
+  return self:isPlayer() and isSage(self:getVocation()) or false
 end
 
 -- Character list

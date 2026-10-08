@@ -94,50 +94,64 @@ local function updateSlider(self)
 end
 
 local function parseSliderPos(self, slider, pos, move)
-  local delta, hotDistance
+  local position
   if self.orientation == 'vertical' then
-    delta = move.y
-    hotDistance = pos.y - slider:getY()
+    position = pos.y
   else
-    delta = move.x
-    hotDistance = pos.x - slider:getX()
+    position = pos.x
   end
 
-  if (delta > 0 and hotDistance + delta > self.hotDistance) or
-     (delta < 0 and hotDistance + delta < self.hotDistance)
-  then
-    -- Calculate the new value based on the slider movement
-    local range, pxrange, px, offset, center = calcValues(self)
-
-    -- Denominator for the value change calculation, ensuring we don't divide by zero
-    local denominator = (pxrange - px)
-    if denominator == 0 then
-      return
-    end
-
-    local newRange = math.max(range - 1, 1)
-    local newValue = self.value + delta * (newRange / denominator)
-
-    -- If not in pixel scroll mode, round to the nearest step value
-    if not self.pixelsScroll then
-      local step = math.max(self.step or 1, 1)
-      if step > 1 then
-        local min         = self.minimum
-        local stepsAmount = math.round((newValue - min) / step)
-        newValue          = min + stepsAmount * step
-      end
-    end
-
-    self:setValue(newValue)
+  local dragStartPosition = self.dragStartPosition
+  local dragStartValue = self.dragStartValue
+  if dragStartPosition == nil or dragStartValue == nil then
+    return
   end
+
+  -- Use the total movement since the press. This preserves sub-step movement
+  -- between mouse events, so a non-pixel scrollbar can still be dragged.
+  local delta = position - dragStartPosition
+
+  -- Calculate the new value based on the slider movement
+  local range, pxrange, px, offset, center = calcValues(self)
+
+  -- Denominator for the value change calculation, ensuring we don't divide by zero
+  local denominator = (pxrange - px)
+  if denominator == 0 then
+    return
+  end
+
+  local newRange = math.max(range - 1, 1)
+  local newValue = dragStartValue + delta * (newRange / denominator)
+
+  -- Protect against invalid numerical results
+  if not (newValue == newValue) or newValue == math.huge or newValue == -math.huge then
+    if delta > 0 then
+      newValue = self.maximum
+    else
+      newValue = self.minimum
+    end
+  end
+
+  -- If not in pixel scroll mode, round to the nearest step value
+  if not self.pixelsScroll then
+    local step = math.max(self.step or 1, 1)
+    if step > 1 then
+      local min         = self.minimum
+      local stepsAmount = math.round((newValue - min) / step)
+      newValue          = min + stepsAmount * step
+    end
+  end
+
+  self:setValue(newValue)
 end
 
 local function parseSliderPress(self, slider, pos, button)
   if self.orientation == 'vertical' then
-    self.hotDistance = pos.y - slider:getY()
+    self.dragStartPosition = pos.y
   else
-    self.hotDistance = pos.x - slider:getX()
+    self.dragStartPosition = pos.x
   end
+  self.dragStartValue = self.value
 end
 
 -- public functions
@@ -155,12 +169,37 @@ function UIScrollBar.create()
   scrollbar.maximumText = nil
   scrollbar.minimumText = nil
   scrollbar.mouseScroll = true
+  scrollbar.dragStartPosition = nil
+  scrollbar.dragStartValue = nil
   return scrollbar
 end
 
 function UIScrollBar:onSetup()
   self.setupDone = true
   local sliderButton = self:getChildById('sliderButton')
+
+  -- If the scrollbar is declared inside an OptionScaleScroll (or similar)
+  -- parent widgets may provide instance properties to configure the scrollbar.
+  local parent = self:getParent()
+  if parent then
+    if parent.minimumScrollValue ~= nil then
+      local minv = tonumber(parent.minimumScrollValue)
+      if minv then self:setMinimum(minv) end
+    end
+    if parent.maximumScrollValue ~= nil then
+      local maxv = tonumber(parent.maximumScrollValue)
+      if maxv then self:setMaximum(maxv) end
+    end
+    if parent.scrollSize ~= nil then
+      local stepv = tonumber(parent.scrollSize)
+      if stepv then self:setStep(stepv) end
+    end
+    if parent.defaultScroll ~= nil then
+      -- support older naming if used in styles
+      if parent.defaultScroll then self:setDefaultScroll() end
+    end
+  end
+
   g_mouse.bindAutoPress(self:getChildById('decrementButton'), function() self:onDecrement() end, 300)
   g_mouse.bindAutoPress(self:getChildById('incrementButton'), function() self:onIncrement() end, 300)
   g_mouse.bindPressMove(sliderButton, function(mousePos, mouseMoved) parseSliderPos(self, sliderButton, mousePos, mouseMoved) end)

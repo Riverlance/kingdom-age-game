@@ -5,8 +5,11 @@ TextWindow < MainWindow
   Item
     id: textItem
     virtual: true
+    focusable: false
+    phantom: true
     anchors.top: parent.top
     anchors.left: parent.left
+    image-source: none
 
   Label
     id: description

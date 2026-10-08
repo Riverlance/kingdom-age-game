@@ -64,17 +64,12 @@ function g_mouseicon.init()
   })
 
   addEvent(function()
-    mouseIcon = g_ui.createWidget('UIItem', rootWidget)
-    mouseIcon:setFocusable(false)
+    mouseIcon = g_ui.createWidget('Item', rootWidget)
     mouseIcon:setId('mouseIcon')
-    mouseIcon:setPhantom(true)
+    mouseIcon:setFocusable(false)
+    mouseIcon:setImageSource('')
+    mouseIcon:setPhantom(true) -- Mouse icon widget must not intercept mouse input from widgets underneath
     mouseIcon:hide()
-
-    -- For item only
-    mouseIcon:setVirtual(true)
-    mouseIcon:setFont('verdana-11px-rounded')
-    mouseIcon:setBorderColor('white')
-    mouseIcon:setColor('white')
   end)
 end
 
@@ -85,8 +80,11 @@ function g_mouseicon.terminate()
 
   removeEvent(mouseMoveEvent)
   mouseMoveEvent = nil
-  mouseIcon:destroy()
+  local icon = mouseIcon
   mouseIcon = nil
+  if icon then
+    icon:destroy()
+  end
 
   g_mouseicon = nil
 end
@@ -135,6 +133,14 @@ function g_mouseicon.displayText(text)
 end
 
 function g_mouseicon.hide()
+  if not mouseIcon then
+    removeEvent(mouseMoveEvent)
+    mouseMoveEvent = nil
+    lastMouseIconPosX = -1
+    lastMouseIconPosY = -1
+    return
+  end
+
   g_effects.cancelFade(mouseIcon) -- Because g_mouseicon.hide() can be called multiple times in a row
   g_effects.fadeOut(mouseIcon, fadeOutTime)
 

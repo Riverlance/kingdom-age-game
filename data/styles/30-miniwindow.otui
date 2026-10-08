@@ -1,9 +1,20 @@
+MiniWindowIconTooltipArea < UIWidget
+  id: miniWindowIconTooltipArea
+  anchors.top: parent.top
+  anchors.left: parent.left
+  margin-left: 6
+  margin-top: 4
+  size: 16 16
+  phantom: false
+
 MiniWindow < UIMiniWindow
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 9
   icon-rect: 6 4 16 16
   width: 192
   height: 80
-  text-offset: 42 4
+  text-offset: 42 5
   text-align: topLeft
   color: #c9bdab
   image-source: /images/ui/_background/mini_window
@@ -32,12 +43,14 @@ MiniWindow < UIMiniWindow
     height: 26
     phantom: true
 
+  MiniWindowIconTooltipArea
+
   CloseMenuButton
     &loct: '${CorelibInfoClose}'
     anchors.verticalCenter: miniwindowTopBar.verticalCenter
     anchors.right: parent.right
     margin-top: -1
-    margin-right: 2
+    margin-right: 4
 
   MinimizeMenuButton
 
@@ -78,7 +91,7 @@ MiniWindowHeader < UIWidget
   margin-left: 3
   margin-right: 3
   border-width-bottom: 1
-  border-color: #98885e
+  border-color: $uiColorBorder
 
 MiniWindowContents < ScrollablePanel
   id: contentsPanel
@@ -99,7 +112,7 @@ MiniWindowFooter < UIWidget
   margin-left: 3
   margin-right: 3
   border-width-top: 1
-  border-color: #98885e
+  border-color: $uiColorBorder
 
 BorderlessGameWindow < UIWindow
   focusable: false

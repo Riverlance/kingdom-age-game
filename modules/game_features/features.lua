@@ -22,158 +22,135 @@ end
 
 
 function GameFeatures.onClientVersionChange(version)
+  -- g_game.enableFeature(GameKeepUnawareTiles)
+  -- g_game.enableFeature(GameNegativeOffset)
+  -- g_game.enableFeature(GameAllowCustomBotScripts)
+
   g_game.enableFeature(GameFormatCreatureName)
 
-  if version >= 770 then
-    g_game.enableFeature(GameLooktypeU16)
-    g_game.enableFeature(GameMessageStatements)
-    g_game.enableFeature(GameLoginPacketEncryption)
-  end
+  -- For Walk
+  g_game.enableFeature(GameAllowPreWalk)
+  g_game.enableFeature(GameMapCache)
+  -- g_game.enableFeature(GameSmoothWalkElevation)
 
-  if version >= 780 then
-    g_game.enableFeature(GamePlayerAddons)
-    g_game.enableFeature(GamePlayerStamina)
-    g_game.enableFeature(GameNewFluids)
-    g_game.enableFeature(GameMessageLevel)
-    g_game.enableFeature(GamePlayerStateU16)
-    g_game.enableFeature(GameNewOutfitProtocol)
-  end
+  -- 770
+  g_game.enableFeature(GameLooktypeU16)
+  g_game.enableFeature(GameMessageStatements)
+  g_game.enableFeature(GameLoginPacketEncryption)
 
-  if version >= 790 then
-    g_game.enableFeature(GameWritableDate)
-  end
+  -- 780
+  g_game.enableFeature(GamePlayerAddons)
+  g_game.enableFeature(GamePlayerStamina)
+  g_game.enableFeature(GameNewFluids)
+  g_game.enableFeature(GameMessageLevel)
+  g_game.enableFeature(GamePlayerStateU16)
+  g_game.enableFeature(GameNewOutfitProtocol)
 
-  if version >= 840 then
-    g_game.enableFeature(GameProtocolChecksum)
-    g_game.enableFeature(GameAccountNames)
-    g_game.enableFeature(GameDoubleFreeCapacity)
-  end
+  -- 790
+  g_game.enableFeature(GameWritableDate)
 
-  if version >= 841 then
-    g_game.enableFeature(GameChallengeOnLogin)
-    g_game.enableFeature(GameMessageSizeCheck)
-  end
+  -- 840
+  g_game.enableFeature(GameProtocolChecksum)
+  g_game.enableFeature(GameAccountNames)
+  g_game.enableFeature(GameDoubleFreeCapacity)
 
-  if version >= 854 then
-    g_game.enableFeature(GameCreatureEmblems)
-  end
+  -- 841
+  g_game.enableFeature(GameChallengeOnLogin)
+  g_game.enableFeature(GameMessageSizeCheck)
 
-  if version >= 860 then
-    g_game.enableFeature(GameAttackSeq)
-  end
+  -- 854
+  g_game.enableFeature(GameCreatureEmblems)
 
-  if version >= 862 then
-    g_game.enableFeature(GamePenalityOnDeath)
-  end
+  -- 860
+  g_game.enableFeature(GameAttackSeq)
 
-  if version >= 870 then
-    g_game.enableFeature(GameDoubleExperience)
-    g_game.enableFeature(GamePlayerMounts)
-  end
+  -- 862
+  g_game.enableFeature(GamePenalityOnDeath)
 
-  if version >= 910 then
-    g_game.enableFeature(GameNameOnNpcTrade)
-    g_game.enableFeature(GameTotalCapacity)
-    g_game.enableFeature(GameSkillsBase)
-    g_game.enableFeature(GamePlayerRegenerationTime)
-    g_game.enableFeature(GameChannelPlayerList)
-    g_game.enableFeature(GameEnvironmentEffect)
-    g_game.enableFeature(GameItemAnimationPhase)
-  end
+  -- 870
+  g_game.enableFeature(GameDoubleExperience)
+  g_game.enableFeature(GamePlayerMounts)
 
-  if version >= 953 then
-    g_game.enableFeature(GameClientPing)
-  end
+  -- 910
+  g_game.enableFeature(GameNameOnNpcTrade)
+  g_game.enableFeature(GameTotalCapacity)
+  g_game.enableFeature(GameSkillsBase)
+  g_game.enableFeature(GamePlayerRegenerationTime)
+  g_game.enableFeature(GameChannelPlayerList)
+  g_game.enableFeature(GameEnvironmentEffect)
 
-  if version >= 960 then
-    g_game.enableFeature(GameSpritesU32)
-    g_game.enableFeature(GameOfflineTrainingTime)
-  end
+  -- 953
+  g_game.enableFeature(GameClientPing)
 
-  if version >= 963 then
-    g_game.enableFeature(GameAdditionalVipInfo)
-  end
+  -- 960
+  g_game.enableFeature(GameSpritesU32)
+  g_game.enableFeature(GameOfflineTrainingTime)
 
-  if version >= 980 then
-    g_game.enableFeature(GamePreviewState)
-    g_game.enableFeature(GameClientVersion)
-  end
+  -- 963
+  g_game.enableFeature(GameAdditionalVipInfo)
 
-  if version >= 981 then
-    g_game.enableFeature(GameLoginPending)
-    g_game.enableFeature(GameNewSpeedLaw)
-  end
+  -- 980
+  g_game.enableFeature(GamePreviewState)
+  g_game.enableFeature(GameClientVersion)
 
-  if version >= 984 then
-    g_game.enableFeature(GameContainerPagination)
-  end
+  -- 981
+  g_game.enableFeature(GameLoginPending)
+  g_game.enableFeature(GameNewSpeedLaw)
 
-  if version >= 1000 then
-    g_game.enableFeature(GameThingMarks)
-  end
+  -- 984
+  g_game.enableFeature(GameContainerPagination)
 
-  if version >= 1035 then
-    g_game.enableFeature(GameDoubleSkills)
-  end
+  -- 1000
+  g_game.enableFeature(GameThingMarks)
 
-  if version >= 1036 then
-    g_game.enableFeature(GameSpeechBubble) -- KA - Renamed from GameCreatureIcons
-  end
+  -- 1035
+  g_game.enableFeature(GameDoubleSkills)
 
-  if version >= 1038 then
-    g_game.enableFeature(GamePremiumExpiration)
-  end
+  -- 1036
+  g_game.enableFeature(GameSpeechBubble)
 
-  if version >= 1050 then
-    g_game.enableFeature(GameEnhancedAnimations)
-  end
+  -- 1038
+  g_game.enableFeature(GamePremiumExpiration)
 
-  if version >= 1053 then
-    g_game.enableFeature(GameUnjustifiedPointsPacket) -- KA - Renamed from GameUnjustifiedPoints
-  end
+  -- 1050
+  g_game.enableFeature(GameEnhancedAnimations)
 
-  if version >= 1054 then
-    g_game.enableFeature(GameExperienceBonus)
-  end
+  -- 1053
+  g_game.enableFeature(GameUnjustifiedPointsPacket)
 
-  if version >= 1055 then
-    g_game.enableFeature(GameDeathType)
-  end
+  -- 1054
+  g_game.enableFeature(GameExperienceBonus)
 
-  if version >= 1057 then
-    g_game.enableFeature(GameIdleAnimations)
-  end
+  -- 1055
+  g_game.enableFeature(GameDeathType)
 
-  if version >= 1061 then
-    g_game.enableFeature(GameOGLInformation)
-  end
+  -- 1057
+  g_game.enableFeature(GameIdleAnimations)
 
-  if version >= 1071 then
-    g_game.enableFeature(GameContentRevision)
-  end
+  -- 1061
+  g_game.enableFeature(GameOGLInformation)
 
-  if version >= 1072 then
-    g_game.enableFeature(GameAuthenticator)
-  end
+  -- 1071
+  g_game.enableFeature(GameContentRevision)
 
-  if version >= 1074 then
-    g_game.enableFeature(GameSessionKey)
-  end
+  -- 1072
+  g_game.enableFeature(GameAuthenticator)
 
-  if version >= 1080 then
-    g_game.enableFeature(GameIngameStore)
-  end
+  -- 1074
+  g_game.enableFeature(GameSessionKey)
 
-  if version >= 1092 then
-    g_game.enableFeature(GameIngameStoreServiceType)
-  end
+  -- 1080
+  g_game.enableFeature(GameIngameStore)
 
-  if version >= 1093 then
-    g_game.enableFeature(GameIngameStoreHighlights)
-    g_game.enableFeature(GameSequencedPackets)
-  end
+  -- 1092
+  g_game.enableFeature(GameIngameStoreServiceType)
 
-  if version >= 1099 then
-    g_game.enableFeature(GameEnterGameShowAppearance)
-  end
+  -- 1093
+  g_game.enableFeature(GameIngameStoreHighlights)
+  g_game.enableFeature(GameSequencedPackets)
+
+  -- 1099
+  g_game.enableFeature(GameEnterGameShowAppearance)
+  g_game.enableFeature(GameVipGroups)
+  g_game.enableFeature(GameCreaturePaperdoll)
 end

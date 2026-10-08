@@ -42,7 +42,10 @@ ServerOpcodes = {
   ServerOpcodeProgressBar             = 56, -- KA - Progress bar
   ServerOpcodeFocusPoints             = 57, -- KA - Focus Points
   ServerOpcodeCreatureOutline         = 58, -- KA - Creature Outline
-  -- Free                               59 to 82
+  ServerOpcodeCreatureTyping          = 59, -- KA - Creature Typing
+  ServerAttachedPaperdoll             = 60,
+  ServerDetachPaperdoll               = 61,
+  -- Free                               62 to 82
   ServerOpcodeCreatureColor           = 83,
   ServerOpcodeCreatureNickname        = 84,
   ServerOpcodePlayerLoginname         = 85,
@@ -167,21 +170,22 @@ ServerOpcodes = {
 
 -- Server to Client - Extended Opcodes
 ServerExtOpcodes = {
-  ServerExtOpcodeOtclientSignal    = 0, -- From Server ProtocolGame::onRecvFirstMessage
-  ServerExtOpcodeAccountInfo       = 1,
-  ServerExtOpcodeInstanceInfo      = 2,
-  ServerExtOpcodeBlinkHit          = 3,
-  ServerExtOpcodeLootWindow        = 4,
-  ServerExtOpcodeScreenImage       = 5,
-  ServerExtOpcodeAudio             = 6,
-  ServerExtOpcodeUnjustifiedPoints = 7,
-  ServerExtOpcodeQuestLog          = 8,
-  ServerExtOpcodeBugReport         = 9,
-  ServerExtOpcodeRuleViolation     = 10,
-  ServerExtOpcodeDailyReward       = 11,
-  ServerExtOpcodeWidgetLock        = 12,
-  ServerExtOpcodePowerList         = 13,
-  -- Free                            14 to 65535
+  ServerExtOpcodeOtclientSignal     = 0, -- From Server ProtocolGame::onRecvFirstMessage
+  ServerExtOpcodeAccountInfo        = 1,
+  ServerExtOpcodeInstanceInfo       = 2,
+  ServerExtOpcodeBlinkHit           = 3,
+  ServerExtOpcodeLootWindow         = 4,
+  ServerExtOpcodeScreenImage        = 5,
+  ServerExtOpcodeAudio              = 6,
+  ServerExtOpcodeUnjustifiedPoints  = 7,
+  ServerExtOpcodeQuestLog           = 8,
+  ServerExtOpcodeBugReport          = 9,
+  ServerExtOpcodeRuleViolation      = 10,
+  ServerExtOpcodeDailyReward        = 11,
+  ServerExtOpcodeWidgetLock         = 12,
+  ServerExtOpcodePowerList          = 13,
+  ServerExtOpcodeCreatureNameShader = 14,
+  -- Free                             15 to 65535
 }
 
 -- Client to Server - Opcodes

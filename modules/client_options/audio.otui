@@ -1,12 +1,24 @@
 Panel
 
+  OptionCategoryLabel
+    &loc: '${ClientOptionsAudioCategoryGeneral}'
+    anchors.top: parent.top
+    margin-top: 0
+
   OptionCheckBox
     id: enableAudio
     &loc: '${ClientOptionsEnableAudio}'
     &loct: '${ClientOptionsAudioTitle} (${ClientOptionsAudioActionKey})'
     @locpar: return { ClientOptionsAudioActionKey = ClientOptionsAudioActionKey }
 
+
+
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsAudioCategoryMusic}'
 
   OptionCheckBox
     id: enableMusic
@@ -24,7 +36,14 @@ Panel
     maximum: 100
     symbol: %
 
+
+
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsAudioCategoryAmbient}'
 
   OptionCheckBox
     id: enableSoundAmbient
@@ -42,7 +61,14 @@ Panel
     maximum: 100
     symbol: %
 
+
+
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsAudioCategoryEffect}'
 
   OptionCheckBox
     id: enableSoundEffect
@@ -60,7 +86,14 @@ Panel
     maximum: 100
     symbol: %
 
+
+
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsAudioCategoryVoice}'
 
   OptionCheckBox
     id: enableSoundVoice
@@ -78,7 +111,14 @@ Panel
     maximum: 100
     symbol: %
 
+
+
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsAudioCategoryInterface}'
 
   OptionCheckBox
     id: enableSoundGui

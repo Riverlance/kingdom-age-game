@@ -4,62 +4,156 @@ _G.GameTextMessage = { }
 
 
 
-DefaultFont = 'verdana-11px-rounded'
+local DefaultFont = {
+  path = 'verdanapro-v',
+  weight = 700,
+}
+local function setMessageFont(widget, font)
+  local descriptor = font or DefaultFont
+  local path = descriptor.path or DefaultFont.path
+  local size = descriptor.size or 11
+  local strokeWidth = descriptor.strokeWidth or 0
+  local strokeColor = tocolor(descriptor.strokeColor or 'black')
+
+  -- Keep the old bold default while allowing custom message fonts to remain
+  -- static unless they explicitly request variable-font properties.
+  local weight = descriptor.weight
+  if not descriptor.path then
+    weight = weight or DefaultFont.weight
+  end
+
+  if weight ~= nil or descriptor.width ~= nil or descriptor.italic ~= nil or descriptor.variations ~= nil then
+    widget:setTTFFontVariations(
+      path,
+      size,
+      strokeWidth,
+      strokeColor,
+      weight or -1,
+      descriptor.width or -1,
+      descriptor.italic == nil and -1 or (descriptor.italic and 1 or 0),
+      descriptor.variations or '')
+  else
+    widget:setTTFFont(path, size, strokeWidth, strokeColor)
+  end
+end
 
 MessageSettings = {
-  none            = { },
-  consoleRed      = { color = TextColors.red,       consoleTab = loc'${CorelibInfoDefault}' },
-  consoleOrange   = { color = TextColors.orange,    consoleTab = loc'${CorelibInfoDefault}' },
-  consoleBlue     = { color = TextColors.blue,      consoleTab = loc'${CorelibInfoDefault}' },
-  centerRed       = { color = TextColors.red,       consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'lowCenterLabel' },
-  centerGreen     = { color = TextColors.green,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'highCenterLabel',   consoleOption = 'showInfoMessagesInConsole' },
-  centerWhite     = { color = TextColors.white,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'middleCenterLabel', consoleOption = 'showEventMessagesInConsole' },
-  bottomWhite     = { color = TextColors.white,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showEventMessagesInConsole' },
-  status          = { color = TextColors.white,     consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showStatusMessagesInConsole' },
-  statusSmall     = { color = TextColors.white,                                                    screenTarget = 'statusLabel' },
-  loot            = { color = TextColors.green,     consoleTab = loc'${GameConsoleTabNameServer}' },
-  private         = { color = TextColors.lightblue,                                                  screenTarget = 'privateLabel' },
-  statusBigTop    = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'privateLabel',      consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
-  statusBigCenter = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'middleCenterLabel', consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
-  statusBigBottom = { color = '#e1e1e1',            consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',       consoleOption = 'showStatusMessagesInConsole', font = 'martel-20px' },
-  look            = { color = '#e6db74',            consoleTab = loc'${GameConsoleTabNameServer}',                                     consoleOption = 'showInfoMessagesInConsole' },
+  none = { },
+
+  channelYellow = { color = TextColors.yellow },
+  channelWhite  = { color = TextColors.white },
+  channelRed    = { color = TextColors.red },
+  channelOrange = { color = TextColors.orange },
+
+  consoleYellow = { color = TextColors.yellow, consoleTab = loc'${CorelibInfoDefault}' },
+  consoleRed    = { color = TextColors.red,    consoleTab = loc'${CorelibInfoDefault}' },
+  consoleOrange = { color = TextColors.orange, consoleTab = loc'${CorelibInfoDefault}' },
+  consoleBlue   = { color = TextColors.blue,   consoleTab = loc'${CorelibInfoDefault}' },
+
+  centerWhite   = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'middleCenterLabel', font = { strokeWidth = 1 }, consoleOption = 'showEventMessagesInConsole' },
+  centerGreen   = { color = TextColors.green, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'highCenterLabel', font = { strokeWidth = 1 },   consoleOption = 'showInfoMessagesInConsole' },
+  centerHKGreen = { color = TextColors.green, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'highCenterLabel', font = { strokeWidth = 1 },   consoleOption = 'showInfoMessagesInConsole' },
+  centerRed     = { color = TextColors.red,   consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'lowCenterLabel', font = { strokeWidth = 1 } },
+
+  bottomWhite = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel', font = { strokeWidth = 1 }, consoleOption = 'showEventMessagesInConsole' },
+
+  statusSmall   = { color = TextColors.white,                                                screenTarget = 'statusLabel', font = { strokeWidth = 1 } },
+  status        = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel', font = { strokeWidth = 1 }, consoleOption = 'showStatusMessagesInConsole' },
+  statusBoosted = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel', font = { strokeWidth = 1 }, consoleOption = 'showStatusMessagesInConsole' },
+  statusOwn     = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}',                                                           consoleOption = 'showStatusMessagesInConsole' },
+  othersStatus  = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}',                                                           consoleOption = 'showOthersStatusMessagesInConsole' },
+
+  loot         = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'highCenterLabel', font = { strokeWidth = 1 }, consoleOption = 'showInfoMessagesInConsole', colored = true },
+  valuableLoot = { color = TextColors.white, consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel',     font = { strokeWidth = 1 }, consoleOption = 'showInfoMessagesInConsole', colored = true },
+
+  private               = { color = TextColors.lightblue, consoleTab = loc'${CorelibInfoDefault}', screenTarget = 'privateLabel', font = { strokeWidth = 1 } },
+  privateRed            = { color = TextColors.red,       consoleTab = loc'${CorelibInfoDefault}', private = true },
+  privatePlayerToPlayer = { color = TextColors.blue, consoleTab = loc'${CorelibInfoDefault}',      private = true },
+  privatePlayerToNpc    = { color = TextColors.blue, consoleTab = loc'${CorelibInfoDefault}',      private = true, npcChat = true },
+  privateNpcToPlayer    = { color = TextColors.lightblue, consoleTab = loc'${CorelibInfoDefault}', private = true, npcChat = true },
+
+  monsterSay  = { color = TextColors.orange, hideInConsole = true },
+  monsterYell = { color = TextColors.orange, hideInConsole = true },
+
+  statusBigTop    = { color = '#e1e1e1', consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'privateLabel', font = { strokeWidth = 1 },      consoleOption = 'showStatusMessagesInConsole', font = { path = 'limited/martel', size = 20, strokeWidth = 2 } },
+  statusBigCenter = { color = '#e1e1e1', consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'middleCenterLabel', font = { strokeWidth = 1 }, consoleOption = 'showStatusMessagesInConsole', font = { path = 'limited/martel', size = 20, strokeWidth = 2 } },
+  statusBigBottom = { color = '#e1e1e1', consoleTab = loc'${GameConsoleTabNameServer}', screenTarget = 'statusLabel', font = { strokeWidth = 1 },       consoleOption = 'showStatusMessagesInConsole', font = { path = 'limited/martel', size = 20, strokeWidth = 2 } },
+
+  potion = { color = TextColors.orange, hideInConsole = true },
+
+  look = { color = '#e6db74', consoleTab = loc'${GameConsoleTabNameServer}', consoleOption = 'showInfoMessagesInConsole' },
 }
 
 MessageTypes = {
-  [MessageModes.BarkLow] = MessageSettings.consoleOrange,
-  [MessageModes.BarkLoud] = MessageSettings.consoleOrange,
-  [MessageModes.Failure] = MessageSettings.statusSmall,
-  [MessageModes.Login] = MessageSettings.bottomWhite,
-  [MessageModes.Game] = MessageSettings.centerWhite,
-  [MessageModes.Status] = MessageSettings.status,
-  [MessageModes.Warning] = MessageSettings.centerRed,
-  [MessageModes.Loot] = MessageSettings.loot,
-  [MessageModes.PrivateFrom] = MessageSettings.consoleBlue,
+  [MessageModes.Say] = MessageSettings.consoleYellow,
+  [MessageModes.Whisper] = MessageSettings.consoleYellow,
+  [MessageModes.Yell] = MessageSettings.consoleYellow,
+
+  [MessageModes.PrivateFrom] = MessageSettings.private,
+  [MessageModes.PrivateTo] = MessageSettings.privatePlayerToPlayer,
+
+  [MessageModes.ChannelManagement] = MessageSettings.channelWhite,
+  [MessageModes.Channel] = MessageSettings.channelYellow,
+  [MessageModes.ChannelHighlight] = MessageSettings.channelOrange,
+
+  [MessageModes.Spell] = MessageSettings.consoleYellow,
+
+  [MessageModes.NpcFromStartBlock] = MessageSettings.privateNpcToPlayer,
+  [MessageModes.NpcFrom] = MessageSettings.privateNpcToPlayer,
+  [MessageModes.NpcTo] = MessageSettings.privatePlayerToNpc,
 
   [MessageModes.GamemasterBroadcast] = MessageSettings.consoleRed,
+  [MessageModes.GamemasterChannel] = MessageSettings.channelRed,
+  [MessageModes.GamemasterPrivateFrom] = MessageSettings.privateRed,
+  [MessageModes.GamemasterPrivateTo] = MessageSettings.privateRed,
 
-  [MessageModes.DamageDealed] = MessageSettings.status,
-  [MessageModes.DamageReceived] = MessageSettings.status,
-  [MessageModes.Heal] = MessageSettings.status,
-  [MessageModes.Exp] = MessageSettings.status,
+  [MessageModes.Login] = MessageSettings.bottomWhite,
+  [MessageModes.Warning] = MessageSettings.centerRed,
+  [MessageModes.Game] = MessageSettings.centerWhite,
+  [MessageModes.GameHighlight] = MessageSettings.centerRed,
+  [MessageModes.Failure] = MessageSettings.statusSmall,
+  [MessageModes.Look] = MessageSettings.look,
 
-  [MessageModes.DamageOthers] = MessageSettings.none,
-  [MessageModes.HealOthers] = MessageSettings.none,
-  [MessageModes.ExpOthers] = MessageSettings.none,
+  [MessageModes.DamageDealed] = MessageSettings.statusOwn,
+  [MessageModes.DamageReceived] = MessageSettings.statusOwn,
+  [MessageModes.Heal] = MessageSettings.statusOwn,
+  [MessageModes.Exp] = MessageSettings.statusOwn,
+  [MessageModes.DamageOthers] = MessageSettings.othersStatus,
+  [MessageModes.HealOthers] = MessageSettings.othersStatus,
+  [MessageModes.ExpOthers] = MessageSettings.othersStatus,
 
-  [MessageModes.TradeNpc] = MessageSettings.centerWhite,
-  [MessageModes.Guild] = MessageSettings.centerWhite,
-  [MessageModes.Party] = MessageSettings.centerGreen,
-  [MessageModes.PartyManagement] = MessageSettings.centerWhite,
-  [MessageModes.TutorialHint] = MessageSettings.centerWhite,
-  [MessageModes.Report] = MessageSettings.consoleRed,
+  [MessageModes.Status] = MessageSettings.status,
+  [MessageModes.Loot] = MessageSettings.loot, -- centerGreen?
+  [MessageModes.TradeNpc] = MessageSettings.centerGreen,
+  [MessageModes.Guild] = MessageSettings.statusOwn, -- centerGreen?
+
+  [MessageModes.PartyManagement] = MessageSettings.centerGreen,
+  [MessageModes.Party] = MessageSettings.statusOwn, -- centerGreen?
+
+  [MessageModes.BarkLow] = MessageSettings.monsterSay,
+  [MessageModes.BarkLoud] = MessageSettings.monsterYell,
+
+  [MessageModes.Report] = MessageSettings.centerWhite,
   [MessageModes.HotkeyUse] = MessageSettings.centerGreen,
+  [MessageModes.TutorialHint] = MessageSettings.statusSmall,
 
   [MessageModes.GameBigTop] = MessageSettings.statusBigTop,
   [MessageModes.GameBigCenter] = MessageSettings.statusBigCenter,
   [MessageModes.GameBigBottom] = MessageSettings.statusBigBottom,
 
-  [MessageModes.Look] = MessageSettings.look,
+  [MessageModes.RVRContinue] = MessageSettings.consoleYellow,
+  [MessageModes.RVRChannel] = MessageSettings.channelWhite,
+
+  [MessageModes.Red] = MessageSettings.consoleRed,
+  [MessageModes.Blue] = MessageSettings.consoleBlue,
+
+  [MessageModes.Potion] = MessageSettings.potion,
+  [MessageModes.BeyondLast] = MessageSettings.centerWhite,
+  [MessageModes.Attention] = MessageSettings.bottomWhite,
+  [MessageModes.BoostedCreature] = MessageSettings.centerWhite,
+  [MessageModes.OfflineTrainning] = MessageSettings.centerWhite,
+  [MessageModes.Transaction] = MessageSettings.centerWhite,
+  [MessageModes.ValuableLoot] = MessageSettings.valuableLoot, -- centerGreen?
 
   [254] = MessageSettings.private
 }
@@ -155,7 +249,7 @@ function GameTextMessage.onZoomChange(self, oldZoom, newZoom)
 end
 
 function GameTextMessage.calculateVisibleTime(text)
-  return math.max(#text * 100, 4000)
+  return math.max(#text * 50, 4000)
 end
 
 function GameTextMessage.displayMessage(mode, text)
@@ -199,9 +293,13 @@ function GameTextMessage.displayMessage(mode, text)
 
   if msgtype.screenTarget then
     local label = messagesPanel:recursiveGetChildById(msgtype.screenTarget)
-    label:setText(text)
+    if msgtype.colored then
+      label:setColoredText(text)
+    else
+      label:setText(text)
+    end
     label:setColor(msgtype.color)
-    label:setFont(msgtype.font or DefaultFont)
+    setMessageFont(label, msgtype.font)
     label:setVisible(true)
     if msgtype.screenTarget == 'statusLabel' then
       updateStatusLabelPosition(label)
@@ -216,7 +314,30 @@ function GameTextMessage.displayMessage(mode, text)
 end
 
 function GameTextMessage.displayPrivateMessage(text)
-  GameTextMessage.displayMessage(254, text)
+  if not g_game.isOnline() then
+    return
+  end
+
+  local msgtype = MessageSettings.private
+  if not msgtype or not msgtype.screenTarget then
+    return
+  end
+
+  local label = messagesPanel:recursiveGetChildById(msgtype.screenTarget)
+  if not label then
+    return
+  end
+
+  label:setText(text)
+  label:setColor(msgtype.color)
+  setMessageFont(label, msgtype.font)
+  label:setVisible(true)
+  removeEvent(label.hideEvent)
+  label.hideEvent = scheduleEvent(function()
+    if isWidgetAlive(label) then
+      label:setVisible(false)
+    end
+  end, GameTextMessage.calculateVisibleTime(text))
 end
 
 function GameTextMessage.displayStatusMessage(text)

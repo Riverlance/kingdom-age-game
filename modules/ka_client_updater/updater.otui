@@ -32,6 +32,7 @@ UIWidget
     margin-top: 17
     margin-left: 29
     text-horizontal-auto-resize: true
+    ttf-stroke: 1 #000000bb
 
   Label
     id: bottomText
@@ -40,13 +41,18 @@ UIWidget
     anchors.left: prev.left
     margin-bottom: 17
     text-horizontal-auto-resize: true
+    ttf-stroke: 1 #000000bb
 
   Label
     id: rightText
     height: 28
-    font: delitschantiqua-20px
+    ttf-font: limited/modernantiqua
+    ttf-font-weight: 500
+    ttf-font-size: 20
+    ttf-stroke: 1 #000000bb
     color: #f0f0f0
     anchors.verticalCenter: emptyBar.verticalCenter
     anchors.right: emptyBar.right
+    margin-top: 1
     margin-right: 29
     text-horizontal-auto-resize: true

@@ -9,7 +9,7 @@ local debugging = false
 local minWidth = 200
 local maxWidth = 800
 
-local choiceHeight      = 14
+local choiceHeight      = 16
 local minVisibleChoices = 1
 local maxVisibleChoices = 10
 
@@ -583,12 +583,12 @@ do
             local text = field:getText()
 
             -- Min characters
-            if field.fieldMinChars > 0 and #text < field.fieldMinChars then
+            if field.fieldMinChars > 0 and string.utf8Length(text) < field.fieldMinChars then
               displayErrorBox(loc'${CorelibInfoError}', f(loc'${GameModalDialogCharsMinErrorMsg}', field.fieldName, field.fieldMinChars))
               return
 
             -- Max characters
-            elseif field.fieldMaxChars > 0 and #text > field.fieldMaxChars then
+            elseif field.fieldMaxChars > 0 and string.utf8Length(text) > field.fieldMaxChars then
               displayErrorBox(loc'${CorelibInfoError}', f(loc'${GameModalDialogCharsMaxErrorMsg}', field.fieldName, field.fieldMaxChars))
               return
             end

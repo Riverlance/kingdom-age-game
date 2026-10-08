@@ -93,7 +93,7 @@ function UICreatureButton:setCreature(data)
     self.skullId        = data:getSkull()
     self.emblemId       = data:getEmblem()
     self.specialIconId  = data:getSpecialIcon()
-    self.vocationId     = data:getVocation()
+    self.vocationId     = data:isPlayer() and data:getVocation() or VocationLearner
 
     return
   end
@@ -216,6 +216,21 @@ function UICreatureButton:updateStaticCircle() -- Update border
       labelWidget:setColor(color)
     end
   end
+end
+
+function UICreatureButton:resetState()
+  self.isHovered = false
+  self.isTarget = false
+  self.isFollowed = false
+
+  if self.creature then
+    self.creature:hideStaticCircle()
+  end
+
+  self:getChildById('creatureWidget'):setBorderWidth(0)
+  self:getChildById('label'):setColor(creatureButtonColors.onIdle.notHovered)
+  self:getChildById('skull'):setImageSource('')
+  self:getChildById('emblem'):setImageSource('')
 end
 
 function UICreatureButton:getCreatureMinimapWidget()

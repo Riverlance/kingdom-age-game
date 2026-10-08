@@ -3,7 +3,10 @@ Item < UIItem
   padding: 1
   image-source: /images/ui/slot/item
   image-clip: 0 0 34 34
-  font: verdana-11px-rounded
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 10
+  ttf-stroke: 1 black
   border-color: #faebd5
   color: white
 
@@ -12,3 +15,16 @@ Item < UIItem
 
   $disabled:
     color: #646464
+
+  UIWidget
+    id: tier
+    size: 10 8
+    image-source: /images/inventory/tiers-strip
+    image-clip: 0 0 10 8
+    image-size: 10 8
+    anchors.top: parent.top
+    anchors.right: parent.right
+    phantom: true
+    focusable: false
+    visible: false
+    image-smooth: true

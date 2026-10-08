@@ -4,18 +4,12 @@ MainWindow
   @onEnter: GameVipList.addVip()
   @onEscape: GameVipList.destroyAddWindow()
 
-  Label
-    &loc: '${GameVipListInfoCharName}:'
+  TextEdit
+    id: name
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-
-  TextEdit
-    id: name
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-top: 4
+    !placeholder: f(loc'${GameVipListInfoCharName}...')
 
   HorizontalSeparator
     anchors.left: parent.left

@@ -12,23 +12,45 @@ local debugInfo = false
 
 
 Locale = {
-  En = 1,
-  Pt = 2,
-  Es = 3,
-  De = 4,
-  Pl = 5,
-  Sv = 6,
+  En    = 1,
+  PtBr  = 2,
+  PtPt  = 3,
+  Es419 = 4,
+  EsEs  = 5,
+  Pl    = 6,
+  Ru    = 7,
+  Sv    = 8,
+  Nb    = 9,
+  De    = 10,
+  Nlnl  = 11,
+  Frfr  = 12,
+  Fi    = 13,
+  It    = 14,
+  ZhCn  = 15,
+  Ja    = 16,
+  Ko    = 17,
 }
 Locale.First = Locale.En
-Locale.Last  = Locale.Sv
+Locale.Last  = Locale.Ko
 
 Locales = {
-  [Locale.En] = 'en',
-  [Locale.Pt] = 'pt',
-  [Locale.Es] = 'es',
-  [Locale.De] = 'de',
-  [Locale.Pl] = 'pl',
-  [Locale.Sv] = 'sv',
+  [Locale.En]    = 'en',
+  [Locale.PtBr]  = 'ptbr',
+  [Locale.PtPt]  = 'ptpt',
+  [Locale.Es419] = 'es419',
+  [Locale.EsEs]  = 'eses',
+  [Locale.Pl]    = 'pl',
+  [Locale.Ru]    = 'ru',
+  [Locale.Sv]    = 'sv',
+  [Locale.Nb]    = 'nb',
+  [Locale.De]    = 'de',
+  [Locale.Nlnl]  = 'nlnl',
+  [Locale.Frfr]  = 'frfr',
+  [Locale.Fi]    = 'fi',
+  [Locale.It]    = 'it',
+  [Locale.ZhCn]  = 'zhcn',
+  [Locale.Ja]    = 'ja',
+  [Locale.Ko]    = 'ko',
 }
 
 
@@ -37,10 +59,6 @@ InstalledLocales = nil
 
 DefaultLocaleId = Locale.En
 CurrentLocaleId = DefaultLocaleId
-
-
-
-localesWindow = nil
 
 
 
@@ -81,19 +99,6 @@ function g_locales.installLocales()
   dofiles('/locales')
 end
 
-function g_locales.installLocaleFonts() -- See https://github.com/otland/otclient/pull/6
-  local locale = g_locales.getLocale()
-  if not locale then
-    return
-  end
-
-  for _, file in pairs(g_resources.listDirectoryFiles(f('/fonts/%s', locale.charset))) do
-    if g_resources.isFileType(file, 'otfont') then
-      g_fonts.importFont(f('/fonts/%s/%s', locale.charset, file))
-    end
-  end
-end
-
 function g_locales.getLocale()
   return InstalledLocales[CurrentLocaleId]
 end
@@ -106,12 +111,19 @@ function g_locales.setLocale(id)
 
   elseif locale == g_locales.getLocale() then
     g_settings.set('locale', id)
+    if g_fonts and g_fonts.setCjkVariant then
+      g_fonts.setCjkVariant(locale.cjkVariant or 'default')
+    end
     return
   end
 
   local prevLocaleId = CurrentLocaleId
   CurrentLocaleId    = id
   g_settings.set('locale', id)
+
+  if g_fonts and g_fonts.setCjkVariant then
+    g_fonts.setCjkVariant(locale.cjkVariant or 'default')
+  end
 
   rootWidget:onLocaleChange(id, prevLocaleId)
 
@@ -121,62 +133,6 @@ function g_locales.setLocale(id)
     pdebug(f('Using configured locale: %d', id))
   end
 end
-
-function g_locales.createWindow()
-  localesWindow          = g_ui.displayUI('locales')
-  localesWindow.onEscape = g_locales.destroyWindow
-
-  local localesPanel = localesWindow:getChildById('localesPanel')
-  local layout       = localesPanel:getLayout()
-  local spacing      = layout:getCellSpacing()
-  local size         = layout:getCellSize()
-
-  local count = 0
-  for id, locale in ipairs(InstalledLocales) do
-    local widget = g_ui.createWidget('LocalesButton', localesPanel)
-
-    widget:setImageSource(f('/images/ui/flags/%s', locale.name))
-    widget:setText(locale.languageName)
-
-    widget.onClick = function()
-      g_locales.destroyWindow()
-
-      -- If chose current locale
-      if id == CurrentLocaleId then
-        return
-      end
-
-      g_locales.setLocale(id)
-
-      restart()
-    end
-
-    count = count + 1
-  end
-
-  count = math.max(1, math.min(count, 3)) -- Display 3 per line
-  localesPanel:setWidth(size.width * count + spacing * (count - 1))
-
-  addEvent(withWeakWidget(localesWindow, function(widget)
-    widget:raise()
-    widget:focus()
-  end))
-end
-
-function g_locales.destroyWindow()
-  if not localesWindow then
-    return
-  end
-
-  localesWindow:destroy()
-  localesWindow = nil
-end
-
-function g_locales.getWindow()
-  return localesWindow
-end
-
-
 
 -- Client to server
 
@@ -259,12 +215,12 @@ function _G.loc(str, params)
     for i = 1, #reverseNumber do
       out = out .. reverseNumber:sub(i, i)
       if i % 3 == 0 and i ~= #number and i ~= #reverseNumber then
-        out = out .. locale.thousandsSeperator
+        out = out .. locale.thousandsSeparator
       end
     end
 
     if number[2] then
-      out = number[2] .. locale.decimalSeperator .. out
+      out = number[2] .. locale.decimalSeparator .. out
     end
 
     return out:reverse()
@@ -278,17 +234,8 @@ function _G.loc(str, params)
   return ret
 end
 
-do
-  local charsetFilenames = { -- In priority order!
-    'cp1252', -- en, pt, es, sv, de
-    'cp1250', -- pl
-  }
-
-  function g_locales.loadLocales(path)
-    for _, charsetFilename in ipairs(charsetFilenames) do
-      dofile(f('%sloc/%s', path, charsetFilename))
-    end
-  end
+function g_locales.loadLocales(path)
+  dofile(f('%sloc.lua', path))
 end
 
 
@@ -303,8 +250,6 @@ function g_locales.init()
   local localeId = tonumber(g_settings.get('locale'))
   g_locales.setLocale(localeId or DefaultLocaleId)
 
-  g_locales.installLocaleFonts() -- See https://github.com/otland/otclient/pull/6
-
   connect(g_game, {
     onGameStart = g_locales.onGameStart
   })
@@ -317,9 +262,6 @@ function g_locales.terminate() -- not in use at the moment
     onGameStart = g_locales.onGameStart
   })
 
-  disconnect(g_app, {
-    onRun = g_locales.createWindow
-  })
 end
 
 function g_locales.onGameStart()

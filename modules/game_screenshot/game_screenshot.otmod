@@ -1,0 +1,9 @@
+Module
+  name: game_screenshot
+  description: Automatic and manual screenshots
+  author: Kingdom Age
+  sandboxed: true
+  scripts: [ game_screenshot ]
+  dependencies: [ client_options, game_interface ]
+  @onLoad: GameScreenshot.init()
+  @onUnload: GameScreenshot.terminate()

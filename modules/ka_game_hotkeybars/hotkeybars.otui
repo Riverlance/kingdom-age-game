@@ -116,10 +116,10 @@ HotkeyBarContainer < UIHotkeyBarContainer
     phantom: true
     anchors.fill: parent
 
-  UIWidget
+  MenuButton
     id: deleteButton
-    image-source: /images/ui/_button/mini_window
-    image-clip: 28 0 14 14
+    icon-clip: 28 0 14 14
+    icon-size: 8 8
     size: 8 8
     visible: false
     anchors.top: parent.top

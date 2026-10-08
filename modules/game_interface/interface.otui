@@ -59,7 +59,10 @@ TrackerWidget < UIWidget
 
   UILabel
     id: distance
-    font: verdana-11px-antialised
+    ttf-font: verdanapro-v
+    ttf-font-weight: 700
+    ttf-font-size: 8
+    ttf-stroke: 1 black
     color: #ffc659
     text-auto-resize: true
     phantom: true
@@ -144,7 +147,6 @@ UIWidget
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      invert: true
 
   GameSidePanel
     id: gameRightSecondPanel
@@ -159,7 +161,6 @@ UIWidget
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      invert: true
 
   GameSidePanel
     id: gameRightThirdPanel
@@ -174,7 +175,6 @@ UIWidget
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      invert: true
 
   // Used also for lock widgets by server
   GameBottomPanel
@@ -413,13 +413,13 @@ UIWidget
     $hidden:
       size: 0 0
 
-    image-clip: 22 0 7 11
+    image-clip: 21 0 7 11
 
     $hover:
-      image-clip: 22 11 7 11
+      image-clip: 21 11 7 11
 
     $pressed:
-      image-clip: 22 22 7 11
+      image-clip: 21 22 7 11
 
   UIButton
     id: chatButton

@@ -18,11 +18,12 @@ NPCItemBox < Panel
 
     Creature
       id: outfit
-      size: 64 64
+      size: 76 76
+      padding-top: 8
       phantom: true
       anchors.top: parent.top
       anchors.horizontalCenter: parent.horizontalCenter
-      creature-size: 97
+      creature-size: 64
       image-source: none
       image-color: #ffffffff
 

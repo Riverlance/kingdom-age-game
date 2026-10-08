@@ -13,6 +13,11 @@ MiniWindow
   &save: true
   &contentMinimumHeight: 31
 
+  MiniWindowIconTooltipArea
+    &loct: '${BattleWindowTitle}\n\n${BattleAutoTargetTooltip}'
+    @locpar: return { NextTargetActionKey = NextTargetActionKey, PrevTargetActionKey = PrevTargetActionKey }
+    !tooltip-type: TooltipType.textBlock
+
   ArrowMenuButton
     &loct: '${CorelibInfoShowOptions}'
     anchors.verticalCenter: lockButton.verticalCenter
@@ -25,13 +30,6 @@ MiniWindow
   BallMenuButton
     id: sortMenuButton
     @onClick: GameBattleList.createSortMenu()
-
-  InfoMenuButton
-    &loct: '${BattleAutoTargetTooltip}'
-    @locpar: return { NextTargetActionKey = NextTargetActionKey, PrevTargetActionKey = PrevTargetActionKey }
-    !tooltip-type: TooltipType.textBlock
-    anchors.verticalCenter: sortMenuButton.verticalCenter
-    anchors.right: sortMenuButton.outsideLeft
 
   MiniWindowHeader
     height: 20

@@ -23,8 +23,6 @@ MiniWindow
     id: sortMenuButton
     @onClick: GamePartyList.createSortMenu()
 
-  InfoMenuButton
-
   MiniWindowHeader
     height: 41
 
@@ -159,7 +157,9 @@ MiniWindow
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      font: sans-8px
+      ttf-font: opensans-v
+      ttf-font-weight: 700
+      ttf-font-size: 8
       text-offset: 4 1
       phantom: false
 
@@ -211,7 +211,9 @@ MiniWindow
       anchors.top: prev.outsideBottom
       anchors.left: parent.left
       anchors.right: parent.right
-      font: sans-8px
+      ttf-font: opensans-v
+      ttf-font-weight: 700
+      ttf-font-size: 8
       text-offset: 4 1
       phantom: false
 

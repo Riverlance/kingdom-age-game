@@ -1,7 +1,7 @@
 CheckBox < UICheckBox
   size: 14 14
   text-align: left
-  text-offset: 16 0
+  text-offset: 18 0
   color: #c9bdab
   image-color: #dfdfdfff
   image-rect: 0 0 14 14
@@ -43,8 +43,10 @@ ColorBox < UICheckBox
     border-color: alpha
 
 ButtonBox < UICheckBox
-  font: verdana-11px-antialised
-  color: #98885e
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
+  color: $uiColorBorder
   size: 106 23
   //text-offset: 0 0
   text-align: center

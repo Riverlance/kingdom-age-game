@@ -1,5 +1,59 @@
 Panel
 
+  OptionCategoryLabel
+    &loc: '${ClientOptionsDisplayCategoryGeneral}'
+    anchors.top: parent.top
+    margin-top: 0
+
+  OptionLabel
+    id: gameScreenSizeLabel
+    &loc: '${ClientOptionsGameScreenSize}'
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionComboBox
+    id: gameScreenSize
+    anchors.top: prev.outsideBottom
+    anchors.right: prev.right
+    margin-top: 2
+
+  OptionLabel
+    &loc: '${ClientOptionsShaderFilter}'
+    $!first:
+      anchors.top: gameScreenSizeLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  OptionComboBox
+    id: shaderFilter
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    margin-top: 2
+
+  OptionCheckBox
+    id: transposedView
+    &loc: '${ClientOptionsTransposedView}'
+    &loct: '${ClientOptionsTransposedViewTooltip}'
+    !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
+
+  OptionCheckBox
+    id: dontStretchShrink
+    &loc: '${ClientOptionsDontStretchShrink}'
+    &loct: '${ClientOptionsDontStretchShrinkTooltip}'
+    !tooltip-type: TooltipType.textBlock
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsDisplayCategoryMouse}'
+
   OptionCheckBox
     id: enableHighlightMouseTarget
     &loc: '${ClientOptionsEnableHighlightMouseTarget}'
@@ -18,7 +72,17 @@ Panel
     anchors.right: prev.right
     margin-top: 2
 
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsDisplayCategoryFloor}'
+
   OptionLabel
+    id: floorViewModeLabel
     &loc: '${ClientOptionsFloorViewMode}'
     $!first:
       anchors.top: prev.outsideBottom
@@ -34,7 +98,8 @@ Panel
   OptionLabel
     &loc: '${ClientOptionsFloorFadingDelay}'
     $!first:
-      anchors.top: crosshair.outsideBottom
+      anchors.top: floorViewModeLabel.top
+      margin-top: 0
     anchors.left: parent.horizontalCenter
     margin-left: 10
 
@@ -47,14 +112,246 @@ Panel
 
   OptionLabel
     &loc: '${ClientOptionsShadowFloorIntensity}'
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
     $!first:
       anchors.top: floorViewMode.outsideBottom
 
   OptionScrollbar
     id: shadowFloorIntensity
+    anchors.right: prev.right
     minimum: 0
     maximum: 100
     symbol: %
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsDisplayCategoryEffect}'
+
+  OptionLabel
+    id: setEffectAlphaLabel
+    &loc: '${ClientOptionsEffectAlphaScroll}'
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
+
+  OptionScrollbar
+    id: setEffectAlphaScroll
+    anchors.right: prev.right
+    minimum: 10
+    maximum: 100
+    value: 100
+    symbol: %
+
+  OptionLabel
+    id: setMissileAlphaLabel
+    &loc: '${ClientOptionsMissileAlphaScroll}'
+    $!first:
+      anchors.top: setEffectAlphaLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
+
+  OptionScrollbar
+    id: setMissileAlphaScroll
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
+    minimum: 10
+    maximum: 100
+    value: 100
+    symbol: %
+
+
+
+  Panel
+    id: statsOptionsPanel
+    anchors.top: prev.outsideBottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 0
+    visible: false
+    layout:
+      type: anchor
+
+    OptionHorizontalSeparator
+      anchors.top: parent.top
+
+    OptionCategoryLabel
+      &loc: '${ClientOptionsDisplayCategoryStats}'
+
+    OptionLabel
+      id: leftArcLabel
+      &loc: '${ClientOptionsStatsCircleOptionLeft}'
+      &loct: '${ClientOptionsStatsCircleOptionLeftTooltip}'
+      anchors.right: parent.horizontalCenter
+      margin-right: 10
+
+    OptionComboBox
+      id: leftArcComboBox
+      anchors.top: prev.outsideBottom
+      anchors.left: prev.left
+      anchors.right: prev.right
+      margin-top: 2
+      @onTextChange: |
+        local option = self:getCurrentOption()
+        if option then
+          GameStatsCircle.setArcStatsType(GameStatsCircle.m.leftArc, option.data)
+        end
+
+    OptionLabel
+      id: rightArcLabel
+      &loc: '${ClientOptionsStatsCircleOptionRight}'
+      &loct: '${ClientOptionsStatsCircleOptionRightTooltip}'
+      $!first:
+        anchors.top: leftArcLabel.top
+        margin-top: 0
+      anchors.left: parent.horizontalCenter
+      margin-left: 10
+
+    OptionComboBox
+      id: rightArcComboBox
+      anchors.top: prev.outsideBottom
+      anchors.left: prev.left
+      anchors.right: prev.right
+      margin-top: 2
+      @onTextChange: |
+        local option = self:getCurrentOption()
+        if option then
+          GameStatsCircle.setArcStatsType(GameStatsCircle.m.rightArc, option.data)
+        end
+
+    OptionLabel
+      id: topArcLabel
+      &loc: '${ClientOptionsStatsCircleOptionTop}'
+      &loct: '${ClientOptionsStatsCircleOptionTopTooltip}'
+      anchors.right: parent.horizontalCenter
+      margin-right: 10
+
+    OptionComboBox
+      id: topArcComboBox
+      anchors.top: prev.outsideBottom
+      anchors.left: prev.left
+      anchors.right: prev.right
+      margin-top: 2
+      @onTextChange: |
+        local option = self:getCurrentOption()
+        if option then
+          GameStatsCircle.setArcStatsType(GameStatsCircle.m.topArc, option.data)
+        end
+
+    OptionLabel
+      id: bottomArcLabel
+      &loc: '${ClientOptionsStatsCircleOptionBottom}'
+      &loct: '${ClientOptionsStatsCircleOptionBottomTooltip}'
+      $!first:
+        anchors.top: topArcLabel.top
+        margin-top: 0
+      anchors.left: parent.horizontalCenter
+      margin-left: 10
+
+    OptionComboBox
+      id: bottomArcComboBox
+      anchors.top: prev.outsideBottom
+      anchors.left: prev.left
+      anchors.right: prev.right
+      margin-top: 2
+      @onTextChange: |
+        local option = self:getCurrentOption()
+        if option then
+          GameStatsCircle.setArcStatsType(GameStatsCircle.m.bottomArc, option.data)
+        end
+
+    OptionLabel
+      id: sizeLabel
+      &loc: '${ClientOptionsStatsCircleOptionSize}'
+      &loct: '${ClientOptionsStatsCircleOptionSizeTooltip}'
+      anchors.right: parent.horizontalCenter
+      margin-right: 10
+
+    OptionScrollbar
+      id: sizeScrollbar
+      anchors.left: prev.left
+      anchors.right: prev.right
+      minimum: 1
+      maximum: 100
+      symbol: %
+      @onValueChange: GameStatsCircle.setSize(self:getValue() / 100)
+
+    OptionLabel
+      id: distFromCenLabel
+      &loc: '${CorelibInfoDistance}'
+      &loct: '${ClientOptionsStatsCircleOptionDistanceTooltip}'
+      $!first:
+        anchors.top: sizeLabel.top
+        margin-top: 0
+      anchors.left: parent.horizontalCenter
+      margin-left: 10
+
+    OptionScrollbar
+      id: distFromCenScrollbar
+      anchors.left: prev.left
+      anchors.right: prev.right
+      minimum: 0
+      maximum: 100
+      symbol: %
+      @onValueChange: GameStatsCircle.setDistanceFromCenter(self:getValue() / 100)
+
+    OptionLabel
+      id: fillOpacityLabel
+      &loc: '${ClientOptionsStatsCircleOptionFillOpacity}'
+      &loct: '${ClientOptionsStatsCircleOptionFillOpacityTooltip}'
+      anchors.right: parent.horizontalCenter
+      margin-right: 10
+
+    OptionScrollbar
+      id: fillOpacityScrollbar
+      anchors.left: prev.left
+      anchors.right: prev.right
+      minimum: 0
+      maximum: 100
+      symbol: %
+      @onValueChange: GameStatsCircle.setCircleFillOpacity(self:getValue() / 100)
+
+    OptionLabel
+      id: bgOpacityLabel
+      &loc: '${ClientOptionsStatsCircleOptionBackgroundOpacity}'
+      &loct: '${ClientOptionsStatsCircleOptionBackgroundOpacityTooltip}'
+      $!first:
+        anchors.top: fillOpacityLabel.top
+        margin-top: 0
+      anchors.left: parent.horizontalCenter
+      margin-left: 10
+
+    OptionScrollbar
+      id: bgOpacityScrollbar
+      anchors.left: prev.left
+      anchors.right: prev.right
+      minimum: 0
+      maximum: 100
+      symbol: %
+      @onValueChange: GameStatsCircle.setCircleBackgroundOpacity(self:getValue() / 100)
+
+    OptionCheckBox
+      id: gameScreenBasedCheckBox
+      &loc: '${ClientOptionsStatsCircleOptionGameScreenBased}'
+      &loct: '${ClientOptionsStatsCircleOptionGameScreenBasedTooltip}'
+      $!first:
+        margin-top: 10
+      @onCheckChange: GameStatsCircle.setGameScreenBased(self:isChecked())
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsDisplayCategoryInformation}'
 
   OptionLabel
     &loc: '${ClientOptionsCreatureInformationScale}'
@@ -67,55 +364,64 @@ Panel
     minimum: 0
     maximum: 9
     minimum-text: Auto
+    !enabled: g_gameConfig.isDrawingInformationByWidget() == false
 
   OptionLabel
+    id: staticTextScaleLabel
     &loc: '${ClientOptionsStaticTextScale}'
-    $!first:
-      anchors.top: shadowFloorIntensity.outsideBottom
-    anchors.left: parent.horizontalCenter
-    margin-left: 10
+    anchors.right: parent.horizontalCenter
+    margin-right: 10
 
   OptionScrollbar
     id: staticTextScale
-    anchors.top: prev.outsideBottom
-    anchors.left: prev.left
+    anchors.right: prev.right
     minimum: 0
     maximum: 9
     minimum-text: Auto
 
   OptionLabel
     &loc: '${ClientOptionsAnimatedTextScale}'
-    anchors.right: parent.horizontalCenter
-    margin-right: 10
+    $!first:
+      anchors.top: staticTextScaleLabel.top
+      margin-top: 0
+    anchors.left: parent.horizontalCenter
+    margin-left: 10
 
   OptionScrollbar
     id: animatedTextScale
-    anchors.right: prev.right
+    anchors.top: prev.outsideBottom
+    anchors.left: prev.left
     minimum: 0
     maximum: 9
     minimum-text: Auto
 
   OptionCheckBox
-    id: dontStretchShrink
-    &loc: '${ClientOptionsDontStretchShrink}'
-    &loct: '${ClientOptionsDontStretchShrinkTooltip}'
+    id: showFps
+    &loc: '${ClientOptionsShowFps}'
+    &loct: '${ClientOptionsShowFpsTooltip}'
     !tooltip-type: TooltipType.textBlock
     $!first:
       margin-top: 10
+
+  OptionCheckBox
+    id: showPing
+    &loc: '${ClientOptionsShowPing}'
+    &loct: '${ClientOptionsShowPingTooltip}'
+    !tooltip-type: TooltipType.textBlock
 
   OptionCheckBox
     id: showHotkeybars
     &loc: '${ClientOptionsShowHotkeybars}'
     &loct: '${ClientOptionsShowHotkeybarsTooltip}'
     !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
 
   OptionCheckBox
     id: clearLootbarItemsOnEachDrop
     &loc: '${ClientOptionsClearLootbarItemsOnEachDrop}'
     &loct: '${ClientOptionsClearLootbarItemsOnEachDropTooltip}'
     !tooltip-type: TooltipType.textBlock
-
-  OptionHorizontalSeparator
 
   OptionCheckBox
     id: showText
@@ -126,6 +432,7 @@ Panel
   OptionCheckBox
     id: showNames
     &loc: '${ClientOptionsShowNames}'
+    !enabled: g_gameConfig.isDrawingInformationByWidget() == false
 
   OptionCheckBox
     id: showIcons
@@ -134,12 +441,14 @@ Panel
   OptionCheckBox
     id: showHealth
     &loc: '${ClientOptionsShowHealth}'
+    !enabled: g_gameConfig.isDrawingInformationByWidget() == false
 
   OptionCheckBox
     id: showMana
     &loc: '${ClientOptionsShowMana}'
     &loct: '${ClientOptionsShowManaTooltip}'
     !tooltip-type: TooltipType.textBlock
+    !enabled: g_gameConfig.isDrawingInformationByWidget() == false
 
   OptionCheckBox
     id: showVigor
@@ -152,15 +461,3 @@ Panel
   OptionCheckBox
     id: showExpBar
     &loc: '${ClientOptionsShowExpBar}'
-
-  OptionCheckBox
-    id: showFps
-    &loc: '${ClientOptionsShowFps}'
-    &loct: '${ClientOptionsShowFpsTooltip}'
-    !tooltip-type: TooltipType.textBlock
-
-  OptionCheckBox
-    id: showPing
-    &loc: '${ClientOptionsShowPing}'
-    &loct: '${ClientOptionsShowPingTooltip}'
-    !tooltip-type: TooltipType.textBlock

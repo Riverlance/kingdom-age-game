@@ -7,7 +7,7 @@ EmoteWindow < UIWidget
   padding: 4
   image-source: /images/ui/_background/default_stone_blue
   image-repeated: true
-  border: 2 #98885e
+  border: 2 $uiColorBorder
   layout:
     type: grid
     cell-size: 32 32
@@ -28,9 +28,9 @@ EmoteWindowButton < Button
 
 EmoteButton < UIButton
   $hover:
-    border: 1 #98885e
+    border: 1 $uiColorBorder
   $!hover:
-    border: 0 #98885e
+    border: 0 $uiColorBorder
   @onClick: GameEmotes.useEmote(self.id)
 
   UIWidget

@@ -5,7 +5,36 @@ function UIGameMap.create()
   gameMap:setKeepAspectRatio(true)
   gameMap:setVisibleDimension({width = 15, height = 11})
   gameMap:setDrawLights(true)
+  gameMap.interactiveText = nil
   return gameMap
+end
+
+function UIGameMap:clearInteractiveText()
+  if self.interactiveText then
+    g_mouse.popCursor('pointer')
+    self.interactiveText = nil
+  end
+end
+
+function UIGameMap:updateInteractiveText(mousePos)
+  local interactiveText = self:getInteractiveText(mousePos)
+  if interactiveText == self.interactiveText then
+    return interactiveText
+  end
+
+  self:clearInteractiveText()
+  if interactiveText ~= '' then
+    self.interactiveText = interactiveText
+    g_mouse.pushCursor('pointer')
+  end
+
+  return self.interactiveText
+end
+
+function UIGameMap:onHoverChange(hovered)
+  if not hovered then
+    self:clearInteractiveText()
+  end
 end
 
 function UIGameMap:onDragEnter(mousePos)
@@ -21,7 +50,7 @@ function UIGameMap:onDragEnter(mousePos)
 
   self.currentDragThing = thing
 
-  if thing:isItem() and thing:isPickupable() then
+  if thing:isItem() and not thing:isNotMoveable() then
     g_mouseicon.displayItem(thing)
   end
   g_mouse.pushCursor('target')
@@ -32,6 +61,7 @@ end
 function UIGameMap:onDragLeave(droppedWidget, mousePos)
   self.currentDragThing = nil
   self.hoveredWho = nil
+  self:clearInteractiveText()
   g_mouseicon.hide()
   g_mouse.popCursor('target')
   return true
@@ -54,8 +84,13 @@ function UIGameMap:onDrop(widget, mousePos)
   end
 
   local thingTile = thing:getTile()
-  if thingPos.x ~= 65535 and not thingTile then
-    return false
+  if thingPos.x ~= 65535 then
+    if not thingTile then
+      return false
+    end
+    if thingTile:getThingStackPos(thing) == -1 then
+      return false
+    end
   end
 
   local toPos = tile:getPosition()
@@ -69,6 +104,7 @@ function UIGameMap:onDrop(widget, mousePos)
     g_game.move(thing, toPos, 1)
   end
 
+  g_mouseicon.hide()
   return true
 end
 
@@ -83,7 +119,8 @@ function UIGameMap:onMousePress()
   end
 end
 
-function UIGameMap:onMouseMove()
+function UIGameMap:onMouseMove(mousePos)
+  self:updateInteractiveText(mousePos)
   return false
 end
 
@@ -92,6 +129,14 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
 
   if not self.allowNextRelease then
     return true
+  end
+
+  if mouseButton == MouseLeftButton then
+    local interactiveText = self:updateInteractiveText(mousePosition)
+    if interactiveText and interactiveText ~= '' and GameConsole and GameConsole.sendNpcMessage then
+      GameConsole.sendNpcMessage(interactiveText)
+      return true
+    end
   end
 
   -- Happens when clicking outside of map boundaries

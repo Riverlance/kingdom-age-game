@@ -436,6 +436,7 @@ function GamePlayerShop.createItemBox(item)
   boxItem:setItemId(item.clientId)
   boxItem:setItemSubType(item.subType or 0)
   boxItem:updateBackground()
+  boxItem.hoverLookAllowVirtual = true
 
   if item.temp then
     shopItemBox:setOpacity(0.5)
@@ -470,10 +471,8 @@ end
 function GamePlayerShop.refreshTradeItems()
   print("refresh trade items")
   local layout                = itemsPanel:getLayout()
-  local localPlayer           = g_game.getLocalPlayer()
-
-  -- Disable layout updates
   layout:disableUpdates()
+  local localPlayer           = g_game.getLocalPlayer()
 
   -- Clear selected item
   GamePlayerShop.clearSelectedItem()
@@ -492,10 +491,8 @@ function GamePlayerShop.refreshTradeItems()
     GamePlayerShop.createItemBox(tradeItem)
   end
 
-  -- Enable layout updates
-  layout:enableUpdates()
-
   -- Force layout update
+  layout:enableUpdates()
   layout:update()
 end
 
@@ -720,7 +717,8 @@ function GamePlayerShop.onClose()
   GamePlayerShop.hide()
 end
 
-function GamePlayerShop.onPlayerGoods(money, bankMoney, items)
+function GamePlayerShop.onPlayerGoods(money, bankMoney, _kapsCoins, _kaps, _townTrustLevel,
+                                      _townTrustExperience, _townTrustExpOfActualLevel, _townTrustExpToNextLevel, items)
   playerItems = { }
 
   playerMoney     = money

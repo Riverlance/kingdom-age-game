@@ -15,6 +15,7 @@ Module
     - game_textmessage
     - game_modaldialog
     - game_attachedeffects
+    - game_paperdolls
     - ka_game_screenimage
     - ka_game_lootbar
     - ka_game_blinkhit
@@ -31,6 +32,7 @@ Module
 
     // Windows
     - game_containers
+    - game_walk
     - game_console
     - game_ruleviolation
 
@@ -45,9 +47,11 @@ Module
     - game_unjustifiedpoints
     - game_minimap
     - game_viplist
+    - game_creatureinformation
 
     // Top menu left buttons
     - game_hotkeys
     - ka_game_hotkeybars
     - game_questlog
     - ka_game_dailyreward
+    - game_screenshot

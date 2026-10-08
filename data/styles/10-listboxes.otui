@@ -1,14 +1,14 @@
 HorizontalList < UIScrollArea
   layout: horizontalBox
   border-width: 1
-  border-color: #98885e
+  border-color: $uiColorBorder
   image-source: /images/ui/textedit
   image-border: 1
 
 VerticalList < UIScrollArea
   layout: verticalBox
   border-width: 1
-  border-color: #98885e
+  border-color: $uiColorBorder
   image-source: /images/ui/textedit
   image-border: 1
 

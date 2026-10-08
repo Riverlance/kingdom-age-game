@@ -1,5 +1,10 @@
 Panel
 
+  OptionCategoryLabel
+    &loc: '${ClientOptionsPanelCategoryGeneral}'
+    anchors.top: parent.top
+    margin-top: 0
+
   OptionLabel
     &loc: '${ClientOptionsSidePanelsPriority}'
     &loct: '${ClientOptionsSidePanelsPriorityTooltip}'
@@ -13,7 +18,37 @@ Panel
     id: panelsPriorityRightSide
     &loc: '${ClientOptionsPanelsPriorityRightSide}'
 
+
+
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsPanelCategoryInformation}'
+
+  OptionCheckBox
+    id: showExpiryInInventory
+    &loc: '${ClientOptionsShowExpiryInInventory}'
+    &loct: '${ClientOptionsShowExpiryInInventoryTooltip}'
+    !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
+
+  OptionCheckBox
+    id: showExpiryInContainers
+    &loc: '${ClientOptionsShowExpiryInContainers}'
+    &loct: '${ClientOptionsShowExpiryInContainersTooltip}'
+    !tooltip-type: TooltipType.textBlock
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsPanelCategorySticker}'
 
   OptionLabel
     id: leftStickerLabel

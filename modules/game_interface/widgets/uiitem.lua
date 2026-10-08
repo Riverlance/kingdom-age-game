@@ -42,17 +42,27 @@ function UIItem:onDrop(widget, mousePos)
   end
 
   local item = widget.currentDragThing
-  if not item:isItem() then
+  if not item or not item:isItem() then
     return false
   end
 
   local itemPos = item:getPosition()
+  if not itemPos then
+    return false
+  end
+
   local itemTile = item:getTile()
   if itemPos.x ~= 65535 and not itemTile then
     return false
   end
 
   local toPos = self.position
+  if not toPos and self:getParent() and self:getParent().slotPosition then
+    toPos = self:getParent().slotPosition
+  end
+  if not toPos then
+    return false
+  end
   if itemPos.x == toPos.x and itemPos.y == toPos.y and itemPos.z == toPos.z then
     return false
   end
@@ -63,6 +73,7 @@ function UIItem:onDrop(widget, mousePos)
     g_game.move(item, toPos, 1)
   end
 
+  g_mouseicon.hide()
   return true
 end
 
@@ -74,12 +85,20 @@ function UIItem:onDestroy()
   if self.hoveredWho then
     self.hoveredWho = nil
   end
+
+  if self:isVirtual() and g_mouseicon then
+    g_mouseicon.hide()
+  end
 end
 
 function UIItem:onHoverChange(hovered)
   UIWidget.onHoverChange(self, hovered)
 
   if self:isVirtual() or not self:isDraggable() then
+    local draggingWidget = g_ui.getDraggingWidget()
+    if not draggingWidget or draggingWidget == self then
+      g_mouseicon.hide()
+    end
     return
   end
 
@@ -104,6 +123,7 @@ function UIItem:onMouseRelease(mousePosition, mouseButton)
   end
 
   if self:isVirtual() then
+    g_mouseicon.hide()
     return false
   end
 

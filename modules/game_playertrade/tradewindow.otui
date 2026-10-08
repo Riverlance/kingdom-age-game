@@ -1,7 +1,7 @@
 TradeWindow < MiniWindow
   &loc: '${GamePlayerTradeWindowTitle}'
 
-  UIItem
+  Item
     id: tradeItem
     virtual: true
     size: 16 16

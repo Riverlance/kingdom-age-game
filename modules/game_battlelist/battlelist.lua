@@ -24,6 +24,30 @@ mouseWidget = nil
 
 currentTarget = nil
 
+local BattleButtonPool = ObjectPool.new(function()
+  local widget = g_ui.createWidget('BattleButton')
+  widget.onlyOutfit = true
+  widget:show()
+  widget:setOn(true)
+  widget.onHoverChange = GameBattleList.onBattleButtonHoverChange
+  widget.onMouseRelease = GameBattleList.onBattleButtonMouseRelease
+  return widget
+end, function(widget)
+  widget:resetState()
+
+  if widget:getParent() then
+    widget:getParent():removeChild(widget)
+  end
+
+  widget:show()
+  widget:setOn(true)
+  widget.cid = nil
+  widget.outfit = nil
+  widget.name = nil
+  widget.nickname = nil
+  widget.data = nil
+end)
+
 
 -- Sorting
 
@@ -62,8 +86,8 @@ local defaultValues = {
   filterNeutral      = true,
   filterParty        = true,
 
-  sortType  = BattleSortType.Distance,
-  sortOrder = BattleOrder.Ascending
+  sortType  = SortType.Distance,
+  sortOrder = Order.Ascending
 }
 
 -- Position checking
@@ -104,9 +128,6 @@ function GameBattleList.init()
     }
   end
 
-  GameBattleList.setSortType(GameBattleList.getSortType())
-  GameBattleList.setSortOrder(GameBattleList.getSortOrder())
-
   arrowMenuButton = battleWindow:getChildById('arrowMenuButton')
   arrowMenuButton:setOn(not g_settings.getValue('BattleList', 'filterPanel', defaultValues.filterPanel))
   GameBattleList.onClickArrowMenuButton(arrowMenuButton)
@@ -135,6 +156,9 @@ function GameBattleList.init()
   GameBattleList.onClickFilterParty(filterPartyButton)
 
   battlePanel = battleWindow:getChildById('contentsPanel'):getChildById('battlePanel')
+
+  GameBattleList.setSortType(GameBattleList.getSortType())
+  GameBattleList.setSortOrder(GameBattleList.getSortOrder())
 
   mouseWidget = g_ui.createWidget('UIButton')
   mouseWidget:setVisible(false)
@@ -219,6 +243,7 @@ function GameBattleList.terminate()
   mouseWidget:destroy()
 
   battleTopMenuButton:destroy()
+  BattleButtonPool:clear()
   battleWindow:destroy()
 
   g_keyboard.unbindKeyDown('Ctrl+B')
@@ -288,12 +313,8 @@ function GameBattleList.add(creature)
 
   -- Register first time creature adding
 
-  button            = g_ui.createWidget('BattleButton')
-  button.onlyOutfit = true
+  button            = BattleButtonPool:get()
   button:setup(creature)
-
-  button.onHoverChange  = GameBattleList.onBattleButtonHoverChange
-  button.onMouseRelease = GameBattleList.onBattleButtonMouseRelease
 
   battleList[cid] = button
   table.insert(battleListByIndex, battleList[cid])
@@ -323,7 +344,7 @@ function GameBattleList.remove(creature)
   end
 
   if battleList[cid] then
-    battleList[cid]:destroy()
+    BattleButtonPool:release(battleList[cid])
     battleList[cid] = nil
   end
   table.remove(battleListByIndex, index)
@@ -611,20 +632,30 @@ function GameBattleList.sortList()
 end
 
 function GameBattleList.updateList()
+  battlePanel:disableUpdateTemporarily()
   GameBattleList.sortList()
   for i = 1, #battleListByIndex do
-    battlePanel:moveChildToIndex(battleListByIndex[i], i)
+    local battleButton = battleListByIndex[i]
+    if battleButton then
+      battlePanel:moveChildToIndex(battleButton, i)
+    end
   end
   GameBattleList.filterButtons()
 end
 
 function GameBattleList.clearList()
+  currentTarget = nil
+
+  for _, button in pairs(battleList) do
+    BattleButtonPool:release(button)
+  end
+
   battleList         = { }
   battleListByIndex  = { }
-  battlePanel:destroyChildren()
 end
 
 function GameBattleList.refreshList()
+  battlePanel:disableUpdateTemporarily()
   GameBattleList.clearList()
 
   for _, creature in pairs(GameInterface.getMapPanel():getSpectators()) do
@@ -680,11 +711,23 @@ function GameBattleList.onFollowingCreatureChange(creature, prevCreature)
     button:update()
   end
 
-  if prevButton then
-    prevButton.isTarget = false
-    prevButton.isFollowed = false
-    prevButton:update()
+  if creature then
+    if prevButton then
+      prevButton.isTarget = false
+      prevButton.isFollowed = false
+      prevButton:update()
+      GameBattleList.onBattleButtonHoverChange(prevButton, prevButton.isHovered)
+    end
+  else
+    -- Clear stale follow flags when following is cancelled without a previous creature.
+    for _, battleButton in pairs(battleList) do
+      if battleButton.isFollowed then
+        battleButton.isFollowed = false
+        battleButton:update()
+      end
+    end
   end
+
 end
 
 function GameBattleList.onAppear(creature)
@@ -708,10 +751,15 @@ function GameBattleList.onDisappear(creature)
 end
 
 function GameBattleList.onPositionChange(creature, pos, oldPos)
+  battlePanel:disableUpdateTemporarily()
   local button = battleList[creature:getId()]
   local mapPanel = GameInterface.getMapPanel()
   local posCheck = g_clock.millis()
   local diffTime = posCheck - lastPosCheck
+
+  if creature:isLocalPlayer() and pos and oldPos and pos.z ~= oldPos.z then
+    addEvent(GameBattleList.refreshList)
+  end
 
   if creature:isLocalPlayer() or (GameBattleList.getSortType() == SortType.Distance and diffTime > posUpdateDelay) or (button and not button:isOn() and mapPanel and mapPanel:isInRange(pos)) then
     GameBattleList.updateList()

@@ -1,0 +1,43 @@
+-- Consolidated UTF-8 locale file.
+
+g_locales.addTranslations({
+  GameContainersCurrentPage = {
+    en    = "Page %d of %d",
+    ptbr  = "Página %d de %d",
+    ptpt  = "Página %d de %d",
+    es419 = "Página %d de %d",
+    eses  = "Página %d de %d",
+    pl    = "Strona %d z %d",
+    ru    = "Страница %d из %d",
+    sv    = "Sida %d av %d",
+    nb    = "Side %d av %d",
+    de    = "Seite %d von %d",
+    nlnl  = "Pagina %d van %d",
+    frfr  = "Page %d sur %d",
+    fi    = "Sivu %d/%d",
+    it    = "Pagina %d di %d",
+    zhcn  = "第 %d 页，共 %d 页",
+    ja    = "%d / %dページ",
+    ko    = "%d / %d 페이지",
+  },
+
+  GameContainersArrowUpButton = {
+    en    = "Back",
+    ptbr  = "Voltar",
+    ptpt  = "Voltar",
+    es419 = "Atrás",
+    eses  = "Atrás",
+    pl    = "Wstecz",
+    ru    = "Назад",
+    sv    = "Tillbaka",
+    nb    = "Tilbake",
+    de    = "Zurück",
+    nlnl  = "Terug",
+    frfr  = "Retour",
+    fi    = "Takaisin",
+    it    = "Indietro",
+    zhcn  = "返回",
+    ja    = "戻る",
+    ko    = "뒤로",
+  },
+})

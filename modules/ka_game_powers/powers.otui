@@ -13,6 +13,10 @@ MiniWindow
   &save: true
   &contentMinimumHeight: 42
 
+  MiniWindowIconTooltipArea
+    !tooltip: f(loc'${GamePowersWindowTitle}\n\n${GamePowersButtonInfo}', 'Ctrl+K')
+    !tooltip-type: TooltipType.textBlock
+
   ArrowMenuButton
     &loct: '${CorelibInfoShowOptions}'
     anchors.verticalCenter: lockButton.verticalCenter
@@ -25,10 +29,6 @@ MiniWindow
   BallMenuButton
     id: sortMenuButton
     @onClick: GamePowers.createSortMenu()
-
-  InfoMenuButton
-    !tooltip: f(loc'${GamePowersButtonInfo}', 'Ctrl+K')
-    !tooltip-type: TooltipType.textBlock
 
   MiniWindowHeader
     height: 20

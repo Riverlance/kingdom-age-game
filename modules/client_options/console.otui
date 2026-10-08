@@ -1,16 +1,22 @@
 Panel
 
+  OptionCategoryLabel
+    &loc: '${ClientOptionsConsoleCategoryGeneral}'
+    anchors.top: parent.top
+    margin-top: 0
+
   OptionCheckBox
     id: autoDisableChatOnSendMessage
     &loc: '${ClientOptionsAutoDisableChatOnSendMessage}'
 
-  OptionCheckBox
-    id: showTimestampsInConsole
-    &loc: '${ClientOptionsShowTimestampsInConsole}'
 
-  OptionCheckBox
-    id: showLevelsInConsole
-    &loc: '${ClientOptionsShowLevelsInConsole}'
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsConsoleCategorySource}'
 
   OptionCheckBox
     id: showInfoMessagesInConsole
@@ -25,9 +31,34 @@ Panel
     &loc: '${ClientOptionsShowStatusMessagesInConsole}'
 
   OptionCheckBox
+    id: showOthersStatusMessagesInConsole
+    &loc: '${ClientShowOthersStatusMessagesInConsole}'
+
+  OptionCheckBox
     id: showPrivateMessagesInConsole
     &loc: '${ClientOptionsShowPrivateMessagesInConsole}'
 
   OptionCheckBox
     id: showPrivateMessagesOnScreen
     &loc: '${ClientOptionsShowPrivateMessagesOnScreen}'
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsConsoleCategoryInformation}'
+
+  OptionCheckBox
+    id: showTimestampsInConsole
+    &loc: '${ClientOptionsShowTimestampsInConsole}'
+
+  OptionCheckBox
+    id: showLevelsInConsole
+    &loc: '${ClientOptionsShowLevelsInConsole}'
+
+  OptionCheckBox
+    id: showHighlightedUnderline
+    &loc: '${ClientOptionsShowHighlightedUnderline}'

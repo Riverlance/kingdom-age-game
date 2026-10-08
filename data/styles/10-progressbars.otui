@@ -4,8 +4,11 @@ ProgressBar < UIProgressBar
   background-color: gray
   image-source: /images/ui/_background/progress_bar
   image-border: 1
-  font: verdana-11px-rounded
-  text-offset: 0 1
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 10
+  ttf-stroke: 1 black
+  text-offset: 0 -1
   margin-top: 2
   margin-bottom: 2
 
@@ -21,8 +24,11 @@ ColorProgressBar < UIProgressBar
   background-color: gray
   background-padding: 1
   border: 1 black
-  font: verdana-11px-rounded
-  text-offset: 0 1
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 10
+  ttf-stroke: 1 black
+  text-offset: 0 -1
   margin-top: 2
   margin-bottom: 2
 
@@ -31,4 +37,8 @@ ProgressRect < UIProgressRect
   phantom: true
   color: white
   background-color: #00000088
-  font: verdana-11px-rounded
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 10
+  ttf-stroke: 1 black
+  text-offset: 0 -1

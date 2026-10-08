@@ -27,7 +27,6 @@ VerticalScrollBar < UIScrollBar
   image-source: /images/ui/scrollbar
   image-clip: 39 0 13 65
   image-border: 1
-  pixels-scroll: true
 
   UIButton
     id: decrementButton
@@ -76,7 +75,7 @@ HorizontalScrollBar < UIScrollBar
 
   UIButton
     id: decrementButton
-    anchors.top: parent.top
+    anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left
     image-source: /images/ui/scrollbar
     image-clip: 0 39 13 13
@@ -91,7 +90,7 @@ HorizontalScrollBar < UIScrollBar
 
   UIButton
     id: incrementButton
-    anchors.bottom: parent.bottom
+    anchors.verticalCenter: parent.verticalCenter
     anchors.right: parent.right
     size: 13 13
     image-source: /images/ui/scrollbar

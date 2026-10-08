@@ -1,0 +1,43 @@
+-- Consolidated UTF-8 locale file.
+
+g_locales.addTranslations({
+  GameTrackerWindowTitle = {
+    en    = "Set a color",
+    ptbr  = "Definir uma cor",
+    ptpt  = "Definir uma cor",
+    es419 = "Establecer un color",
+    eses  = "Establecer un color",
+    pl    = "Ustaw kolor",
+    ru    = "Установить цвет",
+    sv    = "Ange en färg",
+    nb    = "Angi en farge",
+    de    = "Farbe festlegen",
+    nlnl  = "Een kleur instellen",
+    frfr  = "Choisir une couleur",
+    fi    = "Valitse väri",
+    it    = "Imposta un colore",
+    zhcn  = "设置颜色",
+    ja    = "色を設定",
+    ko    = "색상 설정",
+  },
+
+  GameTrackerByPosWindowTitle = {
+    en    = "Track another position",
+    ptbr  = "Rastrear outra posição",
+    ptpt  = "Rastrear outra posição",
+    es419 = "Rastrear otra posición",
+    eses  = "Rastrear otra posición",
+    pl    = "Śledź inną pozycję",
+    ru    = "Отслеживать другую позицию",
+    sv    = "Spåra en annan position",
+    nb    = "Spor en annen posisjon",
+    de    = "Eine andere Position verfolgen",
+    nlnl  = "Een andere positie volgen",
+    frfr  = "Suivre une autre position",
+    fi    = "Seuraa toista sijaintia",
+    it    = "Segui un’altra posizione",
+    zhcn  = "追踪另一个位置",
+    ja    = "別の位置を追跡",
+    ko    = "다른 위치 추적",
+  },
+})

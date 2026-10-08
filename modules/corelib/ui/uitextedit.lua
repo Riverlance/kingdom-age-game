@@ -157,7 +157,7 @@ function UITextEdit:onTextChange(newText, oldText)
   end
 
   -- Max characters
-  if (self.maxChars or 0) > 0 and #newText > self.maxChars then
+  if (self.maxChars or 0) > 0 and string.utf8Length(newText) > self.maxChars then
     return onError()
 
   -- Regex

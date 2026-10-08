@@ -73,6 +73,9 @@ function GameContainers.refreshContainerItems(container)
   for slot = 0, container:getCapacity() - 1 do
     local itemWidget = container.itemsPanel:getChildById('item' .. slot)
     itemWidget:setItem(container:getItem(slot))
+    ItemsDatabase.setTier(itemWidget, container:getItem(slot))
+    itemWidget:setShowDuration(ClientOptions.getOption('showExpiryInContainers'))
+    itemWidget:setShowCharges(ClientOptions.getOption('showExpiryInContainers'))
     itemWidget:updateBackground()
   end
 
@@ -236,6 +239,9 @@ function GameContainers.onContainerOpen(container, previousContainer)
   -- Set item widget
   local containerItemWidget = containerWindow:getChildById('containerItemWidget')
   containerItemWidget:setItem(container:getContainerItem())
+  ItemsDatabase.setTier(containerItemWidget, container:getContainerItem())
+  containerItemWidget:setShowDuration(ClientOptions.getOption('showExpiryInContainers'))
+  containerItemWidget:setShowCharges(ClientOptions.getOption('showExpiryInContainers'))
   containerItemWidget:setPhantom(true)
 
   -- Set item name
@@ -257,6 +263,9 @@ function GameContainers.onContainerOpen(container, previousContainer)
     local itemWidget = g_ui.createWidget('Item', contentsPanel)
     itemWidget:setId('item' .. slot)
     itemWidget:setItem(container:getItem(slot))
+    ItemsDatabase.setTier(itemWidget, container:getItem(slot))
+    itemWidget:setShowDuration(ClientOptions.getOption('showExpiryInContainers'))
+    itemWidget:setShowCharges(ClientOptions.getOption('showExpiryInContainers'))
     itemWidget:setMargin(0)
     itemWidget:updateBackground()
     itemWidget.position = container:getSlotPosition(slot)
@@ -304,5 +313,8 @@ function GameContainers.onContainerUpdateItem(container, slot, item, oldItem)
 
   local itemWidget = container.itemsPanel:getChildById('item' .. slot)
   itemWidget:setItem(item)
+  ItemsDatabase.setTier(itemWidget, item)
+  itemWidget:setShowDuration(ClientOptions.getOption('showExpiryInContainers'))
+  itemWidget:setShowCharges(ClientOptions.getOption('showExpiryInContainers'))
   itemWidget:updateBackground()
 end

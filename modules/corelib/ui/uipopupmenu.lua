@@ -12,7 +12,7 @@ function UIPopupMenu.create()
   return menu
 end
 
-function UIPopupMenu:display(pos)
+function UIPopupMenu:display(pos, parent)
   -- don't display if not options was added
   if self:getChildCount() == 0 then
     self:destroy()
@@ -32,7 +32,7 @@ function UIPopupMenu:display(pos)
     pos = g_window.getMousePosition()
   end
 
-  rootWidget:addChild(self)
+  (parent or rootWidget):addChild(self)
   self:setPosition(pos)
   self:grabMouse()
   self:focus()
@@ -42,23 +42,23 @@ end
 
 function UIPopupMenu:onGeometryChange(newRect, oldRect)
   local parent = self:getParent()
-  if not parent then
+  if not parent or parent ~= rootWidget then
     return
   end
 
   local ymax = parent:getY() + parent:getHeight()
   local xmax = parent:getX() + parent:getWidth()
 
-  if newRect.y + newRect.height > ymax then
-    local newy = newRect.y - newRect.height
-    if newy > 0 and newy + newRect.height < ymax then
+  if ymax < newRect.y + newRect.height then
+    local newy = ymax - newRect.height
+    if newy > 0 and ymax > newy + newRect.height then
       self:setY(newy)
     end
   end
 
-  if newRect.x + newRect.width > xmax then
-    local newx = newRect.x - newRect.width
-    if newx > 0 and newx + newRect.width < xmax then
+  if xmax < newRect.x + newRect.width then
+    local newx = xmax - newRect.width
+    if newx > 0 and xmax > newx + newRect.width then
       self:setX(newx)
     end
   end

@@ -1,13 +1,8 @@
 Panel
-
-  OptionButton
-    id: hotkeysButton
-    &loc: '${GameHotkeysWindowTitle}'
-    &loct: '${GameHotkeysWindowTitle} (${GameHotkeysActionKey})'
-    @locpar: return { GameHotkeysActionKey = GameHotkeysActionKey }
-    @onClick: GameHotkeys.toggle()
-
-  OptionHorizontalSeparator
+  OptionCategoryLabel
+    &loc: '${ClientOptionsControlCategoryGeneral}'
+    anchors.top: parent.top
+    margin-top: 0
 
   OptionCheckBox
     id: classicControl
@@ -18,12 +13,44 @@ Panel
       margin-top: 10
 
   OptionCheckBox
-    id: autoChaseOverride
-    &loc: '${ClientOptionsAutoChaseOverride}'
-    &loct: '${ClientOptionsAutoChaseOverrideTooltip}'
+    id: moveFullStack
+    &loc: '${ClientOptionsMoveFullStack}'
+    &loct: '${ClientOptionsMoveFullStackTooltip}'
     !tooltip-type: TooltipType.textBlock
 
+
+
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsControlCategoryHotkeys}'
+
+  OptionButton
+    id: hotkeysButton
+    &loc: '${GameHotkeysWindowTitle}'
+    &loct: '${GameHotkeysWindowTitle} (${GameHotkeysActionKey})'
+    @locpar: return { GameHotkeysActionKey = GameHotkeysActionKey }
+    @onClick: GameHotkeys.toggle()
+
+  OptionLabel
+    &loc: '${ClientOptionsHotkeyDelayLabel}'
+
+  OptionScrollbar
+    id: hotkeyDelay
+    minimum: 30
+    maximum: 250
+    symbol: ms
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsControlCategoryWalking}'
 
   OptionCheckBox
     id: smartWalk
@@ -45,7 +72,11 @@ Panel
     &loct: '${ClientOptionsCycleWalkTooltip}'
     !tooltip-type: TooltipType.textBlock
 
-  OptionHorizontalSeparator
+  OptionCheckBox
+    id: autoChaseOverride
+    &loc: '${ClientOptionsAutoChaseOverride}'
+    &loct: '${ClientOptionsAutoChaseOverrideTooltip}'
+    !tooltip-type: TooltipType.textBlock
 
   OptionLabel
     &loc: '${ClientOptionsBouncingKeysDelayScrollBarLabel}'
@@ -66,19 +97,28 @@ Panel
     symbol: ms
 
   OptionLabel
-    &loc: '${ClientOptionsTurnDelayLabel}'
+    &loc: '${ClientOptionsWalkTurnDelayLabel}'
 
   OptionScrollbar
-    id: turnDelay
-    minimum: 30
-    maximum: 250
+    id: walkTurnDelay
+    minimum: 10
+    maximum: 500
     symbol: ms
 
   OptionLabel
-    &loc: '${ClientOptionsHotkeyDelayLabel}'
+    &loc: '${ClientOptionsWalkTeleportDelayLabel}'
 
   OptionScrollbar
-    id: hotkeyDelay
-    minimum: 30
-    maximum: 250
+    id: walkTeleportDelay
+    minimum: 50
+    maximum: 500
+    symbol: ms
+
+  OptionLabel
+    &loc: '${ClientOptionsWalkStairsDelayLabel}'
+
+  OptionScrollbar
+    id: walkStairsDelay
+    minimum: 50
+    maximum: 500
     symbol: ms

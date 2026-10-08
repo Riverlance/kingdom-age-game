@@ -20,5 +20,7 @@ Module
     dofile 'player'
     dofile 'textmessages'
     dofile 'thing'
+    dofile 'items'
+    dofile 'tile'
 
     dofiles 'ui'

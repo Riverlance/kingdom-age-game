@@ -6,7 +6,7 @@ Module
   autoload: true
   autoload-priority: 1000
   sandboxed: true
-  dependencies: [ game_interface ]
+  dependencies: [ client_options, game_interface ]
   scripts: [ game_statscircle ]
   @onLoad: GameStatsCircle.init()
   @onUnload: GameStatsCircle.terminate()

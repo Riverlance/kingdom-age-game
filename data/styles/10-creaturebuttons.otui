@@ -19,7 +19,9 @@ CreatureButtonMinimapWidget < UIWidget
     text-wrap: true
     text-auto-resize: true
     text-align: center
-    font: sans-8px
+    ttf-font: opensans-v
+    ttf-font-weight: 700
+    ttf-font-size: 8
     color: #000000
     anchors.top: prev.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter
@@ -68,6 +70,7 @@ CreatureButton < UICreatureButton
 
   Label
     id: label
+    text-auto-resize: true
     anchors.top: prev.top
     anchors.left: prev.outsideRight
     anchors.right: creatureType.outsideLeft

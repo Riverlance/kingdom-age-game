@@ -28,11 +28,14 @@ TableColumn < Label
 TableHeaderRow < Label
   layout: horizontalBox
   focusable: false
-  height: 10
+  height: 20
   text-wrap: true
 
 TableHeaderColumn < UITableHeaderColumn
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
+  ttf-stroke: 2 black
   background-color: alpha
   color: #f2af4eff
   height: 23
@@ -42,7 +45,7 @@ TableHeaderColumn < UITableHeaderColumn
   image-color: #dfdfdf
   image-clip: 0 0 32 21
   image-border: 4
-  padding: 5 10 5 10
+  //padding: 5 10 5 10
   enabled: false
   focusable: false
 

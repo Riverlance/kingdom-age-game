@@ -76,6 +76,7 @@ function GamePlayerTrade.fillTrade(name, items, counter)
   for index,item in ipairs(items) do
     local itemWidget = g_ui.createWidget('Item', tradeContainer)
     itemWidget:setItem(item)
+    ItemsDatabase.setTier(itemWidget, item)
     itemWidget:setVirtual(true)
     itemWidget:setMargin(0)
     itemWidget.onClick = function()

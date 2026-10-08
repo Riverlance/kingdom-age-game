@@ -116,7 +116,11 @@ function GameHotkeyBars.deinitHotkeyBars()
 end
 
 function GameHotkeyBars.saveHotkeyBars()
-  local settings = Client.getPlayerSettings()
+  local settings = g_playerSettings.get()
+  if not settings then
+    return
+  end
+
   local hotkeyBars = { }
   for id, hotkeyBar in ipairs(hotkeyBarList) do
     hotkeyBars[id] = { }
@@ -130,13 +134,13 @@ function GameHotkeyBars.saveHotkeyBars()
 end
 
 function GameHotkeyBars.loadHotkeyBars()
-  local settings = Client.getPlayerSettings()
-  local hotkeyBars = settings:getNode('hotkeybars')
-  if hotkeyBars then
+  local settings = g_playerSettings.get()
+  local hotkeyBars = settings and settings:getNode('hotkeybars')
+  if settings and hotkeyBars then
     settings:remove('hotkeybars') --remove old config
   end
 
-  hotkeyBars = settings:getNode('HotkeyBars') or { }
+  hotkeyBars = settings and settings:getNode('HotkeyBars') or { }
   for i = 1, #hotkeyBarList do
     hotkeyBarList[i]:load(hotkeyBars[tostring(i)])
   end

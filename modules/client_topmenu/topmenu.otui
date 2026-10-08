@@ -22,17 +22,19 @@ TopMenuPanel
 
   TopMenuFrameCounterLabel
     id: fpsLabel
-    phantom: false
-    text-auto-resize: true
     anchors.top: parent.top
     anchors.left: leftGameButtonsPanel.right
+    margin-top: 2
+    phantom: false
+    text-auto-resize: true
 
   TopMenuPingLabel
-    color: white
     id: pingLabel
-    text-auto-resize: true
     anchors.top: fpsLabel.bottom
     anchors.left: fpsLabel.left
+    margin-top: 2
+    color: white
+    text-auto-resize: true
 
   TopMenuButtonsPanel
     id: rightButtonsPanel

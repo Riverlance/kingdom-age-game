@@ -123,18 +123,51 @@ function UIComboBox:onMousePress(mousePos, mouseButton)
   end
   menu:setId(self:getId() .. 'PopupMenu')
   for _, v in ipairs(self.options) do
-    menu:addOption(v.text, function() self:setOption(v.text) end)
+    menu:addOption(v.text, function()
+      if self.onOptionSelect and self.onOptionSelect(self, v.text, v.data) then
+        return
+      end
+
+      self:setOption(v.text)
+    end)
   end
   menu:setWidth(self:getWidth())
-  menu:display({ x = self:getX(), y = self:getY() + self:getHeight() })
+
+  local updateMenuPosition = withWeakWidget(menu, function(popupMenu)
+    if not isWidgetAlive(self) then
+      return
+    end
+
+    popupMenu:setPosition({ x = self:getX(), y = self:getY() + self:getHeight() })
+  end)
+
+  connect(self, {
+    onGeometryChange = updateMenuPosition
+  })
 
   connect(menu, {
     onDestroy = function()
-      self:setOn(false)
+      if isWidgetAlive(self) then
+        disconnect(self, {
+          onGeometryChange = updateMenuPosition
+        })
+        self:setOn(false)
+      end
     end
   })
 
-  self:setOn(true)
+  local popupParent = self:getParent()
+  while popupParent and popupParent ~= rootWidget do
+    if popupParent:isClipping() then
+      break
+    end
+    popupParent = popupParent:getParent()
+  end
+
+  menu:display({ x = self:getX(), y = self:getY() + self:getHeight() }, popupParent or rootWidget)
+  if isWidgetAlive(menu) then
+    self:setOn(true)
+  end
 
   g_sounds.getChannel(AudioChannels.Gui):play(f('%s/mouse_click.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
 

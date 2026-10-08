@@ -77,7 +77,7 @@ TopMenuPanel < Panel
   image-source: /images/ui/_background/default_stone_blue
   image-repeated: true
   border-width-bottom: 1
-  border-color: #98885e
+  border-color: $uiColorBorder
   focusable: false
   visible: true
   on: true
@@ -86,10 +86,16 @@ TopMenuPanel < Panel
     visible: false
 
 TopMenuFrameCounterLabel < Label
-  font: verdana-11px-rounded
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 10
+  ttf-stroke: 1 black
   color: white
-  margin-top: 4
+  margin-top: 0
   margin-left: 5
 
 TopMenuPingLabel < Label
-  font: verdana-11px-rounded
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 10
+  ttf-stroke: 1 black

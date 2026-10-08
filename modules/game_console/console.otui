@@ -1,8 +1,12 @@
 ConsoleLabel < UITextEdit
-  font: verdana-11px-antialised
+  ttf-font: verdanapro-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
   height: 14
   color: yellow
   margin-left: 2
+  text-line-height: auto
+  text-line-min-height: 10
   text-wrap: true
   text-auto-resize: true
   selection-color: #111416
@@ -13,18 +17,11 @@ ConsoleLabel < UITextEdit
   draggable: true
   selectable: false
   focusable: false
-
-ConsolePhantomLabel < UILabel
-  font: verdana-11px-antialised
-  height: 14
-  color: yellow
-  text-wrap: true
-  text-auto-resize: true
-  selection-color: #111416
-  selection-background-color: #999999
+  auto-scroll: false
 
 ConsoleTabBar < MoveableTabBar
   height: 28
+  phantom: true
 
 ConsoleTabBarPanel < MoveableTabBarPanel
   id: consoleTab
@@ -37,6 +34,7 @@ ConsoleTabBarPanel < MoveableTabBarPanel
     layout:
       type: verticalBox
       align-bottom: true
+      spacing: 0
     inverted-scroll: true
     padding: 1
 
@@ -52,7 +50,9 @@ ConsoleTabBarButton < MoveableTabBarButton
   &minWidth: 135
   height: 28
   padding: 5
-  font: sans-11px
+  ttf-font: opensans-v
+  ttf-font-weight: 700
+  ttf-font-size: 11
 
 Panel
   id: consolePanel
@@ -74,7 +74,7 @@ Panel
     border-width-top: 1
     border-color-top: #101010
     border-width-bottom: 1
-    border-color-bottom: #98885e
+    border-color-bottom: $uiColorBorder
     focusable: false
 
     Button
@@ -173,7 +173,7 @@ Panel
       anchors.bottom: parent.bottom
       anchors.right: parent.right
       border-width-left: 1
-      border-color-left: #98885e
+      border-color-left: $uiColorBorder
       visible: true
 
       $on:
@@ -212,7 +212,7 @@ Panel
       margin-bottom: 1
       margin-right: 0
       border-width: 1
-      border-color: #98885e
+      border-color: $uiColorBorder
       padding: 1
       focusable: false
 
@@ -228,7 +228,7 @@ Panel
       margin-top: 1
       margin-bottom: 1
       border-width: 1
-      border-color: #98885e
+      border-color: $uiColorBorder
       padding: 1
       focusable: false
 
@@ -257,22 +257,17 @@ Panel
 
   Panel
     id: footerPanel
-    height: 24
+    height: 22
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-top: 1
     image-source: /images/ui/_background/default_stone_grey
     image-repeated: true
-    border-width-top: 1
-    border-color-top: #98885e
-    border-width-bottom: 1
-    border-color-bottom: #101010
 
     Button
       id: sayModeButton
       &loct: '${GameConsoleMsgVolume}'
-      size: 20 20
+      size: 22 22
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
       icon: /images/ui/console/say
@@ -283,19 +278,30 @@ Panel
       id: toggleChat
       size: 22 22
       // Do not use as &loct here, or it will keep always with tooltip of GameConsoleChatDisable, but never of GameConsoleChatEnable
-      !tooltip: loc'${GameConsoleChatDisable}'
+      &loct: '${GameConsoleChatDisable}'
       icon: /images/ui/console/chat
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
-      margin-right: 1
       @onClick: ClientOptions.setOption('enableChat', not ClientOptions.getOption('enableChat'))
+
+    Button
+      id: consoleTextEditInfoButton
+      size: 22 22
+      text: ?
+      text-align: center
+      color: #cdc46c
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.right: toggleChat.left
+      &loct: '${GameConsoleChatInputHelp}'
+      !tooltip-type: TooltipType.textBlock
 
     TextEdit
       id: consoleTextEdit
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: sayModeButton.right
-      anchors.right: toggleChat.left
-      margin-left: 3
-      margin-right: 3
+      anchors.right: consoleTextEditInfoButton.left
       shift-navigation: true
       max-length: 255
+      !placeholder: loc'${GameConsoleChatPlaceholder}'
+      placeholder-color: #707070
+      @onTextChange: GameConsole.onTextChange(self:getText())

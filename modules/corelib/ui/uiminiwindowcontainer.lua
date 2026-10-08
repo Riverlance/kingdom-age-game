@@ -34,6 +34,11 @@ end
 
 function UIMiniWindowContainer:onDrop(widget, mousePos)
   if widget:getClassName() == 'UIMiniWindow' then
+    -- The preview is still a child of this container while onDrop is called.
+    -- Remove it before calculating the layout, otherwise it is counted as a
+    -- real mini window and can make a panel appear full.
+    UIMiniWindow.clearDropPreview()
+
     local oldParent = widget:getParent()
     if oldParent == self then
       return true
@@ -90,29 +95,27 @@ function UIMiniWindowContainer:scheduleInsert(widget, index)
         oldParent:removeChild(widget)
       end
       self:insertChild(index, widget)
+    end
 
-      while true do
-        local placed = false
-        for nIndex, nWidget in pairs(self.scheduledWidgets) do
-          if nIndex - 1 <= self:getChildCount() then
-            local nParent = nWidget and nWidget:getParent()
-
-            if nParent == self then
-              self:removeChild(nWidget)
-            elseif nParent then
-              nParent:removeChild(nWidget)
+    while true do
+      local placed = false
+      for nIndex, nWidget in pairs(self.scheduledWidgets) do
+        if nIndex - 1 <= self:getChildCount() then
+          local nOldParent = nWidget:getParent()
+          if nOldParent ~= self then
+            if nOldParent then
+              nOldParent:removeChild(nWidget)
             end
-
             self:insertChild(nIndex, nWidget)
-            self.scheduledWidgets[nIndex] = nil
-            placed = true
-            break
           end
-        end
-
-        if not placed then
+          self.scheduledWidgets[nIndex] = nil
+          placed = true
           break
         end
+      end
+
+      if not placed then
+        break
       end
     end
   end
@@ -133,12 +136,12 @@ function UIMiniWindowContainer:order()
   end
 end
 
-function UIMiniWindowContainer:saveChildren()
+function UIMiniWindowContainer:saveChildren(scheduleSave)
   local children = self:getChildren()
   local ignoreIndex = 0
   for i = 1, #children do
     if children[i].save then
-      children[i]:saveParentIndex(self:getId(), i - ignoreIndex)
+      children[i]:saveParentIndex(self:getId(), i - ignoreIndex, scheduleSave)
     else
       ignoreIndex = ignoreIndex + 1
     end

@@ -21,8 +21,11 @@ CharacterProgressBar < ProgressBar
 
 CharacterProgressBarValue < Label
   anchors.fill: prev
-  font: verdana-11px-rounded
-  text-offset: 0 1
+  ttf-font: opensans-v
+  ttf-font-weight: 800
+  ttf-font-size: 10
+  ttf-stroke: 1 black
+  //text-offset: 0 -1
   text-align: center
   phantom: false
 
@@ -139,7 +142,7 @@ MiniWindow
   icon: /images/ui/top_menu/healthinfo
   // Mini window height is set in Lua
   &save: true
-  &defaultHeight: 278
+  &defaultHeight: 280
 
   BallMenuButton
     id: ballButton
@@ -249,12 +252,13 @@ MiniWindow
 
     Creature
       id: outfitCreatureBox
-      size: 70 70
+      size: 76 76
       anchors.top: centerPanel.top
       anchors.horizontalCenter: parent.horizontalCenter
       margin-top: 4
-      padding: 1
-      creature-size: 107
+      padding-top: 8
+      padding-left: 8
+      creature-size: 64
 
     Button
       id: skillsButton
@@ -334,20 +338,22 @@ MiniWindow
 
     LeftSlot
       anchors.top: outfitCreatureBox.outsideBottom
-      anchors.left: centerPanel.left
-      margin-top: 5
+      anchors.right: parent.horizontalCenter
+      margin-right: 2
+      margin-top: 4
 
     RightSlot
       anchors.top: outfitCreatureBox.outsideBottom
-      anchors.right: centerPanel.right
-      margin-top: 5
+      anchors.left: parent.horizontalCenter
+      margin.left: 2
+      margin-top: 4
 
     GameLabel
       id: combatControls
       size: 64 20
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: parent.horizontalCenter
-      margin-top: 5
+      margin-top: 4
 
       layout:
         type: grid

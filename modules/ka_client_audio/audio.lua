@@ -95,6 +95,7 @@ function ClientAudio.updateAudios()
   end
 
   local position = g_game.getLocalPlayer():getPosition()
+  g_sounds.setPosition(position)
   for _, _channel in ipairs(channels) do
     local channel = _channel.channel
     if channel then
@@ -130,6 +131,10 @@ function ClientAudio.parseAudioRequest(protocolGame, opcode, msg)
     local fadeInTime = tonumber(params[6])
     local x = tonumber(params[7])
     local y = tonumber(params[8])
+    local pitch = tonumber(params[9]) or 1.0
+    if pitch <= 0 then
+      pitch = 1.0
+    end
     if not channelId or path == '' or not gain or not repetitions or not fadeInTime or not x or not y then
       return
     end
@@ -140,7 +145,7 @@ function ClientAudio.parseAudioRequest(protocolGame, opcode, msg)
     end
 
     path = f('%s%s', AudioChannelRootPath, path)
-    local audio = channel:play(path, gain, repetitions, fadeInTime)
+    local audio = channel:play(path, gain, repetitions, fadeInTime, pitch)
     if audio and x ~= 0 and y ~= 0 then
       audio:setPosition(x, y)
     end

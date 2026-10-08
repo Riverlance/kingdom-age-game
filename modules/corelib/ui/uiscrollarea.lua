@@ -117,6 +117,7 @@ end
 
 function UIScrollArea:setInverted(inverted)
   self.inverted = inverted
+  self:updateScrollBars()
 end
 
 function UIScrollArea:setAlwaysScrollMaximum(value)
@@ -181,11 +182,12 @@ function UIScrollArea:ensureChildVisible(child)
     local childBottom = childTop + childHeight
 
     if childHeight > viewHeight then
-      -- Avoid jumping to the end for oversized focus targets (e.g. tab content containers).
-      if childTop < viewTop then
-        self.verticalScrollBar:decrement(viewTop - childTop)
-      elseif childTop > viewTop then
-        self.verticalScrollBar:increment(childTop - viewTop)
+      -- Oversized focus targets (e.g. tab content containers) cannot fit in the
+      -- viewport. Preserve the current scroll while any part remains visible.
+      if childBottom < viewTop then
+        self.verticalScrollBar:decrement(viewTop - childBottom)
+      elseif childTop > viewBottom then
+        self.verticalScrollBar:increment(childTop - viewBottom)
       end
     else
       local deltaY = viewTop - childTop

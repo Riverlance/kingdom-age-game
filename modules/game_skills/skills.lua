@@ -181,6 +181,10 @@ end
 function GameSkills.online()
   skillsWindow:setup()
 
+  if g_game.getFeature(GameEnterGameShowAppearance) then
+    contentsPanel:getChildById('regenerationTime'):getChildByIndex(1):setText('Food')
+  end
+
   local player = g_game.getLocalPlayer()
 
   if expSpeedEvent then
@@ -241,10 +245,18 @@ function GameSkills.onSkillButtonClick(button)
 end
 
 function GameSkills.onExperienceChange(localPlayer, value)
+  if not localPlayer then
+    return
+  end
   GameSkills.setSkillValue('experience', loc(value))
+  GameSkills.onLevelChange(localPlayer, localPlayer:getLevel(), localPlayer:getLevelPercent())
 end
 
 function GameSkills.onLevelChange(localPlayer, level, levelPercent, oldLevel, oldLevelPercent)
+  if not localPlayer then
+    return
+  end
+  levelPercent = levelPercent or localPlayer:getLevelPercent()
   GameSkills.setSkillValue('level', loc(level))
   GameSkills.setSkillPercent('level', levelPercent, getExperienceTooltipText(localPlayer, level, levelPercent))
 end
@@ -273,14 +285,20 @@ function GameSkills.onRegenerationChange(localPlayer, time, oldTime)
     return
   end
 
-  local minutes = math.floor(time / 60)
+  local hours = math.floor(time / 3600)
+  local totalMinutes = math.floor(time / 60)
+  local minutes = totalMinutes % 60
   local seconds = time % 60
-  if seconds < 10 then
-    seconds = '0' .. seconds
+  local fmt = ''
+  local alert = 300
+  if g_game.getFeature(GameEnterGameShowAppearance) then
+    fmt = string.format('%02d:%02d:%02d', hours, minutes, seconds)
+    alert = 0
+  else
+    fmt = string.format('%02d:%02d', totalMinutes, seconds)
   end
-
-  GameSkills.setSkillValue('regenerationTime', minutes .. ':' .. seconds)
-  GameSkills.checkAlert('regenerationTime', time, false, 300)
+  GameSkills.setSkillValue('regenerationTime', fmt)
+  GameSkills.checkAlert('regenerationTime', time, false, alert)
 end
 
 function GameSkills.onSpeedChange(localPlayer, speed)
@@ -297,4 +315,3 @@ function GameSkills.updateFocusPoints(protocol, msg)
   local focusPoints = msg:getU32()
   GameSkills.setSkillValue('focusPoints', loc(focusPoints))
 end
-

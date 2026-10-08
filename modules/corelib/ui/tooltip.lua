@@ -51,6 +51,9 @@ Tooltip = createClass({
     -- Attach to list - List by id
     self.__listById[obj.type] = obj
 
+    -- Tooltip widgets must not intercept mouse input from widgets underneath
+    obj.widget:setPhantom(true)
+
     -- Hide widget
     obj.widget:hide()
   end,

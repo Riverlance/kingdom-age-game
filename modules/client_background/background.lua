@@ -11,8 +11,12 @@ local clientVersionLabel
 local logoBaseSize
 local logoScaleRetryEvent
 
-local musicFilename = '/audios/music/quest/nox/shell'
+local musicDirectory = '/audios/_enter_game'
+local defaultMusic = musicDirectory .. '/shell.ogg'
+local musicFilename = defaultMusic
 local musicChannel
+local backgroundPath = '/images/ui/enter_game/background'
+local defaultBackground = backgroundPath .. '/background.png'
 
 if g_sounds then
   musicChannel = g_sounds.getChannel(AudioChannels.Music)
@@ -26,7 +30,45 @@ local function playBackgroundMusic()
 
   musicChannel:stopAudioGroup(musicFilename)
   musicChannel:clearAudioGroup(musicFilename)
-  musicChannel:play(musicFilename, 1.0, -1, 7) -- Startup music
+  musicChannel:play(musicFilename, 1.0, -1, 7, 1.0) -- Startup music
+end
+
+local function getRandomMusic()
+  local musicFiles = { }
+
+  for _, file in ipairs(g_resources.listDirectoryFiles(musicDirectory)) do
+    if file:match('^.+%.ogg$') then
+      local path = musicDirectory .. '/' .. file
+      if g_resources.fileExists(path) then
+        table.insert(musicFiles, path)
+      end
+    end
+  end
+
+  if #musicFiles == 0 then
+    return defaultMusic
+  end
+
+  return musicFiles[math.random(#musicFiles)]
+end
+
+local function getRandomBackground()
+  local backgrounds = { }
+
+  for _, file in ipairs(g_resources.listDirectoryFiles(backgroundPath)) do
+    if file:match('%.png$') then
+      local path = backgroundPath .. '/' .. file
+      if g_resources.fileExists(path) then
+        table.insert(backgrounds, path)
+      end
+    end
+  end
+
+  if #backgrounds == 0 then
+    return defaultBackground
+  end
+
+  return backgrounds[math.random(#backgrounds)]
 end
 
 function ClientBackground.init()
@@ -34,7 +76,10 @@ function ClientBackground.init()
   ClientBackground.m = modules.client_background
 
   background = g_ui.displayUI('background')
+  background:setImageSource(getRandomBackground())
   background:lower()
+
+  musicFilename = getRandomMusic()
 
   particles = background:getChildById('particles')
 
@@ -42,7 +87,7 @@ function ClientBackground.init()
   logoBaseSize = nil
 
   clientVersionLabel = background:getChildById('clientVersionLabel')
-  clientVersionLabel:setText(f('%s\n%s', g_app.getName(), f(loc'${BackgroundClientVersion}', CLIENT_VERSION)))
+  clientVersionLabel:setText(f('%s\n%s', g_app.getName(), f(loc'${BackgroundClientVersion}', CLIENT_VERSION_NAME)))
   -- clientVersionLabel:setText(g_app.getName() .. ' ' .. g_app.getVersion() .. '\n' ..
   --                            'Rev  ' .. g_app.getBuildRevision() .. ' (' .. g_app.getBuildCommit() .. ')\n' ..
   --                            'Built on ' .. g_app.getBuildDate() .. ' for arch ' .. g_app.getBuildArch() .. '\n' ..

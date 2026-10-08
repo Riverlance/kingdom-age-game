@@ -43,7 +43,7 @@ HotkeyAssignWindow < MainWindow
 MainWindow
   id: hotkeysWindow
   &loc: '${GameHotkeysWindowTitle}'
-  size: 500 555
+  size: 500 580
 
   @onEnter: GameHotkeys.ok()
   @onEscape: GameHotkeys.cancel()
@@ -52,7 +52,9 @@ MainWindow
     &loc: '${GameHotkeysWindowTip}'
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    font: sans-8px
+    ttf-font: opensans-v
+    ttf-font-weight: 700
+    ttf-font-size: 8
     text-auto-resize: true
 
   VerticalScrollBar
@@ -151,6 +153,11 @@ MainWindow
     ButtonBox
       id: useWith
       &loc: '${GameHotkeysUseWith}'
+      margin-top: 2
+
+    ButtonBox
+      id: useAtCursor
+      &loc: '${GameHotkeysUseAtCursor}'
       margin-top: 2
 
   HorizontalSeparator

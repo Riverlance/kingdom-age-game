@@ -26,6 +26,29 @@ local executeConfig = function(attachedEffect, config)
         attachedEffect:setOpacity(config.opacity)
     end
 
+    if config.light then
+        attachedEffect:setLight({
+            color = config.light.color or 0,
+            intensity = config.light.intensity or 0
+        })
+    end
+
+    if config.drawOrder then
+        attachedEffect:setDrawOrder(config.drawOrder)
+    end
+
+    if config.bounce then
+        attachedEffect:setBounce(config.bounce[1], config.bounce[2], config.bounce[3] or 1000)
+    end
+
+    if config.pulse then
+        attachedEffect:setPulse(config.pulse[1], config.pulse[2], config.pulse[3] or 1000)
+    end
+
+    if config.fade then
+        attachedEffect:setFade(config.fade[1], config.fade[2], config.fade[3] or 1000)
+    end
+
     if config.duration ~= nil and config.duration > 0 then
         attachedEffect:setDuration(config.duration)
     end
@@ -34,12 +57,18 @@ local executeConfig = function(attachedEffect, config)
         attachedEffect:setLoop(config.loop)
     end
 
+    attachedEffect:setPermanent(type(config.permanent) ~= "boolean" or config.permanent)
+
     if config.transform then
         attachedEffect:setTransform(config.transform)
     end
 
     if config.hideOwner then
         attachedEffect:setHideOwner(config.hideOwner)
+    end
+
+    if config.followOwner then
+        attachedEffect:setFollowOwner(config.followOwner)
     end
 
     if config.size then
@@ -157,7 +186,11 @@ AttachedEffectManager = {
                 end
             end
         end
-        return __EFFECTS[id].config
+        local effectConfig = __EFFECTS[id] and __EFFECTS[id].config or nil
+        if not effectConfig then
+            g_logger.debug(string.format("[AttachedEffect]getConfig: No config registered for effect ID %d", id))
+        end
+        return effectConfig
     end,
     executeThingConfig = function(effect, category, thingId)
         executeConfig(effect, AttachedEffectManager.getConfig(effect:getId(), category, thingId))

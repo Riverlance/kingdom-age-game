@@ -1,48 +1,60 @@
 Panel
 
-  OptionButton
-    id: changeLocaleButton
-    &loc: '${ClientOptionsChangeLocaleButton}'
-    &loct: '${ClientOptionsChangeLocaleButtonTooltip}'
-    !tooltip-type: TooltipType.textBlock
-    // Do not put it inside options.lua
-    @onClick: |
-      if not g_game.isOnline() then
-        g_locales.createWindow()
-      end
+  OptionCategoryLabel
+    &loc: '${ClientOptionsGameCategoryGeneral}'
+    anchors.top: parent.top
+    margin-top: 0
 
-  OptionButton
-    icon: /images/ui/top_menu/party_level_calculator
-    &loct: '${ClientOptionsPartyListLevelCalculatorWindowTitle}'
-    !tooltip-type: TooltipType.textBlock
-    size: 23 23
-    @onClick: GamePartyList.partyLevelCalculatorWindowToggle()
+  OptionLabel
+    &loc: '${ClientOptionsChangeLocale}'
 
-  OptionHorizontalSeparator
-
-  OptionCheckBox
-    id: moveFullStack
-    &loc: '${ClientOptionsMoveFullStack}'
-    &loct: '${ClientOptionsMoveFullStackTooltip}'
-    !tooltip-type: TooltipType.textBlock
-    $!first:
-      margin-top: 10
+  OptionComboBox
+    id: localeComboBox
+    anchors.top: prev.outsideBottom
+    anchors.right: parent.horizontalCenter
+    margin-top: 2
+    margin-right: 2
 
   OptionCheckBox
     id: goldLootAutoDeposit
     &loc: '${ClientOptionsGoldLootAutoDeposit}'
     !tooltip: f(loc'${ClientOptionsGoldLootAutoDepositTooltip}', 20)
     !tooltip-type: TooltipType.textBlock
+    $!first:
+      margin-top: 10
+
+
 
   OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsGameCategoryOther}'
+
+  OptionButton
+    icon: /images/ui/top_menu/party_level_calculator
+    &loct: '${ClientOptionsPartyListLevelCalculatorWindowTitle}'
+    !tooltip-type: TooltipType.textBlock
+    size: 23 23
+    $!first:
+      margin-top: 10
+    @onClick: GamePartyList.partyLevelCalculatorWindowToggle()
+
+
+
+  OptionHorizontalSeparator
+
+
+
+  OptionCategoryLabel
+    &loc: '${ClientOptionsGameCategoryLinks}'
 
   OptionButton
     icon: /images/ui/top_menu/links
     &loct: '${ClientOptionsButtonLinksTooltip}'
     !tooltip-type: TooltipType.textBlock
     size: 23 23
-    $!first:
-      margin-top: 10
     @onClick: g_platform.openUrl('https://linktr.ee/kingdomage')
 
   OptionButton

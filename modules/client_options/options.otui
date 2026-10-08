@@ -1,15 +1,30 @@
 OptionLabel < Label
-  anchors.left: parent.left
-  anchors.right: parent.right
-  color: #c9bdab
-  phantom: false
-
   $first:
     anchors.top: parent.top
 
   $!first:
     anchors.top: prev.outsideBottom
     margin-top: 10
+
+  anchors.left: parent.left
+  anchors.right: parent.right
+
+  color: #c9bdab
+  phantom: false
+
+OptionCategoryLabel < Label
+  anchors.top: prev.outsideBottom
+
+  anchors.horizontalCenter: parent.horizontalCenter
+  margin-top: 10
+
+  ttf-font: sansita-v
+  ttf-font-size: 14
+  ttf-font-weight: 700
+  height: 22
+
+  phantom: false
+  color: #f2af4e
 
 OptionScrollbar < HorizontalScrollBar
   anchors.left: parent.left
@@ -26,7 +41,7 @@ OptionScrollbar < HorizontalScrollBar
     anchors.top: prev.outsideBottom
     margin-top: 2
 
-OptionComboBox < ComboBox
+OptionComboBox < ComboBoxRounded
   anchors.left: parent.left
   anchors.right: parent.right
   mouse-scroll: false
@@ -81,7 +96,7 @@ OptionHorizontalSeparator < HorizontalSeparator
 MainWindow
   id: optionsWindow
   &loc: '${ClientOptionsTitle}'
-  size: 700 450
+  size: 800 400
   &save: true
 
   @onEnter: ClientOptions.hide()
@@ -92,7 +107,7 @@ MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    width: 100
+    width: 125
     step: 10
 
   VerticalScrollBar
@@ -101,7 +116,7 @@ MainWindow
     anchors.right: parent.right
     anchors.bottom: okButton.outsideTop
     margin-bottom: 10
-    step: 20
+    step: 40
     pixels-scroll: true
 
   ScrollablePanel
@@ -114,6 +129,17 @@ MainWindow
     margin-left: 10
     margin-right: 4
     vertical-scrollbar: optionsTabContentScrollBar
+
+  Button
+    id: consoleTextEditInfoButton
+    size: 22 22
+    text: ?
+    text-align: center
+    color: #cdc46c
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: optionsTabContent.horizontalCenter
+    &loct: '${ClientOptionsTip}'
+    !tooltip-type: TooltipType.textBlock
 
   Button
     id: okButton

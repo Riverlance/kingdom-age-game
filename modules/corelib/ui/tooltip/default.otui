@@ -1,10 +1,12 @@
 TooltipDefault < Label
-  font: sans-11px
+  ttf-font: opensans-v
+  ttf-font-weight: 800
+  ttf-font-size: 11
   text-align: center
   text-auto-resize: true
   padding: 4
   background-color: #111111cc
   border-width: 1
-  border-color: #98885e
+  border-color: $uiColorBorder
   phantom: true
   focusable: false

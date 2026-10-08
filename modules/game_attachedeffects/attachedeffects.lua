@@ -3,6 +3,8 @@ function onGameStart()
   -- g_game.getLocalPlayer():attachEffect(g_attachedEffects.getById(1))
   -- g_game.getLocalPlayer():attachEffect(g_attachedEffects.getById(2))
   -- g_game.getLocalPlayer():attachEffect(g_attachedEffects.getById(3))
+  -- g_game.getLocalPlayer():getTile():attachEffect(g_attachedEffects.getById(1))
+  -- g_game.getLocalPlayer():attachParticleEffect("creature-effect")
 end
 
 function onGameEnd()
@@ -12,6 +14,11 @@ end
 local function onAttach(effect, owner)
   local category, thingId = AttachedEffectManager.getDataThing(owner)
   local config = AttachedEffectManager.getConfig(effect:getId(), category, thingId)
+
+  if not config then
+    g_logger.debug(string.format("[AttachedEffect] onAttach: No config found for effect ID %d (category: %d, thingId: %d)", effect:getId(), category, thingId))
+    return
+  end
 
   if config.isThingConfig then
     AttachedEffectManager.executeThingConfig(effect, category, thingId)
@@ -25,6 +32,11 @@ end
 local function onDetach(effect, oldOwner)
   local category, thingId = AttachedEffectManager.getDataThing(oldOwner)
   local config = AttachedEffectManager.getConfig(effect:getId(), category, thingId)
+
+  if not config then
+    g_logger.debug(string.format("[AttachedEffect] onDetach: No config found for effect ID %d (category: %d, thingId: %d)", effect:getId(), category, thingId))
+    return
+  end
 
   if config.onDetach then
     config.onDetach(effect, oldOwner, config.__onDetach)

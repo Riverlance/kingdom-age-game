@@ -14,10 +14,12 @@ Module
     dofile 'table'
     dofile 'bitwise'
     dofile 'struct'
+    dofile 'base64'
 
     dofile 'util'
     dofile 'config'
     dofile 'settings'
+    dofile 'settingsplayer'
     dofile 'keyboard'
     dofile 'mouse'
     dofile 'net'
@@ -35,3 +37,4 @@ Module
     dofile 'shader'
 
     dofile 'http'
+    dofile 'objectpool'

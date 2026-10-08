@@ -88,11 +88,7 @@ function ProtocolLogin:sendLoginPacket()
     msg:addU8(1) --unknown
     msg:addU8(1) --unknown
 
-    if g_game.getClientVersion() >= 1072 then
-      msg:addString(f('%s %s', g_graphics.getVendor(), g_graphics.getRenderer()))
-    else
-      msg:addString(g_graphics.getRenderer())
-    end
+    msg:addString(f('%s %s', g_graphics.getVendor(), g_graphics.getRenderer()))
     msg:addString(g_graphics.getVersion())
   end
 
@@ -192,67 +188,47 @@ end
 
 function ProtocolLogin:parseCharacterList(msg)
   local characters = { }
+  local worlds     = { }
 
-  if g_game.getClientVersion() > 1010 then
-    local worlds = { }
+  local worldsCount = msg:getU8()
+  for _ = 1, worldsCount do
+    local world = { }
+    local worldId = msg:getU8()
+    world.worldId = worldId
+    world.worldName = msg:getString()
+    world.worldIp = msg:getString()
+    world.worldPort = msg:getU16()
+    world.previewState = msg:getU8()
+    worlds[worldId] = world
+  end
 
-    local worldsCount = msg:getU8()
-    for _ = 1, worldsCount do
-      local world = { }
-      local worldId = msg:getU8()
-      world.worldId = worldId
-      world.worldName = msg:getString()
-      world.worldIp = msg:getString()
-      world.worldPort = msg:getU16()
-      world.previewState = msg:getU8()
-      worlds[worldId] = world
+  local charactersCount = msg:getU8()
+  for i = 1, charactersCount do
+    local character = { }
+    local worldId = msg:getU8()
+    character.worldId = worldId
+    character.name = msg:getString()
+    character.loginname = msg:getString()
+    if g_game.getFeature(GameEnterGameShowAppearance) then
+      character.level = msg:getU32()
+      character.vocationId = msg:getU16()
+      character.vocation = VocationStr[character.vocationId] or tostring(character.vocationId)
+      character.outfitid = msg:getU16()
+      character.headcolor = msg:getU8()
+      character.torsocolor = msg:getU8()
+      character.legscolor = msg:getU8()
+      character.detailcolor = msg:getU8()
+      character.addonsflags = msg:getU8()
+      character.online = msg:getU8() ~= 0
     end
-
-    local charactersCount = msg:getU8()
-    for i = 1, charactersCount do
-      local character = { }
-      local worldId = msg:getU8()
-      character.worldId = worldId
-      character.name = msg:getString()
-      character.loginname = msg:getString()
-      if g_game.getFeature(GameEnterGameShowAppearance) then
-        character.level = msg:getU32()
-        character.vocationId = msg:getU16()
-        character.vocation = VocationStr[character.vocationId] or tostring(character.vocationId)
-        character.outfitid = msg:getU16()
-        character.headcolor = msg:getU8()
-        character.torsocolor = msg:getU8()
-        character.legscolor = msg:getU8()
-        character.detailcolor = msg:getU8()
-        character.addonsflags = msg:getU8()
-        character.online = msg:getU8() ~= 0
-      end
-      local world = worlds[worldId]
-      if world then
-        character.worldName = world.worldName
-        character.worldIp = world.worldIp
-        character.worldPort = world.worldPort
-        character.previewState = world.previewState
-      end
-      characters[i] = character
+    local world = worlds[worldId]
+    if world then
+      character.worldName = world.worldName
+      character.worldIp = world.worldIp
+      character.worldPort = world.worldPort
+      character.previewState = world.previewState
     end
-
-  else
-    local charactersCount = msg:getU8()
-    for i = 1, charactersCount do
-      local character = { }
-      character.name = msg:getString()
-      character.loginname = msg:getString()
-      character.worldName = msg:getString()
-      character.worldIp = iptostring(msg:getU32())
-      character.worldPort = msg:getU16()
-
-      if g_game.getFeature(GamePreviewState) then
-        character.previewState = msg:getU8()
-      end
-
-      characters[i] = character
-    end
+    characters[i] = character
   end
 
   local account = { }

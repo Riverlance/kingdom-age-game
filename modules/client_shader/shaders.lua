@@ -1,5 +1,106 @@
 _G.ClientShaders = { }
 
+local textShadersByName = { }
+textShadersByName.None = ''
+for _, shaderData in ipairs(TextShaders) do
+  local shaderName = shaderData.frag and shaderData.name or ''
+  textShadersByName[shaderData.name] = shaderName
+  textShadersByName[shaderData.name:gsub('^Outline %- ', '')] = shaderName
+end
+
+local function resolveTextShader(shaderName)
+  if type(shaderName) == 'number' then
+    local shaderData = TextShaders[shaderName]
+    return shaderData and (shaderData.frag and shaderData.name or '') or nil
+  end
+
+  if shaderName == nil or shaderName == false or shaderName == '' or shaderName == 'None' then
+    return ''
+  end
+
+  local shaderData = textShadersByName[shaderName]
+  return type(shaderData) == 'string' and shaderData or shaderName
+end
+
+local function resolveWidgetTextShader(shaderName)
+  local resolved = resolveTextShader(shaderName)
+  if resolved == nil or resolved == '' then
+    return resolved
+  end
+
+  if resolved:sub(1, 9) == 'Widget - ' then
+    return resolved
+  end
+
+  if resolved:sub(1, 10) == 'Outline - ' then
+    return 'Widget - ' .. resolved
+  end
+
+  return resolved
+end
+
+function ClientShaders.getTextShaderName(shaderName)
+  return resolveTextShader(shaderName)
+end
+
+function ClientShaders.getWidgetTextShaderName(shaderName)
+  return resolveWidgetTextShader(shaderName)
+end
+
+function ClientShaders.setCreatureNameShader(creature, shaderName)
+  if not creature then
+    return false
+  end
+
+  local resolved = resolveTextShader(shaderName)
+  if resolved == nil then
+    return false
+  end
+
+  -- Keep the generic shader on the creature even when information is drawn by
+  -- a widget. This lets the widget be created after the server opcode arrives
+  -- and still receive the selected shader.
+  creature:setNameShader(resolved)
+
+  local infoWidget = creature:getWidgetInformation()
+  if infoWidget and infoWidget.name then
+    local widgetShader = g_gameConfig.isDrawingInformationByWidget() and resolveWidgetTextShader(resolved) or ''
+    infoWidget.name:setShader(widgetShader)
+  end
+
+  return true
+end
+
+function ClientShaders.setCreatureNameShaderById(creature, id)
+  return ClientShaders.setCreatureNameShader(creature, id)
+end
+
+function ClientShaders.removeCreatureNameShader(creature)
+  return ClientShaders.setCreatureNameShader(creature, nil)
+end
+
+function ClientShaders.setWidgetTextShader(widget, shaderName)
+  if not widget then
+    return false
+  end
+
+  local resolved = resolveWidgetTextShader(shaderName)
+  if resolved == nil then
+    return false
+  end
+
+  widget:setShader(resolved)
+  return true
+end
+
+function ClientShaders.setWidgetTextShaderById(widget, id)
+  return ClientShaders.setWidgetTextShader(widget, id)
+end
+
+function ClientShaders.removeWidgetTextShader(widget)
+  return ClientShaders.setWidgetTextShader(widget, nil)
+end
+
 
 
 --[[
@@ -48,16 +149,19 @@ function ClientShaders.init()
   })
 
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeMapShaders, ClientShaders.parse)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeCreatureNameShader, ClientShaders.parseCreatureNameShader)
 end
 
 function ClientShaders.terminate()
   ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeMapShaders)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeCreatureNameShader)
 
   disconnect(g_game, {
     onGameStart = ClientShaders.onGameStart,
   })
 
   _G.ClientShaders = nil
+  g_shaders.clear()
 end
 
 
@@ -160,6 +264,14 @@ function ClientShaders.parse(protocol, msg)
   -- Update effects
   for id, state in pairs(effects) do
     map:setDrawEffectShaders(id, state)
+  end
+end
+
+function ClientShaders.parseCreatureNameShader(protocol, opcode, msg)
+  local creature = g_map.getCreatureById(msg:getU32())
+  local shaderName = msg:getString()
+  if creature then
+    ClientShaders.setCreatureNameShader(creature, shaderName)
   end
 end
 

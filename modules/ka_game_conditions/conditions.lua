@@ -582,16 +582,7 @@ function GameConditions.onStatesChange(localPlayer, now, old)
     return
   end
 
-  local bitsChanged = bit.bxor(now, old)
-  for i = 1, 32 do
-    local pow = math.pow(2, i - 1)
-    if pow > bitsChanged then
-      break
-    end
-
-    local bitChanged = bit.band(bitsChanged, pow)
-    if bitChanged ~= 0 then
-      GameConditions.toggleIcon(bitChanged)
-    end
-  end
+  Player.iterateChangedStates(now, old, function(bitChanged)
+    GameConditions.toggleIcon(bitChanged)
+  end)
 end

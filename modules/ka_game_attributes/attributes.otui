@@ -1,17 +1,12 @@
-AttributeAddButton < UIButton
+AttributeAddButton < MenuButton
+  size: 14 14
+  icon-source: /images/ui/_button/mini_window_icon
+  icon-clip: 14 0 14 14
+
   &loct: '${GameAttributesButtonAddTooltip}'
   anchors.top: parent.top
   anchors.horizontalCenter: parent.horizontalCenter
   margin-top: 4
-  size: 14 14
-  image-source: /images/ui/_button/mini_window
-  image-clip: 14 0 14 14
-
-  $hover:
-    image-clip: 14 14 14 14
-
-  $pressed:
-    image-clip: 14 28 14 14
 
   $!first:
     anchors.top: prev.outsideBottom
@@ -34,11 +29,9 @@ MiniWindow
   &defaultHeight: 235
   &save: true
 
-  InfoMenuButton
-    &loct: '${GameAttributesButtonInfoTooltip}'
+  MiniWindowIconTooltipArea
+    &loct: '${GameAttributesWindowTitle}\n\n${GameAttributesButtonInfoTooltip}'
     !tooltip-type: TooltipType.textBlock
-    anchors.verticalCenter: lockButton.verticalCenter
-    anchors.right: lockButton.outsideLeft
 
 
 

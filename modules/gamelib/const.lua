@@ -182,7 +182,7 @@ GameChannelPlayerList       = 11
 GamePlayerMounts            = 12
 GameEnvironmentEffect       = 13
 GameCreatureEmblems         = 14
-GameItemAnimationPhase      = 15
+-- KA - Free
 GameMagicEffectU16          = 16
 -- KA - Free
 GameSpritesU32              = 18
@@ -272,7 +272,17 @@ GameItemShader              = 101
 GameCreatureShader          = 102
 GameCreatureAttachedEffect  = 103
 GameEnterGameShowAppearance = 104
-LastGameFeature             = 105
+GameSmoothWalkElevation     = 105
+GameNegativeOffset          = 106
+GameAllowCustomBotScripts   = 120
+GameAllowPreWalk            = 122
+-- KA - Free
+-- KA - Free
+GameMapCache                = 125
+-- KA - Free
+-- KA - Free
+GameCreaturePaperdoll       = 128
+LastGameFeature             = 129
 
 TextColors = {
   red         = '#f55e5e', --'#c83200'
@@ -289,56 +299,82 @@ TextColors = {
 }
 
 MessageModes = {
-  None                  = 0,
-  Say                   = 1,
-  Whisper               = 2,
-  Yell                  = 3,
-  PrivateFrom           = 4,
-  PrivateTo             = 5,
-  ChannelManagement     = 6,
-  Channel               = 7,
-  ChannelHighlight      = 8,
-  Spell                 = 9,
-  NpcFromStartBlock     = 10,
-  NpcFrom               = 11,
-  NpcTo                 = 12,
-  GamemasterBroadcast   = 13,
-  GamemasterChannel     = 14,
-  GamemasterPrivateFrom = 15,
-  GamemasterPrivateTo   = 16,
-  Login                 = 17,
-  Warning               = 18,
-  Game                  = 19,
-  GameHighlight         = 20,
-  Failure               = 21,
-  Look                  = 22,
-  DamageDealed          = 23,
-  DamageReceived        = 24,
-  Heal                  = 25,
-  Exp                   = 26,
-  DamageOthers          = 27,
-  HealOthers            = 28,
-  ExpOthers             = 29,
-  Status                = 30,
-  Loot                  = 31,
-  TradeNpc              = 32,
-  Guild                 = 33,
-  PartyManagement       = 34,
-  Party                 = 35,
-  BarkLow               = 36,
-  BarkLoud              = 37,
-  Report                = 38,
-  HotkeyUse             = 39,
-  TutorialHint          = 40,
-  Thankyou              = 41,
-  GamemasterSay         = 42,
-  Mana                  = 43,
-  GameBigTop            = 44, -- KA - Big font text message (Jotun)
-  GameBigCenter         = 45, -- KA - Big font text message (Jotun)
-  GameBigBottom         = 46, -- KA - Big font text message (Jotun)
+  None = 0,
 
-  Last                  = 52,
-  Invalid               = 255,
+  Say = 1,
+  Whisper = 2,
+  Yell = 3,
+
+  PrivateFrom = 4,
+  PrivateTo = 5,
+
+  ChannelManagement = 6,
+  Channel = 7,
+  ChannelHighlight = 8,
+
+  Spell = 9,
+
+  NpcFromStartBlock = 10,
+  NpcFrom = 11,
+  NpcTo = 12,
+
+  GamemasterBroadcast = 13,
+  GamemasterChannel = 14,
+  GamemasterPrivateFrom = 15,
+  GamemasterPrivateTo = 16,
+
+  Login = 17,
+  Warning = 18,
+  Game = 19,
+  GameHighlight = 20,
+  Failure = 21,
+  Look = 22,
+
+  DamageDealed = 23,
+  DamageReceived = 24,
+  Heal = 25,
+  Exp = 26,
+  DamageOthers = 27,
+  HealOthers = 28,
+  ExpOthers = 29,
+
+  Status = 30,
+  Loot = 31,
+  TradeNpc = 32,
+  Guild = 33,
+
+  PartyManagement = 34,
+  Party = 35,
+
+  BarkLow = 36,
+  BarkLoud = 37,
+
+  Report = 38,
+  HotkeyUse = 39,
+  TutorialHint = 40,
+
+  GamemasterSay = 41,
+
+  GameBigTop = 42, -- KA - Big font text message
+  GameBigCenter = 43, -- KA - Big font text message
+  GameBigBottom = 44, -- KA - Big font text message
+
+  RVRContinue = 45,
+  RVRChannel = 46,
+
+  Red = 47,
+  Blue = 48,
+
+  Potion = 49,
+  BeyondLast = 50,
+  Attention = 51,
+  BoostedCreature = 52,
+  OfflineTrainning = 53,
+  Transaction = 54,
+  ValuableLoot = 55,
+
+  Last = 56,
+  Invalid = 255,
 }
 
 OTSERV_RSA  = '1091201329673994292788609605089955415282375029027981291234687579' ..
@@ -464,7 +500,8 @@ HotkeyItemUseType = {
   Default   = nil,
   Crosshair = 1,
   Target    = 2,
-  Self      = 3
+  Self      = 3,
+  Cursor    = 4
 }
 
 WidgetLockActionFlag = {

@@ -24,6 +24,8 @@ local defaultOptions = {
   showTimestampsInConsole = true,
   showLevelsInConsole = true,
   showPrivateMessagesInConsole = true,
+  showHighlightedUnderline = true,
+  showOthersStatusMessagesInConsole = false,
   showPrivateMessagesOnScreen = true,
   enabledLeftPanels = 1,
   enabledRightPanels = 1,
@@ -40,7 +42,7 @@ local defaultOptions = {
   showChat = true,
   enableChat = true,
   gameScreenSize = 19,
-  backgroundFrameRate = 201,
+  backgroundFrameRate = 501,
   enableAudio = true,
   enableMusic = true,
   enableSoundAmbient = true,
@@ -61,12 +63,16 @@ local defaultOptions = {
   showExpBar = true,
   showText = true,
   showHotkeybars = true,
+  showExpiryInInventory = true,
+  showExpiryInContainers = true,
   clearLootbarItemsOnEachDrop = true,
   enableHighlightMouseTarget = true,
   crosshair = 'default',
   floorViewMode = 1,
   floorFadingDelay = 150,
   shadowFloorIntensity = 50,
+  setEffectAlphaScroll = 100,
+  setMissileAlphaScroll = 100,
   showMouseItemIcon = true,
   mouseItemIconOpacity = 50,
   dontStretchShrink = false,
@@ -83,7 +89,9 @@ local defaultOptions = {
   cycleWalk = true,
   cycleWalkDelay = 100,
   bouncingKeysDelayScrollBar = 1000,
-  turnDelay = 50,
+  walkTurnDelay = 100,
+  walkTeleportDelay = 50,
+  walkStairsDelay = 50,
   hotkeyDelay = 70,
   showMinimapExtraIcons = true,
   goldLootAutoDeposit = true,
@@ -92,6 +100,20 @@ local defaultOptions = {
   animatedTextScale = 0,
   uiScale = 0,
 }
+
+local gameScreenSizes = getGameScreenSizes()
+
+ClientOptions.GameScreenSizes = gameScreenSizes
+
+local function normalizeGameScreenSize(value)
+  value = math.round(tonumber(value) or gameScreenSizes[#gameScreenSizes].height)
+  for index = #gameScreenSizes, 1, -1 do
+    if value >= gameScreenSizes[index].height then
+      return gameScreenSizes[index].height
+    end
+  end
+  return gameScreenSizes[1].height
+end
 
 local optionsWindow
 local optionsButton
@@ -103,8 +125,8 @@ local options = { }
 local gamePanel
 local controlPanel
 local audioPanel
-local graphicPanel
-local displayPanel
+GraphicPanel = nil
+DisplayPanel = nil
 local panelOptionsPanel
 local consolePanel
 
@@ -115,6 +137,7 @@ local viewModeComboBox
 local crosshairComboBox
 local floorViewModeComboBox
 local uiScaleComboBox
+local localeComboBox
 
 local sidePanelsRadioGroup
 local autoDependentScaleRefreshEvent
@@ -412,18 +435,25 @@ function ClientOptions.init()
   gamePanel         = g_ui.loadUI('game')
   controlPanel      = g_ui.loadUI('control')
   audioPanel        = g_ui.loadUI('audio')
-  graphicPanel      = g_ui.loadUI('graphic')
-  displayPanel      = g_ui.loadUI('display')
+  GraphicPanel      = g_ui.loadUI('graphic')
+  DisplayPanel      = g_ui.loadUI('display')
   panelOptionsPanel = g_ui.loadUI('panel')
   consolePanel      = g_ui.loadUI('console')
+
+  local gameScreenSizeComboBox = DisplayPanel:getChildById('gameScreenSize')
+  if gameScreenSizeComboBox then
+    for _, screenSize in ipairs(gameScreenSizes) do
+      gameScreenSizeComboBox:addOption(f('%dx%d SQMs', screenSize.width, screenSize.height), screenSize.height)
+    end
+  end
 
   setupSidePanelsPriority()
 
   optionsTabBar:addTab(loc'${ClientOptionsTabTitleGame}', gamePanel, '/images/ui/options/game')
   optionsTabBar:addTab(loc'${ClientOptionsTabTitleControl}', controlPanel, '/images/ui/options/control')
   optionsTabBar:addTab(loc'${ClientOptionsTabTitleAudio}', audioPanel, '/images/ui/options/audio')
-  optionsTabBar:addTab(loc'${ClientOptionsTabTitleGraphic}', graphicPanel, '/images/ui/options/graphic')
-  optionsTabBar:addTab(loc'${ClientOptionsTabTitleDisplay}', displayPanel, '/images/ui/options/display')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleGraphic}', GraphicPanel, '/images/ui/options/graphic')
+  optionsTabBar:addTab(loc'${ClientOptionsTabTitleDisplay}', DisplayPanel, '/images/ui/options/display')
   optionsTabBar:addTab(loc'${ClientOptionsTabTitlePanel}', panelOptionsPanel, '/images/ui/options/panel')
   optionsTabBar:addTab(loc'${ClientOptionsTabTitleConsole}', consolePanel, '/images/ui/options/console')
   requestOptionsTabRefresh(nil, true)
@@ -436,7 +466,7 @@ function ClientOptions.init()
 
   -- Mouse item icon example
 
-  local showMouseItemIcon = graphicPanel:getChildById('showMouseItemIcon')
+  local showMouseItemIcon = GraphicPanel:getChildById('showMouseItemIcon')
   showMouseItemIcon.onHoverChange = function (self, hovered)
     if hovered then
       g_mouseicon.display(3585, ClientOptions.getOption('mouseItemIconOpacity') / 100, nil, 7)
@@ -444,12 +474,12 @@ function ClientOptions.init()
       g_mouseicon.hide()
     end
   end
-  local mouseItemIconOpacity = graphicPanel:getChildById('mouseItemIconOpacity')
+  local mouseItemIconOpacity = GraphicPanel:getChildById('mouseItemIconOpacity')
   mouseItemIconOpacity.onHoverChange = showMouseItemIcon.onHoverChange
 
   -- Map shaders
 
-  shaderFilterComboBox = graphicPanel:getChildById('shaderFilter')
+  shaderFilterComboBox = DisplayPanel:getChildById('shaderFilter')
   if shaderFilterComboBox then
     for k, shader in ipairs(MapShaders) do
       shaderFilterComboBox:addOption(shader.name, k)
@@ -458,7 +488,7 @@ function ClientOptions.init()
 
   -- View mode combobox
 
-  viewModeComboBox = graphicPanel:getChildById('viewMode')
+  viewModeComboBox = GraphicPanel:getChildById('viewMode')
   if viewModeComboBox then
     for k = 0, #ViewModes do
       viewModeComboBox:addOption(ViewModes[k].name, k)
@@ -479,7 +509,7 @@ function ClientOptions.init()
 
   -- Crosshair
 
-  crosshairCombobox = displayPanel:getChildById('crosshair')
+  crosshairCombobox = DisplayPanel:getChildById('crosshair')
 
   crosshairCombobox:addOption(loc'${ClientOptionsCrosshairValueDisabled}', 'disabled')
   crosshairCombobox:addOption(loc'${CorelibInfoDefault}', 'default')
@@ -487,7 +517,7 @@ function ClientOptions.init()
 
   -- Floor view mode
 
-  floorViewModeComboBox = displayPanel:getChildById('floorViewMode')
+  floorViewModeComboBox = DisplayPanel:getChildById('floorViewMode')
 
   floorViewModeComboBox:addOption(loc'${CorelibInfoDefault}', 0)
   floorViewModeComboBox:addOption(loc'${ClientOptionsFloorViewModeValueFading}', 1)
@@ -497,7 +527,7 @@ function ClientOptions.init()
 
   -- UI scale
 
-  uiScaleComboBox = graphicPanel.uiScale
+  uiScaleComboBox = GraphicPanel.uiScale
 
   uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValueAuto}', 0)
   uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValue1x}', 1)
@@ -505,8 +535,44 @@ function ClientOptions.init()
   uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValue4x}', 4)
   uiScaleComboBox:addOption(loc'${ClientOptionsUiScaleValue8x}', 8)
 
+  -- Locale combobox
+
+  localeComboBox = gamePanel:getChildById('localeComboBox')
+  for _, locale in ipairs(g_locales.getInstalledLocales()) do
+    localeComboBox:addOption(loc(locale.displayNameKey), locale.id)
+  end
+  localeComboBox:setCurrentOptionByData(CurrentLocaleId, true)
+
+  localeComboBox.onMousePress = function(self, mousePos, mouseButton)
+    if g_game.isOnline() then
+      displayInfoBox(loc'${ClientOptionsLocaleChangeOnlineTitle}', loc'${ClientOptionsLocaleChangeOnlineMessage}')
+      return true
+    end
+
+    return UIComboBox.onMousePress(self, mousePos, mouseButton)
+  end
+
+  localeComboBox.onOptionSelect = function(self, text, localeId)
+    if g_game.isOnline() then
+      displayInfoBox(loc'${ClientOptionsLocaleChangeOnlineTitle}', loc'${ClientOptionsLocaleChangeOnlineMessage}')
+      return true
+    end
+
+    if localeId == CurrentLocaleId then
+      return true
+    end
+
+    g_locales.setLocale(localeId)
+    restart()
+    return true
+  end
+
   addEvent(function()
     ClientOptions.setup()
+
+    gameScreenSizeComboBox.onOptionChange = function(comboBox, option)
+      ClientOptions.setOption('gameScreenSize', comboBox:getCurrentOption().data)
+    end
 
 
 
@@ -587,10 +653,11 @@ function ClientOptions.terminate()
   optionsTabContent          = nil
   optionsTabContentScrollBar = nil
   gamePanel                  = nil
+  localeComboBox             = nil
   controlPanel               = nil
   audioPanel                 = nil
-  graphicPanel               = nil
-  displayPanel               = nil
+  GraphicPanel               = nil
+  DisplayPanel               = nil
   panelOptionsPanel          = nil
   consolePanel               = nil
 
@@ -609,13 +676,17 @@ function ClientOptions.show()
   optionsWindow:show()
   optionsWindow:raise()
   optionsWindow:focus()
-  optionsButton:setOn(true)
+  if optionsButton then
+    optionsButton:setOn(true)
+  end
   requestOptionsTabRefresh(nil, false)
 end
 
 function ClientOptions.hide()
   optionsWindow:hide()
-  optionsButton:setOn(false)
+  if optionsButton then
+    optionsButton:setOn(false)
+  end
 end
 
 function ClientOptions.toggleOption(key)
@@ -632,6 +703,10 @@ function ClientOptions.updateOption(key) -- Execute functions within its option
 end
 
 function ClientOptions.setOption(key, value, force)
+  if key == 'gameScreenSize' then
+    value = normalizeGameScreenSize(value)
+  end
+
   if not force and ClientOptions.getOption(key) == value then
     return
   end
@@ -834,14 +909,21 @@ function ClientOptions.setOption(key, value, force)
   elseif modules.game_interface and key == "enableChat" then
     GameConsole.m.consoleToggleChat:setOn(value)
 
+  elseif modules.game_console and GameConsole and key == 'showHighlightedUnderline' then
+    GameConsole.setShowHighlightedUnderline(value)
+
   elseif modules.game_interface and key == 'gameScreenSize' then
     GameInterface.getMapPanel():setZoom(value)
 
   elseif key == 'backgroundFrameRate' then
-    g_app.setMaxFps(value > 0 and value < 201 and value or 0)
+    g_app.setMaxFps(value > 0 and value < 501 and value or 0)
 
   elseif modules.game_interface and key == 'showNames' then
     GameInterface.getMapPanel():setDrawNames(value)
+
+    if g_gameConfig.isDrawingInformationByWidget() and modules.game_creatureinformation then
+      modules.game_creatureinformation.toggleInformation()
+    end
 
   elseif modules.game_interface and key == 'showLevel' then
     GameInterface.getMapPanel():setDrawLevels(value)
@@ -852,8 +934,16 @@ function ClientOptions.setOption(key, value, force)
   elseif modules.game_interface and key == 'showHealth' then
     GameInterface.getMapPanel():setDrawHealthBars(value)
 
+    if g_gameConfig.isDrawingInformationByWidget() and modules.game_creatureinformation then
+      modules.game_creatureinformation.toggleInformation()
+    end
+
   elseif modules.game_interface and key == 'showMana' then
     GameInterface.updateManaBar(value)
+
+    if g_gameConfig.isDrawingInformationByWidget() and modules.game_creatureinformation then
+      modules.game_creatureinformation.toggleInformation()
+    end
 
   elseif modules.game_interface and key == 'showVigor' then
     GameInterface.getMapPanel():setDrawVigorBar(value)
@@ -872,6 +962,16 @@ function ClientOptions.setOption(key, value, force)
       return
     end
     GameHotkeyBars.onDisplay(value)
+
+  elseif key == 'showExpiryInInventory' then
+    if modules.game_character and GameCharacter then
+      addEvent(GameCharacter.reloadInventory)
+    end
+
+  elseif key == 'showExpiryInContainers' then
+    if modules.game_containers and GameContainers then
+      addEvent(GameContainers.reloadContainers)
+    end
 
   elseif modules.game_interface and key == 'dontStretchShrink' then
     addEvent(function() GameInterface.updateStretchShrink() end)
@@ -915,7 +1015,7 @@ function ClientOptions.setOption(key, value, force)
   elseif key == 'floorViewMode' then
     GameInterface.getMapPanel():setFloorViewMode(value)
 
-    local floorFadingDelayWidget = displayPanel:getChildById('floorFadingDelay')
+    local floorFadingDelayWidget = DisplayPanel:getChildById('floorFadingDelay')
     if floorFadingDelayWidget then
       floorFadingDelayWidget:setEnabled(value == 1)
     end
@@ -927,6 +1027,20 @@ function ClientOptions.setOption(key, value, force)
     local mapPanel = GameInterface and GameInterface.getMapPanel()
     if mapPanel then
       mapPanel:setShadowFloorIntensity(1 - (value / 100))
+    end
+
+  elseif key == 'setEffectAlphaScroll' then
+    g_client.setEffectAlpha(value / 100)
+    local label = GraphicPanel:getChildById('setEffectAlphaLabel')
+    if label then
+      label:setText(f(loc'${ClientOptionsEffectAlphaScroll}: %s%%', value))
+    end
+
+  elseif key == 'setMissileAlphaScroll' then
+    g_client.setMissileAlpha(value / 100)
+    local label = GraphicPanel:getChildById('setMissileAlphaLabel')
+    if label then
+      label:setText(f(loc'${ClientOptionsMissileAlphaScroll}: %s%%', value))
     end
 
   elseif key == 'showMinimapExtraIcons' then
@@ -986,6 +1100,10 @@ end
 
 function ClientOptions.getOption(key)
   return options[key]
+end
+
+function ClientOptions.refreshOptionsTab()
+  requestOptionsTabRefresh(nil, false)
 end
 
 function ClientOptions.addTab(name, panel, icon)

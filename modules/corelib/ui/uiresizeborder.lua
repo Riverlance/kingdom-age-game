@@ -75,6 +75,11 @@ function UIResizeBorder:onMouseMove(mousePos, mouseMoved)
       delta = -delta
     end
     newSize = math.min(math.max(parent:getHeight() + delta, self.minimum), self.maximum)
+    if self:getAnchorType(AnchorBottom) ~= AnchorNone then
+      newSize = math.min(math.max(parent:getHeight() + delta, self.minimum), self.maximum)
+    elseif self:getAnchorType(AnchorTop) ~= AnchorNone then
+      newSize = math.min(math.max(parent:getHeight() - delta, self.minimum), self.maximum)
+    end
     parent:setHeight(newSize)
 
   else
@@ -86,6 +91,11 @@ function UIResizeBorder:onMouseMove(mousePos, mouseMoved)
       delta = -delta
     end
     newSize = math.min(math.max(parent:getWidth() + delta, self.minimum), self.maximum)
+    if self:getAnchorType(AnchorRight) ~= AnchorNone then
+      newSize = math.min(math.max(parent:getWidth() + delta, self.minimum), self.maximum)
+    elseif self:getAnchorType(AnchorLeft) ~= AnchorNone then
+      newSize = math.min(math.max(parent:getWidth() - delta, self.minimum), self.maximum)
+    end
     parent:setWidth(newSize)
   end
 

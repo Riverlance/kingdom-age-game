@@ -27,8 +27,10 @@ rightArc  = nil
 topArc    = nil
 bottomArc = nil
 
-arcSettings = nil
+arcSettings = { }
 optionPanel = nil
+statsOptionsPanel = nil
+statsOptionsPanelHeight = 0
 
 arcSizeRatio        = g_settings.getNumber('stats_circle_size', 1.)
 gameScreenBased     = g_settings.getBoolean('stats_circle_gamescreenbased', false)
@@ -65,6 +67,8 @@ function GameStatsCircle.init()
   imageSizeBroad     = baseImageSizeBroad * 1.
   imageMargin        = 0
 
+  GameStatsCircle.enableOptionsPanel()
+
   connect(g_game, {
     onGameStart = GameStatsCircle.onGameStart,
     onGameEnd   = GameStatsCircle.onGameEnd,
@@ -98,6 +102,8 @@ function GameStatsCircle.terminate()
   bottomArc = nil
 
   optionPanel = nil
+  statsOptionsPanel = nil
+  statsOptionsPanelHeight = 0
 
   disconnect(LocalPlayer, {
     onHealthChange       = GameStatsCircle.onHealthChange,
@@ -141,7 +147,7 @@ end
 
 function GameStatsCircle.onGameEnd()
   GameStatsCircle.savePlayerSettings()
-  GameStatsCircle.disableOptionsPanel()
+  GameStatsCircle.setOptionsPanelVisible(false)
 
   arcSettings = { }
 end
@@ -149,7 +155,8 @@ end
 
 
 function GameStatsCircle.loadPlayerSettings()
-  local settings = Client.getPlayerSettings():getNode('StatsCircle') or { }
+  local playerSettings = g_playerSettings.get()
+  local settings = playerSettings and playerSettings:getNode('StatsCircle') or { }
   for arcNode, _ in pairs(settings) do
     local arc = GameStatsCircle.m[arcNode]
     arc.statsType = settings[arcNode].statsType or arc.statsType
@@ -163,7 +170,11 @@ function GameStatsCircle.savePlayerSettings()
     arcSettings[arc:getId()] = { statsType = arc.statsType }
   end
 
-  local settings = Client.getPlayerSettings()
+  local settings = g_playerSettings.get()
+  if not settings then
+    return
+  end
+
   settings:setNode('StatsCircle', arcSettings)
   settings:save()
 end
@@ -259,6 +270,9 @@ function GameStatsCircle.updateArc(arc, percent)
   end
 
   local player = g_game.getLocalPlayer()
+  if not player then
+    return
+  end
 
   if arc.statsType == Stats.Health then
     percent = percent or player:getHealthPercent()
@@ -403,14 +417,26 @@ function GameStatsCircle.updateArcsComboBox()
     comboBox:addOption(loc'${GameStatsCircleStatVigor}', Stats.Vigor)
     comboBox:addOption(loc'${GameStatsCircleStatCapacity}', Stats.Capacity)
     comboBox:addOption(loc'${GameStatsCircleStatExperience}', Stats.Experience)
-    comboBox:setCurrentOptionByData(arcSettings[comboBox.arc:getId()])
+    comboBox:setCurrentOptionByData(arcSettings[comboBox.arc:getId()] or comboBox.arc.statsType, true)
   end
 end
 
 function GameStatsCircle.enableOptionsPanel()
-  -- Add to options module
-  optionPanel = g_ui.loadUI('option_statscircle')
-  ClientOptions.addTab(loc'${GameStatsCircleTitle}', optionPanel, '/images/ui/options/stats_circle')
+  optionPanel = ClientOptions.m.DisplayPanel
+
+  if not optionPanel then
+    return
+  end
+
+  statsOptionsPanel = optionPanel:recursiveGetChildById('statsOptionsPanel')
+  if not statsOptionsPanel then
+    return
+  end
+
+  optionPanel:updateLayout()
+  statsOptionsPanel:updateLayout()
+  statsOptionsPanelHeight = statsOptionsPanel:getContentsSize().height + statsOptionsPanel:getPaddingTop() + statsOptionsPanel:getPaddingBottom() + 1
+  statsOptionsPanel:setHeight(statsOptionsPanelHeight)
 
   -- UI values
   leftArcComboBox   = optionPanel:recursiveGetChildById('leftArcComboBox')
@@ -438,20 +464,16 @@ function GameStatsCircle.enableOptionsPanel()
   distFromCenScrollbar:setValue(distFromCenterRatio * 100)
   fillOpacityScrollbar:setValue(opacityCircleFill * 100)
   bgOpacityScrollbar:setValue(opacityCircleBg * 100)
+
+  GameStatsCircle.setOptionsPanelVisible(g_game.isOnline())
 end
 
-function GameStatsCircle.disableOptionsPanel()
-  leftArcComboBox         = nil
-  rightArcComboBox        = nil
-  topArcComboBox          = nil
-  bottomArcComboBox       = nil
-  arcsComboBox            = nil
-  sizeScrollbar           = nil
-  gameScreenBasedCheckBox = nil
-  distFromCenScrollbar    = nil
-  fillOpacityScrollbar    = nil
-  bgOpacityScrollbar      = nil
+function GameStatsCircle.setOptionsPanelVisible(visible)
+  if not statsOptionsPanel then
+    return
+  end
 
-  ClientOptions.removeTab(loc'${GameStatsCircleTitle}')
-  optionPanel = nil
+  statsOptionsPanel:setHeight(visible and statsOptionsPanelHeight or 0)
+  statsOptionsPanel:setVisible(visible)
+  ClientOptions.refreshOptionsTab()
 end
