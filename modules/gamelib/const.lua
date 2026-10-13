@@ -497,11 +497,12 @@ HotkeyStatus = {
 }
 
 HotkeyItemUseType = {
-  Default   = nil,
+  Default   = 0,
   Crosshair = 1,
   Target    = 2,
   Self      = 3,
-  Cursor    = 4
+  Cursor    = 4,
+  Equip     = 5
 }
 
 WidgetLockActionFlag = {

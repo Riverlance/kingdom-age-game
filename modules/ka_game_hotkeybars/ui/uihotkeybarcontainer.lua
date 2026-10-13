@@ -52,7 +52,6 @@ function UIHotkeyBarContainer:updateLook()
 
   -- reset look
 
-  local hasTooltip = true
   local tooltipText = ''
   self:setText('')
 
@@ -74,10 +73,8 @@ function UIHotkeyBarContainer:updateLook()
 
   if string.exists(keySettings.keyCombo) then
     tooltipText = f('[%s]', keySettings.keyCombo)
-  else
-    hasTooltip = false
   end
-  tooltipType = TooltipType.default
+  local tooltipType = TooltipType.default
 
   if string.exists(keySettings.text) then
     self:setText('(...)')
@@ -98,7 +95,9 @@ function UIHotkeyBarContainer:updateLook()
     itemWidget:setVisible(true)
     itemWidget:setItemId(keySettings.itemId)
     itemWidget:setItemSubType(keySettings.subType)
-    if keySettings.useType == HotkeyItemUseType.Default then
+    if keySettings.useType == HotkeyItemUseType.Equip then
+      tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerEquipItem}', tooltipText)
+    elseif keySettings.useType == HotkeyItemUseType.Default then
       tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseItem}', tooltipText)
     elseif keySettings.useType == HotkeyItemUseType.Self then
       tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseOnYourself}', tooltipText)
@@ -106,9 +105,15 @@ function UIHotkeyBarContainer:updateLook()
       tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseOnTarget}', tooltipText)
     elseif keySettings.useType == HotkeyItemUseType.Crosshair then
       tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseWith}', tooltipText)
+    elseif keySettings.useType == HotkeyItemUseType.Cursor then
+      tooltipText = f(loc'%s ${GameHotkeyBarsInfoContainerUseAtMouse}', tooltipText)
     end
   end
-  self:setTooltip(hasTooltip and tooltipText or '', tooltipType)
+  if string.exists(tooltipText) then
+    self:setTooltip(tooltipText, tooltipType)
+  else
+    self:removeTooltip()
+  end
 end
 
 

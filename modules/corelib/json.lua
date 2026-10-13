@@ -209,9 +209,8 @@ local function parse_unicode_escape(s)
    -- Surrogate pair?
   if n2 then
     return codepoint_to_utf8((n1 - 0xd800) * 0x400 + (n2 - 0xdc00) + 0x10000)
-  else
-    return codepoint_to_utf8(n1)
   end
+  return codepoint_to_utf8(n1)
 end
 
 

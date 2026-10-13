@@ -17,6 +17,7 @@ function GameHotkeyBars.init()
   connect(g_game, {
     onGameStart           = GameHotkeyBars.online,
     onGameEnd             = GameHotkeyBars.offline,
+    onPlayerInventory     = GameHotkeyBars.onUpdateHotkeys,
     onClientOptionChanged = GameHotkeyBars.onClientOptionChanged,
   })
 
@@ -73,6 +74,7 @@ function GameHotkeyBars.terminate()
   disconnect(g_game, {
     onGameStart           = GameHotkeyBars.online,
     onGameEnd             = GameHotkeyBars.offline,
+    onPlayerInventory     = GameHotkeyBars.onUpdateHotkeys,
     onClientOptionChanged = GameHotkeyBars.onClientOptionChanged,
   })
 

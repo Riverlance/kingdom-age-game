@@ -264,9 +264,8 @@ function resolvepath(filePath, depth)
       end
       return  basepath .. filePath
 
-    else
-      return filePath
     end
+    return filePath
   else
     local basepath = getfsrcpath(depth+1)
     if basepath:sub(#basepath) ~= '/' then
@@ -296,25 +295,22 @@ end
 function fromboolean(boolean)
   if boolean then
     return 'true'
-  else
-    return 'false'
   end
+  return 'false'
 end
 
 function booleantonumber(boolean)
   if boolean then
     return 1
-  else
-    return 0
   end
+  return 0
 end
 
 function numbertoboolean(number)
   if number ~= 0 then
     return true
-  else
-    return false
   end
+  return false
 end
 
 function protectedcall(func, ...)

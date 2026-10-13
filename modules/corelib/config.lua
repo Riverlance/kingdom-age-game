@@ -10,14 +10,13 @@ local function convertSettingValue(value)
       return sizetostring(value)
     elseif value.r then
       return colortostring(value)
-    else
-      return value
     end
-  elseif value == nil then
-    return ''
-  else
-    return tostring(value)
+    return value
   end
+  if value == nil then
+    return ''
+  end
+  return tostring(value)
 end
 
 function Config:set(key, value)
@@ -72,4 +71,3 @@ end
 function Config:getColor(key, default)
   return tocolor(self:get(key, default))
 end
-

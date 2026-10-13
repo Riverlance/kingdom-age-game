@@ -9,6 +9,7 @@ HotkeyColors = {
   ItemUseTarget = '#ff6b6b',
   ItemUse = '#aef2ff',
   ItemUseAtCursor = '#ffb300',
+  ItemEquip = '#9dff8a',
   Power = '#cd4eff',
   Text = '#c9bdab',
   TextAutoSend = '#fff6c8',
@@ -23,10 +24,12 @@ hotkeysOverwriteWindow = nil
 currentHotkeyLabel = nil
 hotkeyItemLabel = nil
 currentItemPreview = nil
+useDefault = nil
 useOnSelf = nil
 useOnTarget = nil
 useWith = nil
 useAtCursor = nil
+useEquip = nil
 useRadioGroup = nil
 addHotkeyButton = nil
 removeHotkeyButton = nil
@@ -37,6 +40,37 @@ defaultComboKeys = nil
 currentHotkeys = nil
 hotkeyList = { }
 lastHotkeyTime = g_clock.millis()
+local playerInventoryLoaded = false
+
+
+local function isUseWithType(useType)
+  return useType == HotkeyItemUseType.Crosshair or
+    useType == HotkeyItemUseType.Target or
+    useType == HotkeyItemUseType.Self or
+    useType == HotkeyItemUseType.Cursor
+end
+
+function GameHotkeys.normalizeItemUseType(keySettings)
+  if not keySettings or not keySettings.itemId then
+    return
+  end
+
+  local item = Item.create(keySettings.itemId)
+  local isUseWith = item:isMultiUse()
+  local isEquipable = g_game.isItemEquipable(keySettings.itemId)
+
+  if isUseWith then
+    if keySettings.useType == nil or keySettings.useType == HotkeyItemUseType.Default then
+      keySettings.useType = HotkeyItemUseType.Crosshair
+    end
+  elseif keySettings.useType == nil or isUseWithType(keySettings.useType) then
+    keySettings.useType = HotkeyItemUseType.Default
+  end
+
+  if playerInventoryLoaded and keySettings.useType == HotkeyItemUseType.Equip and not isEquipable then
+    keySettings.useType = isUseWith and HotkeyItemUseType.Crosshair or HotkeyItemUseType.Default
+  end
+end
 
 
 
@@ -66,16 +100,20 @@ function GameHotkeys.init()
   currentItemPreview.onDragLeave = GameHotkeys.dragLeaveItemPreview
   currentItemPreview.onDrop = GameHotkeys.dropOnItemPreview
 
+  useDefault = hotkeysWindow:recursiveGetChildById('useDefault')
   useOnSelf = hotkeysWindow:recursiveGetChildById('useOnSelf')
   useOnTarget = hotkeysWindow:recursiveGetChildById('useOnTarget')
   useWith = hotkeysWindow:recursiveGetChildById('useWith')
   useAtCursor = hotkeysWindow:recursiveGetChildById('useAtCursor')
+  useEquip = hotkeysWindow:recursiveGetChildById('useEquip')
   useRadioGroupWidget = hotkeysWindow:getChildById('useGroup')
   useRadioGroup = UIRadioGroup.create()
-  useRadioGroup:addWidget(useOnSelf)
-  useRadioGroup:addWidget(useOnTarget)
+  useRadioGroup:addWidget(useDefault)
   useRadioGroup:addWidget(useWith)
   useRadioGroup:addWidget(useAtCursor)
+  useRadioGroup:addWidget(useOnSelf)
+  useRadioGroup:addWidget(useOnTarget)
+  useRadioGroup:addWidget(useEquip)
   useRadioGroup.onSelectionChange = function(self, selected) GameHotkeys.onChangeUseType(self, selected) end
 
   hotkeyTextLabel = hotkeysWindow:getChildById('hotkeyTextLabel')
@@ -87,8 +125,9 @@ function GameHotkeys.init()
   end
 
   connect(g_game, {
-    onGameStart = GameHotkeys.online,
-    onGameEnd   = GameHotkeys.offline
+    onGameStart       = GameHotkeys.online,
+    onGameEnd         = GameHotkeys.offline,
+    onPlayerInventory = GameHotkeys.onPlayerInventory
   })
 
   connect(GamePowers, {
@@ -106,8 +145,9 @@ function GameHotkeys.terminate()
   })
 
   disconnect(g_game, {
-    onGameStart = GameHotkeys.online,
-    onGameEnd   = GameHotkeys.offline
+    onGameStart       = GameHotkeys.online,
+    onGameEnd         = GameHotkeys.offline,
+    onPlayerInventory = GameHotkeys.onPlayerInventory
   })
 
   g_keyboard.unbindKeyDown(GameHotkeysActionKey)
@@ -135,10 +175,12 @@ function GameHotkeys.terminate()
   currentHotkeyLabel = nil
   hotkeyItemLabel    = nil
   currentItemPreview = nil
+  useDefault         = nil
   useOnSelf          = nil
   useOnTarget        = nil
   useWith            = nil
   useAtCursor        = nil
+  useEquip           = nil
   addHotkeyButton    = nil
   removeHotkeyButton = nil
   hotkeyTextLabel    = nil
@@ -156,6 +198,7 @@ function GameHotkeys.online()
 end
 
 function GameHotkeys.offline()
+  playerInventoryLoaded = false
   GameHotkeys.save()
   GameHotkeys.unload()
   GameHotkeys.hide()
@@ -287,11 +330,11 @@ function GameHotkeys.sort()
   table.sort(hotkeys, function(a,b)
     if #a:getId() < #b:getId() then
       return true
-    elseif #a:getId() == #b:getId() then
-      return a:getId() < b:getId()
-    else
-      return false
     end
+    if #a:getId() == #b:getId() then
+      return a:getId() < b:getId()
+    end
+    return false
   end)
   for newIndex, hotkey in ipairs(hotkeys) do
     currentHotkeys:moveChildToIndex(hotkey, newIndex)
@@ -321,8 +364,9 @@ function GameHotkeys.load(forceDefaults)
       keySettings.autoSend = string.exists(settings.text) and toboolean(settings.autoSend) or nil
       keySettings.itemId = tonumber(settings.itemId) or nil
       keySettings.subType = tonumber(settings.subType) or nil
-      keySettings.useType = tonumber(settings.useType) or nil
+      keySettings.useType = tonumber(settings.useType)
       keySettings.powerId = tonumber(settings.powerId) or nil
+      GameHotkeys.normalizeItemUseType(keySettings)
       GameHotkeys.addKeyCombo(keySettings)
     end
   else --retrocompatibility
@@ -336,9 +380,17 @@ function GameHotkeys.load(forceDefaults)
         keySettings.text = not keySettings.powerId and tostring(keySettings.value) or nil -- parse numeric text
       end
       if tonumber(index) then
+        keySettings.itemId = tonumber(keySettings.itemId) or nil
+        keySettings.subType = tonumber(keySettings.subType) or nil
+        keySettings.useType = tonumber(keySettings.useType)
+        GameHotkeys.normalizeItemUseType(keySettings)
         GameHotkeys.addKeyCombo(keySettings)
       else --retrocompatibility
         keySettings.keyCombo = tostring(index)
+        keySettings.itemId = tonumber(keySettings.itemId) or nil
+        keySettings.subType = tonumber(keySettings.subType) or nil
+        keySettings.useType = tonumber(keySettings.useType)
+        GameHotkeys.normalizeItemUseType(keySettings)
         GameHotkeys.addKeyCombo(keySettings)
       end
     end
@@ -527,6 +579,7 @@ function GameHotkeys.addKeyCombo(keySettings, focus)
   if not string.exists(keyCombo) then
     return
   end
+  GameHotkeys.normalizeItemUseType(keySettings)
   hotkeyList[keyCombo] = table.copy(keySettings) or { }
 
   local hotkeyLabel = currentHotkeys:getChildById('Hotkey_' .. keyCombo)
@@ -637,13 +690,19 @@ function GameHotkeys.doAction(keySettings)
   if keySettings.itemId then
     if keySettings.useType == HotkeyItemUseType.Default then
       g_game.useInventoryItem(keySettings.itemId)
+    elseif keySettings.useType == HotkeyItemUseType.Equip then
+      g_game.equipItem(Item.create(keySettings.itemId))
     elseif keySettings.useType == HotkeyItemUseType.Crosshair then
       local item = Item.create(keySettings.itemId)
       GameInterface.startUseWith(item)
     elseif keySettings.useType == HotkeyItemUseType.Target then
+      local item = Item.create(keySettings.itemId)
       local attackingCreature = g_game.getAttackingCreature()
-      if not attackingCreature then GameInterface.startUseWith(item) end
-      if attackingCreature:getTile() then g_game.useInventoryItemWith(keySettings.itemId, attackingCreature) end
+      if not attackingCreature then
+        GameInterface.startUseWith(item)
+      elseif attackingCreature:getTile() then
+        g_game.useInventoryItemWith(keySettings.itemId, attackingCreature)
+      end
     elseif keySettings.useType == HotkeyItemUseType.Self then
       g_game.useInventoryItemWith(keySettings.itemId, g_game.getLocalPlayer())
     elseif keySettings.useType == HotkeyItemUseType.Cursor then
@@ -686,6 +745,9 @@ function GameHotkeys.updateHotkeyLabel(hotkeyLabel)
     elseif keySettings.useType == HotkeyItemUseType.Cursor then
       hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemAtCursor}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUseAtCursor)
+    elseif keySettings.useType == HotkeyItemUseType.Equip then
+      hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemEquip}', keySettings.keyCombo))
+      hotkeyLabel:setColor(HotkeyColors.ItemEquip)
     else
       hotkeyLabel:setText(f(loc'%s: ${GameHotkeysItemUse}', keySettings.keyCombo))
       hotkeyLabel:setColor(HotkeyColors.ItemUse)
@@ -708,6 +770,26 @@ function GameHotkeys.updateHotkeyList()
   for _, hotkey in ipairs(currentHotkeys:getChildren()) do
     GameHotkeys.updateHotkeyLabel(hotkey)
   end
+end
+
+function GameHotkeys.onPlayerInventory()
+  playerInventoryLoaded = true
+
+  for _, hotkey in ipairs(currentHotkeys:getChildren()) do
+    local keySettings = hotkey.settings
+    local previousUseType = keySettings.useType
+    GameHotkeys.normalizeItemUseType(keySettings)
+
+    if previousUseType ~= keySettings.useType then
+      local appliedSettings = hotkeyList[keySettings.keyCombo]
+      if appliedSettings then
+        appliedSettings.useType = keySettings.useType
+      end
+    end
+  end
+
+  GameHotkeys.updateHotkeyList()
+  GameHotkeys.updateHotkeyForm()
 end
 
 function GameHotkeys.updateHotkeyForm(reset, dontUpdateText)
@@ -749,25 +831,36 @@ function GameHotkeys.updateHotkeyForm(reset, dontUpdateText)
       switchItemPreview(false)
     elseif keySettings.itemId then --TODO: isValidItem
       disableText()
-      switchItemPreview(true, keySettings.useType)
+      switchItemPreview(true, true)
       currentItemPreview:setItemId(keySettings.itemId)
       if keySettings.subType then
         currentItemPreview:setItemSubType(keySettings.subType)
       end
-      if keySettings.useType then
-        if keySettings.useType == HotkeyItemUseType.Crosshair then
-          selectedWidget = useWith
-        elseif keySettings.useType == HotkeyItemUseType.Target then
-          selectedWidget = useOnTarget
-        elseif keySettings.useType == HotkeyItemUseType.Self then
-          selectedWidget = useOnSelf
-        elseif keySettings.useType == HotkeyItemUseType.Cursor then
-          selectedWidget = useAtCursor
-        else
-          selectedWidget = nil
-        end
-        useRadioGroup:selectWidget(selectedWidget)
+      GameHotkeys.normalizeItemUseType(keySettings)
+
+      local item = Item.create(keySettings.itemId)
+      local isUseWith = item:isMultiUse()
+      local isEquipable = g_game.isItemEquipable(keySettings.itemId)
+      useDefault:setEnabled(not isUseWith)
+      useWith:setEnabled(isUseWith)
+      useAtCursor:setEnabled(isUseWith)
+      useOnSelf:setEnabled(isUseWith)
+      useOnTarget:setEnabled(isUseWith)
+      useEquip:setEnabled(isEquipable)
+
+      local selectedWidget = useDefault
+      if keySettings.useType == HotkeyItemUseType.Crosshair then
+        selectedWidget = useWith
+      elseif keySettings.useType == HotkeyItemUseType.Target then
+        selectedWidget = useOnTarget
+      elseif keySettings.useType == HotkeyItemUseType.Self then
+        selectedWidget = useOnSelf
+      elseif keySettings.useType == HotkeyItemUseType.Cursor then
+        selectedWidget = useAtCursor
+      elseif keySettings.useType == HotkeyItemUseType.Equip then
+        selectedWidget = useEquip
       end
+      useRadioGroup:selectWidget(selectedWidget, true)
     elseif keySettings.powerId then --TODO: isValidPower
       disableText()
       switchItemPreview(true)
@@ -865,7 +958,9 @@ end
 
 function GameHotkeys.onChangeUseType(self, selectedWidget)
   local keySettings = currentHotkeyLabel.settings
-  if selectedWidget == useWith then
+  if selectedWidget == useDefault then
+    keySettings.useType = HotkeyItemUseType.Default
+  elseif selectedWidget == useWith then
     keySettings.useType = HotkeyItemUseType.Crosshair
   elseif selectedWidget == useOnTarget then
     keySettings.useType = HotkeyItemUseType.Target
@@ -873,8 +968,8 @@ function GameHotkeys.onChangeUseType(self, selectedWidget)
     keySettings.useType = HotkeyItemUseType.Self
   elseif selectedWidget == useAtCursor then
     keySettings.useType = HotkeyItemUseType.Cursor
-  else
-    keySettings.useType = HotkeyItemUseType.Default
+  elseif selectedWidget == useEquip then
+    keySettings.useType = HotkeyItemUseType.Equip
   end
   GameHotkeys.onEdit(currentHotkeyLabel)
   GameHotkeys.updateHotkeyLabel(currentHotkeyLabel)

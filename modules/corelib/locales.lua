@@ -168,9 +168,8 @@ function g_locales.getTranslation(id)
   local selected = tr and (tr[lang] or tr['en']) or nil-- default: English
   if type(selected) == 'table' then
     return selected[math.random(#selected)]
-  else
-    return selected
   end
+  return selected
 end
 
 function g_locales.addTranslations(tr, overwrite) -- { id = { [lang] = text, ... }, ...}

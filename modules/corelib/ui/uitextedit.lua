@@ -161,7 +161,8 @@ function UITextEdit:onTextChange(newText, oldText)
     return onError()
 
   -- Regex
-  elseif string.exists(self.regex) and string.exists(newText) then
+  end
+  if string.exists(self.regex) and string.exists(newText) then
     local formattedText = newText:match(self.regex)
 
     if string.exists(formattedText) then

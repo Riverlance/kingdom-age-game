@@ -212,6 +212,8 @@ function UIHotkeyBar:configHotkey(widget)
 
     if widget:getItem():isMultiUse() then
       keySettings.useType = HotkeyItemUseType.Crosshair
+    else
+      keySettings.useType = HotkeyItemUseType.Default
     end
 
   elseif widgetClass == 'UIGameMap' then
@@ -221,12 +223,16 @@ function UIHotkeyBar:configHotkey(widget)
       keySettings.subType = item:getSubType()
       if item:isMultiUse() then
         keySettings.useType = HotkeyItemUseType.Crosshair
+      else
+        keySettings.useType = HotkeyItemUseType.Default
       end
     end
 
   elseif widgetClass == 'UIHotkeyLabel' or widgetClass == 'UIHotkeyBarContainer' then
     keySettings = widget.settings
   end
+
+  GameHotkeys.normalizeItemUseType(keySettings)
 
   keySettings.hotkeyBarId = self.id
   return keySettings

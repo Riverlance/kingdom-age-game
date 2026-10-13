@@ -43,7 +43,7 @@ HotkeyAssignWindow < MainWindow
 MainWindow
   id: hotkeysWindow
   &loc: '${GameHotkeysWindowTitle}'
-  size: 500 580
+  size: 500 626
 
   @onEnter: GameHotkeys.ok()
   @onEscape: GameHotkeys.cancel()
@@ -142,13 +142,8 @@ MainWindow
     anchors.right: parent.right
 
     ButtonBox
-      id: useOnSelf
-      &loc: '${GameHotkeysUseOnSelf}'
-
-    ButtonBox
-      id: useOnTarget
-      &loc: '${GameHotkeysUseOnTarget}'
-      margin-top: 2
+      id: useDefault
+      &loc: '${GameHotkeysUseDefault}'
 
     ButtonBox
       id: useWith
@@ -157,7 +152,22 @@ MainWindow
 
     ButtonBox
       id: useAtCursor
-      &loc: '${GameHotkeysUseAtCursor}'
+      &loc: '${GameHotkeysUseAtMouse}'
+      margin-top: 2
+
+    ButtonBox
+      id: useOnSelf
+      &loc: '${GameHotkeysUseOnSelf}'
+      margin-top: 2
+
+    ButtonBox
+      id: useOnTarget
+      &loc: '${GameHotkeysUseOnTarget}'
+      margin-top: 2
+
+    ButtonBox
+      id: useEquip
+      &loc: '${GameHotkeysUseEquip}'
       margin-top: 2
 
   HorizontalSeparator

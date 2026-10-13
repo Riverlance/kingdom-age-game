@@ -171,9 +171,8 @@ function UIResizeBorder:getParentSize()
   local parent = self:getParent()
   if self.vertical then
     return parent:getHeight()
-  else
-    return parent:getWidth()
   end
+  return parent:getWidth()
 end
 
 function UIResizeBorder:checkBoundary(size)
