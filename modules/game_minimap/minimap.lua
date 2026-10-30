@@ -30,6 +30,7 @@ fullMapButton = nil
 
 preloaded = false
 oldPos = nil
+local jumpModeEnabled = false
 
 currentMapFilename = ''
 
@@ -83,6 +84,7 @@ function GameMinimap.init()
   g_keyboard.bindKeyDown('Escape', function() if minimapWidget.fullMapView then GameMinimap.toggleFullMap() end end)
 
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo, GameMinimap.onInstanceInfo)
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeJumpMode, GameMinimap.onJumpMode)
 
   connect(g_game, {
     onGameStart        = GameMinimap.online,
@@ -125,6 +127,7 @@ function GameMinimap.terminate()
   })
 
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo)
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeJumpMode)
 
   local gameRootPanel = GameInterface.getRootPanel()
   g_keyboard.unbindKeyPress('Alt+Left', gameRootPanel)
@@ -167,6 +170,7 @@ function GameMinimap.online()
 end
 
 function GameMinimap.offline()
+  jumpModeEnabled = false
   minimapWindow:setSettings({ hideControllers = ballButton:isOn() })
   GameMinimap.saveMap()
   g_minimap.clean()
@@ -176,6 +180,10 @@ function GameMinimap.offline()
   end
 
   currentMapFilename = ''
+end
+
+function GameMinimap.onJumpMode(protocolGame, opcode, msg)
+  jumpModeEnabled = msg:getU8() == 1
 end
 
 function GameMinimap.loadMap(clean)
@@ -345,6 +353,10 @@ end
 
 function GameMinimap.getMinimapBar()
   return minimapBar
+end
+
+function GameMinimap.isJumpModeEnabled()
+  return jumpModeEnabled
 end
 
 function GameMinimap.toggleControllers()

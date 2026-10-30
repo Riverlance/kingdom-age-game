@@ -30,7 +30,6 @@ WeightUnit = loc'${CorelibInfoOz}'
 BackpackSize   = 20
 BackpackPrice  = 20
 BackpackWeight = 18
-ItemMaxAmount  = 100
 ItemMaxPrice   = 100000000
 
 -- Error
@@ -560,7 +559,7 @@ function GamePlayerShop.getBuyAmount(item, amount) -- (item[, amount])
       -- Check item amount according to player money, up to ItemMaxAmount
       local minimumCost = item.price + backpackPrice
       while money >= minimumCost and itemsAmount < ItemMaxAmount do
-        -- Buying each backpack of items until 100 items (it will loop until 5 times, since 5 * BackpackSize = ItemMaxAmount)
+        -- Buy each backpack of items until the configured stack size
         local amount = math.min(math.floor(money / item.price), BackpackSize)
         local price  = amount * item.price + BackpackPrice
 

@@ -124,7 +124,7 @@ MessageTypes = {
 
   [MessageModes.Status] = MessageSettings.status,
   [MessageModes.Loot] = MessageSettings.loot, -- centerGreen?
-  [MessageModes.TradeNpc] = MessageSettings.centerGreen,
+  [MessageModes.Trade] = MessageSettings.centerGreen,
   [MessageModes.Guild] = MessageSettings.statusOwn, -- centerGreen?
 
   [MessageModes.PartyManagement] = MessageSettings.centerGreen,

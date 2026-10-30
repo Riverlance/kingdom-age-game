@@ -23,7 +23,8 @@ PlayerStates = {
   PZ = 262144,
   WZ = 524288,
   RZ = 1048576,
-  BZ = 2097152
+  BZ = 2097152,
+  Root = 4194304
 }
 
 local PLAYER_STATE_SEGMENT = 4294967296

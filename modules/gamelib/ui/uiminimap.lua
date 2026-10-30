@@ -531,7 +531,8 @@ function UIMinimap:onMouseRelease(pos, button)
 
   if button == MouseLeftButton then
     local player = g_game.getLocalPlayer()
-    if g_game.getGroupAccess() and g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed() then
+    local isJumpModeEnabled = GameMinimap and GameMinimap.isJumpModeEnabled and GameMinimap.isJumpModeEnabled()
+    if g_game.getGroupAccess() and (isJumpModeEnabled or (g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed())) then
       return g_game.sendGmTeleport(mapPos)
     end
     if Position.distance(player:getPosition(), mapPos) > 250 then

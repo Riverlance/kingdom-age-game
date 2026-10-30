@@ -185,7 +185,8 @@ ServerExtOpcodes = {
   ServerExtOpcodeWidgetLock         = 12,
   ServerExtOpcodePowerList          = 13,
   ServerExtOpcodeCreatureNameShader = 14,
-  -- Free                             15 to 65535
+  ServerExtOpcodeJumpMode           = 15,
+  -- Free                             16 to 65535
 }
 
 -- Client to Server - Opcodes

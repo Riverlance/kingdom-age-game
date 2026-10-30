@@ -6,6 +6,8 @@ ACCOUNT_TYPE_SENIORTUTOR = 3
 ACCOUNT_TYPE_GAMEMASTER  = 4
 ACCOUNT_TYPE_GOD         = 5
 
+ItemMaxAmount = 100
+
 FloorHigher = 0
 FloorLower  = 15
 
@@ -340,7 +342,7 @@ MessageModes = {
 
   Status = 30,
   Loot = 31,
-  TradeNpc = 32,
+  Trade = 32,
   Guild = 33,
 
   PartyManagement = 34,

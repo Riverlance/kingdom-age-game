@@ -381,6 +381,26 @@ g_locales.addTranslations({
     ko    = "당신은 마비되었습니다",
   },
 
+  GameConditionsStateRoot = {
+    en    = "You are rooted",
+    ptbr  = "Você está enraizado",
+    ptpt  = "Estás enraizado",
+    es419 = "Estás enraizado",
+    eses  = "Estás enraizado",
+    pl    = "Jesteś unieruchomiony",
+    ru    = "Вы обездвижены",
+    sv    = "Du är rotad",
+    nb    = "Du er rotfestet",
+    de    = "Du bist bewegungsunfähig",
+    nlnl  = "Je bent geïmmobiliseerd",
+    frfr  = "Vous êtes immobilisé",
+    fi    = "Olet juurtunut",
+    it    = "Sei immobilizzato",
+    zhcn  = "你被定身了",
+    ja    = "移動できなくなっています",
+    ko    = "당신은 속박되었습니다",
+  },
+
   GameConditionsStateHaste = {
     en    = "You are hasted",
     ptbr  = "Você está acelerado",

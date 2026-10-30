@@ -95,6 +95,7 @@ Icons[PlayerStates.PZ] = { tooltip = loc'${GameConditionsStatePZ}', path = '/ima
 Icons[PlayerStates.WZ] = { tooltip = loc'${GameConditionsStateWZ}', path = '/images/game/creature/condition/default_wz', id = 'condition_wz' }
 Icons[PlayerStates.RZ] = { tooltip = loc'${GameConditionsStateRZ}', path = '/images/game/creature/condition/default_rz', id = 'condition_rz' }
 Icons[PlayerStates.BZ] = { tooltip = loc'${GameConditionsStateBZ}', path = '/images/game/creature/condition/default_bz', id = 'condition_bz' }
+Icons[PlayerStates.Root] = { tooltip = loc'${GameConditionsStateRoot}', path = '/images/game/creature/condition/default_root', id = 'condition_root' }
 
 
 

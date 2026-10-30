@@ -74,7 +74,7 @@ SpeakTypes = {
 
   [MessageModes.Status] = SpeakTypesSettings.none, -- ignored
   [MessageModes.Loot] = SpeakTypesSettings.none, -- ignored
-  [MessageModes.TradeNpc] = SpeakTypesSettings.none, -- ignored
+  [MessageModes.Trade] = SpeakTypesSettings.none, -- ignored
   [MessageModes.Guild] = SpeakTypesSettings.none, -- ignored
 
   [MessageModes.PartyManagement] = SpeakTypesSettings.none, -- ignored
