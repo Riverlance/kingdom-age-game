@@ -439,22 +439,26 @@ function GameBattleList.filterButtons()
     end
     local creature = _button.creature
 
-    local on          = not GameBattleList.buttonFilter(_button)
-    local playerPos   = localPlayer:getPosition()
-    local creaturePos = creature:getPosition()
+    if not creature then
+      _button:setOn(false)
+    else
+      local on          = not GameBattleList.buttonFilter(_button)
+      local playerPos   = localPlayer:getPosition()
+      local creaturePos = creature:getPosition()
 
-    if creature:isLocalPlayer() or
-       creature:isDead() or
-       not playerPos or
-       not creaturePos or
-       playerPos.z ~= creaturePos.z or
-       not creature:canBeSeen() or -- Handles invisible state also
-       not mapPanel:isInRange(creaturePos)
-    then
-      on = false
+      if creature:isLocalPlayer() or
+         creature:isDead() or
+         not playerPos or
+         not creaturePos or
+         playerPos.z ~= creaturePos.z or
+         not creature:canBeSeen() or -- Handles invisible state also
+         not mapPanel:isInRange(creaturePos)
+      then
+        on = false
+      end
+
+      _button:setOn(on)
     end
-
-    _button:setOn(on)
   end
 end
 
@@ -577,8 +581,27 @@ function GameBattleList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
+        if localPlayerPos then
+          sortFunction = function(a,b)
+            local creatureA, creatureB = a and a.creature, b and b.creature
+            if not creatureA then
+              return false
+            end
+            if not creatureB then
+              return true
+            end
 
-        sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.creature:getPosition()) < getDistanceTo(localPlayerPos, b.creature:getPosition()) end
+            local positionA, positionB = creatureA:getPosition(), creatureB:getPosition()
+            if not positionA then
+              return false
+            end
+            if not positionB then
+              return true
+            end
+
+            return getDistanceTo(localPlayerPos, positionA) < getDistanceTo(localPlayerPos, positionB)
+          end
+        end
       end
 
     -- Ascending - Health
@@ -600,8 +623,27 @@ function GameBattleList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
+        if localPlayerPos then
+          sortFunction = function(a,b)
+            local creatureA, creatureB = a and a.creature, b and b.creature
+            if not creatureA then
+              return false
+            end
+            if not creatureB then
+              return true
+            end
 
-        sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.creature:getPosition()) > getDistanceTo(localPlayerPos, b.creature:getPosition()) end
+            local positionA, positionB = creatureA:getPosition(), creatureB:getPosition()
+            if not positionA then
+              return false
+            end
+            if not positionB then
+              return true
+            end
+
+            return getDistanceTo(localPlayerPos, positionA) > getDistanceTo(localPlayerPos, positionB)
+          end
+        end
       end
 
     -- Descending - Health

@@ -6,7 +6,7 @@ ACCOUNT_TYPE_SENIORTUTOR = 3
 ACCOUNT_TYPE_GAMEMASTER  = 4
 ACCOUNT_TYPE_GOD         = 5
 
-ItemMaxAmount = 100
+ItemMaxAmount = 1000
 
 FloorHigher = 0
 FloorLower  = 15

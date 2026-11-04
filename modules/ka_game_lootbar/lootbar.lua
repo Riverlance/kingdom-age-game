@@ -216,7 +216,15 @@ function GameLootbar.onLoot(protocolGame, opcode, msg)
 
   local pos = { x = tonumber(params[1]), y = tonumber(params[2]), z = tonumber(params[3]) }
   if not pos.x or not pos.y or not pos.z then
-    pos = g_game.getLocalPlayer():getPosition()
+    local localPlayer = g_game.getLocalPlayer()
+    if not localPlayer then
+      return
+    end
+
+    pos = localPlayer:getPosition()
+    if not pos then
+      return
+    end
   end
 
   for i = 4, #params do

@@ -81,12 +81,16 @@ function UICreatureButton:setCreature(data)
     self.name     = data:getName()
     self.nickname = data:getNickname()
 
-    self.healthPercent  = data:getHealthPercent()
-    self.manaPercent    = data:getManaPercent()
-    self.vigorPercent   = data:getVigorPercent()
-    self.position.x     = position.x
-    self.position.y     = position.y
-    self.position.z     = position.z
+    self.healthPercent = data:getHealthPercent()
+    self.manaPercent   = data:getManaPercent()
+    self.vigorPercent  = data:getVigorPercent()
+
+    if position then
+      self.position.x = position.x
+      self.position.y = position.y
+      self.position.z = position.z
+    end
+
     self.ping           = 0
     self.creatureTypeId = data:getType()
     self.shieldId       = data:getShield()
@@ -455,10 +459,14 @@ function UICreatureButton:updatePosition(position)
   end
 
   if self.creature then
-    local _position = self.creature:getPosition()
-    position.x      = _position.x
-    position.y      = _position.y
-    position.z      = _position.z
+    local creaturePosition = self.creature:getPosition()
+    if creaturePosition then
+      position.x = creaturePosition.x
+      position.y = creaturePosition.y
+      position.z = creaturePosition.z
+    else
+      position = self.position
+    end
   else
     position = self.position
   end
@@ -469,19 +477,21 @@ function UICreatureButton:updatePosition(position)
     color = 'darkGreen'
   else
     local localPlayerPos = localPlayer:getPosition()
-    local distance       = getDistanceTo(localPlayerPos, position, true)
+    if localPlayerPos then
+      local distance = getDistanceTo(localPlayerPos, position, true)
 
-    -- Outer party shared experience distance limit
-    if distance > 30 then
-      color = 'red'
+      -- Outer party shared experience distance limit
+      if distance > 30 then
+        color = 'red'
 
-    -- Cannot see each other
-    elseif not Position.isInRange(localPlayerPos, position, ScreenRangeX, ScreenRangeY) then
-      color = 'yellow'
+      -- Cannot see each other
+      elseif not Position.isInRange(localPlayerPos, position, ScreenRangeX, ScreenRangeY) then
+        color = 'yellow'
 
-    -- Local player can see position
-    else
-      color = 'darkGreen'
+      -- Local player can see position
+      else
+        color = 'darkGreen'
+      end
     end
   end
 
@@ -627,17 +637,14 @@ function UICreatureButton:updateVocation(vocationId)
 end
 
 function UICreatureButton:updateInfoIcon()
-  local localPlayer = g_game.getLocalPlayer()
-  if not localPlayer then
-    return
-  end
-
   local infoIconWidget = self:getChildById('infoIcon')
-  if not infoIconWidget then
+  local localPlayer    = g_game.getLocalPlayer()
+  local localPlayerPos = localPlayer and localPlayer:getPosition()
+  if not infoIconWidget or not localPlayerPos then
     return
   end
 
-  local distance = getDistanceTo(localPlayer:getPosition(), self.position, true)
+  local distance = getDistanceTo(localPlayerPos, self.position, true)
 
   local hierarchyStr = f(loc'${GamelibInfoCreatureButtonHierarchy}: %s', self.creatureTypeId == CreatureTypePlayer and ShieldStr[self.shieldId] or table.contains({ CreatureTypeSummonOwn, CreatureTypeSummonOther }, self.creatureTypeId) and loc'${GamelibInfoCreatureButtonSummon}' or loc'${GamelibInfoCreatureButtonUnknown}')
   local distanceStr  = f(loc'${CorelibInfoDistance}: ${GamelibInfoCreatureButtonSQMs}', distance)

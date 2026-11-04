@@ -1419,6 +1419,11 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
     return
   end
 
+  local localPlayer = g_game.getLocalPlayer()
+  if creatureThing and not localPlayer then
+    return
+  end
+
   local menu = g_ui.createWidget('PopupMenu')
   menu:setGameMenu(true)
 
@@ -1478,7 +1483,6 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
   end
 
   if creatureThing then
-    local localPlayer = g_game.getLocalPlayer()
     local creatureName = creatureThing:getName()
     menu:addSeparator()
 
@@ -1512,7 +1516,8 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
 
     else
       local localPosition = localPlayer:getPosition()
-      if creatureThing:getPosition().z == localPosition.z then
+      local creaturePosition = creatureThing:getPosition()
+      if localPosition and creaturePosition and creaturePosition.z == localPosition.z then
         if not classic then
           shortcut = '(Alt)'
         else
@@ -1552,7 +1557,7 @@ function GameInterface.createThingMenu(menuPosition, lookThing, useThing, creatu
           end
         end
 
-        local creatureDistance = getDistanceBetween(creatureThing:getPosition(), localPosition)
+        local creatureDistance = getDistanceBetween(creaturePosition, localPosition)
         if GameConsole and creatureThing:isNpc() and creatureDistance <= Npc.DefaultDistance then
           menu:addOption(loc'${GameInterfaceContextMenuTalk}', function() if GameConsole then GameConsole.greetNpc(creatureThing) end end)
         end
@@ -1665,8 +1670,13 @@ function GameInterface.processMouseAction(menuPosition, mouseButton, autoWalkPos
   local mouseLeftAndRight = g_mouse.isPressed(MouseLeftButton) and mouseRight or g_mouse.isPressed(MouseRightButton) and mouseLeft
 
   -- Near, but not on same player position
-  local creatureDistance = creatureThing and getDistanceBetween(creatureThing:getPosition(), pos) or 0
-  local isCreatureNear   = creatureThing and creatureThing:getPosition().z == autoWalkPos.z and creatureDistance > 0
+  local creatureDistance = 0
+  local isCreatureNear   = false
+  local creaturePosition = creatureThing and creatureThing:getPosition()
+  if creaturePosition then
+    creatureDistance = getDistanceBetween(creaturePosition, pos)
+    isCreatureNear   = creaturePosition.z == autoWalkPos.z and creatureDistance > 0
+  end
 
   local isMultiUse = useThing:isMultiUse()
   -- These containers must always be opened, even when quick loot is enabled in the future (see Mehah's quick loot implementation in this module)
@@ -2146,7 +2156,12 @@ function GameInterface.onTrackPosition(posNode, remove)
     local pos = posNode.position
     posNode.widget = g_ui.createWidget('TrackerWidget', gameScreenArea)
     posNode.widget:setId(f('tracked_position_%d_%d_%d', pos.x, pos.y, pos.z))
-    g_game.sendMagicEffect(g_game.getLocalPlayer():getPosition(), 347)
+
+    local localPlayer    = g_game.getLocalPlayer()
+    local playerPosition = localPlayer and localPlayer:getPosition()
+    if playerPosition then
+      g_game.sendMagicEffect(playerPosition, 347)
+    end
   end
 
   local trackWidget = posNode.widget
@@ -2178,7 +2193,12 @@ function updateTrackArrow(trackNode)
     return
   end
 
-  local playerPos = g_game.getLocalPlayer():getPosition()
+  local localPlayer = g_game.getLocalPlayer()
+  local playerPos   = localPlayer and localPlayer:getPosition()
+  if not playerPos then
+    return
+  end
+
   local trackPos = trackNode.position
 
   trackNode.widget:setVisible(not Position.isInRange(playerPos, trackPos, trackerWidgetOrbitRadiusSqm - 1, trackerWidgetOrbitRadiusSqm - 1))
@@ -2298,33 +2318,35 @@ function GameInterface.initCycleWalkEvent()
   end
 
   cycleWalkEvent = cycleEvent(function()
-    local player = g_game.getLocalPlayer()
-    if not player then
-      return
-    end
-
-    -- Happens when clicking outside of map boundaries
-    local autoWalkPos = gameMapPanel:getPosition(g_window.getMousePosition())
-    if not autoWalkPos or (autoWalkPos.x == 0 and autoWalkPos.y == 0 and autoWalkPos.z == 0) then
-      return
-    end
-
     local keyMods = g_window.getKeyboardModifiers()
     if keyMods ~= KeyboardNoModifier or not g_mouse.isPressed(MouseMidButton) then
       GameInterface.stopCycleWalkEvent()
       return
     end
 
-    -- Auto walk pos is mouse pos behind walls
-    local playerPos = player:getPosition()
-    if autoWalkPos.z ~= playerPos.z then
-      local dz = autoWalkPos.z - playerPos.z
-      autoWalkPos.x = autoWalkPos.x + dz
-      autoWalkPos.y = autoWalkPos.y + dz
-      autoWalkPos.z = playerPos.z
-    end
+    local player = g_game.getLocalPlayer()
+    if player then
+      -- Auto walk - Happens when clicking outside of map boundaries
+      local autoWalkPos = gameMapPanel:getPosition(g_window.getMousePosition())
+      if not autoWalkPos or (autoWalkPos.x == 0 and autoWalkPos.y == 0 and autoWalkPos.z == 0) then
+        return
+      end
 
-    player:autoWalk(autoWalkPos)
+      local playerPos = player:getPosition()
+      if not playerPos then
+        return
+      end
+
+      -- Auto walk - pos is mouse pos behind walls
+      if autoWalkPos.z ~= playerPos.z then
+        local dz = autoWalkPos.z - playerPos.z
+        autoWalkPos.x = autoWalkPos.x + dz
+        autoWalkPos.y = autoWalkPos.y + dz
+        autoWalkPos.z = playerPos.z
+      end
+
+      player:autoWalk(autoWalkPos)
+    end
 
   end, ClientOptions.getOption('cycleWalkDelay'))
 end
@@ -2364,7 +2386,11 @@ function GameInterface.onAttackingCreatureChange(creature, prevCreature)
 
   if creature then
     creature:showStaticCircle(UICreatureButton.getStaticCircleTargetColor().notHovered)
-    g_game.sendDistanceEffect(creature:getPosition(), 41)
+
+    local position = creature:getPosition()
+    if position then
+      g_game.sendDistanceEffect(position, 41)
+    end
   end
 end
 

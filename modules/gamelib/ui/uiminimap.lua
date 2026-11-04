@@ -174,9 +174,11 @@ function UIMinimap:refreshAlternativesPosition()
 end
 
 function UIMinimap:reset()
-  local player = g_game.getLocalPlayer()
-  if player then
-    self:setCameraPosition(player:getPosition())
+  local player   = g_game.getLocalPlayer()
+  local position = player and player:getPosition()
+
+  if position then
+    self:setCameraPosition(position)
   end
 end
 
@@ -256,18 +258,23 @@ function UIMinimap:addFlag(mapPos, icon, description, force, temporary)
 
   flag.onMouseRelease = function(widget, _pos, button)
     if button == MouseLeftButton then
-      local player = g_game.getLocalPlayer()
-      if player then
-        if Position.distance(player:getPosition(), widget.pos) > 250 then
-          GameTextMessage.displayStatusMessage(loc'${GamelibInfoDestinationOutRange}')
-          return false
-        end
+      local player         = g_game.getLocalPlayer()
+      local playerPosition = player and player:getPosition()
 
-        if widget:getParent().autowalk then
-          player:autoWalk(widget.pos)
-        end
-        return true
+      if not playerPosition then
+        return false
       end
+
+      if Position.distance(playerPosition, widget.pos) > 250 then
+        GameTextMessage.displayStatusMessage(loc'${GamelibInfoDestinationOutRange}')
+        return false
+      end
+
+      if widget:getParent().autowalk then
+        player:autoWalk(widget.pos)
+      end
+
+      return true
 
     elseif button == MouseRightButton then
       local menu = g_ui.createWidget('PopupMenu')
@@ -530,12 +537,18 @@ function UIMinimap:onMouseRelease(pos, button)
   end
 
   if button == MouseLeftButton then
-    local player = g_game.getLocalPlayer()
     local isJumpModeEnabled = GameMinimap and GameMinimap.isJumpModeEnabled and GameMinimap.isJumpModeEnabled()
     if g_game.getGroupAccess() and (isJumpModeEnabled or (g_keyboard.isCtrlPressed() and g_keyboard.isShiftPressed())) then
       return g_game.sendGmTeleport(mapPos)
     end
-    if Position.distance(player:getPosition(), mapPos) > 250 then
+
+    local player         = g_game.getLocalPlayer()
+    local playerPosition = player and player:getPosition()
+    if not playerPosition then
+      return false
+    end
+
+    if Position.distance(playerPosition, mapPos) > 250 then
     	GameTextMessage.displayStatusMessage(loc'${GamelibInfoDestinationOutRange}')
     	return false
     end
@@ -543,7 +556,9 @@ function UIMinimap:onMouseRelease(pos, button)
     if self.autowalk then
       player:autoWalk(mapPos)
     end
+
     return true
+
   elseif button == MouseRightButton then
     local menu = g_ui.createWidget('PopupMenu')
     menu:setGameMenu(true)
@@ -555,8 +570,10 @@ function UIMinimap:onMouseRelease(pos, button)
     menu:addSeparator()
     bindCopyPositionOption(menu, mapPos)
     menu:display(pos)
+
     return true
   end
+
   return false
 end
 

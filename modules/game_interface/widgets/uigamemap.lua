@@ -139,33 +139,27 @@ function UIGameMap:onMouseRelease(mousePosition, mouseButton)
     end
   end
 
-  -- Happens when clicking outside of map boundaries
+  local tile          = self:getTile(mousePosition)
+  local lookThing     = tile and tile:getTopLookThing() or nil
+  local useThing      = tile and tile:getTopUseThing() or nil
+  local creatureThing = tile and tile:getTopCreature() or nil
+  local wrapThing     = tile and tile:getTopWrapThing() or nil
+
+  -- Auto walk - Happens when clicking outside of map boundaries
   local autoWalkPos = self:getPosition(mousePosition)
   if not autoWalkPos or (autoWalkPos.x == 0 and autoWalkPos.y == 0 and autoWalkPos.z == 0) then
     return false
   end
 
-  -- Auto walk pos is mouse pos behind walls
-  local playerPos = g_game.getLocalPlayer():getPosition()
-  if autoWalkPos.z ~= playerPos.z then
+  local localPlayer = g_game.getLocalPlayer()
+  local playerPos   = localPlayer and localPlayer:getPosition()
+
+  -- Auto walk - pos is mouse pos behind walls
+  if playerPos and autoWalkPos.z ~= playerPos.z then
     local dz = autoWalkPos.z - playerPos.z
     autoWalkPos.x = autoWalkPos.x + dz
     autoWalkPos.y = autoWalkPos.y + dz
     autoWalkPos.z = playerPos.z
-  end
-
-  local lookThing
-  local useThing
-  local creatureThing
-  local multiUseThing
-  local wrapThing
-
-  local tile = self:getTile(mousePosition)
-  if tile then
-    lookThing = tile:getTopLookThing()
-    useThing = tile:getTopUseThing()
-    creatureThing = tile:getTopCreature()
-    wrapThing = tile:getTopWrapThing()
   end
 
   if not creatureThing then

@@ -94,7 +94,12 @@ function ClientAudio.updateAudios()
     return
   end
 
-  local position = g_game.getLocalPlayer():getPosition()
+  local localPlayer = g_game.getLocalPlayer()
+  local position    = localPlayer and localPlayer:getPosition()
+  if not position then
+    return
+  end
+
   g_sounds.setPosition(position)
   for _, _channel in ipairs(channels) do
     local channel = _channel.channel
@@ -241,10 +246,10 @@ end
 do
   local function canReleaseAudioEffect(pos)
     local localPlayer = g_game.getLocalPlayer()
-    if not localPlayer then
+    local playerPos   = localPlayer and localPlayer:getPosition()
+    if not playerPos then
       return
     end
-    local playerPos = localPlayer:getPosition()
 
     -- Diff floor, then we need to check if has ground between
     if pos.z ~= playerPos.z then

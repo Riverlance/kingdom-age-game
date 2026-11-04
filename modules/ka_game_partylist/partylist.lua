@@ -780,7 +780,11 @@ function GamePartyList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
-        sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] < ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
+        if localPlayerPos then
+          sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] < ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
+        else
+          sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] < ShieldHierarchy[b.shieldId] end
+        end
       end
 
     -- Appear
@@ -792,7 +796,9 @@ function GamePartyList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
-        sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
+        if localPlayerPos then
+          sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) < getDistanceTo(localPlayerPos, b.position) end
+        end
       end
 
     -- Health
@@ -823,7 +829,11 @@ function GamePartyList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
-        sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] > ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
+        if localPlayerPos then
+          sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] > ShieldHierarchy[b.shieldId] or ShieldHierarchy[a.shieldId] == ShieldHierarchy[b.shieldId] and getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
+        else
+          sortFunction = function(a,b) return ShieldHierarchy[a.shieldId] > ShieldHierarchy[b.shieldId] end
+        end
       end
 
     -- Appear
@@ -835,7 +845,9 @@ function GamePartyList.sortList()
       local localPlayer = g_game.getLocalPlayer()
       if localPlayer then
         local localPlayerPos = localPlayer:getPosition()
-        sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
+        if localPlayerPos then
+          sortFunction = function(a,b) return getDistanceTo(localPlayerPos, a.position) > getDistanceTo(localPlayerPos, b.position) end
+        end
       end
 
     -- Health

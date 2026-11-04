@@ -214,25 +214,28 @@ function walk(dir)
     nextWalkDir = nil
 
     if g_game.getFeature(GameAllowPreWalk) then
-        local toPos = Position.translatedToDirection(player:getPosition(), dir)
-        local toTile = g_map.getTile(toPos)
+        local playerPos = player:getPosition()
+        if playerPos then
+            local toPos = Position.translatedToDirection(playerPos, dir)
+            local toTile = g_map.getTile(toPos)
 
-        -- KA - Ghost mode walking
-        local isInGhostMode = player:isInGhostMode()
+            -- KA - Ghost mode walking
+            local isInGhostMode = player:isInGhostMode()
 
-        if toTile and (toTile:isWalkable() or isInGhostMode) then
-            player:preWalk(dir)
-        elseif canChangeFloorDown(toPos) or canChangeFloorUp(toPos) then
-            player:preWalk(dir)
-        else
-            -- KA - Turn to unwalkable direction
-            if not isInGhostMode and toTile and not toTile:isEmpty() then
-                g_game.turn(dir)
+            if toTile and (toTile:isWalkable() or isInGhostMode) then
+                player:preWalk(dir)
+            elseif canChangeFloorDown(toPos) or canChangeFloorUp(toPos) then
+                player:preWalk(dir)
+            else
+                -- KA - Turn to unwalkable direction
+                if not isInGhostMode and toTile and not toTile:isEmpty() then
+                    g_game.turn(dir)
+                end
+
+                -- KA - Removed possibility to walk to higher/lower floor by items that have elevation.
+                -- Floor changes are handled explicitly by canChangeFloorDown() and canChangeFloorUp().
+                return false
             end
-
-            -- KA - Removed possibility to walk to higher/lower floor by items that have elevation.
-            -- Floor changes are handled explicitly by canChangeFloorDown() and canChangeFloorUp().
-            return false
         end
     end
 

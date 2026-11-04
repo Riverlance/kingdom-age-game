@@ -113,6 +113,11 @@ AttachedEffectManager.register(9, 'Thunder', '/images/game/effect/thunder', Thin
 AttachedEffectManager.register(10, 'Dynamic Effect', 0, 0, {
     duration = 500,
     onAttach = function(effect, owner)
+        local ownerPos = owner and owner:getPosition()
+        if not ownerPos then
+            return
+        end
+
         local spriteSize = g_gameConfig.getSpriteSize()
         local length = 3
 
@@ -121,7 +126,7 @@ AttachedEffectManager.register(10, 'Dynamic Effect', 0, 0, {
         missile:setDirection(5)
         missile:setOffset(spriteSize * length, 0)
         missile:setBounce(0, 15, 1000)
-        missile:move(Position.translated(owner:getPosition(), -length, 0), owner:getPosition())
+        missile:move(Position.translated(ownerPos, -length, 0), ownerPos)
         effect:attachEffect(missile)
 
         missile = AttachedEffect.create(38, ThingCategoryMissile)
@@ -129,7 +134,7 @@ AttachedEffectManager.register(10, 'Dynamic Effect', 0, 0, {
         missile:setDirection(3)
         missile:setOffset(-(spriteSize * length), 0)
         missile:setBounce(0, 15, 1000)
-        missile:move(Position.translated(owner:getPosition(), length, 0), owner:getPosition())
+        missile:move(Position.translated(ownerPos, length, 0), ownerPos)
         effect:attachEffect(missile)
     end,
     onDetach = function(effect, oldOwner)
