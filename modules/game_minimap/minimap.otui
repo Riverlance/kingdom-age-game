@@ -3,6 +3,7 @@ MiniWindow
   &loc: '${GameMinimapTitle}'
   icon: /images/ui/top_menu/minimap
   &save: true
+  &openByDefault: true
   &contentMinimumHeight: 117
 
   MiniWindowIconTooltipArea

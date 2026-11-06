@@ -142,6 +142,7 @@ MiniWindow
   icon: /images/ui/top_menu/healthinfo
   // Mini window height is set in Lua
   &save: true
+  &openByDefault: true
   &defaultHeight: 280
 
   BallMenuButton

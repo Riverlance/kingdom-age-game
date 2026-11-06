@@ -209,6 +209,11 @@ function UIMiniWindow:isLocked()
 end
 
 function UIMiniWindow:setup(button)
+  if self.defaultOpenEvent then
+    removeEvent(self.defaultOpenEvent)
+  end
+  self.defaultOpenEvent = nil
+
   self:getChildById('closeButton').onClick =
     function()
       if self:isLocked() then
@@ -252,26 +257,69 @@ function UIMiniWindow:setup(button)
     self.topMenuButton = button
   end
 
+  self:close(true)
+
   self.defaultHeight = self.defaultHeight or 140 -- (see ResizeBorder on 30-miniwindow for the 140 value)
 
   local isResizeable = self:isResizeable()
   local selfSettings = self:getSettings(true)
   local isMinimized  = selfSettings and selfSettings.minimized or self:isOn()
+  local hasRestoredParent = false
 
-  if selfSettings then
-    if selfSettings.parentId then
-      local parent = rootWidget:recursiveGetChildById(selfSettings.parentId)
-      if parent then
-        if parent:getClassName() == 'UIMiniWindowContainer' and selfSettings.index then
-          self.miniIndex = selfSettings.index
-          parent:scheduleInsert(self, selfSettings.index)
-        elseif selfSettings.position then
-          self:setParent(parent, true)
-          self:setPosition(topoint(selfSettings.position))
+  if selfSettings and selfSettings.parentId then
+    local parent = rootWidget:recursiveGetChildById(selfSettings.parentId)
+    if parent then
+      if parent:getClassName() == 'UIMiniWindowContainer' and selfSettings.index then
+        if self:getParent() ~= parent then
+          self:setParent(nil, true)
         end
+        self.miniIndex = selfSettings.index
+        parent:scheduleInsert(self, selfSettings.index)
+        hasRestoredParent = true
+      elseif selfSettings.position then
+        self:setParent(parent, true)
+        self:setPosition(topoint(selfSettings.position))
+        hasRestoredParent = true
       end
     end
+  end
 
+  if not hasRestoredParent and self:getParent() then
+    self:setParent(nil, true)
+  end
+
+  local function initializeVisibility()
+    self:close(true)
+
+    if self.openByDefault then
+      local miniWindow = self
+      self.defaultOpenEvent = addEvent(function()
+        if not isWidgetAlive(miniWindow) then
+          return
+        end
+
+        miniWindow.defaultOpenEvent = nil
+        if not g_game.isOnline() then
+          return
+        end
+
+        local currentSettings = miniWindow:getSettings(true)
+        if currentSettings and currentSettings.closed ~= nil then
+          return
+        end
+
+        if hasRestoredParent then
+          miniWindow:open()
+        else
+          GameInterface.toggleMiniWindow(miniWindow)
+        end
+      end)
+    else
+      self:setSettings({closed = true})
+    end
+  end
+
+  if selfSettings then
     if isMinimized then
       self:minimize(true)
     else
@@ -289,21 +337,23 @@ function UIMiniWindow:setup(button)
       self:unlock(true)
     end
 
-    if selfSettings.closed then
-      self:close(true)
+    if selfSettings.closed == nil then
+      initializeVisibility()
     else
-      self:open(true)
+      if selfSettings.closed then
+        self:close(true)
+      else
+        self:open(true)
+      end
     end
   else
-    if self:getId() == 'battleWindow' then
-      self:open(true)
-    end
-
     if isMinimized then
       self:minimize(true)
     else
       self:setHeight(isResizeable and self:getMinimumHeight() or self.defaultHeight, true)
     end
+
+    initializeVisibility()
   end
 
   local oldParent = self:getParent()
