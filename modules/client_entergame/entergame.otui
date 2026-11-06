@@ -43,10 +43,13 @@ MainWindow
     anchors.left: accountNameBackground.left
     margin-left: 50
 
-  PasswordTextEdit
+  TextEdit
     id: accountNameTextEdit
     size: 200 20
     image-source: /images/ui/enter_game/text_edit
+    padding-top: 2
+    !placeholder: loc'${EnterGameAccountPlaceholder}'
+    placeholder-color: #707070
     anchors.verticalCenter: accountNameBackground.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
     margin-left: 60

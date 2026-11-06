@@ -658,6 +658,25 @@ local function useItemAtCursor(keySettings)
   end
 end
 
+function GameHotkeys.sendHotkeyUseAttempt(itemId, subType, isEquip)
+  if not g_game.canPerformGameAction() then
+    return
+  end
+
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeHotkeyUseAttempt)
+  msg:addU16(itemId)
+  msg:addU16(subType < 0 and 0xFFFF or subType)
+  msg:addU8(isEquip and 1 or 0)
+  protocolGame:send(msg)
+end
+
 function GameHotkeys.doAction(keySettings)
   if GameHotkeys.isOpen() then
     return
@@ -688,6 +707,8 @@ function GameHotkeys.doAction(keySettings)
   end
 
   if keySettings.itemId then
+    GameHotkeys.sendHotkeyUseAttempt(keySettings.itemId, keySettings.subType or -1, keySettings.useType == HotkeyItemUseType.Equip)
+
     if keySettings.useType == HotkeyItemUseType.Default then
       g_game.useInventoryItem(keySettings.itemId)
     elseif keySettings.useType == HotkeyItemUseType.Equip then

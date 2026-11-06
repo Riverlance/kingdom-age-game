@@ -84,17 +84,17 @@ local function encode_table(val, stack)
     stack[val] = nil
     return "[" .. table.concat(res, ",") .. "]"
 
-  else
-    -- Treat as an object
-    for k, v in pairs(val) do
-      if type(k) ~= "string" then
-        error("invalid table: mixed or invalid key types")
-      end
-      table.insert(res, encode(k, stack) .. ":" .. encode(v, stack))
-    end
-    stack[val] = nil
-    return "{" .. table.concat(res, ",") .. "}"
   end
+
+  -- Treat as an object
+  for k, v in pairs(val) do
+    if type(k) ~= "string" then
+      error("invalid table: mixed or invalid key types")
+    end
+    table.insert(res, encode(k, stack) .. ":" .. encode(v, stack))
+  end
+  stack[val] = nil
+  return "{" .. table.concat(res, ",") .. "}"
 end
 
 
@@ -191,11 +191,14 @@ local function codepoint_to_utf8(n)
   local f = math.floor
   if n <= 0x7f then
     return string.char(n)
-  elseif n <= 0x7ff then
+  end
+  if n <= 0x7ff then
     return string.char(f(n / 64) + 192, n % 64 + 128)
-  elseif n <= 0xffff then
+  end
+  if n <= 0xffff then
     return string.char(f(n / 4096) + 224, f(n % 4096 / 64) + 128, n % 64 + 128)
-  elseif n <= 0x10ffff then
+  end
+  if n <= 0x10ffff then
     return string.char(f(n / 262144) + 240, f(n % 262144 / 4096) + 128,
                        f(n % 4096 / 64) + 128, n % 64 + 128)
   end

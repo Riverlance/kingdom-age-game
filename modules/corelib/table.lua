@@ -1,5 +1,3 @@
-#
-
 function pack(...)
   return {...}
 end
@@ -66,6 +64,10 @@ function table.get(t, ...)
     t = (t or __emptyTable)[args[i]]
   end
   return t
+end
+
+function table.slice(t, first, last)
+  return { unpack(t, first or 1, last or #t) }
 end
 
 function table.size(t)

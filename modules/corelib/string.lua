@@ -1,5 +1,3 @@
-#
-
 -- Methods
 
 local stringMetatable = getmetatable('')
@@ -43,7 +41,8 @@ if not stringMetatable.isset__index then
     if type(v) == 'table' then
       if type(v[1]) == 'number' then
         return self:sub(v[1], v[2])
-      elseif type(v[1]) == 'string' then
+      end
+      if type(v[1]) == 'string' then
         return self:gsub(unpack(v))
       end
     elseif type(v) == 'number' then
@@ -147,17 +146,23 @@ local function utf8CodepointSize(self, index)
 
   if first >= 0xC2 and first <= 0xDF then
     return isContinuation(second) and 2 or 1
-  elseif first == 0xE0 then
+  end
+  if first == 0xE0 then
     return second and second >= 0xA0 and second <= 0xBF and isContinuation(self:byte(index + 2)) and 3 or 1
-  elseif (first >= 0xE1 and first <= 0xEC) or (first >= 0xEE and first <= 0xEF) then
+  end
+  if (first >= 0xE1 and first <= 0xEC) or (first >= 0xEE and first <= 0xEF) then
     return isContinuation(second) and isContinuation(self:byte(index + 2)) and 3 or 1
-  elseif first == 0xED then
+  end
+  if first == 0xED then
     return second and second >= 0x80 and second <= 0x9F and isContinuation(self:byte(index + 2)) and 3 or 1
-  elseif first == 0xF0 then
+  end
+  if first == 0xF0 then
     return second and second >= 0x90 and second <= 0xBF and isContinuation(self:byte(index + 2)) and isContinuation(self:byte(index + 3)) and 4 or 1
-  elseif first >= 0xF1 and first <= 0xF3 then
+  end
+  if first >= 0xF1 and first <= 0xF3 then
     return isContinuation(second) and isContinuation(self:byte(index + 2)) and isContinuation(self:byte(index + 3)) and 4 or 1
-  elseif first == 0xF4 then
+  end
+  if first == 0xF4 then
     return second and second >= 0x80 and second <= 0x8F and isContinuation(self:byte(index + 2)) and isContinuation(self:byte(index + 3)) and 4 or 1
   end
 
@@ -267,9 +272,11 @@ function string:getMonthDayEnding() -- You can use as string.getMonthDayEnding(1
   if number then
     if number == 1 or number == 21 or number == 31 then
       return 'st'
-    elseif number == 2 or number == 22 then
+    end
+    if number == 2 or number == 22 then
       return 'nd'
-    elseif number == 3 or number == 23 then
+    end
+    if number == 3 or number == 23 then
       return 'rd'
     end
   end

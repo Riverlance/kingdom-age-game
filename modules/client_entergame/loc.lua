@@ -421,6 +421,26 @@ g_locales.addTranslations({
     ko    = "계정",
   },
 
+  EnterGameAccountPlaceholder = {
+      en    = "Name or email",
+      ptbr  = "Nome ou e-mail",
+      ptpt  = "Nome ou e-mail",
+      es419 = "Nombre o correo",
+      eses  = "Nombre o correo",
+      pl    = "Nazwa lub e-mail",
+      ru    = "Имя или эл. почта",
+      sv    = "Namn eller e-post",
+      nb    = "Navn eller e-post",
+      de    = "Name oder E-Mail",
+      nlnl  = "Naam of e-mail",
+      frfr  = "Nom ou e-mail",
+      fi    = "Nimi tai sähköposti",
+      it    = "Nome o email",
+      zhcn  = "名称或邮箱",
+      ja    = "名前またはメール",
+      ko    = "이름 또는 이메일",
+  },
+
   EnterGamePasswordLabel = {
     en    = "Password",
     ptbr  = "Senha",

@@ -323,7 +323,8 @@ ClientExtOpcodes = {
   ClientExtOpcodeGoldLootAutoDeposit = 13,
   ClientExtOpcodeDeals               = 14,
   ClientExtOpcodeWorldChannel        = 15,
-  -- Free                              16 to 65535
+  ClientExtOpcodeHotkeyUseAttempt    = 16,
+  -- Free                              17 to 65535
 }
 
 ClientActions = {
