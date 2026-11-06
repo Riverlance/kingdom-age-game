@@ -257,7 +257,10 @@ function UIMiniWindow:setup(button)
     self.topMenuButton = button
   end
 
-  self:close(true)
+  local isContainer = self.container ~= nil
+  if not isContainer then
+    self:close(true)
+  end
 
   self.defaultHeight = self.defaultHeight or 140 -- (see ResizeBorder on 30-miniwindow for the 140 value)
 
@@ -284,12 +287,14 @@ function UIMiniWindow:setup(button)
     end
   end
 
-  if not hasRestoredParent and self:getParent() then
+  if not isContainer and not hasRestoredParent and self:getParent() then
     self:setParent(nil, true)
   end
 
   local function initializeVisibility()
-    self:close(true)
+    if not isContainer then
+      self:close(true)
+    end
 
     if self.openByDefault then
       local miniWindow = self
@@ -314,7 +319,7 @@ function UIMiniWindow:setup(button)
           GameInterface.toggleMiniWindow(miniWindow)
         end
       end)
-    else
+    elseif not isContainer then
       self:setSettings({closed = true})
     end
   end
@@ -340,7 +345,7 @@ function UIMiniWindow:setup(button)
     if selfSettings.closed == nil then
       initializeVisibility()
     else
-      if selfSettings.closed then
+      if selfSettings.closed and not isContainer then
         self:close(true)
       else
         self:open(true)
