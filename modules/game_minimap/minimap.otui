@@ -51,6 +51,7 @@ MiniWindow
 
     OptionScrollbar
       id: minimapOpacity
+      mouse-scroll: true
       width: 100
       anchors.bottom: positionLabel.outsideTop
       anchors.left: parent.left

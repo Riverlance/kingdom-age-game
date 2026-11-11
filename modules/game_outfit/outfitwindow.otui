@@ -3,7 +3,7 @@ PrevOutfitButton < PreviousButton
 NextMountButton < NextButton
 PrevMountButton < PreviousButton
 
-MainWindow
+BlurredMainWindow
   &loc: '${GameOutfitWindowTitle}'
   size: 340 340
 

@@ -80,7 +80,8 @@ ServerOpcodes = {
   ServerOpcodeDeleteInContainer       = 114,
   ServerOpcodePlayerShop              = 115, -- KA - Player shop actions
   ServerOpcodeCreatureSpeechBubble    = 116, -- KA - Creature speech bubble
-  -- Free                               117 to 119
+  ServerOpcodeMinimapCreatureSnapshot = 117, -- KA - Minimap creature snapshot
+  -- Free                               118 to 119
   ServerOpcodeSetInventory            = 120,
   ServerOpcodeDeleteInventory         = 121,
   ServerOpcodeOpenNpcTrade            = 122,
@@ -186,7 +187,9 @@ ServerExtOpcodes = {
   ServerExtOpcodePowerList          = 13,
   ServerExtOpcodeCreatureNameShader = 14,
   ServerExtOpcodeJumpMode           = 15,
-  -- Free                             16 to 65535
+  -- Free                             16
+  ServerExtOpcodeContactPresence    = 17,
+  -- Free                             18 to 65535
 }
 
 -- Client to Server - Opcodes
@@ -229,7 +232,10 @@ ClientOpcodes = {
   ClientOpcodeTurnEast                  = 112,
   ClientOpcodeTurnSouth                 = 113,
   ClientOpcodeTurnWest                  = 114,
-  -- Free                                 115 to 118
+  ClientOpcodeGmTeleport                = 115,
+  -- Free                                 116
+  ClientOpcodeMinimapCreatureSnapshot   = 117, -- KA - Minimap creature snapshot
+  -- Free                                 118
   ClientOpcodeEquipItem                 = 119, -- 910
   ClientOpcodeMove                      = 120,
   ClientOpcodeInspectNpcTrade           = 121,
@@ -324,7 +330,8 @@ ClientExtOpcodes = {
   ClientExtOpcodeDeals               = 14,
   ClientExtOpcodeWorldChannel        = 15,
   ClientExtOpcodeHotkeyUseAttempt    = 16,
-  -- Free                              17 to 65535
+  ClientExtOpcodeContactPresence     = 17,
+  -- Free                              18 to 65535
 }
 
 ClientActions = {

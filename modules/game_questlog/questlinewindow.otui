@@ -34,7 +34,7 @@ MissionDataLabel < Label
   color: #333b43
   margin-right: 3
 
-QuestLineWindow < MainWindow
+QuestLineWindow < BlurredMainWindow
   id: questLineWindow
   &loc: '${GameQuestLogWindowTitle}'
   size: 500 400

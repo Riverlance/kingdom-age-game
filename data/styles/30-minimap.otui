@@ -12,6 +12,7 @@ MinimapCross < UIWidget
 Minimap < UIMinimap
   draggable: true
   focusable: false
+  clipping: true
   cross: true
   color: black
 
@@ -66,7 +67,7 @@ MinimapFlagCheckBox < CheckBox
   $pressed:
     icon-clip: 0 22 11 11
 
-MinimapAddFlagWindow < MainWindow
+MinimapAddFlagWindow < BlurredMainWindow
   &loc: '${ClientStylesMapInfoAddMark}'
   size: 196 185
 
@@ -202,7 +203,7 @@ MinimapAddFlagWindow < MainWindow
     anchors.right: parent.right
     anchors.bottom: parent.bottom
 
-MinimapEditFlagWindow < MainWindow
+MinimapEditFlagWindow < BlurredMainWindow
   &loc: '${ClientStylesMapInfoEditMark}'
   size: 196 185
 

@@ -1,4 +1,4 @@
-MainWindow
+BlurredMainWindow
   id: addServerWindow
   &loc: '${ClientServerListAddServerWindow}'
   size: 250 190

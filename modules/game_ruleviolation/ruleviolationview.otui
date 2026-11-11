@@ -23,7 +23,7 @@ RVVRowLabel < Label
 
 
 
-RVViewWindow < MainWindow
+RVViewWindow < BlurredMainWindow
   &loc: '${GameRuleViolationWindowTitle}'
   size: 400 600
   @onEscape: |
@@ -188,6 +188,7 @@ RVViewWindow < MainWindow
 
   OptionScrollbar
     id: rvViewRowsPerPageOptionScrollbar
+    mouse-scroll: true
     step: 10
     anchors.bottom: next.top
     anchors.left: parent.left

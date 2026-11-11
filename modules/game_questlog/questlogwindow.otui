@@ -34,7 +34,7 @@ QuestDataLabel < Label
   // color: #e6db74 // Updated on Lua
   margin-right: 3
 
-QuestLogWindow < MainWindow
+QuestLogWindow < BlurredMainWindow
   id: questLogWindow
   &loc: '${GameQuestLogWindowTitle}'
   size: 500 400

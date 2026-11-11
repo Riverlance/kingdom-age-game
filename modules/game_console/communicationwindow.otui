@@ -25,7 +25,7 @@ WhiteListLabel < Label
     color: #ffffff
 
 
-MainWindow
+BlurredMainWindow
   id: communicationWindow
   &loc: '${GameConsoleCommunicationWindow}'
   size: 515 410

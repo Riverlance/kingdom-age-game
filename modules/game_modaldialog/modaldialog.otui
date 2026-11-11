@@ -66,7 +66,7 @@ ModalButton < Button
 
 
 
-ModalDialog < MainWindow
+ModalDialog < BlurredMainWindow
   id: modalDialog
   size: 200 150
 

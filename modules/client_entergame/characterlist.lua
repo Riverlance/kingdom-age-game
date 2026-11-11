@@ -144,7 +144,7 @@ end
 local function updateCharacterNameColor(characterWidget, online)
     local nameWidget = characterWidget:getChildById('name')
     if nameWidget then
-        nameWidget:setColor(online and tocolor('green') or tocolor('#990f0f'))
+        nameWidget:setColor(online and tocolor('green') or tocolor('#cc1414'))
     end
 end
 

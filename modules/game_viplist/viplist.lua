@@ -18,6 +18,7 @@ vipInfo = { }
 vipGroups = { }
 maxVipGroups = 0
 GameVipList.showGrouped = true
+GameVipList.isInvisible = false
 
 
 
@@ -32,6 +33,8 @@ function GameVipList.init()
     onVipStateChange = GameVipList.onVipStateChange,
     onVipGroupChange = GameVipList.onVipGroupChange
   })
+
+  ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeContactPresence, GameVipList.parseContactPresence)
 
   g_keyboard.bindKeyDown(GameVipListActionKey, GameVipList.toggle)
 
@@ -67,6 +70,8 @@ function GameVipList.terminate()
     onVipStateChange = GameVipList.onVipStateChange,
     onVipGroupChange = GameVipList.onVipGroupChange
   })
+
+  ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeContactPresence)
 
   if not g_game.getFeature(GameAdditionalVipInfo) then
     GameVipList.saveVipInfo()
@@ -127,10 +132,37 @@ function GameVipList.offline()
   GameVipList.clear()
   vipGroups = { }
   maxVipGroups = 0
+  GameVipList.isInvisible = false
 end
 
 function GameVipList.toggle()
   GameInterface.toggleMiniWindow(vipWindow)
+end
+
+function GameVipList.createContactsMenu()
+  local menu = g_ui.createWidget('PopupMenu')
+  menu:setGameMenu(true)
+  menu:addOption(GameVipList.isInvisible and loc'${GameVipListContextMenuOnline}' or loc'${GameVipListContextMenuInvisible}', GameVipList.toggleContactPresence)
+  menu:display()
+end
+
+function GameVipList.toggleContactPresence()
+  local protocolGame = g_game.getProtocolGame()
+  if not protocolGame then
+    return
+  end
+
+  GameVipList.isInvisible = not GameVipList.isInvisible
+
+  local msg = OutputMessage.create()
+  msg:addU8(ClientOpcodes.ClientOpcodeExtendedOpcode)
+  msg:addU16(ClientExtOpcodes.ClientExtOpcodeContactPresence)
+  msg:addU8(GameVipList.isInvisible and 1 or 0)
+  protocolGame:send(msg)
+end
+
+function GameVipList.parseContactPresence(protocolGame, opcode, msg)
+  GameVipList.isInvisible = msg:getU8() ~= 0
 end
 
 function GameVipList.createAddWindow()
@@ -356,7 +388,7 @@ function GameVipList.onAddVip(id, name, state, description, iconId, notify, grou
   elseif state == VipState.Pending then
     label:setColor('#ffca38')
   else
-    label:setColor('#990f0f')
+    label:setColor('#cc1414')
   end
 
   label.vipState = state
@@ -427,7 +459,7 @@ function GameVipList.setVipState(widget, state)
   elseif state == VipState.Pending then
     widget:setColor('#ffca38')
   else
-    widget:setColor('#990f0f')
+    widget:setColor('#cc1414')
   end
 end
 

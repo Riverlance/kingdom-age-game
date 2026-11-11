@@ -1,4 +1,4 @@
-HotkeyAssignWindow < MainWindow
+HotkeyAssignWindow < BlurredMainWindow
   id: assignWindow
   &loc: '${GameHotkeysAssignWindow}'
   size: 360 150
@@ -40,7 +40,7 @@ HotkeyAssignWindow < MainWindow
 
 
 
-MainWindow
+BlurredMainWindow
   id: hotkeysWindow
   &loc: '${GameHotkeysWindowTitle}'
   size: 500 626

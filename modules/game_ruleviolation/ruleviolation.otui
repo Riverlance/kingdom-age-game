@@ -45,7 +45,7 @@ RVTextEdit < TextEdit
 
 
 
-RVWindow < MainWindow
+RVWindow < BlurredMainWindow
   id: ruleViolationWindow
   size: 500 600
   @onEscape: |

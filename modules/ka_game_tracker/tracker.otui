@@ -12,7 +12,7 @@ ColorBar < HorizontalScrollBar
 
 
 
-TrackerWindow < MainWindow
+TrackerWindow < BlurredMainWindow
   size: 200 150
   &loc: '${GameTrackerWindowTitle}'
 

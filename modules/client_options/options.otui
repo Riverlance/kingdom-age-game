@@ -93,7 +93,7 @@ OptionHorizontalSeparator < HorizontalSeparator
 
 
 
-MainWindow
+BlurredMainWindow
   id: optionsWindow
   &loc: '${ClientOptionsTitle}'
   size: 800 400

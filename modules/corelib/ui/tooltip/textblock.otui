@@ -1,8 +1,11 @@
 TooltipTextBlock < Panel
   width: 300
-  background-color: #111111cc
-  border-width: 1
-  border-color: $uiColorBorder
+  //background-color: #111111cc
+  image-source: /images/ui/_background/window
+  image-border: 1
+  backdrop-blur-radius: 5
+  //border-width: 1
+  //border-color: $uiColorBorder
   phantom: true
   focusable: false
 

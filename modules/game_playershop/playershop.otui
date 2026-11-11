@@ -43,7 +43,7 @@ ShopItemBox < Panel
     margin-right: 5
 
 
-MainWindow
+BlurredMainWindow
   id: ShopWindow
   &loc: '${GamePlayerShopWindowTitle}'
   size: 600 620
@@ -202,7 +202,7 @@ MainWindow
         auto-spacing: true
 
 
-PriceWindow < MainWindow
+PriceWindow < BlurredMainWindow
   id: priceWindow
   &loc: '${GameInterfaceCountWindowTitle}'
   size: 196 90

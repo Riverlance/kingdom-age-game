@@ -1,4 +1,4 @@
-TextWindow < MainWindow
+TextWindow < BlurredMainWindow
   id: textWindow
   size: 350 400
 

@@ -33,7 +33,7 @@ InputBoxButtonsPanel < Panel
 
 
 
-InputBoxWindow < MainWindow
+InputBoxWindow < BlurredMainWindow
   __class: UIInputBox
   width: 260
   layout:

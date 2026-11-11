@@ -53,7 +53,7 @@ RewardProgressBar < ProgressBar
   $first:
     anchors.top: parent.top
 
-DailyRewardWindow < MainWindow
+DailyRewardWindow < BlurredMainWindow
   id: dailyRewardWindow
   &loc: '${GameDailyRewardWindowTitle}'
   size: 500 280

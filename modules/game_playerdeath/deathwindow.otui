@@ -1,4 +1,4 @@
-DeathWindow < MainWindow
+DeathWindow < BlurredMainWindow
   id: deathWindow
   &loc: '${GamePlayerDeathMsgYouAreDead}'
   width: 180

@@ -14,7 +14,7 @@ VipGroupBox < CheckBox
   text-offset: 15 -1
   color: #f4ecec
 
-MainWindow
+BlurredMainWindow
   size: 218 200
   &loc: '${GameVipListWindowTitleEdit}'
 

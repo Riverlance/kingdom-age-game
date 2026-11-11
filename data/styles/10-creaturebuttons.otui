@@ -1,31 +1,42 @@
 CreatureButtonMinimapWidget < UIWidget
-  size: 20 36
+  size: 28 64
   &isCreatureButtonMinimapWidget: true
   // To remove button on logout
   &temporary: true
-  // Maximum possible since zoom is from -5 to 5
-  &maxZoom: -5
+  // Match the minimap region-label zoom threshold
+  &maxZoom: 0
   phantom: true
 
   UICreature
     id: creatureWidget
-    size: 20 20
+    size: 28 28
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    background-color: #ffffff88
+    margin-top: 22
+    phantom: true
 
   Label
     id: titleLabel
     text-wrap: true
     text-auto-resize: true
     text-align: center
-    ttf-font: opensans-v
+    ttf-font: verdanapro-v
     ttf-font-weight: 700
     ttf-font-size: 8
-    color: #000000
+    ttf-stroke: 1 #000000bb
+    color: #ffffff
     anchors.top: prev.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter
-    background-color: #ffffff88
+    phantom: true
+
+  UIWidget
+    id: markerDot
+    size: 3 3
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 29
+    border: 1 #ffffff44
+    background-color: #3264c8
     phantom: true
 
 CreatureButtonIcon < UIWidget

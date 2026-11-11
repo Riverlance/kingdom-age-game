@@ -10,7 +10,7 @@ ChannelListLabel < Label
     background-color: #ffffff22
     color: #ffffff
 
-MainWindow
+BlurredMainWindow
   id: channelsWindow
   &loc: '${GameConsoleChannels}'
   size: 300 238

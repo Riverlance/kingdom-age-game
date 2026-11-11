@@ -224,16 +224,13 @@ function walk(dir)
 
             if toTile and (toTile:isWalkable() or isInGhostMode) then
                 player:preWalk(dir)
-            elseif canChangeFloorDown(toPos) or canChangeFloorUp(toPos) then
-                player:preWalk(dir)
             else
                 -- KA - Turn to unwalkable direction
                 if not isInGhostMode and toTile and not toTile:isEmpty() then
                     g_game.turn(dir)
                 end
 
-                -- KA - Removed possibility to walk to higher/lower floor by items that have elevation.
-                -- Floor changes are handled explicitly by canChangeFloorDown() and canChangeFloorUp().
+                -- Floor changes require the Fox Mask action, so blocked tiles cannot be pre-walked
                 return false
             end
         end
@@ -260,37 +257,6 @@ function turn(dir, repeated)
         lastTurn = g_clock.millis()
         player:lockWalk(g_settings.getNumber('walkTurnDelay'))
     end
-end
-
-local function canChangeFloor(pos, deltaZ)
-    if deltaZ == 0 then
-        return false
-    end
-
-    local toPos = {x = pos.x, y = pos.y, z = pos.z + deltaZ}
-    local toTile = g_map.getTile(toPos)
-    if not toTile then
-        return false
-    end
-
-    if deltaZ > 0 then
-        -- Floor changes are handled by floor-change tiles. This client does
-        -- not support changing floors through three or more elevated items
-        -- on the same tile (for example, stacked parcels).
-        return toTile:isWalkable() and toTile:hasFloorChange()
-    elseif deltaZ < 0 then
-        return toTile:isWalkable()
-    end
-
-    return false
-end
-
-function canChangeFloorDown(pos)
-    return canChangeFloor(pos, 1)
-end
-
-function canChangeFloorUp(pos)
-    return canChangeFloor(pos, -1)
 end
 
 function addWalkEvent(dir, delay)

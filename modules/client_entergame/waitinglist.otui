@@ -1,4 +1,4 @@
-MainWindow
+BlurredMainWindow
   id: waitingWindow
   &loc: '${CharacterListWaitingListTitle}'
   size: 260 200

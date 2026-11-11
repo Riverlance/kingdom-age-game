@@ -17,7 +17,7 @@ local motdWindow
 local motdButton
 local clientBox
 local protocolLogin
-local motdEnabled = false
+local motdEnabled = true
 
 
 
@@ -38,8 +38,9 @@ local function onError(protocol, message, errorCode)
 end
 
 local function onMotd(protocol, motd)
-  G.motdNumber = tonumber(motd:sub(0, motd:find('\n')))
-  G.motdMessage = motd:sub(motd:find('\n') + 1, #motd)
+  local separator = motd:find('\n')
+  G.motdNumber = motd:sub(1, separator - 1)
+  G.motdMessage = motd:sub(separator + 1)
   if motdEnabled then
     motdButton:show()
   end
@@ -89,7 +90,7 @@ local function onCharacterList(protocol, characters, account, otui)
   ClientCharacterList.show()
 
   if motdEnabled then
-    local lastMotdNumber = g_settings.getNumber('motd')
+    local lastMotdNumber = g_settings.get('motd')
     if G.motdNumber and G.motdNumber ~= lastMotdNumber then
       g_settings.set('motd', G.motdNumber)
       motdWindow = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)

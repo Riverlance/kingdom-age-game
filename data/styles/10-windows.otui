@@ -8,8 +8,7 @@ Window < UIWindow
   text-offset: 0 10
   text-align: top
   image-source: /images/ui/_background/window
-  image-border: 5
-  image-border-top: 30
+  image-border: 1
   padding-top: 38
   padding-left: 9
   padding-right: 9
@@ -19,7 +18,7 @@ Window < UIWindow
     color: #c9bdab88
 
   $dragging:
-    opacity: 0.8
+    opacity: 0.9
 
 HeadlessWindow < UIWindow
   size: 200 200
@@ -33,7 +32,18 @@ HeadlessWindow < UIWindow
     color: #c9bdab88
 
   $dragging:
-    opacity: 0.8
+    opacity: 0.9
+
+BlurredWindow < Window
+  backdrop-blur-radius: 5
+
+BlurredHeadlessWindow < HeadlessWindow
+  backdrop-blur-radius: 5
+
+
 
 MainWindow < Window
   anchors.centerIn: parent
+
+BlurredMainWindow < MainWindow
+  backdrop-blur-radius: 5

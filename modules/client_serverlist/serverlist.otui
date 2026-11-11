@@ -58,7 +58,7 @@ ServerWidget < UIWidget
     margin-top: 1
     @onClick: ClientServerList.remove(self:getParent())
 
-MainWindow
+BlurredMainWindow
   id: serverListWindow
   &loc: '${ClientServerListServerListWindow}'
   size: 340 290

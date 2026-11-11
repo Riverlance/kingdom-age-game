@@ -389,7 +389,9 @@ function GamePartyList.add(data, isInvitee)
   button:setup(data)
 
   if cid ~= localPlayer:getId() and not isInvitee and button.creatureTypeId == CreatureTypePlayer then
-    button:enableCreatureMinimapWidget()
+    if GameMinimap and GameMinimap.addPartyMemberMarker then
+      GameMinimap.addPartyMemberMarker(button)
+    end
   end
 
   -- -- Callback

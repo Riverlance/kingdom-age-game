@@ -1,4 +1,4 @@
-PartyLevelCalculatorWindow < MainWindow
+PartyLevelCalculatorWindow < BlurredMainWindow
   id: partyLevelCalculatorWindow
   &loc: '${ClientOptionsPartyListLevelCalculatorWindowTitle}'
   size: 250 150

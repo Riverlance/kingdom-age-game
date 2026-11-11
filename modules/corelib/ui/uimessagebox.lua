@@ -20,7 +20,7 @@ function UIMessageBox.display(title, message, buttons, onEnterCallback, onEscape
   local maxWidth = math.min(916, math.max(260, rootWidth - 40))
   local maxHeight = math.min(616, math.max(120, rootHeight - 40))
 
-  messageBox:setStyle('MainWindow')
+  messageBox:setStyle('BlurredMainWindow')
   messageBox:setText(title)
 
   local messageLabel = g_ui.createWidget('MessageBoxLabel', messageBox)

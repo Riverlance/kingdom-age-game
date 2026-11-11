@@ -1,4 +1,4 @@
-CountWindow < MainWindow
+CountWindow < BlurredMainWindow
   id: countWindow
   &loc: '${GameInterfaceCountWindowTitle}'
   size: 196 90

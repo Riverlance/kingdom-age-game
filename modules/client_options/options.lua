@@ -93,7 +93,7 @@ local defaultOptions = {
   walkTeleportDelay = 50,
   walkStairsDelay = 50,
   hotkeyDelay = 70,
-  showMinimapExtraIcons = true,
+  showMinimapExtraIcons = false,
   goldLootAutoDeposit = true,
   creatureInformationScale = 0,
   staticTextScale = 0,
@@ -1048,10 +1048,7 @@ function ClientOptions.setOption(key, value, force)
       return
     end
 
-    local minimapWidget = GameMinimap.getMinimapWidget()
-    minimapWidget:setAlternativeWidgetsVisible(value)
-
-    GameMinimap.m.extraIconsButton:setOn(value)
+    GameMinimap.setExtraIconsVisible(value)
 
   elseif key == 'goldLootAutoDeposit' then
     if localPlayer then

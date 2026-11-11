@@ -19,8 +19,11 @@ TerminalLabel < UITextEdit
 
 UIWindow
   id: terminalWindow
-  background-color: #000000
-  opacity: 0.85
+  //background-color: #000000
+  //opacity: 0.85
+  image-source: /images/ui/_background/window
+  image-border: 1
+  backdrop-blur-radius: 5
   clipping: true
   anchors.fill: parent
   border: 0 white

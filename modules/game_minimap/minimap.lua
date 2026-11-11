@@ -31,10 +31,69 @@ fullMapButton = nil
 preloaded = false
 oldPos = nil
 local jumpModeEnabled = false
+local previousFullscreenFocus = nil
 
 currentMapFilename = ''
 
 local lastMinimapMarkId = 19
+local creatureSnapshotRequestEvent = nil
+local creatureSnapshotRefreshEvent = nil
+local creatureSnapshotRequestId = 0
+local creatureSnapshotChunkIndex = 0
+local creatureSnapshotInProgress = false
+local creatureSnapshotRequestPending = false
+local creatureSnapshotLastRequestTime = nil
+local creatureSnapshotViewUnavailable = false
+local MinimapCreatureSnapshotUpdateInterval = 1000
+local MinimapCreatureSnapshotInitialDelay = 150
+
+local function nextCreatureSnapshotRequestId()
+  creatureSnapshotRequestId = creatureSnapshotRequestId % 65535 + 1
+  return creatureSnapshotRequestId
+end
+
+local function isCreatureSnapshotViewActive()
+  return minimapWidget and g_game.isOnline() and
+    (minimapWidget.fullMapView or (minimapWindow and minimapWindow:isVisible()))
+end
+
+local function startCreatureSnapshotRefresh()
+  if creatureSnapshotRefreshEvent then
+    return
+  end
+
+  creatureSnapshotRefreshEvent = cycleEvent(function()
+    if not isCreatureSnapshotViewActive() then
+      return
+    end
+
+    GameMinimap.requestCreatureSnapshot()
+  end, MinimapCreatureSnapshotUpdateInterval)
+end
+
+local function stopCreatureSnapshotRefresh()
+  if creatureSnapshotRefreshEvent then
+    removeEvent(creatureSnapshotRefreshEvent)
+    creatureSnapshotRefreshEvent = nil
+  end
+end
+
+local function cancelCreatureSnapshotRequest(clearMarkers)
+  if creatureSnapshotRequestEvent then
+    removeEvent(creatureSnapshotRequestEvent)
+    creatureSnapshotRequestEvent = nil
+  end
+
+  nextCreatureSnapshotRequestId()
+  creatureSnapshotChunkIndex = 0
+  creatureSnapshotInProgress = false
+  creatureSnapshotRequestPending = false
+  creatureSnapshotLastRequestTime = nil
+  creatureSnapshotViewUnavailable = false
+  if clearMarkers and minimapWidget then
+    minimapWidget:clearWorldCreatureMarkers()
+  end
+end
 
 
 
@@ -69,22 +128,33 @@ function GameMinimap.init()
   local compassWidget = minimapBar:getChildById('compass')
   extraIconsButton = compassWidget:getChildById('extraIconsButton')
   fullMapButton = compassWidget:getChildById('fullMapButton')
+  GameMinimap.setExtraIconsVisible(ClientOptions.getOption('showMinimapExtraIcons'))
 
   for i = 1, lastMinimapMarkId do
     g_textures.preload(f('/images/ui/minimap/flag%d', i))
   end
 
   local gameRootPanel = GameInterface.getRootPanel()
-  g_keyboard.bindKeyPress('Alt+Left', function() minimapWidget:move(1, 0) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Right', function() minimapWidget:move(-1, 0) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Up', function() minimapWidget:move(0, 1) end, gameRootPanel)
-  g_keyboard.bindKeyPress('Alt+Down', function() minimapWidget:move(0, -1) end, gameRootPanel)
+  local function moveFullscreenMinimap(x, y)
+    if not minimapWidget.fullMapView then
+      return false
+    end
+
+    minimapWidget:move(x, y)
+    return true
+  end
+
+  g_keyboard.bindKeyPress('Alt+Left', function() return moveFullscreenMinimap(1, 0) end, gameRootPanel)
+  g_keyboard.bindKeyPress('Alt+Right', function() return moveFullscreenMinimap(-1, 0) end, gameRootPanel)
+  g_keyboard.bindKeyPress('Alt+Up', function() return moveFullscreenMinimap(0, 1) end, gameRootPanel)
+  g_keyboard.bindKeyPress('Alt+Down', function() return moveFullscreenMinimap(0, -1) end, gameRootPanel)
   g_keyboard.bindKeyDown(GameMinimapActionKey, GameMinimap.toggle)
   g_keyboard.bindKeyDown('Ctrl+Shift+M', GameMinimap.toggleFullMap)
   g_keyboard.bindKeyDown('Escape', function() if minimapWidget.fullMapView then GameMinimap.toggleFullMap() end end)
 
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo, GameMinimap.onInstanceInfo)
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeJumpMode, GameMinimap.onJumpMode)
+  ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeMinimapCreatureSnapshot, GameMinimap.onCreatureSnapshot)
 
   connect(g_game, {
     onGameStart        = GameMinimap.online,
@@ -112,6 +182,9 @@ function GameMinimap.terminate()
     GameMinimap.toggleFullMap()
   end
 
+  stopCreatureSnapshotRefresh()
+  cancelCreatureSnapshotRequest(true)
+
   g_settings.setValue('Minimap', 'opacity', minimapOpacityScrollbar:getValue())
 
   disconnect(LocalPlayer, {
@@ -128,6 +201,7 @@ function GameMinimap.terminate()
 
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeInstanceInfo)
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeJumpMode)
+  ProtocolGame.unregisterOpcode(ServerOpcodes.ServerOpcodeMinimapCreatureSnapshot)
 
   local gameRootPanel = GameInterface.getRootPanel()
   g_keyboard.unbindKeyPress('Alt+Left', gameRootPanel)
@@ -149,6 +223,7 @@ function GameMinimap.toggle()
     GameMinimap.toggleFullMap()
   end
   GameInterface.toggleMiniWindow(minimapWindow)
+  addEvent(GameMinimap.requestCreatureSnapshot)
 end
 
 function GameMinimap.preload()
@@ -165,11 +240,15 @@ function GameMinimap.online()
 
   GameMinimap.loadMap(not preloaded)
   GameMinimap.updateCameraPosition()
+  GameMinimap.requestCreatureSnapshot()
+  startCreatureSnapshotRefresh()
 
   minimapWidget:setOpacity(1.0)
 end
 
 function GameMinimap.offline()
+  stopCreatureSnapshotRefresh()
+  cancelCreatureSnapshotRequest(true)
   jumpModeEnabled = false
   minimapWindow:setSettings({ hideControllers = ballButton:isOn() })
   GameMinimap.saveMap()
@@ -258,11 +337,15 @@ function GameMinimap.toggleFullMap()
     return
   end
 
+  local rootPanel = GameInterface.getRootPanel()
+  if not minimapWidget.fullMapView then
+    previousFullscreenFocus = rootPanel:getFocusedChild()
+  end
+
   minimapWidget.fullMapView = not minimapWidget.fullMapView
 
   -- Update parent
 
-  local rootPanel = GameInterface.getRootPanel()
   local parent    = minimapWidget.fullMapView and rootPanel or minimapWindow:getChildById('contentsPanel')
 
   minimapBackgroundWidget:setParent(parent)
@@ -300,6 +383,9 @@ function GameMinimap.toggleFullMap()
     ballButton:addAnchor(AnchorRight, 'minimapBar', AnchorOutsideLeft)
 
     minimapWidget:setZoom(minimapWidget.zoomFullmap)
+    rootPanel:focus()
+    minimapWidget:setFocusable(true)
+    minimapWidget:focus()
     g_sounds.getChannel(AudioChannels.Gui):play(f('%s/fullmap_open.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   else
     minimapWindow:show()
@@ -319,12 +405,20 @@ function GameMinimap.toggleFullMap()
     ballButton:addAnchor(AnchorRight, 'lockButton', AnchorOutsideLeft)
 
     minimapWidget:setZoom(minimapWidget.zoomMinimap)
+    minimapWidget:setFocusable(false)
+    if previousFullscreenFocus and not previousFullscreenFocus:isDestroyed() then
+      rootPanel:focusChild(previousFullscreenFocus, ActiveFocusReason)
+    else
+      rootPanel:focus()
+    end
+    previousFullscreenFocus = nil
     g_sounds.getChannel(AudioChannels.Gui):play(f('%s/fullmap_close.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
   end
 
   -- Update camera position
 
   GameMinimap.updateCameraPosition()
+  GameMinimap.requestCreatureSnapshot()
 end
 
 function GameMinimap.toggleWorldChannel()
@@ -454,4 +548,148 @@ function GameMinimap.onUpdateTrackColor(posNode)
   if posNode.minimapWidget then
     posNode.minimapWidget:setIconColor(posNode.color)
   end
+end
+
+
+
+-- Creature minimap markers
+
+function GameMinimap.addPartyMemberMarker(creatureButton)
+  if not minimapWidget then
+    return false
+  end
+
+  return minimapWidget:addCreatureMarker(creatureButton)
+end
+
+function GameMinimap.updatePartyMemberMarker(creatureButton)
+  if not minimapWidget then
+    return false
+  end
+
+  return minimapWidget:updateCreatureMarker(creatureButton)
+end
+
+function GameMinimap.removePartyMemberMarker(creatureId)
+  if not minimapWidget then
+    return false
+  end
+
+  return minimapWidget:removeCreatureMarker(creatureId)
+end
+
+function GameMinimap.onCreatureSnapshot(protocol, msg)
+  local requestId = msg:getU16()
+  local chunkIndex = msg:getU16()
+  local count = msg:getU8()
+  local isLastChunk = msg:getU8() == 1
+  local creatures = { }
+  for index = 1, count do
+    creatures[index] = {
+      id = msg:getU32(),
+      type = msg:getU8(),
+      position = msg:getPosition(),
+      name = msg:getString(),
+      outfit = protocol:getOutfit(msg)
+    }
+  end
+
+  if requestId ~= creatureSnapshotRequestId or not minimapWidget then
+    return
+  end
+
+  if chunkIndex == 1 then
+    creatureSnapshotChunkIndex = 1
+  elseif chunkIndex ~= creatureSnapshotChunkIndex + 1 then
+    return
+  else
+    creatureSnapshotChunkIndex = chunkIndex
+  end
+
+  minimapWidget:addWorldCreatureSnapshotChunk(creatures, chunkIndex == 1, isLastChunk)
+
+  if isLastChunk then
+    creatureSnapshotInProgress = false
+    if creatureSnapshotRequestPending then
+      creatureSnapshotRequestPending = false
+      GameMinimap.requestCreatureSnapshot()
+    end
+  end
+end
+
+function GameMinimap.requestCreatureSnapshot()
+  if not isCreatureSnapshotViewActive() then
+    return false
+  end
+
+  local request = minimapWidget:getCreatureSnapshotRequest()
+  if not request then
+    if not creatureSnapshotViewUnavailable then
+      nextCreatureSnapshotRequestId()
+      creatureSnapshotChunkIndex = 0
+      creatureSnapshotInProgress = false
+      creatureSnapshotRequestPending = false
+      minimapWidget:clearWorldCreatureMarkers()
+    end
+    creatureSnapshotViewUnavailable = true
+    return false
+  end
+
+  creatureSnapshotViewUnavailable = false
+
+  if creatureSnapshotRequestEvent then
+    return true
+  end
+
+  if creatureSnapshotInProgress then
+    creatureSnapshotRequestPending = true
+    return true
+  end
+
+  local delay = MinimapCreatureSnapshotInitialDelay
+  if creatureSnapshotLastRequestTime then
+    delay = math.max(0, MinimapCreatureSnapshotUpdateInterval - (g_clock.millis() - creatureSnapshotLastRequestTime))
+  end
+
+  creatureSnapshotRequestEvent = scheduleEvent(function()
+    creatureSnapshotRequestEvent = nil
+    if not isCreatureSnapshotViewActive() then
+      return
+    end
+
+    local request = minimapWidget:getCreatureSnapshotRequest()
+    if not request then
+      if not creatureSnapshotViewUnavailable then
+        nextCreatureSnapshotRequestId()
+        creatureSnapshotChunkIndex = 0
+        creatureSnapshotInProgress = false
+        creatureSnapshotRequestPending = false
+        minimapWidget:clearWorldCreatureMarkers()
+      end
+      creatureSnapshotViewUnavailable = true
+      return
+    end
+
+    creatureSnapshotViewUnavailable = false
+    local requestId = nextCreatureSnapshotRequestId()
+    creatureSnapshotChunkIndex = 0
+    creatureSnapshotInProgress = true
+    creatureSnapshotLastRequestTime = g_clock.millis()
+    g_game.sendMinimapCreatureSnapshotRequest(requestId, request.position, request.rangeX, request.rangeY)
+  end, delay)
+
+  return true
+end
+
+function GameMinimap.setExtraIconsVisible(show)
+  if not minimapWidget then
+    return false
+  end
+
+  minimapWidget:setAlternativeWidgetsVisible(show)
+  if extraIconsButton then
+    extraIconsButton:setOn(show)
+  end
+
+  return true
 end

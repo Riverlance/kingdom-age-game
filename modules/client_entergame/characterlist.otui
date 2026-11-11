@@ -146,7 +146,7 @@ CharacterWidget < UIWidget
     $on:
       color: #ffffff
 
-MainWindow
+BlurredMainWindow
   id: charactersWindow
   &loc: '${CharacterListTitle}'
   visible: false

@@ -51,7 +51,7 @@ NPCItemBox < Panel
       image-color: #ffffff88
       color: #aaaaaa88
 
-MainWindow
+BlurredMainWindow
   id: npcWindow
   &loc: '${GameNpcTradeNpcWindowTitle}'
   size: 600 620

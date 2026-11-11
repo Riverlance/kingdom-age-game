@@ -42,6 +42,7 @@ PopupMenu < UIPopupMenu
   width: 50
   image-source: /images/ui/_background/panel_rounded
   image-border: 1
+  backdrop-blur-radius: 5
   padding: 3
 
 PopupScrollMenuButton < UIButton

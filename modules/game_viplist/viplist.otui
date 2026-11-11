@@ -48,6 +48,12 @@ MiniWindow
   &save: true
   &contentMinimumHeight: 24
 
+  BallMenuButton
+    id: ballButton
+    anchors.verticalCenter: lockButton.verticalCenter
+    anchors.right: lockButton.outsideLeft
+    @onClick: GameVipList.createContactsMenu()
+
   MiniWindowContents
     layout: verticalBox
     padding-left: 4

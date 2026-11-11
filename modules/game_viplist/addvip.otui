@@ -1,4 +1,4 @@
-MainWindow
+BlurredMainWindow
   size: 256 128
   &loc: '${GameVipListWindowTitleAdd}'
   @onEnter: GameVipList.addVip()
