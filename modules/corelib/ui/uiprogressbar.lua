@@ -115,14 +115,14 @@ function UIProgressBar:setValueDelayed(value, minimum, maximum, delayDuration, d
     widget.value = nextValue
     widget:updateBackground()
 
-    widget.valueDelayedEventId = scheduleEvent(function()
+    widget.valueDelayedEventId = addEvent(function()
       if isWidgetAlive(widget) then
         onSetValueDelayed(widget)
       end
     end, delayTicks)
   end
 
-  self.valueDelayedStartEventId = scheduleEvent(function()
+  self.valueDelayedStartEventId = addEvent(function()
     if isWidgetAlive(self) then
       onSetValueDelayed(self)
     end

@@ -81,7 +81,7 @@ local function capture(id)
   local fileName = string.format('%s/%s_%d_%s_%s.png', screenshotDirectory, safeName(playerName), level,
     event.label, os.date('%Y%m%d%H%M%S'))
 
-  screenshotEvent = scheduleEvent(function()
+  screenshotEvent = addEvent(function()
     screenshotEvent = nil
     takeScreenshot(fileName)
   end, 100)

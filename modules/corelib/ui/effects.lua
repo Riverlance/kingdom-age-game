@@ -14,7 +14,7 @@ function g_effects.fadeIn(widget, time, elapsed)
   removeEvent(widget.fadeEvent)
   if elapsed < time then
     removeEvent(widget.fadeEvent)
-    widget.fadeEvent = scheduleEvent(function()
+    widget.fadeEvent = addEvent(function()
       if isWidgetAlive(widget) then
         g_effects.fadeIn(widget, time, elapsed + 30)
       end
@@ -37,7 +37,7 @@ function g_effects.fadeOut(widget, time, elapsed)
   removeEvent(widget.fadeEvent)
   widget:setOpacity(math.max((time - elapsed) / time, 0))
   if elapsed < time then
-    widget.fadeEvent = scheduleEvent(function()
+    widget.fadeEvent = addEvent(function()
       if isWidgetAlive(widget) then
         g_effects.fadeOut(widget, time, elapsed + 30)
       end
@@ -67,7 +67,7 @@ function g_effects.startBlink(widget, duration, interval, clickCancel)
   end, interval)
 
   if duration > 0 then
-    widget.blinkStopEvent = scheduleEvent(function()
+    widget.blinkStopEvent = addEvent(function()
       if isWidgetAlive(widget) then
         g_effects.stopBlink(widget)
       end

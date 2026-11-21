@@ -9,7 +9,7 @@ ConditionWidget < UIWidget
     margin-left: 2
 
 
-MiniWindow
+PlayerMiniWindow
   id: conditionWindow
   &loc: '${CorelibConditionsWindowTitle}'
   icon: /images/ui/top_menu/conditions

@@ -19,13 +19,9 @@ CharacterProgressBar < ProgressBar
     height: 0
     margin-top: 0
 
-CharacterProgressBarValue < Label
+CharacterProgressBarValue < GameLabel
+  ttf-font-size: 9
   anchors.fill: prev
-  ttf-font: opensans-v
-  ttf-font-weight: 800
-  ttf-font-size: 10
-  ttf-stroke: 1 black
-  //text-offset: 0 -1
   text-align: center
   phantom: false
 
@@ -136,7 +132,7 @@ MountButton < CombatBox
 
 
 
-MiniWindow
+PlayerMiniWindow
   id: inventoryWindow
   &loc: '${CharacterWindowTitle}'
   icon: /images/ui/top_menu/healthinfo

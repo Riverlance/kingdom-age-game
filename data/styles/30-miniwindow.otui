@@ -9,8 +9,10 @@ MiniWindowIconTooltipArea < UIWidget
 
 MiniWindow < UIMiniWindow
   ttf-font: verdanapro-v
-  ttf-font-weight: 700
+  ttf-font-weight: 900
   ttf-font-size: 9
+  letter-spacing: -0.5
+  ttf-stroke: 1 #000b
   icon-rect: 6 4 16 16
   width: 192
   height: 80
@@ -117,3 +119,11 @@ MiniWindowFooter < UIWidget
 BorderlessGameWindow < UIWindow
   focusable: false
   margin: 2
+
+
+
+PlayerMiniWindow < MiniWindow
+
+ContainerMiniWindow < MiniWindow
+
+PlayerTradeMiniWindow < MiniWindow

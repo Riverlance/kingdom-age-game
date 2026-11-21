@@ -2,7 +2,7 @@ PartyTabButton < TabButton
   size: 20 20
   icon-source: /images/ui/party_list/filter
 
-MiniWindow
+PlayerMiniWindow
   id: partyWindow
   &loc: '${GamePartyListWindowTitle}'
   icon: /images/ui/top_menu/party_list

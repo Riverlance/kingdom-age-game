@@ -46,41 +46,6 @@ function UITextEdit:updateScrollBars()
   end
 end
 
-function UITextEdit:updatePlaceholder(text) -- ([text])
-  local placeholder = self.placeholder
-  if not placeholder then
-    return
-  end
-
-  text = text or self:getText()
-
-  placeholder:setTextWrap(self:isMultiline())
-
-  placeholder:setVisible(not string.exists(text))
-end
-
-function UITextEdit:setPlaceholderText(text, update) -- ([text[, update = true]])
-  local placeholder = self.placeholder
-  if not placeholder then
-    return false
-  end
-
-  text = text or ''
-  if update == nil then
-    update = true
-  end
-
-  placeholder:setText(text)
-
-  if update then
-    self:updatePlaceholder()
-  end
-
-  return true
-end
-
-
-
 -- Event
 
 function UITextEdit:onStyleApply(styleName, styleNode)
@@ -109,19 +74,6 @@ function UITextEdit:onStyleApply(styleName, styleNode)
         end
       end)
 
-    -- Placeholder
-    elseif name == 'placeholdertext' then
-      addEvent(function()
-        if not isWidgetAlive(self) then
-          return
-        end
-
-        local placeholder = self.placeholder
-        if placeholder then
-          placeholder:setText(value)
-          self:updatePlaceholder()
-        end
-      end)
     end
   end
 end
@@ -153,7 +105,6 @@ function UITextEdit:onTextChange(newText, oldText)
   local function onError(text)
     text = text or oldText
     self:setText(text, true)
-    self:updatePlaceholder(text)
   end
 
   -- Max characters
@@ -172,10 +123,6 @@ function UITextEdit:onTextChange(newText, oldText)
     else
       return onError()
     end
-  end
-
-  if newText ~= oldText then
-    self:updatePlaceholder(newText)
   end
 end
 

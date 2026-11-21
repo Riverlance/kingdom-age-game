@@ -257,8 +257,9 @@ function UIMiniWindow:setup(button)
     self.topMenuButton = button
   end
 
+  local isPlayerMiniWindow = self:getStyleName() == 'PlayerMiniWindow'
   local isContainer = self.container ~= nil
-  if not isContainer then
+  if isPlayerMiniWindow and not isContainer then
     self:close(true)
   end
 
@@ -287,12 +288,12 @@ function UIMiniWindow:setup(button)
     end
   end
 
-  if not isContainer and not hasRestoredParent and self:getParent() then
+  if isPlayerMiniWindow and not isContainer and not hasRestoredParent and self:getParent() then
     self:setParent(nil, true)
   end
 
   local function initializeVisibility()
-    if not isContainer then
+    if isPlayerMiniWindow and not isContainer then
       self:close(true)
     end
 
@@ -319,7 +320,7 @@ function UIMiniWindow:setup(button)
           GameInterface.toggleMiniWindow(miniWindow)
         end
       end)
-    elseif not isContainer then
+    elseif isPlayerMiniWindow and not isContainer then
       self:setSettings({closed = true})
     end
   end
@@ -345,7 +346,7 @@ function UIMiniWindow:setup(button)
     if selfSettings.closed == nil then
       initializeVisibility()
     else
-      if selfSettings.closed and not isContainer then
+      if selfSettings.closed and isPlayerMiniWindow and not isContainer then
         self:close(true)
       else
         self:open(true)

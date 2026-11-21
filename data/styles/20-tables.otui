@@ -33,9 +33,9 @@ TableHeaderRow < Label
 
 TableHeaderColumn < UITableHeaderColumn
   ttf-font: verdanapro-v
-  ttf-font-weight: 700
+  ttf-font-weight: 900
   ttf-font-size: 11
-  ttf-stroke: 2 black
+  ttf-stroke: 1 #000b
   background-color: alpha
   color: #f2af4eff
   height: 23

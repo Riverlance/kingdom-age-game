@@ -1,7 +1,9 @@
 HotkeyListLabel < UIHotkeyLabel
   ttf-font: verdanapro-v
-  ttf-font-weight: 700
-  ttf-font-size: 11
+  ttf-font-weight: 900
+  ttf-font-size: 10
+  letter-spacing: -0.5
+  ttf-stroke: 1 #000b
   text-offset: 2 0
   focusable: true
   phantom: false

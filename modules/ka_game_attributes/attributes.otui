@@ -22,7 +22,7 @@ AttributeActLabel < Label
   margin-right: 4
   phantom: false
 
-MiniWindow
+PlayerMiniWindow
   icon: /images/ui/top_menu/attributes
   id: attributeWindow
   &loc: '${GameAttributesWindowTitle}'

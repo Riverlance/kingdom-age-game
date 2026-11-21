@@ -17,13 +17,10 @@ CreatureButtonMinimapWidget < UIWidget
 
   Label
     id: titleLabel
+    ttf-font-size: 8
     text-wrap: true
     text-auto-resize: true
     text-align: center
-    ttf-font: verdanapro-v
-    ttf-font-weight: 700
-    ttf-font-size: 8
-    ttf-stroke: 1 #000000bb
     color: #ffffff
     anchors.top: prev.outsideBottom
     anchors.horizontalCenter: parent.horizontalCenter
@@ -79,7 +76,7 @@ CreatureButton < UICreatureButton
     anchors.right: none
     icon-source: /images/ui/minimap/track_mark
 
-  Label
+  GameLabel
     id: label
     text-auto-resize: true
     anchors.top: prev.top

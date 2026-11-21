@@ -142,7 +142,7 @@ function GameLevelUp.shrinkOut(time)
   levelUpWidget:setOpacity(opacity)
   GameLevelUp.updatePosition()
 
-  levelUpWidget.shrinkOutEvent = scheduleEvent(withWeakWidget(levelUpWidget, function(widget)
+  levelUpWidget.shrinkOutEvent = addEvent(withWeakWidget(levelUpWidget, function(widget)
     if widget == levelUpWidget then
       GameLevelUp.shrinkOut(time - config.shrinkInterval)
     end
@@ -151,7 +151,7 @@ end
 
 function GameLevelUp.ensurePosition()
   GameLevelUp.updatePosition()
-  levelUpWidget.ensurePositionEvent = scheduleEvent(withWeakWidget(levelUpWidget, function(widget)
+  levelUpWidget.ensurePositionEvent = addEvent(withWeakWidget(levelUpWidget, function(widget)
     if widget == levelUpWidget then
       GameLevelUp.ensurePosition()
     end
@@ -177,7 +177,7 @@ function GameLevelUp.addWidget(localPlayer, level, levelPercent, oldLevel, oldLe
   levelUpWidget:setOpacity(1)
   GameLevelUp.ensurePosition()
 
-  levelUpWidget.shrinkInEvent = scheduleEvent(withWeakWidget(levelUpWidget, function(widget)
+  levelUpWidget.shrinkInEvent = addEvent(withWeakWidget(levelUpWidget, function(widget)
     if widget == levelUpWidget then
       GameLevelUp.shrinkOut(config.shrinkTime)
     end

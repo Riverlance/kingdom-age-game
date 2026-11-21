@@ -802,7 +802,7 @@ end
 
 function GameInterface.forceExit()
   g_game.cancelLogin()
-  scheduleEvent(exit, 10)
+  addEvent(exit, 10)
   return true
 end
 

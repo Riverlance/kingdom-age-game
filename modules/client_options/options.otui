@@ -47,7 +47,6 @@ OptionComboBox < ComboBoxRounded
   mouse-scroll: false
 
 OptionCheckBox < CheckBox
-  height: 16
   anchors.left: parent.left
   anchors.right: parent.right
   @onCheckChange: ClientOptions.setOption(self:getId(), self:isChecked())

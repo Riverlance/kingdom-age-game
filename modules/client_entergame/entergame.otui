@@ -49,7 +49,6 @@ MainWindow
     image-source: /images/ui/enter_game/text_edit
     padding-top: 2
     !placeholder: loc'${EnterGameAccountPlaceholder}'
-    placeholder-color: #707070
     anchors.verticalCenter: accountNameBackground.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
     margin-left: 60

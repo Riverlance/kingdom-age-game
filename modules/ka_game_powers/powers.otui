@@ -6,7 +6,7 @@ PowerTabButton < TabButton
 
 
 
-MiniWindow
+PlayerMiniWindow
   id: powersWindow
   &loc: '${GamePowersWindowTitle}'
   icon: /images/ui/top_menu/powers

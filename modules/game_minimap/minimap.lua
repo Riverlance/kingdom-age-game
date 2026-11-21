@@ -651,7 +651,7 @@ function GameMinimap.requestCreatureSnapshot()
     delay = math.max(0, MinimapCreatureSnapshotUpdateInterval - (g_clock.millis() - creatureSnapshotLastRequestTime))
   end
 
-  creatureSnapshotRequestEvent = scheduleEvent(function()
+  creatureSnapshotRequestEvent = addEvent(function()
     creatureSnapshotRequestEvent = nil
     if not isCreatureSnapshotViewActive() then
       return

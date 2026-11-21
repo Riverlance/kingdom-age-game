@@ -208,7 +208,7 @@ function Client.loadFiles()
   g_game.enableFeature(GameMagicEffectU16)
   g_game.enableFeature(GameDistanceEffectU16)
 
-  scheduleEvent(function()
+  addEvent(function()
     local path = resolvepath('/things/Kingdom Age')
     local errorMessage = ''
     g_logger.setLevel(5)
@@ -233,7 +233,7 @@ function Client.loadFiles()
       g_game.setClientVersion(0)
       g_game.setProtocolVersion(0)
     end
-  end, 1)
+  end)
 end
 
 function Client.isLoaded()

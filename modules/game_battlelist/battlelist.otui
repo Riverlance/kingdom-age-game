@@ -6,7 +6,7 @@ BattleTabButton < TabButton
   $on:
     &loct: '${FilterHide}'
 
-MiniWindow
+PlayerMiniWindow
   id: battleWindow
   &loc: '${BattleWindowTitle}'
   icon: /images/ui/top_menu/battle_list

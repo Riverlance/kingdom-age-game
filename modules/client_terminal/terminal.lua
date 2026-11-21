@@ -383,7 +383,7 @@ end
 
 function ClientTerminal.addLine(text, color)
   if not flushEvent then
-    flushEvent = scheduleEvent(ClientTerminal.flushLines, 10)
+    flushEvent = addEvent(ClientTerminal.flushLines, 10)
   end
 
   text = string.gsub(text, '\t', '    ')

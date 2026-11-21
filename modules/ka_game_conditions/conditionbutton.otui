@@ -35,7 +35,7 @@ ConditionButton < UIConditionButton
     anchors.right: parent.right
     phantom: true
 
-  Label
+  GameLabel
     id: conditionClock
     anchors.top: parent.top
     anchors.right: conditionType.outsideLeft
@@ -55,7 +55,7 @@ ConditionButton < UIConditionButton
     margin-left: 2
     phantom: true
 
-  Label
+  GameLabel
     id: conditionAuxiliar
     anchors.top: parent.top
     anchors.left: conditionPowerIcon.outsideRight

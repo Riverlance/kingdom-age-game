@@ -1,7 +1,4 @@
-IgnoreListLabel < Label
-  ttf-font: verdanapro-v
-  ttf-font-weight: 700
-  ttf-font-size: 11
+IgnoreListLabel < ListLabel
   background-color: alpha
   text-offset: 2 0
   focusable: true
@@ -11,10 +8,7 @@ IgnoreListLabel < Label
     background-color: #ffffff22
     color: #ffffff
 
-WhiteListLabel < Label
-  ttf-font: verdanapro-v
-  ttf-font-weight: 700
-  ttf-font-size: 11
+WhiteListLabel < ListLabel
   background-color: alpha
   text-offset: 2 0
   focusable: true

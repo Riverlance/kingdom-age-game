@@ -6,7 +6,7 @@ _G.GameTextMessage = { }
 
 local DefaultFont = {
   path = 'verdanapro-v',
-  weight = 700,
+  weight = 900,
 }
 local function setMessageFont(widget, font)
   local descriptor = font or DefaultFont
@@ -305,7 +305,7 @@ function GameTextMessage.displayMessage(mode, text)
       updateStatusLabelPosition(label)
     end
     removeEvent(label.hideEvent)
-    label.hideEvent = scheduleEvent(function()
+    label.hideEvent = addEvent(function()
       if isWidgetAlive(label) then
         label:setVisible(false)
       end
@@ -333,7 +333,7 @@ function GameTextMessage.displayPrivateMessage(text)
   setMessageFont(label, msgtype.font)
   label:setVisible(true)
   removeEvent(label.hideEvent)
-  label.hideEvent = scheduleEvent(function()
+  label.hideEvent = addEvent(function()
     if isWidgetAlive(label) then
       label:setVisible(false)
     end

@@ -11,30 +11,35 @@ G = G or { }
 
 -- @docfuncs @{
 
-function scheduleEvent(callback, delay)
+local function createCallbackWithArgs(callback, args, argsCount)
+  return function()
+    return callback(unpack(args, 1, argsCount))
+  end
+end
+
+function addEvent(callback, delayOrFront, ...)
   local ok, info = pcall(debug.getinfo, callback, 'S')
   local name = ok and info and ((info.short_src or 'lua') .. ':' .. (info.linedefined or 0)) or 'lua'
-  local event = g_dispatcher.scheduleEventEx and g_dispatcher.scheduleEventEx(name, callback, delay) or g_dispatcher.scheduleEvent(callback, delay)
+  local callbackWithArgs = createCallbackWithArgs(callback, {...}, select('#', ...))
+  local event
+  if delayOrFront == nil or type(delayOrFront) == 'boolean' then
+    local front = delayOrFront == true
+    event = g_dispatcher.addImmediateEventEx and g_dispatcher.addImmediateEventEx(name, callbackWithArgs, front) or g_dispatcher.addImmediateEvent(callbackWithArgs, front)
+  else
+    event = g_dispatcher.addEventEx and g_dispatcher.addEventEx(name, callbackWithArgs, delayOrFront) or g_dispatcher.addEvent(callbackWithArgs, delayOrFront)
+  end
   -- must hold a reference to the callback, otherwise it would be collected
-  event._callback = callback
+  event._callback = callbackWithArgs
   return event
 end
 
-function addEvent(callback, front)
+function cycleEvent(callback, interval, ...)
   local ok, info = pcall(debug.getinfo, callback, 'S')
   local name = ok and info and ((info.short_src or 'lua') .. ':' .. (info.linedefined or 0)) or 'lua'
-  local event = g_dispatcher.addEventEx and g_dispatcher.addEventEx(name, callback) or g_dispatcher.addEvent(callback, front)
+  local callbackWithArgs = createCallbackWithArgs(callback, {...}, select('#', ...))
+  local event = g_dispatcher.cycleEventEx and g_dispatcher.cycleEventEx(name, callbackWithArgs, interval) or g_dispatcher.cycleEvent(callbackWithArgs, interval)
   -- must hold a reference to the callback, otherwise it would be collected
-  event._callback = callback
-  return event
-end
-
-function cycleEvent(callback, interval)
-  local ok, info = pcall(debug.getinfo, callback, 'S')
-  local name = ok and info and ((info.short_src or 'lua') .. ':' .. (info.linedefined or 0)) or 'lua'
-  local event = g_dispatcher.cycleEventEx and g_dispatcher.cycleEventEx(name, callback, interval) or g_dispatcher.cycleEvent(callback, interval)
-  -- must hold a reference to the callback, otherwise it would be collected
-  event._callback = callback
+  event._callback = callbackWithArgs
   return event
 end
 
@@ -49,10 +54,10 @@ function periodicalEvent(eventFunc, conditionFunc, delay, autoRepeatDelay)
       return
     end
     eventFunc()
-    scheduleEvent(func, delay)
+    addEvent(func, delay)
   end
 
-  scheduleEvent(function()
+  addEvent(function()
     func()
   end, autoRepeatDelay)
 end

@@ -1,4 +1,4 @@
-TradeWindow < MiniWindow
+TradeWindow < PlayerTradeMiniWindow
   &loc: '${GamePlayerTradeWindowTitle}'
 
   Item

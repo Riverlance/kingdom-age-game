@@ -12,6 +12,7 @@ local CONDITION_ATTR_DESCRIPTION   = 5
 local CONDITION_ATTR_ORIGINID      = 6
 local CONDITION_ATTR_ORIGINNAME    = 7
 local CONDITION_ATTR_ATTRIBUTE     = 8
+local CONDITION_ATTR_TOTALDURATION = 9
 local CONDITION_ATTR_ENDLIST       = 255
 
 local CONDITION_ACTION_UPDATE = 1
@@ -209,6 +210,16 @@ function GameConditions.addCondition(condition)
   condition.startTime = os.time()
   condition.button = g_ui.createWidget('ConditionButton')
   condition.button:setup(condition)
+  local timer = condition.button.clock
+  if timer and condition.remainingTime and condition.totalDuration then
+    local remainingDuration = math.floor(condition.remainingTime / 1000)
+    local endTime = timer.startTime + remainingDuration
+    timer.duration = math.floor(condition.totalDuration / 1000)
+    timer.spentTime = math.max(0, timer.duration - remainingDuration)
+    timer.endTime = endTime
+    timer.startTime = endTime - timer.duration
+    condition.button:updateConditionClock()
+  end
   table.insert(conditionList, condition)
   conditionPanel:addChild(condition.button)
   GameConditions.updateConditionList()
@@ -276,6 +287,8 @@ function GameConditions.parseConditions(protocol, msg)
     while nextByte ~= CONDITION_ATTR_ENDLIST do
       if nextByte == CONDITION_ATTR_REMAININGTIME then
         condition.remainingTime = msg:getU32()
+      elseif nextByte == CONDITION_ATTR_TOTALDURATION then
+        condition.totalDuration = msg:getU32()
       elseif nextByte == CONDITION_ATTR_TURNS then
         condition.turns = msg:getU32()
       elseif nextByte == CONDITION_ATTR_ITEM then

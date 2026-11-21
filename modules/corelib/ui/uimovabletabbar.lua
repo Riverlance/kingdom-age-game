@@ -199,7 +199,7 @@ local function tabBlink(tab, step)
 
   removeEvent(tab.blinkEvent)
   if step < 4 then
-    tab.blinkEvent = scheduleEvent(function()
+    tab.blinkEvent = addEvent(function()
       if isWidgetAlive(tab) then
         tabBlink(tab, step + 1)
       end

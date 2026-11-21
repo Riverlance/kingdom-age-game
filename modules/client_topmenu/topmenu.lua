@@ -138,7 +138,7 @@ function ClientTopMenu.updateFps(fps)
   if g_game.isOnline() then
     local vsync = ClientOptions.getOption('vsync')
     if fpsEvent == nil and lastSyncValue ~= vsync then
-      fpsEvent = scheduleEvent(function()
+      fpsEvent = addEvent(function()
         fpsMin = -1
         lastSyncValue = vsync
         fpsEvent = nil

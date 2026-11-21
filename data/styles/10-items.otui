@@ -4,7 +4,7 @@ Item < UIItem
   image-source: /images/ui/slot/item
   image-clip: 0 0 34 34
   ttf-font: verdanapro-v
-  ttf-font-weight: 700
+  ttf-font-weight: 900
   ttf-font-size: 10
   ttf-stroke: 1 black
   border-color: #faebd5

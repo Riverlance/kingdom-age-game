@@ -1,4 +1,4 @@
-MiniWindow
+PlayerMiniWindow
   id: minimapWindow
   &loc: '${GameMinimapTitle}'
   icon: /images/ui/top_menu/minimap

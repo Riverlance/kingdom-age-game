@@ -1,4 +1,4 @@
-NPCOfferLabel < Label
+NPCOfferLabel < GameLabel
   anchors.left: prev.right
   anchors.right: parent.right
   anchors.top: prev.top
@@ -54,7 +54,7 @@ NPCItemBox < Panel
 BlurredMainWindow
   id: npcWindow
   &loc: '${GameNpcTradeNpcWindowTitle}'
-  size: 600 620
+  size: 600 635
   @onEscape: GameNpcTrade.closeNpcTrade()
 
   Button
@@ -84,7 +84,7 @@ BlurredMainWindow
   LightFlatPanel
     id: buyOptions
     width: 200
-    height: 144
+    height: 159
     anchors.bottom: prev.top
     anchors.right: parent.right
     margin-bottom: 10
@@ -159,7 +159,7 @@ BlurredMainWindow
     anchors.right: prev.outsideLeft
     margin-right: 5
 
-    Label
+    GameLabel
       phantom: false
       id: nameDesc
       &loc: '${CorelibInfoName}:'
@@ -173,7 +173,7 @@ BlurredMainWindow
     NPCOfferLabel
       id: name
 
-    Label
+    GameLabel
       phantom: false
       id: priceDesc
       &loc: '${GameNpcTradePriceDesc}:'
@@ -186,7 +186,7 @@ BlurredMainWindow
     NPCOfferLabel
       id: price
 
-    Label
+    GameLabel
       phantom: false
       id: weightDesc
       &loc: '${GameNpcTradeWeightDesc}:'
@@ -199,7 +199,7 @@ BlurredMainWindow
     NPCOfferLabel
       id: weight
 
-    Label
+    GameLabel
       phantom: false
       id: moneyDesc
       &loc: '${GameNpcTradeMoneyDesc}:'
@@ -213,7 +213,7 @@ BlurredMainWindow
       id: money
       phantom: false
 
-    Label
+    GameLabel
       phantom: false
       id: kapsDesc
       &loc: '${GameNpcTradeKapsDesc}:'
@@ -227,7 +227,7 @@ BlurredMainWindow
       id: kaps
       phantom: false
 
-    Label
+    GameLabel
       phantom: false
       id: capacityDesc
       &loc: '${GameNpcTradeCapacityDesc}:'
@@ -240,7 +240,7 @@ BlurredMainWindow
     NPCOfferLabel
       id: capacity
 
-    Label
+    GameLabel
       phantom: false
       id: trustDesc
       &loc: '${GameNpcTradeTrustDesc}:'

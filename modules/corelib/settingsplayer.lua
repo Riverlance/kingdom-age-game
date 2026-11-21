@@ -80,7 +80,7 @@ function g_playerSettings.scheduleSave()
   playerSettingsDirty = true
 
   g_playerSettings.cancelSave()
-  playerSettingsSaveEvent = scheduleEvent(function()
+  playerSettingsSaveEvent = addEvent(function()
     playerSettingsSaveEvent = nil
     g_playerSettings.flushSave()
   end, playerSettingsSaveDelay)
@@ -124,7 +124,7 @@ end
 
 local function onGameEnd()
   -- Run after all other onGameEnd callbacks have updated player settings.
-  scheduleEvent(g_playerSettings.flushSave)
+  addEvent(g_playerSettings.flushSave)
 end
 
 local function onExit()

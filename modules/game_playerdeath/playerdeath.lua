@@ -126,7 +126,7 @@ function GamePlayerDeath.scheduleReconnect()
     removeEvent(reconnectEvent)
   end
 
-  reconnectEvent = scheduleEvent(function()
+  reconnectEvent = addEvent(function()
     reconnectEvent = nil
 
     if deathWindow then

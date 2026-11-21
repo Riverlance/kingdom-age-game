@@ -26,7 +26,7 @@ PowersListButton < UIPowerButton
     margin-left: 2
     phantom: true
 
-  Label
+  GameLabel
     id: label
     phantom: true
     anchors.top: parent.top

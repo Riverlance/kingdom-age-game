@@ -422,6 +422,7 @@ function UIMinimap:createCreatureMarker(markerTable, creatureId, color)
   marker.contentWidth = marker:getWidth()
 
   local creatureWidget = marker:getChildById('creatureWidget')
+  marker.baseCreatureHeight = creatureWidget:getHeight()
   marker.baseCreatureMarginTop = creatureWidget:getMarginTop()
 
   local markerDot = marker:getChildById('markerDot')
@@ -489,13 +490,6 @@ function UIMinimap:updateCreatureMarkerHover(pos, force)
     hoveredMarker, closestDistance = findClosestCreatureMarker(
       self.worldCreatureMarkers or { }, mousePos, self.creatureMarkersExtraIcons,
       closestMarker, closestDistance)
-
-    if not hoveredMarker and self.hoveredCreatureMarker and self.hoveredCreatureMarker:isVisible() then
-      local titleLabel = self.hoveredCreatureMarker:getChildById('titleLabel')
-      if titleLabel and titleLabel:isVisible() and titleLabel:containsPoint(mousePos) then
-        hoveredMarker = self.hoveredCreatureMarker
-      end
-    end
   end
 
   if hoveredMarker == self.hoveredCreatureMarker then
@@ -511,6 +505,7 @@ function UIMinimap:updateCreatureMarkerHover(pos, force)
 
   self.hoveredCreatureMarker = hoveredMarker
   if hoveredMarker then
+    hoveredMarker:raise()
     hoveredMarker:getChildById('titleLabel'):setVisible(true)
   end
 end
@@ -658,6 +653,7 @@ function UIMinimap:updateCreatureMarkerVisibility(marker)
   local dotSize = marker.baseDotSize or markerDot:getWidth()
   local dotBorderWidth = marker.baseDotBorderWidth or markerDot:getBorderTopWidth()
   local dotMarginTop = marker.baseDotMarginTop or markerDot:getMarginTop()
+  local creatureHeight = marker.baseCreatureHeight or creatureWidget:getHeight()
   local creatureMarginTop = marker.baseCreatureMarginTop or creatureWidget:getMarginTop()
 
   if not self.creatureMarkersExtraIcons then
@@ -667,7 +663,7 @@ function UIMinimap:updateCreatureMarkerVisibility(marker)
     markerWidth = math.max(markerWidth, dotSize)
     markerHeight = math.max(markerHeight, dotSize)
     dotMarginTop = math.floor((markerHeight - dotSize) / 2 + 0.5)
-    creatureMarginTop = creatureMarginTop + math.floor((markerHeight - baseHeight) / 2)
+    creatureMarginTop = dotMarginTop + dotSize + 1
   end
 
   if marker:getWidth() ~= markerWidth then
@@ -687,6 +683,10 @@ function UIMinimap:updateCreatureMarkerVisibility(marker)
   end
   if markerDot:getMarginTop() ~= dotMarginTop then
     markerDot:setMarginTop(dotMarginTop)
+  end
+  local visibleCreatureHeight = self.creatureMarkersExtraIcons and creatureHeight or 0
+  if creatureWidget:getHeight() ~= visibleCreatureHeight then
+    creatureWidget:setHeight(visibleCreatureHeight)
   end
   if creatureWidget:getMarginTop() ~= creatureMarginTop then
     creatureWidget:setMarginTop(creatureMarginTop)

@@ -2,7 +2,7 @@ PageButton < Button
 
 
 
-ContainerWindow < MiniWindow
+ContainerWindow < ContainerMiniWindow
   UIItem
     id: containerItemWidget
     virtual: true

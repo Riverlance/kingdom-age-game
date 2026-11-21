@@ -418,8 +418,7 @@ do
           field.maxChars = field.fieldMaxChars -- TextField typing
           field.regex    = field.fieldRegex
           field:setTextHidden(field.fieldHidden)
-          field:setPlaceholderText(field.fieldName)
-          field:setPhantom(true)
+          field:setPlaceholder(field.fieldName)
 
           -- Tooltip
           if string.exists(field.fieldTooltip) then

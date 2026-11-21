@@ -87,15 +87,15 @@ TopMenuPanel < Panel
 
 TopMenuFrameCounterLabel < Label
   ttf-font: verdanapro-v
-  ttf-font-weight: 700
+  ttf-font-weight: 900
   ttf-font-size: 10
-  ttf-stroke: 1 black
+  ttf-stroke: 1 #000b
   color: white
   margin-top: 0
   margin-left: 5
 
 TopMenuPingLabel < Label
   ttf-font: verdanapro-v
-  ttf-font-weight: 700
+  ttf-font-weight: 900
   ttf-font-size: 10
-  ttf-stroke: 1 black
+  ttf-stroke: 1 #000b

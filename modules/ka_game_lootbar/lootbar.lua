@@ -155,7 +155,7 @@ function GameLootbar.shrinkOut(widget, time)
   widget:setWidth(width)
   GameLootbar.updatePosition()
 
-  widget.shrinkOutEvent = scheduleEvent(function()
+  widget.shrinkOutEvent = addEvent(function()
     if isWidgetAlive(widget) then
       GameLootbar.shrinkOut(widget, time - config.shrinkInterval)
     end
@@ -197,7 +197,7 @@ function GameLootbar.addItem(id, count, name, pos)
   item:setItemId(id)
   item:setItemCount(count)
 
-  widget.shrinkInEvent = scheduleEvent(function()
+  widget.shrinkInEvent = addEvent(function()
     if isWidgetAlive(widget) then
       GameLootbar.shrinkOut(widget, config.shrinkTime)
     end

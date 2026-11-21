@@ -254,7 +254,7 @@ function UIHotkeyBarContainer:setPowerEffect(boostLevel)
 
   local particle = g_ui.createWidget(style, powerWidget)
   self.powerEffectWidget = particle
-  self.powerEffectDestroyEvent = scheduleEvent(function()
+  self.powerEffectDestroyEvent = addEvent(function()
     self.powerEffectDestroyEvent = nil
     self.powerEffectWidget = nil
     particle:destroy()
@@ -290,9 +290,9 @@ function UIHotkeyBarContainer:setPowerProgressShader(exhaustTime)
       widget:setShader('Widget - None')
       self.powerProgressEvent = nil
     else
-      self.powerProgressEvent = scheduleEvent(function() updateShader() end, 50)
+      self.powerProgressEvent = addEvent(function() updateShader() end, 50)
     end
   end
 
-  self.powerProgressEvent = scheduleEvent(function() updateShader() end, 50)
+  self.powerProgressEvent = addEvent(function() updateShader() end, 50)
 end

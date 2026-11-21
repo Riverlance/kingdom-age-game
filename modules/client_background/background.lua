@@ -184,7 +184,7 @@ function ClientBackground.updateLogoScaleByWindowFactor()
 
   if not rememberLogoBaseSize() then
     removeEvent(logoScaleRetryEvent)
-    logoScaleRetryEvent = scheduleEvent(ClientBackground.updateLogoScaleByWindowFactor, 30)
+    logoScaleRetryEvent = addEvent(ClientBackground.updateLogoScaleByWindowFactor, 30)
     return
   end
 

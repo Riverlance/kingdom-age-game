@@ -27,7 +27,6 @@ game
     max-z: 15
     sea-floor: 7
     underground-floor: 8
-    aware-underground-floor-range: 2
 
   tile
     max-elevation: 24
@@ -62,12 +61,13 @@ font
   // eg, /fonts/verdanapro-v.ttf|9|1|#000000ff|700
   // eg, /fonts/opensans-v.ttf|12|1|black|700|75|false|wght=700,wdth=75|0.5
   // letter-spacing is a floating-point pixel value and defaults to 0.
-  widget: opensans-v|11|1|black|800||||0
-  static-text: verdanapro-v|11|1|black|800||||-1
-  animated-text: verdanapro-v|11|1|black|800||||-1
-  creature-text: verdanapro-v|11|1|black|800||||-1
-  item-count: verdanapro-v|10|1|black|700||||0
-  item-duration: verdanapro-v|7|1|black|700||||0
+  widget: opensans-v|11|1|#000b|800||||0
+  static-text: verdanapro-v|11|1|#000b|900||||-1
+  animated-text: verdanapro-v|11|1|#000b|900||||-1
+  creature-text: verdanapro-v|11|1|#000b|900||||-1
+  level: verdanapro-v|9|1|black|900||||0
+  item-count: verdanapro-v|10|1|black|900||||0
+  item-duration: verdanapro-v|7|1|black|900||||0
 
   fallbacks
     // file|size|stroke-width|stroke-color|weight|width|italic|variations|size-scale

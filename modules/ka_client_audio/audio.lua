@@ -43,12 +43,20 @@ function ClientAudio.init()
   ProtocolGame.registerExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeAudio, ClientAudio.parseAudioRequest)
 
   connect(LocalPlayer, {
-    onPositionChange = ClientAudio.onPositionChange
+    onPositionChange = ClientAudio.onPositionChange,
+    onWalk           = ClientAudio.onCreatureMove,
+  })
+
+  connect(Creature, {
+    onWalk = ClientAudio.onCreatureMove,
   })
 
   connect(g_game, {
     onAddMagicEffect     = ClientAudio.onAddMagicEffect,
     onAddDistanceMissile = ClientAudio.onAddDistanceMissile,
+    onItemTransform      = ClientAudio.onItemTransform,
+    onCreatureMove       = ClientAudio.onCreatureMove,
+    onGameEnd            = ClientAudio.onGameEnd,
   })
 end
 
@@ -56,10 +64,18 @@ function ClientAudio.terminate()
   disconnect(g_game, {
     onAddMagicEffect     = ClientAudio.onAddMagicEffect,
     onAddDistanceMissile = ClientAudio.onAddDistanceMissile,
+    onItemTransform      = ClientAudio.onItemTransform,
+    onCreatureMove       = ClientAudio.onCreatureMove,
+    onGameEnd            = ClientAudio.onGameEnd,
   })
 
   disconnect(LocalPlayer, {
-    onPositionChange = ClientAudio.onPositionChange
+    onPositionChange = ClientAudio.onPositionChange,
+    onWalk           = ClientAudio.onCreatureMove,
+  })
+
+  disconnect(Creature, {
+    onWalk = ClientAudio.onCreatureMove,
   })
 
   ProtocolGame.unregisterExtendedOpcode(ServerExtOpcodes.ServerExtOpcodeAudio)
@@ -754,5 +770,136 @@ do
         exhaustion.lastExecution = os.clock()
       end
     end
+  end
+end
+
+
+
+-- Walking step audio
+
+local function createItemIdSet(itemIds)
+  local itemIdSet = { }
+  for _, itemId in ipairs(itemIds) do
+    itemIdSet[itemId] = true
+  end
+  return itemIdSet
+end
+
+local walkAudioGrounds = {
+  stone = createItemIdSet{ 409, 410, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 429, 430, 431, 436, 437, 438, 463, 479, 481, 596, 597, 598, 599, 601, 600, 604, 605, 609, 610, 800, 870, 923, 924, 925, 926, 927, 928, 929, 930, 931, 932, 933, 934, 935, 936, 1210, 1211, 1212, 1213, 1214, 1215, 1216, 1217, 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1225, 1226, 1227, 1228, 1229, 1230, 1231, 1232, 1233, 1234, 1235, 1236, 1237, 1238, 1239, 1240, 1241, 1242, 1243, 1244, 1245, 1246, 1247, 1248, 1249, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257, 1258, 1259, 1260, 1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268, 1269, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 566, 567, 4394, 4395, 4396, 4397, 4398, 4399, 4400, 4401, 4402, 4403, 4404, 4405, 4406, 4407, 4408, 4409, 4410, 4555, 4559, 4560, 4561, 4562, 4563, 4564, 4565, 4566, 4567, 4568, 4584, 4823, 859, 4825, 4826, 9291, 5405, 5406, 5407, 5408, 5409, 6127, 6128, 6129, 6130, 6683, 6684, 6685, 6686, 6967, 7062, 7063, 7064, 7065, 7066, 7350, 7351, 7353, 7355, 7356, 7358, 4824, 7593, 7594, 7595, 7596, 7597, 7598, 7599, 7600, 7601, 7602, 7603, 7604, 7729, 7730, 7731, 7732, 7733, 7734, 7735, 7736, 7739, 7740, 7760, 7770, 7880, 8131, 8228, 8229, 8230, 8276, 8277, 8278, 8279, 8280, 8281, 8283, 8284, 8285, 8286, 8287, 8288, 8289, 8290, 8658, 8690, 8755, 8756, 8757, 8932, 5404, 9257, 9290, 9305, 9481, 9482, 9483, 9484, 9485, 9486, 9487, 9575, 9576, 9577, 9578, 9579, 9580, 9581, 9848, 9849, 9850, 9851, 9852, 9853, 9854, 9855, 9856, 9857, 9929, 9930, 9931, 9932, 9933, 9934, 9935, 9936, 9937, 9938, 9939, 10145, 10146, 10180, 10548, 10549, 10550, 10551, 10552, 10553, 10986, 10989, 10991, 10997, 10998, 10999, 11000, 11001, 11002, 11038, 11278, 11279, 11280, 11281, 11282, 11283, 11284, 11285, 11417, 11418, 11419, 11420, 11421, 11422, 11423, 11424, 11425, 11843, 11844, 11845, 11846, 11847, 11848, 11849, 11850, 11851, 11852, 11853, 11854, 11855, 11856, 11857, 11858, 11926, 11927, 11928, 11929, 11930, 11931, 11932, 11933, 11934, 11935, 11936, 11937, 11938, 11939, 11940, 11941, 11943, 11944, 11945, 11946, 11947, 11948, 11949, 11950, 12285, 12286, 12287, 12288, 12289, 12290, 12291, 12292, 12293, 12059, 12060, 12061, 12062, 12063, 12065, 12066, 12068, 12845, 13430, 13431, 13432, 13433, 13434, 13435, 13436, 13437, 13438, 13439, 13440, 13441, 13442, 13443, 13444, 13445, 13446, 13447, 13448, 13449, 13450, 13451, 13452, 13453, 13455, 13456, 13457, 13458, 13459, 13460, 13461, 13462, 13463, 13464, 13465, 13533, 13534, 13535, 13536, 13537, 13538, 13805, 13806, 13807, 13808, 13809, 13810, 14137, 14138, 14139, 14140, 14770, 14771, 14772, 14773, 14774, 14775, 14776, 14777, 15000, 15001, 15002, 15003, 15145, 15146, 15468, 15469, 15470, 15471, 15472, 15641, 15642, 15643, 15644, 15645, 15646, 15647, 15648, 15649, 15650, 15717, 15785, 16174, 17316, 17464, 17465, 17466, 17467, 17468, 17505, 17506, 17507, 17508, 17509, 17510, 17544, 17545, 17546, 17547, 17666, 17968, 18013, 19145, 19147, 19608, 19609, 19610, 19611, 19612, 19613, 19614, 19615, 19825, 19826, 19827, 19828, 19829, 19830, 19831, 19832, 19833, 19834, 19835, 19836, 19837, 19838, 19839, 19840, 19841, 19842, 19843, 19844, 19845, 19846, 19847, 19848, 20125, 20136, 20232, 20259, 20260, 20261, 20262, 20263, 20374, 20375, 20376, 20377, 20378, 20379, 20488, 20489, 20490, 20533, 20534, 20535, 20536, 20537, 20538, 20539, 20540, 20541, 20542, 20544, 20545, 20712, 20888, 21034, 21035, 21138, 21139, 21345, 21346, 21406, 21407, 21408, 21409, 21437, 21440, 21441, 21442, 21575, 21576, 21577, 21578, 21579, 21580, 21581, 21582, 21583, 21584, 21585, 21676, 21677, 21678, 21679, 21680, 21681, 21693, 21694, 21696, 21697, 21698, 21699, 21700, 21701, 21702, 21703, 21704, 21705, 21706, 21707, 21708, 21709, 21710, 21711, 21712, 21713, 21714, 21715, 21716, 21717, 21718, 21719, 21720, 21721, 21722, 21723, 21724, 21725, 21726, 21727, 21728, 21729, 21730, 21731, 21732, 21733, 21734, 21735, 21736, 21737, 21971, 22157, 22538, 22539, 22540, 22541, 22688, 22716, 22717, 22718, 22719, 22748, 22793, 22795, 22872, 22877, 22878, 22892, 22893, 22894, 23048, 23049, 23050, 23051, 23052, 23053, 23054, 23055, 23056, 23111, 23112, 23113, 23363, 23364, 23463, 25167, 25221 },
+  wood  = createItemIdSet{ 369, 370, 408, 411, 412, 413, 414, 428, 432, 433, 434, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 464, 475, 8709, 1771, 482, 483, 484, 485, 486, 563, 564, 2253, 2254, 2259, 2260, 2261, 2262, 4971, 5544, 5691, 5743, 5744, 5763, 5764, 5768, 5769, 5770, 6209, 6212, 7053, 7272, 7357, 7767, 7768, 905, 7769, 7867, 7886, 8308, 8309, 8310, 8311, 8312, 8313, 8314, 8315, 8316, 8708, 8766, 8767, 8768, 8769, 10900, 10901, 10902, 10903, 10904, 10905, 10906, 10907, 11316, 476, 11731, 11732, 11733, 11734, 11735, 11736, 11737, 11738, 11739, 12129, 12799, 12846, 15596, 16203, 16484, 16485, 16486, 16487, 16488, 16489, 16584, 17516, 17517, 17518, 17937, 17982, 17985, 20658, 20713, 20714, 21294, 21374, 22750 },
+  mud   = createItemIdSet{ 194, 950, 952, 4821, 4822, 6352, 10113, 10494, 10605, 11348, 11366, 12090, 12091, 12092, 12093, 12094, 12095, 12112, 12113, 12253, 12254, 12255, 12256, 12257, 12258, 12277, 12278, 12279, 12280, 12281, 12721, 13184, 13988, 13989, 15040, 15041, 15042, 15043, 15044, 15045, 15046, 15047, 16280, 16281, 16282, 16283, 16284, 16285, 16286, 16287, 17667, 18838, 18839, 18840, 18841, 19477, 19478, 19970, 19971, 19972, 19973, 20012, 20013, 20014, 20015, 20025, 20137, 23461, 23472 },
+  snow  = createItemIdSet{ 799, 6580, 6581, 6582, 6583, 6584, 6585, 6586, 6587, 6588, 6589, 6590, 6591, 6592, 6593, 6594, 6595, 6596, 6597, 6598, 6599, 6600, 6601, 6602, 6603, 6604, 6605, 6606, 6607, 6608 },
+}
+
+local walkAudioExhaustion = { }
+local walkAudioFileExists = { }
+local walkAudioInterval = 200
+
+function ClientAudio.onGameEnd()
+  walkAudioExhaustion = { }
+end
+
+function ClientAudio.onCreatureMove(creature, oldPos, newPos)
+  if not creature or not creature:isPlayer() or creature:isInGhostMode() or (oldPos.x == newPos.x and oldPos.y == newPos.y) then
+    return
+  end
+
+  local ambientChannel = channels[AudioChannels.Ambient]
+  if ambientChannel.volume <= 0 then
+    return
+  end
+
+  local tile = g_map.getTile(newPos)
+  local ground = tile and tile:getGround()
+  if not ground then
+    return
+  end
+
+  local groundId = ground:getId()
+  local creatureId = creature:getId()
+  local now = g_clock.millis()
+  if (walkAudioExhaustion[creatureId] or 0) > now then
+    return
+  end
+  walkAudioExhaustion[creatureId] = now + walkAudioInterval
+
+  local material
+  if walkAudioGrounds.stone[groundId] or tile:hasElevation(1) then
+    material = 'stone'
+  elseif walkAudioGrounds.wood[groundId] then
+    material = 'wood'
+  elseif walkAudioGrounds.mud[groundId] then
+    material = 'mud'
+  elseif walkAudioGrounds.snow[groundId] then
+    material = 'snow'
+  else
+    material = 'default'
+  end
+
+  local path = f('%s/walk/%s_%d.ogg', getAudioChannelPath(AudioChannels.Ambient), material, math.random(4))
+  if walkAudioFileExists[path] == nil then
+    walkAudioFileExists[path] = g_resources.fileExists(path)
+  end
+  if not walkAudioFileExists[path] then
+    return
+  end
+
+  local audio = ambientChannel.channel:play(path, 1, 0, 0)
+  if audio then
+    audio:setPosition(newPos.x, newPos.y)
+  end
+end
+
+
+
+-- Elevator audio
+
+local elevatorItemClientIds = {
+  upStartBottom  = { 25140, 25154 },
+  downStartTop   = { 25140, 25146 },
+  downStartBottom = { 25165, 25164 },
+}
+
+local elevatorSoundCooldowns = { }
+local elevatorSoundCooldown = 250
+
+local function playElevatorSound(direction, position, elevatorFloor)
+  local ambientChannel = channels[AudioChannels.Ambient]
+  if ambientChannel.volume <= 0 then
+    return
+  end
+
+  local key = f('%d:%d:%d:%s', position.x, position.y, elevatorFloor, direction)
+  local now = g_clock.millis()
+  if (elevatorSoundCooldowns[key] or 0) > now then
+    return
+  end
+
+  local expiresAt = now + elevatorSoundCooldown
+  elevatorSoundCooldowns[key] = expiresAt
+  addEvent(function(key, expectedExpiresAt)
+    if elevatorSoundCooldowns[key] == expectedExpiresAt then
+      elevatorSoundCooldowns[key] = nil
+    end
+  end, elevatorSoundCooldown, key, expiresAt)
+
+  local path = f('%s/item/elevator_stone_%s.ogg', getAudioChannelPath(AudioChannels.Ambient), direction)
+  local audio = ambientChannel.channel:play(path, 1, 0, 0)
+  if audio then
+    audio:setPosition(position.x, position.y)
+  end
+end
+
+function ClientAudio.onItemTransform(oldItem, newItem, position)
+  local oldItemId = oldItem:getId()
+  local newItemId = newItem:getId()
+
+  if oldItemId == elevatorItemClientIds.upStartBottom[1] and newItemId == elevatorItemClientIds.upStartBottom[2] then
+    playElevatorSound('up', position, position.z)
+  elseif oldItemId == elevatorItemClientIds.downStartTop[1] and newItemId == elevatorItemClientIds.downStartTop[2] then
+    playElevatorSound('down', position, position.z + 1)
+  elseif oldItemId == elevatorItemClientIds.downStartBottom[1] and newItemId == elevatorItemClientIds.downStartBottom[2] then
+    playElevatorSound('down', position, position.z)
   end
 end

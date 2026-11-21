@@ -116,7 +116,7 @@ local function blinkIcon(icon, ticks)
   end
 
   icon:setVisible(not icon:isVisible())
-  scheduleEvent(function()
+  addEvent(function()
     blinkIcon(icon, ticks)
   end, ticks)
 end

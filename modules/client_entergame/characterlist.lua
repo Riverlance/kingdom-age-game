@@ -37,7 +37,7 @@ local function tryLogin(charInfo, tries)
 				loginEvent = nil
 			end
         end
-        loginEvent = scheduleEvent(function()
+        loginEvent = addEvent(function()
             tryLogin(charInfo, tries + 1)
         end, 100)
         return
@@ -77,7 +77,7 @@ local function updateWait(timeStart, timeEnd)
             local label = waitingWindow:getChildById('timeLabel')
             label:setText(f(loc'${CharacterListWaitingListTimelabel}', timeStr))
 
-            updateWaitEvent = scheduleEvent(function()
+            updateWaitEvent = addEvent(function()
                 updateWait(timeStart, timeEnd)
             end, 1000 * progressBar:getPercentPixels() / 100 * (timeEnd - timeStart))
             return true
@@ -135,10 +135,10 @@ local function onLoginWait(message, time)
     local label = waitingWindow:getChildById('infoLabel')
     label:setText(message)
 
-    updateWaitEvent = scheduleEvent(function()
+    updateWaitEvent = addEvent(function()
         updateWait(g_clock.seconds(), g_clock.seconds() + time)
-    end, 0)
-    resendWaitEvent = scheduleEvent(resendWait, time * 1000)
+    end)
+    resendWaitEvent = addEvent(resendWait, time * 1000)
 end
 
 local function updateCharacterNameColor(characterWidget, online)
@@ -661,7 +661,7 @@ function CharacterList.scheduleAutoReconnect()
     end
 
     removeAutoReconnectEvent()
-    autoReconnectEvent = scheduleEvent(CharacterList.executeAutoReconnect, 2500)
+    autoReconnectEvent = addEvent(CharacterList.executeAutoReconnect, 2500)
 end
 
 function CharacterList.executeAutoReconnect()

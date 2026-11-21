@@ -118,7 +118,7 @@ local function removeSingleImage(index, fadeOut)
   else
     g_effects.fadeOut(image, fadeOut)
 
-    image.destroyEvent = scheduleEvent(withWeakWidget(image, function(widget)
+    image.destroyEvent = addEvent(withWeakWidget(image, function(widget)
       if widget.fadeEvent then
         g_effects.cancelFade(widget)
       end

@@ -275,7 +275,7 @@ function addWalkEvent(dir, delay)
     end
 
     if delay and delay > 0 then
-        walkEvent = scheduleEvent(walkCallback, delay)
+        walkEvent = addEvent(walkCallback, delay)
     else
         walkEvent = addEvent(walkCallback)
     end

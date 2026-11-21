@@ -60,9 +60,9 @@ TrackerWidget < UIWidget
   UILabel
     id: distance
     ttf-font: verdanapro-v
-    ttf-font-weight: 700
+    ttf-font-weight: 900
     ttf-font-size: 8
-    ttf-stroke: 1 black
+    ttf-stroke: 1 #000b
     color: #ffc659
     text-auto-resize: true
     phantom: true

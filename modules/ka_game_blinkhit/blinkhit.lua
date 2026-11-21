@@ -35,5 +35,5 @@ function GameBlinkHit.onBlinkHit(protocolGame, opcode, msg)
   end
 
   setBlink(id, true)
-  scheduleEvent(function() setBlink(id, false) end, blinkTime)
+  addEvent(function() setBlink(id, false) end, blinkTime)
 end

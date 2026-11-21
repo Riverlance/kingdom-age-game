@@ -1336,8 +1336,9 @@ function GameConsole.onTalk(name, level, mode, message, channelId, creaturePos)
     end
 
   else
-    local channel = channels[channelId]
-    if not channel and (defaultMessage or channelId == 0) then
+    local isChannelMessage = mode == MessageModes.ChannelManagement or mode == MessageModes.Channel or mode == MessageModes.ChannelHighlight or mode == MessageModes.GamemasterChannel
+    local channel = isChannelMessage and channels[channelId] or nil
+    if not channel and (defaultMessage or channelId <= 0) then
       channel = loc'${CorelibInfoDefault}'
     end
 
