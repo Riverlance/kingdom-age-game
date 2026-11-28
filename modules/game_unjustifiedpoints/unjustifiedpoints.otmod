@@ -4,6 +4,6 @@ Module
   author: Summ
   sandboxed: true
   scripts: [ unjustifiedpoints ]
-  dependencies: [ client_topmenu, game_interface ]
+  dependencies: [ game_interface ]
   @onLoad: GameUnjustifiedPoints.init()
   @onUnload: GameUnjustifiedPoints.terminate()

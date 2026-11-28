@@ -1,25 +1,6 @@
 -- Consolidated UTF-8 locale file.
 
 g_locales.addTranslations({
-  GameAttributesWindowTitle = {
-    en    = "Attributes",
-    ptbr  = "Atributos",
-    ptpt  = "Atributos",
-    es419 = "Atributos",
-    eses  = "Atributos",
-    pl    = "Atrybuty",
-    ru    = "Характеристики",
-    sv    = "Egenskaper",
-    nb    = "Egenskaper",
-    de    = "Attribute",
-    nlnl  = "Attributen",
-    frfr  = "Attributs",
-    fi    = "Ominaisuudet",
-    it    = "Attributi",
-    zhcn  = "属性",
-    ja    = "属性",
-    ko    = "속성",
-  },
 
   GameAttributesButtonInfoTooltip = {
     en    = "1. 'Distribution' are points that you distributed manually.\n\n2. 'Alignment' are recommended points that were distributed automatically due to your vocation.\n\n3. 'Quest' are points that you can acquire on quests (golden statue, stray faeries, capsules).\n\n4. 'Buff/Debuff' are points that were increased or decreased temporarily due to Powers.",

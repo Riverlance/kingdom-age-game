@@ -64,7 +64,7 @@ function GameLootbar.updatePosition()
     return
   end
 
-  local margin = GameInterface.m.topMenuButton:getHeight() + config.baseMargin
+  local margin = config.baseMargin
 
   -- Hotkey bar
   local topHotkeyBar = modules.ka_game_hotkeybars and GameHotkeyBars.getHotkeyBars()[AnchorTop] or nil

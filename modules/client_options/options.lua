@@ -38,7 +38,8 @@ local defaultOptions = {
   rightSecondPanelWidth = 5,
   leftThirdPanelWidth = 5,
   rightThirdPanelWidth = 5,
-  showTopMenu = true,
+  showLeftSideMenu = true,
+  showRightSideMenu = true,
   showChat = true,
   enableChat = true,
   gameScreenSize = 19,
@@ -727,10 +728,14 @@ function ClientOptions.setOption(key, value, force)
     g_window.setVerticalSync(value)
 
   elseif key == 'showFps' then
-    ClientTopMenu.setFpsVisible(value)
+    if GameInterface and GameInterface.setFpsVisible then
+      GameInterface.setFpsVisible(value)
+    end
 
   elseif key == 'showPing' then
-    ClientTopMenu.setPingVisible(value)
+    if GameInterface and GameInterface.setPingVisible then
+      GameInterface.setPingVisible(value)
+    end
 
   elseif key == 'fullscreen' then
     g_window.setFullscreen(value)
@@ -897,9 +902,11 @@ function ClientOptions.setOption(key, value, force)
       GameInterface.m.gameRightThirdPanel:setWidth(width)
     end
 
-  elseif modules.game_interface and key == 'showTopMenu' then
-    ClientTopMenu.getTopMenu():setVisible(value)
-    GameInterface.getTopMenuButton():setOn(value)
+  elseif modules.game_interface and key == 'showLeftSideMenu' then
+    GameInterface.setLeftSideMenu(value)
+
+  elseif modules.game_interface and key == 'showRightSideMenu' then
+    GameInterface.setRightSideMenu(value)
 
   elseif modules.game_interface and key == 'showChat' then
     GameInterface.getBottomPanel():setVisible(value)

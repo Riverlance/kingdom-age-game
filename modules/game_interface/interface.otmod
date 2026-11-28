@@ -4,7 +4,7 @@ Module
   author: OTClient team
   website: https://github.com/edubart/otclient
   sandboxed: true
-  scripts: [ widgets/uigamemap, widgets/uiitem, interface ]
+  scripts: [ widgets/uigamemap, widgets/uiitem, interface, fps, world, sidemenu ]
   dependencies: [ client_topmenu, client_background, client_options ]
   @onLoad: GameInterface.init()
   @onUnload: GameInterface.terminate()
@@ -35,23 +35,23 @@ Module
     - game_walk
     - game_console
     - game_ruleviolation
+    - game_questlog
 
-    // Top menu right buttons - mini windows
+    // Side menu and top menu mini windows
     - game_character
     - game_skills
     - ka_game_attributes
     - ka_game_powers
     - ka_game_conditions
+    - game_minimap
     - game_battlelist
     - ka_game_partylist
     - game_unjustifiedpoints
-    - game_minimap
     - game_viplist
     - game_creatureinformation
 
     // Top menu left buttons
     - game_hotkeys
     - ka_game_hotkeybars
-    - game_questlog
     - ka_game_dailyreward
     - game_screenshot

@@ -36,7 +36,7 @@ function GameQuestLog.init()
   g_ui.importStyle('questlogwindow')
   g_ui.importStyle('questlinewindow')
 
-  questLogButton = ClientTopMenu.addRightGameButton('questLogButton', { loct = '${GameQuestLogWindowTitle} (${GameQuestLogActionKey})', locpar = { GameQuestLogActionKey = GameQuestLogActionKey } }, '/images/ui/top_menu/questlog', GameQuestLog.toggle)
+  questLogButton = GameInterface.addSideMenuButton('questLogButton', { loct = '${GameQuestLogWindowTitle} (${GameQuestLogActionKey})', locpar = { GameQuestLogActionKey = GameQuestLogActionKey } }, '/images/ui/top_menu/questlog', GameQuestLog.toggle)
 
   connect(g_game, {
     onGameEnd = GameQuestLog.destroyWindows

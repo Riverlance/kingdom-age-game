@@ -11,6 +11,7 @@ local updateWaitEvent
 local resendWaitEvent
 local loginEvent
 local autoReconnectButton
+local motdButton
 local autoReconnectEvent
 local lastLogout = 0
 
@@ -383,6 +384,7 @@ function CharacterList.terminate()
         charactersWindow:destroy()
         charactersWindow = nil
         autoReconnectButton = nil
+        motdButton = nil
     end
 
     if loadBox then
@@ -429,6 +431,7 @@ function CharacterList.create(characters, account, otui)
     charactersWindow = g_ui.displayUI(otui)
     characterList = charactersWindow:getChildById('characterData')
     autoReconnectButton = charactersWindow:getChildById('autoReconnect')
+    motdButton = charactersWindow:getChildById('motdButton')
 
     -- characters
     G.characters = characters
@@ -548,6 +551,7 @@ function CharacterList.create(characters, account, otui)
     end
 
     CharacterList.updateAutoReconnectButton()
+    CharacterList.updateMotdButton()
 end
 
 function CharacterList.destroy()
@@ -641,6 +645,24 @@ function CharacterList.updateAutoReconnectButton()
         autoReconnectButton:setText('Auto reconnect: ' .. status)
     else
         autoReconnectButton:setText('Auto reconnect:\n ' .. status)
+    end
+end
+
+function CharacterList.updateMotdButton()
+    if not motdButton then
+        return
+    end
+
+    if G.motdNumber then
+        motdButton:show()
+    else
+        motdButton:hide()
+    end
+end
+
+function CharacterList.setMotdButtonOn(on)
+    if motdButton then
+        motdButton:setOn(on)
     end
 end
 

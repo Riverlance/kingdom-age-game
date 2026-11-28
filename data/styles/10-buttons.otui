@@ -93,6 +93,9 @@ AddButton < UIButton
   $disabled:
     image-color: #dfdfdf55
 
+RoundedButton < Button
+  image-source: /images/ui/_button/default_rounded
+
 LightButton < Button
   size: 130 21
   image-source: /images/ui/_button/default_rounded

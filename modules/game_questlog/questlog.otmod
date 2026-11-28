@@ -5,6 +5,6 @@ Module
   website: https://github.com/edubart/otclient
   sandboxed: true
   scripts: [ questlog ]
-  dependencies: [ client_topmenu ]
+  dependencies: [ game_interface ]
   @onLoad: GameQuestLog.init()
   @onUnload: GameQuestLog.terminate()

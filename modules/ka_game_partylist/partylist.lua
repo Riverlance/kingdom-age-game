@@ -164,7 +164,7 @@ function GamePartyList.init()
   g_ui.importStyle('partylevelcalculatorwindow')
 
   partyWindow = g_ui.loadUI('partylist')
-  partyTopMenuButton = ClientTopMenu.addRightGameToggleButton('partyTopMenuButton', { loct = '${GamePartyListWindowTitle}' }, '/images/ui/top_menu/party_list', GamePartyList.toggle)
+  partyTopMenuButton = GameInterface.addSideMenuToggleButton('partyTopMenuButton', { loct = '${GamePartyListWindowTitle}' }, '/images/ui/top_menu/party_list', GamePartyList.toggle)
 
   partyWindow.topMenuButton = partyTopMenuButton
   partyTopMenuButton:hide()

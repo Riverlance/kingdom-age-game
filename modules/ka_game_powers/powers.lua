@@ -4,7 +4,7 @@ _G.GamePowers = { }
 
 
 
-local GamePowersActionKey = 'Ctrl+Shift+P'
+local GamePowersActionKey = GameInterface.PowersActionKey
 
 
 
@@ -74,7 +74,7 @@ function GamePowers.init()
 
   powersWindow        = g_ui.loadUI('powers')
   powersHeader        = powersWindow:getChildById('miniWindowHeader')
-  powersTopMenuButton = ClientTopMenu.addRightGameToggleButton('powersTopMenuButton', { loct = '${GamePowersWindowTitle} (${GamePowersActionKey})', locpar = { GamePowersActionKey = GamePowersActionKey } }, '/images/ui/top_menu/powers', GamePowers.toggle)
+  powersTopMenuButton = GameInterface.getSideMenuButton('powersTopMenuButton')
 
   powersWindow.topMenuButton = powersTopMenuButton
 
@@ -135,7 +135,6 @@ function GamePowers.terminate()
     onPlayerPowersList = GamePowers.onPlayerPowersList
   })
 
-  powersTopMenuButton:destroy()
   powersWindow:destroy()
 
   g_keyboard.unbindKeyDown(GamePowersActionKey)

@@ -35,7 +35,7 @@ TopButton < UIButton
 
 TopToggleButton < UIButton
   size: 26 26
-  image-source: /images/ui/_button/top_menu_game
+  image-source: /images/ui/_button/top_menu_hidden
   image-border: 3
 
   $!on !disabled:
@@ -48,12 +48,15 @@ TopToggleButton < UIButton
     image-clip: 0 52 26 26
 
   $on:
+    image-source: /images/ui/_button/top_menu_game
     image-clip: 26 0 26 26
 
   $on hover:
+    image-source: /images/ui/_button/top_menu_game
     image-clip: 26 26 26 26
 
   $on pressed:
+    image-source: /images/ui/_button/top_menu_game
     image-clip: 26 52 26 26
 
   $disabled:
@@ -76,7 +79,7 @@ TopMenuPanel < Panel
   height: 36
   image-source: /images/ui/_background/default_stone_blue
   image-repeated: true
-  border-width-bottom: 1
+  border-width: 1
   border-color: $uiColorBorder
   focusable: false
   visible: true
@@ -85,6 +88,15 @@ TopMenuPanel < Panel
   $!on:
     visible: false
 
+TopMenuWorldLabel < Label
+  ttf-font: verdanapro-v
+  ttf-font-weight: 900
+  ttf-font-size: 10
+  ttf-stroke: 1 #000b
+  color: white
+  margin-top: 0
+  margin-left: 4
+
 TopMenuFrameCounterLabel < Label
   ttf-font: verdanapro-v
   ttf-font-weight: 900
@@ -92,7 +104,7 @@ TopMenuFrameCounterLabel < Label
   ttf-stroke: 1 #000b
   color: white
   margin-top: 0
-  margin-left: 5
+  margin-left: 4
 
 TopMenuPingLabel < Label
   ttf-font: verdanapro-v

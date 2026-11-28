@@ -39,7 +39,7 @@ function GameVipList.init()
   g_keyboard.bindKeyDown(GameVipListActionKey, GameVipList.toggle)
 
   vipWindow = g_ui.loadUI('viplist')
-  vipTopMenuButton = ClientTopMenu.addRightGameToggleButton('vipTopMenuButton', { loct = '${GameVipListWindowTitle} (${GameVipListActionKey})', locpar = { GameVipListActionKey = GameVipListActionKey } }, '/images/ui/top_menu/viplist', GameVipList.toggle)
+  vipTopMenuButton = GameInterface.addSideMenuToggleButton('vipTopMenuButton', { loct = '${GameVipListWindowTitle} (${GameVipListActionKey})', locpar = { GameVipListActionKey = GameVipListActionKey } }, '/images/ui/top_menu/viplist', GameVipList.toggle)
   contentsPanel = vipWindow:getChildById('contentsPanel')
 
   vipWindow.topMenuButton = vipTopMenuButton

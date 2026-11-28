@@ -29,6 +29,8 @@ CharacterWidget < UIWidget
   height: 14
   image-repeated: true
   image-source: none
+  border-width: 0
+  border-color: alpha
   &updateOnStates: |
     function(self)
       local children = self:getChildren()
@@ -44,8 +46,12 @@ CharacterWidget < UIWidget
     end
 
   $focus:
-    image-source: /images/ui/_background/panel_map
-    image-border: 7
+    image-source: /images/ui/_background/panel_root
+    image-repeated: true
+
+    border-width: 1
+    border-color: $uiColorBorder
+
     //image-color: #ffffff88
 
   Creature
@@ -285,6 +291,18 @@ BlurredMainWindow
     anchors.bottom: parent.bottom
     width: 140
     @onClick: CharacterList.toggleAutoReconnect()
+
+  RoundedButton
+    id: motdButton
+    icon-source: /images/ui/top_menu/motd
+    !tooltip: loc'${EnterGameMotdTitle}'
+    visible: false
+    width: 26
+    height: 21
+    anchors.left: autoReconnect.right
+    anchors.bottom: parent.bottom
+    margin-left: 4
+    @onClick: ClientEnterGame.toggleMotd()
 
   LightButton
     id: buttonOk

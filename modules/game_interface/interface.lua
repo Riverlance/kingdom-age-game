@@ -2,6 +2,11 @@ g_locales.loadLocales(resolvepath(''))
 
 _G.GameInterface = { }
 
+local CharacterWindowActionKey = 'Ctrl+I'
+GameInterface.CharacterWindowActionKey = CharacterWindowActionKey
+GameInterface.AttributesActionKey = 'Ctrl+Shift+U'
+GameInterface.PowersActionKey = 'Ctrl+Shift+P'
+
 
 
 Npc.DefaultDistance = 4 -- Check also on server: lib/class/npc.lua
@@ -41,7 +46,6 @@ lastManualWalk = 0
 gameExpBar = nil
 leftPanelButton = nil
 rightPanelButton = nil
-topMenuButton = nil
 chatButton = nil
 currentViewMode = 0
 hookedMenuOptions = { }
@@ -51,6 +55,10 @@ gamePanelsContainer = { }
 -- List of panels, even if panelsPriority is not set
 local _gamePanels = { }
 local _gamePanelsContainer = { }
+local leftSideMenu
+local rightSideMenu
+local sideMenuButtons = { }
+local sideMenuButtonsById = { }
 
 
 
@@ -412,6 +420,160 @@ local function setupSidePanelResizeBorder(panel, borderId, optionKey)
   end
 end
 
+local function setSideMenuButtonDescription(button, description)
+  if type(description) == 'table' then
+    button.loct = description.loct
+    button.locpar = description.locpar
+    button:updateLocale(button.locpar)
+  else
+    button.loct = nil
+    button.locpar = nil
+    button:setTooltip(description)
+  end
+end
+
+local function createSideMenuButton(entry, menu, buttonStyle)
+  local button = g_ui.createWidget(buttonStyle, menu)
+  button:setId(entry.id)
+  setSideMenuButtonDescription(button, entry.description)
+  button:setIcon(resolvepath(entry.icon, 3))
+  button:setOn(entry.on)
+  button:setVisible(entry.visible)
+  button:setEnabled(entry.enabled)
+
+  function button:onMouseRelease(pos, mouseButton)
+    if self:containsPoint(pos) and mouseButton ~= MouseMidButton then
+      if entry.callback then
+        entry.callback()
+      end
+      g_sounds.getChannel(AudioChannels.Gui):play(f('%s/button_2.ogg', getAudioChannelPath(AudioChannels.Gui)), 1.)
+      return true
+    end
+  end
+
+  menu:updateLayout()
+  return button
+end
+
+local function createSideMenuButtonController(entry)
+  local controller = { }
+
+  function controller:setOn(on)
+    if entry.destroyed then
+      return
+    end
+    entry.on = on
+    entry.leftButton:setOn(on)
+    entry.rightButton:setOn(on)
+  end
+
+  function controller:setVisible(visible)
+    if entry.destroyed then
+      return
+    end
+    entry.visible = visible
+    entry.leftButton:setVisible(visible)
+    entry.rightButton:setVisible(visible)
+  end
+
+  function controller:show()
+    self:setVisible(true)
+  end
+
+  function controller:hide()
+    self:setVisible(false)
+  end
+
+  function controller:isVisible()
+    return not entry.destroyed and entry.visible
+  end
+
+  function controller:setEnabled(enabled)
+    if entry.destroyed then
+      return
+    end
+    entry.enabled = enabled
+    entry.leftButton:setEnabled(enabled)
+    entry.rightButton:setEnabled(enabled)
+  end
+
+  function controller:setTooltip(description)
+    if entry.destroyed then
+      return
+    end
+    entry.description = description
+    setSideMenuButtonDescription(entry.leftButton, description)
+    setSideMenuButtonDescription(entry.rightButton, description)
+  end
+
+  function controller:setIcon(icon)
+    if entry.destroyed then
+      return
+    end
+    entry.icon = icon
+    local resolvedIcon = resolvepath(icon, 3)
+    entry.leftButton:setIcon(resolvedIcon)
+    entry.rightButton:setIcon(resolvedIcon)
+  end
+
+  function controller:destroy()
+    if entry.destroyed then
+      return
+    end
+    entry.destroyed = true
+    entry.leftButton:destroy()
+    entry.rightButton:destroy()
+    sideMenuButtonsById[entry.id] = nil
+    for index, currentEntry in ipairs(sideMenuButtons) do
+      if currentEntry == entry then
+        table.remove(sideMenuButtons, index)
+        break
+      end
+    end
+  end
+
+  return controller
+end
+
+local function addSideMenuButton(id, description, icon, callback, toggle)
+  if sideMenuButtonsById[id] then
+    return sideMenuButtonsById[id].controller
+  end
+  if not leftSideMenu or not rightSideMenu then
+    return nil
+  end
+
+  local entry = {
+    id = id,
+    description = description,
+    icon = icon,
+    callback = callback,
+    visible = true,
+    enabled = true,
+    on = false,
+  }
+  local buttonStyle = toggle and 'GameSideMenuTopToggleButton' or 'GameSideMenuTopButton'
+  entry.leftButton = createSideMenuButton(entry, leftSideMenu, buttonStyle)
+  entry.rightButton = createSideMenuButton(entry, rightSideMenu, buttonStyle)
+  entry.controller = createSideMenuButtonController(entry)
+  sideMenuButtonsById[id] = entry
+  table.insert(sideMenuButtons, entry)
+  return entry.controller
+end
+
+function GameInterface.addSideMenuButton(id, description, icon, callback)
+  return addSideMenuButton(id, description, icon, callback, false)
+end
+
+function GameInterface.addSideMenuToggleButton(id, description, icon, callback)
+  return addSideMenuButton(id, description, icon, callback, true)
+end
+
+function GameInterface.getSideMenuButton(id)
+  local entry = sideMenuButtonsById[id]
+  return entry and entry.controller
+end
+
 
 
 function GameInterface.init()
@@ -432,9 +594,13 @@ function GameInterface.init()
   gameExpBar = gameRootPanel:getChildById('gameExpBar')
   leftPanelButton = gameRootPanel:getChildById('leftPanelButton')
   rightPanelButton = gameRootPanel:getChildById('rightPanelButton')
-  topMenuButton = gameRootPanel:getChildById('topMenuButton')
   chatButton = gameRootPanel:getChildById('chatButton')
   gameMapPanel = gameRootPanel:getChildById('gameMapPanel')
+  GameInterface.setFpsLabelWidget(gameMapPanel:getChildById('fpsLabel'))
+  GameInterface.setPingLabelWidget(gameMapPanel:getChildById('pingLabel'))
+  GameInterface.initFps()
+  GameInterface.setWorldInfoWidgets(gameMapPanel:getChildById('worldIcon'), gameMapPanel:getChildById('worldNameLabel'))
+  GameInterface.initWorld()
   gameScreenArea = gameRootPanel:getChildById('gameScreenArea')
   gameRightFirstPanel = gameRootPanel:getChildById('gameRightFirstPanel')
   gameRightSecondPanel = gameRootPanel:getChildById('gameRightSecondPanel')
@@ -448,6 +614,9 @@ function GameInterface.init()
   gameLeftFirstPanelContainer = gameLeftFirstPanel:getChildById('gameLeftFirstPanelContainer')
   gameLeftSecondPanelContainer = gameLeftSecondPanel:getChildById('gameLeftSecondPanelContainer')
   gameLeftThirdPanelContainer = gameLeftThirdPanel:getChildById('gameLeftThirdPanelContainer')
+  leftSideMenu = gameLeftFirstPanel:getChildById('gameLeftFirstPanelSideMenu')
+  rightSideMenu = gameRightFirstPanel:getChildById('gameRightFirstPanelSideMenu')
+  GameInterface.initSideMenu(leftSideMenu, rightSideMenu)
   leftPanelAddButton = gameRootPanel:getChildById('leftPanelAddButton')
   leftPanelRemoveButton = gameRootPanel:getChildById('leftPanelRemoveButton')
   rightPanelAddButton = gameRootPanel:getChildById('rightPanelAddButton')
@@ -543,7 +712,14 @@ function GameInterface.init()
 
   ProtocolGame.registerOpcode(ServerOpcodes.ServerOpcodeCreatureOutline, GameInterface.setCreatureOutline)
 
+  GameInterface.addSideMenuButton('vipShopSideMenuButton', { loct = '${GameInterfaceVipShopTooltip}' }, '/images/ui/top_menu/shop', function() g_platform.openUrl('https://kingdomageonline.com') end)
+  GameInterface.addSideMenuButton('dealsSideMenuButton', { loct = '${GameInterfaceButtonDealsTooltip}' }, '/images/ui/top_menu/deals', GameInterface.toggleDealsButton)
   ClientEnterGame.createEnterGameButton()
+  GameInterface.addSideMenuToggleButton('inventoryTopMenuButton', { loct = "${CharacterWindowTitle} (${CharacterWindowActionKey})", locpar = { CharacterWindowActionKey = CharacterWindowActionKey } }, '/images/ui/top_menu/healthinfo', function() if GameCharacter then GameCharacter.toggle() end end)
+  GameInterface.addSideMenuToggleButton('skillsTopMenuButton', { loct = '${CorelibSkillsWindowTitle}' }, '/images/ui/top_menu/skills', function() if GameSkills then GameSkills.toggle() end end)
+  GameInterface.addSideMenuToggleButton('attributeTopMenuButton', { loct = '${GameAttributesWindowTitle} (${GameAttributesActionKey})', locpar = { GameAttributesActionKey = GameInterface.AttributesActionKey } }, '/images/ui/top_menu/attributes', function() if GameAttributes then GameAttributes.toggle() end end)
+  GameInterface.addSideMenuToggleButton('powersTopMenuButton', { loct = '${GamePowersWindowTitle} (${GamePowersActionKey})', locpar = { GamePowersActionKey = GameInterface.PowersActionKey } }, '/images/ui/top_menu/powers', function() if GamePowers then GamePowers.toggle() end end)
+  GameInterface.addSideMenuToggleButton('conditionTopMenuButton', { loct = '${CorelibConditionsWindowTitle}' }, '/images/ui/top_menu/conditions', function() if GameConditions then GameConditions.toggle() end end)
 
   GameInterface.bindKeys()
 
@@ -577,7 +753,6 @@ function GameInterface.bindKeys()
   g_keyboard.bindKeyDown('Ctrl+L', function() GameInterface.tryLogout(false) end, gameRootPanel)
   g_keyboard.bindKeyDown('Ctrl+.', GameInterface.nextViewMode, gameRootPanel)
 
-  g_keyboard.bindKeyDown('Ctrl+Shift+Q', function() ClientOptions.setOption('showTopMenu', not ClientOptions.getOption('showTopMenu')) end)
   g_keyboard.bindKeyDown('Ctrl+Shift+W', function() ClientOptions.setOption('showChat', not ClientOptions.getOption('showChat')) end)
   g_keyboard.bindKeyDown('Ctrl+Shift+A', function() ClientOptions.setOption('showLeftPanel', not ClientOptions.getOption('showLeftPanel')) end)
   g_keyboard.bindKeyDown('Ctrl+Shift+S', function() ClientOptions.setOption('showRightPanel', not ClientOptions.getOption('showRightPanel')) end)
@@ -596,6 +771,10 @@ function GameInterface.bindKeys()
 end
 
 function GameInterface.terminate()
+  GameInterface.terminateWorld()
+  GameInterface.terminateFps()
+  GameInterface.setFpsLabelWidget(nil)
+  GameInterface.setPingLabelWidget(nil)
   GameInterface.hide()
 
   hookedMenuOptions = { }
@@ -655,6 +834,14 @@ function GameInterface.terminate()
   _gamePanels          = { }
   gamePanelsContainer  = { }
   gamePanels           = { }
+  for _, entry in ipairs(sideMenuButtons) do
+    entry.destroyed = true
+  end
+  sideMenuButtons = { }
+  sideMenuButtonsById = { }
+  leftSideMenu = nil
+  rightSideMenu = nil
+  GameInterface.terminateSideMenu()
 
   -- Look hover
   hoverLookTooltipWidget:destroy()
@@ -1237,6 +1424,7 @@ function GameInterface.setRightPanels(on)
     gameRightThirdPanel:setVisible(false)
   end
 
+  rightSideMenu:updateLayout()
   rightPanelButton:setOn(on)
 end
 
@@ -1266,6 +1454,7 @@ function GameInterface.setLeftPanels(on)
     gameLeftThirdPanel:setVisible(false)
   end
 
+  leftSideMenu:updateLayout()
   leftPanelButton:setOn(on)
 end
 
@@ -2023,10 +2212,6 @@ end
 
 function GameInterface.getRightPanelButton()
   return rightPanelButton
-end
-
-function GameInterface.getTopMenuButton()
-  return topMenuButton
 end
 
 function GameInterface.getChatButton()

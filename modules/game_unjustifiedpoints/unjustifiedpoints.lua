@@ -63,7 +63,7 @@ function GameUnjustifiedPoints.init()
   unjustifiedPointsWindow        = g_ui.loadUI('unjustifiedpoints')
   unjustifiedPointsHeader        = unjustifiedPointsWindow:getChildById('miniWindowHeader')
   unjustifiedPointsFooter        = unjustifiedPointsWindow:getChildById('miniWindowFooter')
-  unjustifiedPointsTopMenuButton = ClientTopMenu.addRightGameToggleButton('unjustifiedPointsTopMenuButton', { loct = '${GameUnjustifiedPointsWindowTitle} (${GameUnjustifiedPointsActionKey})', locpar = { GameUnjustifiedPointsActionKey = GameUnjustifiedPointsActionKey } }, '/images/ui/top_menu/unjustifiedpoints', GameUnjustifiedPoints.toggle)
+  unjustifiedPointsTopMenuButton = GameInterface.addSideMenuToggleButton('unjustifiedPointsTopMenuButton', { loct = '${GameUnjustifiedPointsWindowTitle} (${GameUnjustifiedPointsActionKey})', locpar = { GameUnjustifiedPointsActionKey = GameUnjustifiedPointsActionKey } }, '/images/ui/top_menu/unjustifiedpoints', GameUnjustifiedPoints.toggle)
 
   unjustifiedPointsWindow.topMenuButton = unjustifiedPointsTopMenuButton
   unjustifiedPointsWindow:disableResize()

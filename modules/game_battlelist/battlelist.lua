@@ -111,7 +111,7 @@ function GameBattleList.init()
   g_keyboard.bindKeyDown(BattleActionKey, GameBattleList.toggle)
 
   battleWindow = g_ui.loadUI('battlelist')
-  battleTopMenuButton = ClientTopMenu.addRightGameToggleButton('battleTopMenuButton', { loct = '${BattleWindowTitle} (${BattleActionKey})', locpar = { BattleActionKey = BattleActionKey } }, '/images/ui/top_menu/battle_list', GameBattleList.toggle)
+  battleTopMenuButton = GameInterface.addSideMenuToggleButton('battleTopMenuButton', { loct = '${BattleWindowTitle} (${BattleActionKey})', locpar = { BattleActionKey = BattleActionKey } }, '/images/ui/top_menu/battle_list', GameBattleList.toggle)
 
   battleWindow.topMenuButton = battleTopMenuButton
 

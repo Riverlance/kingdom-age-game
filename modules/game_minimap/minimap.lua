@@ -109,7 +109,7 @@ function GameMinimap.init()
 
   minimapWindow        = g_ui.loadUI('minimap')
   local contentsPanel  = minimapWindow:getChildById('contentsPanel')
-  minimapTopMenuButton = ClientTopMenu.addRightGameToggleButton('minimapTopMenuButton', { loct = '${GameMinimapTitle} (${GameMinimapActionKey})', locpar = { GameMinimapActionKey = GameMinimapActionKey } }, '/images/ui/top_menu/minimap', GameMinimap.toggle)
+  minimapTopMenuButton = GameInterface.addSideMenuToggleButton('minimapTopMenuButton', { loct = '${GameMinimapTitle} (${GameMinimapActionKey})', locpar = { GameMinimapActionKey = GameMinimapActionKey } }, '/images/ui/top_menu/minimap', GameMinimap.toggle)
 
   minimapWindow.topMenuButton = minimapTopMenuButton
 

@@ -257,18 +257,10 @@ PlayerMiniWindow
       padding-left: 8
       creature-size: 64
 
-    Button
-      id: skillsButton
-      icon: /images/ui/top_menu/skills
-      &loct: '${CorelibSkillsWindowTitle}'
-      size: 34 18
+    HeadSlot
       anchors.top: outfitCreatureBox.top
       anchors.horizontalCenter: leftPanel.horizontalCenter
-
-    HeadSlot
-      anchors.top: prev.outsideBottom
-      anchors.horizontalCenter: leftPanel.horizontalCenter
-      margin-top: 1
+      margin-top: 18
 
     BodySlot
       anchors.top: prev.outsideBottom
@@ -285,28 +277,10 @@ PlayerMiniWindow
       anchors.horizontalCenter: prev.horizontalCenter
       margin-top: 1
 
-    Button
-      id: conditionsButton
-      icon: /images/ui/top_menu/conditions
-      &loct: '${CorelibConditionsWindowTitle}'
-      height: 18
-      anchors.top: prev.outsideBottom
-      anchors.left: prev.left
-      anchors.right: prev.right
-      margin-top: 1
-
-    Button
-      icon: /images/ui/top_menu/shop
-      &loct: '${CharacterButtonShopTooltip}'
-      size: 34 18
+    BackSlot
       anchors.top: outfitCreatureBox.top
       anchors.horizontalCenter: rightPanel.horizontalCenter
-      @onClick: g_platform.openUrl('https://kingdomageonline.com')
-
-    BackSlot
-      anchors.top: prev.outsideBottom
-      anchors.horizontalCenter: rightPanel.horizontalCenter
-      margin-top: 1
+      margin-top: 18
 
     NeckSlot
       anchors.top: prev.outsideBottom
@@ -322,16 +296,6 @@ PlayerMiniWindow
       anchors.top: prev.outsideBottom
       anchors.horizontalCenter: prev.horizontalCenter
       margin-top: 1
-
-    Button
-      icon: /images/ui/top_menu/deals
-      &loct: '${CharacterButtonDealsTooltip}'
-      height: 18
-      anchors.top: prev.outsideBottom
-      anchors.left: prev.left
-      anchors.right: prev.right
-      margin-top: 1
-      @onClick: GameInterface.toggleDealsButton()
 
     LeftSlot
       anchors.top: outfitCreatureBox.outsideBottom

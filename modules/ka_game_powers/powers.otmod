@@ -5,6 +5,6 @@ Module
   sandboxed: true
   autoload: true
   scripts: [ powers, power_cast, power_effects ]
-  dependencies: [ client_topmenu, game_interface ]
+  dependencies: [ game_interface, ka_game_attributes ]
   @onLoad: GamePowers.init()
   @onUnload: GamePowers.terminate()

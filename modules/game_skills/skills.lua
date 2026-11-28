@@ -28,6 +28,7 @@ function GameSkills.init()
   })
 
   skillsWindow = g_ui.loadUI('skills')
+  skillsWindow.topMenuButton = GameInterface.getSideMenuButton('skillsTopMenuButton')
 
   contentsPanel = skillsWindow:getChildById('contentsPanel')
 

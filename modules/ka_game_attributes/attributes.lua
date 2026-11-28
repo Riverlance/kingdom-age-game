@@ -4,7 +4,7 @@ _G.GameAttributes = { }
 
 
 
-local GameAttributesActionKey = 'Ctrl+Shift+U'
+local GameAttributesActionKey = GameInterface.AttributesActionKey
 
 
 
@@ -72,11 +72,11 @@ function GameAttributes.init()
   -- Alias
   GameAttributes.m = modules.ka_game_attributes
 
-  g_keyboard.bindKeyDown('Ctrl+Shift+U', GameAttributes.toggle)
+  g_keyboard.bindKeyDown(GameAttributesActionKey, GameAttributes.toggle)
 
   attributeWindow        = g_ui.loadUI('attributes')
   attributeFooter        = attributeWindow:getChildById('miniWindowFooter')
-  attributeTopMenuButton = ClientTopMenu.addRightGameToggleButton('attributeTopMenuButton', { loct = '${GameAttributesWindowTitle} (${GameAttributesActionKey})', locpar = { GameAttributesActionKey = GameAttributesActionKey } }, '/images/ui/top_menu/attributes', GameAttributes.toggle)
+  attributeTopMenuButton = GameInterface.getSideMenuButton('attributeTopMenuButton')
 
   attributeWindow.topMenuButton = attributeTopMenuButton
   attributeWindow:disableResize()
@@ -180,7 +180,6 @@ function GameAttributes.terminate()
     onGameEnd          = GameAttributes.offline,
   })
 
-  attributeTopMenuButton:destroy()
   attributeWindow:destroy()
 
   attributeTopMenuButton = nil
@@ -220,7 +219,7 @@ function GameAttributes.terminate()
   availablePointsLabel = nil
   pointsCostLabel      = nil
 
-  g_keyboard.unbindKeyDown('Ctrl+Shift+U')
+  g_keyboard.unbindKeyDown(GameAttributesActionKey)
 
   _G.GameAttributes = nil
 end

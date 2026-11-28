@@ -26,6 +26,7 @@ conditionList = { }
 
 
 conditionWindow = nil
+conditionTopMenuButton = nil
 conditionHeader = nil
 conditionFooter = nil
 sortMenuButton = nil
@@ -111,6 +112,8 @@ function GameConditions.init()
   conditionWindow = g_ui.loadUI('conditions')
   conditionHeader = conditionWindow:getChildById('miniWindowHeader')
   conditionFooter = conditionWindow:getChildById('miniWindowFooter')
+  conditionTopMenuButton = GameInterface.getSideMenuButton('conditionTopMenuButton')
+  conditionWindow.topMenuButton = conditionTopMenuButton
 
   for k,v in pairs(Icons) do
     g_textures.preload(v.path)
@@ -179,6 +182,7 @@ function GameConditions.terminate()
   conditionList = { }
 
   conditionWindow           = nil
+  conditionTopMenuButton    = nil
   conditionHeader           = nil
   conditionFooter           = nil
   sortMenuButton            = nil
@@ -323,7 +327,7 @@ end
 
 
 function GameConditions.online()
-  conditionWindow:setup()
+  conditionWindow:setup(conditionTopMenuButton)
 
   local localPlayer = g_game.getLocalPlayer()
   if localPlayer then

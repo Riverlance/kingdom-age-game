@@ -3,10 +3,7 @@ g_locales.loadLocales(resolvepath(''))
 _G.GameCharacter = { }
 
 
-
-CharacterWindowActionKey = 'Ctrl+I'
-
-
+local CharacterWindowActionKey = GameInterface.CharacterWindowActionKey
 
 outfitCreatureBox = nil
 
@@ -105,7 +102,7 @@ function GameCharacter.init()
   inventoryWindow.onMinimize = GameCharacter.onMinimize
   inventoryWindow.onMaximize = GameCharacter.onMaximize
   inventoryHeader            = inventoryWindow:getChildById('miniWindowHeader')
-  inventoryTopMenuButton     = ClientTopMenu.addRightGameToggleButton('inventoryTopMenuButton', { loct = "${CharacterWindowTitle} (${CharacterWindowActionKey})", locpar = { CharacterWindowActionKey = CharacterWindowActionKey } }, '/images/ui/top_menu/healthinfo', GameCharacter.toggle)
+  inventoryTopMenuButton     = GameInterface.getSideMenuButton('inventoryTopMenuButton')
 
   inventoryWindow.topMenuButton = inventoryTopMenuButton
   inventoryWindow:disableResize()
@@ -151,24 +148,6 @@ function GameCharacter.init()
   connect(safeFightButton, {
     onCheckChange = GameCharacter.onSetSafeFight
   })
-
-  addEvent(function()
-    if not isWidgetAlive(contentsPanel) then
-      return
-    end
-
-    -- Skills button
-    local skillsButton = contentsPanel.skillsButton
-    if skillsButton then
-      skillsButton.onClick = GameSkills.toggle
-    end
-
-    -- Conditions button
-    local conditionsButton = contentsPanel.conditionsButton
-    if conditionsButton then
-      conditionsButton.onClick = GameConditions.toggle
-    end
-  end)
 
   if g_game.isOnline() then
     GameCharacter.online()
@@ -257,7 +236,6 @@ function GameCharacter.terminate()
   capacityBarValueLabel = nil
   experienceBarValueLabel = nil
 
-  inventoryTopMenuButton:destroy()
   inventoryTopMenuButton = nil
   inventoryWindow:destroy()
   inventoryWindow = nil

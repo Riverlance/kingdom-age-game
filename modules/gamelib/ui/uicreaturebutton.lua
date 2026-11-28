@@ -364,7 +364,7 @@ function UICreatureButton:updatePosition(position)
   updatePartyMemberMarker(self)
 end
 
-function UICreatureButton:updatePing(ping) -- See ClientTopMenu.updatePing
+function UICreatureButton:updatePing(ping) -- See GameInterface.updatePing
   local pingWidget = self:getChildById('pingLabel')
   if not pingWidget then
     return

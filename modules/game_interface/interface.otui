@@ -3,12 +3,20 @@ GameSidePanel < Panel
   anchors.top: parent.top
   anchors.bottom: parent.bottom
   image-source: /images/ui/_background/panel_side
-  image-border: 7
+  image-repeated: true
   focusable: false
   phantom: true
 
   $hidden:
     width: 0
+
+GameLeftSidePanel < GameSidePanel
+  border-width-right: 1
+  border-color-right: $uiColorBorder
+
+GameRightSidePanel < GameSidePanel
+  border-width-left: 1
+  border-color-left: $uiColorBorder
 
 GameSideContainer < UIMiniWindowContainer
   // Do not put margin on it
@@ -16,6 +24,66 @@ GameSideContainer < UIMiniWindowContainer
   layout:
     type: verticalBox
   focusable: false
+
+GameSideMenuPanel < TopMenuPanel
+  anchors.left: parent.left
+  anchors.right: parent.right
+  height: fit-content
+  min-height: 36
+  display: flex
+  flex-flow: row wrap
+  justify-content: center
+  align-items: center
+  align-content: center
+  column-gap: 4
+  row-gap: 4
+  padding: 5 4
+
+  $!on:
+    visible: false
+    height: 0
+    min-height: 0
+
+GameSideMenuVisibilityButton < UIButton
+  size: 20 7
+  anchors.top: parent.top
+  anchors.horizontalCenter: parent.horizontalCenter
+  image-source: /images/ui/_button/sidebar_vertical
+  !tooltip: loc'${GameInterfaceSideMenuButtonHide}'
+  on: true
+
+  $on:
+    image-clip: 0 0 20 7
+
+  $on hover:
+    image-clip: 0 7 20 7
+
+  $on pressed:
+    image-clip: 0 14 20 7
+
+  $!on:
+    image-clip: 20 0 20 7
+    !tooltip: loc'${GameInterfaceSideMenuButtonShow}'
+
+  $!on hover:
+    image-clip: 20 7 20 7
+
+  $!on pressed:
+    image-clip: 20 14 20 7
+
+GameSideMenuTopButton < TopButton
+  position: static
+  flex-shrink: 0
+
+  $hidden:
+    position: absolute
+
+GameSideMenuTopToggleButton < TopToggleButton
+  position: static
+  flex-shrink: 0
+
+  $hidden:
+    position: absolute
 
 GameSidePanelSticker < UIWidget
   anchors.bottom: parent.bottom
@@ -38,13 +106,9 @@ GameBottomPanel < Panel
     border-color-bottom: #101010
 
 GameMapPanel < UIGameMap
-  image-source: /images/ui/_background/panel_map
-  image-border: 7
-  padding: 7
+  image-source: /images/ui/_background/panel_root
+  image-repeated: true
   focusable: false
-
-  $on:
-    padding: 0
 
 TrackerWidget < UIWidget
   size: 48 48
@@ -76,6 +140,57 @@ UIWidget
     id: gameMapPanel
     anchors.fill: gameScreenArea
 
+    UIWidget
+      id: worldIcon
+      size: 16 16
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-top: 4
+      margin-left: 4
+      image-source: /images/client_icon
+      image-size: 16 16
+      image-smooth: true
+      phantom: true
+      visible: false
+
+    TopMenuWorldLabel
+      id: worldNameLabel
+      anchors.left: worldIcon.right
+      anchors.verticalCenter: worldIcon.verticalCenter
+      margin-left: 4
+      phantom: true
+      text-auto-resize: true
+      visible: false
+
+    TopMenuFrameCounterLabel
+      id: fpsLabel
+      anchors.top: worldIcon.bottom
+      anchors.left: parent.left
+      margin-top: 2
+      max-height: -1
+      phantom: false
+      text-auto-resize: true
+
+      $hidden:
+        height: 0
+        margin-top: 0
+        max-height: 0
+
+    TopMenuPingLabel
+      id: pingLabel
+      anchors.top: fpsLabel.bottom
+      anchors.left: fpsLabel.left
+      margin-top: 2
+      max-height: -1
+      color: white
+      text-auto-resize: true
+      visible: false
+
+      $hidden:
+        height: 0
+        margin-top: 0
+        max-height: 0
+
   // Used for anchoring purposes and for lock widgets by server
   UIWidget
     id: gameScreenArea
@@ -86,7 +201,7 @@ UIWidget
     focusable: false
     phantom: true
 
-  GameSidePanel
+  GameLeftSidePanel
     id: gameLeftFirstPanel
     anchors.left: parent.left
     &sidePanelId: 2
@@ -94,8 +209,20 @@ UIWidget
     GameSidePanelSticker
       id: gameLeftPanelSticker
 
+    GameSideMenuVisibilityButton
+      id: leftSideMenuButton
+      @onClick: ClientOptions.setOption('showLeftSideMenu', not ClientOptions.getOption('showLeftSideMenu'))
+
+    GameSideMenuPanel
+      id: gameLeftFirstPanelSideMenu
+      anchors.top: leftSideMenuButton.outsideBottom
+
     GameSideContainer
       id: gameLeftFirstPanelContainer
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: gameLeftFirstPanelSideMenu.outsideBottom
+      anchors.bottom: parent.bottom
 
     ResizeBorder
       id: leftFirstPanelResizeBorder
@@ -103,7 +230,7 @@ UIWidget
       anchors.top: parent.top
       anchors.bottom: parent.bottom
 
-  GameSidePanel
+  GameLeftSidePanel
     id: gameLeftSecondPanel
     anchors.left: prev.outsideRight
     &sidePanelId: 4
@@ -117,7 +244,7 @@ UIWidget
       anchors.top: parent.top
       anchors.bottom: parent.bottom
 
-  GameSidePanel
+  GameLeftSidePanel
     id: gameLeftThirdPanel
     anchors.left: prev.outsideRight
     &sidePanelId: 6
@@ -131,7 +258,7 @@ UIWidget
       anchors.top: parent.top
       anchors.bottom: parent.bottom
 
-  GameSidePanel
+  GameRightSidePanel
     id: gameRightFirstPanel
     anchors.right: parent.right
     &sidePanelId: 1
@@ -139,8 +266,20 @@ UIWidget
     GameSidePanelSticker
       id: gameRightPanelSticker
 
+    GameSideMenuVisibilityButton
+      id: rightSideMenuButton
+      @onClick: ClientOptions.setOption('showRightSideMenu', not ClientOptions.getOption('showRightSideMenu'))
+
+    GameSideMenuPanel
+      id: gameRightFirstPanelSideMenu
+      anchors.top: rightSideMenuButton.outsideBottom
+
     GameSideContainer
       id: gameRightFirstPanelContainer
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: gameRightFirstPanelSideMenu.outsideBottom
+      anchors.bottom: parent.bottom
 
     ResizeBorder
       id: rightFirstPanelResizeBorder
@@ -148,7 +287,7 @@ UIWidget
       anchors.top: parent.top
       anchors.bottom: parent.bottom
 
-  GameSidePanel
+  GameRightSidePanel
     id: gameRightSecondPanel
     anchors.right: prev.outsideLeft
     &sidePanelId: 3
@@ -162,7 +301,7 @@ UIWidget
       anchors.top: parent.top
       anchors.bottom: parent.bottom
 
-  GameSidePanel
+  GameRightSidePanel
     id: gameRightThirdPanel
     anchors.right: prev.outsideLeft
     &sidePanelId: 5
@@ -248,36 +387,6 @@ UIWidget
       image-source: /images/ui/experience/bar_side_right
       anchors.bottom: parent.bottom
       anchors.right: parent.right
-
-  UIButton
-    id: topMenuButton
-    size: 20 7
-    anchors.top: parent.top
-    anchors.horizontalCenter: gameBottomPanel.horizontalCenter
-    image-source: /images/ui/_button/sidebar_vertical
-    !tooltip: f(loc'${GameInterfaceTopMenuButtonHide}', 'Ctrl+Shift+Q')
-    on: true
-    @onClick: |
-      ClientOptions.setOption('showTopMenu', not ClientOptions.getOption('showTopMenu'))
-
-    $on:
-      image-clip: 0 0 20 7
-
-    $on hover:
-      image-clip: 0 7 20 7
-
-    $on pressed:
-      image-clip: 0 14 20 7
-
-    $!on:
-      image-clip: 20 0 20 7
-      !tooltip: f(loc'${GameInterfaceTopMenuButtonShow}', 'Ctrl+Shift+Q')
-
-    $!on hover:
-      image-clip: 20 7 20 7
-
-    $!on pressed:
-      image-clip: 20 14 20 7
 
   UIButton
     id: leftPanelButton

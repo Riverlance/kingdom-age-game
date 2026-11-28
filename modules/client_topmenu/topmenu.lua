@@ -10,11 +10,6 @@ local rightButtonsPanel
 local leftGameButtonsPanel
 local rightGameButtonsPanel
 
-local lastSyncValue = -1
-local fpsEvent = nil
-local fpsMin = -1;
-local fpsMax = -1;
-
 
 
 local function addButton(id, description, icon, callback, panel, toggle, front)
@@ -65,11 +60,7 @@ function ClientTopMenu.init()
 
   connect(g_game, {
     onGameStart = ClientTopMenu.online,
-    onGameEnd   = ClientTopMenu.offline,
-    onPingBack  = ClientTopMenu.updatePing
-  })
-  connect(g_app, {
-    onFps = ClientTopMenu.updateFps
+    onGameEnd   = ClientTopMenu.offline
   })
 
   topMenu = g_ui.displayUI('topmenu')
@@ -78,22 +69,18 @@ function ClientTopMenu.init()
   rightButtonsPanel = topMenu:getChildById('rightButtonsPanel')
   leftGameButtonsPanel = topMenu:getChildById('leftGameButtonsPanel')
   rightGameButtonsPanel = topMenu:getChildById('rightGameButtonsPanel')
-  pingLabel = topMenu:getChildById('pingLabel')
-  fpsLabel = topMenu:getChildById('fpsLabel')
 
   if g_game.isOnline() then
     ClientTopMenu.online()
+  else
+    ClientTopMenu.offline()
   end
 end
 
 function ClientTopMenu.terminate()
-  disconnect(g_app, {
-    onFps = ClientTopMenu.updateFps
-  })
   disconnect(g_game, {
     onGameStart = ClientTopMenu.online,
-    onGameEnd   = ClientTopMenu.offline,
-    onPingBack  = ClientTopMenu.updatePing
+    onGameEnd   = ClientTopMenu.offline
   })
 
   topMenu:destroy()
@@ -102,8 +89,6 @@ function ClientTopMenu.terminate()
   rightButtonsPanel = nil
   leftGameButtonsPanel = nil
   rightGameButtonsPanel = nil
-  pingLabel = nil
-  fpsLabel = nil
 
   _G.ClientTopMenu = nil
 end
@@ -111,100 +96,13 @@ end
 
 
 function ClientTopMenu.online()
+  topMenu:hide()
   ClientTopMenu.showGameButtons()
-
-  addEvent(withWeakWidget(pingLabel, function(widget)
-    if ClientOptions.getOption('showPing') and g_game.getFeature(GameClientPing) then
-      widget:show()
-    else
-      widget:hide()
-    end
-  end))
 end
 
 function ClientTopMenu.offline()
   ClientTopMenu.hideGameButtons()
-  pingLabel:hide()
-  fpsMin = -1
-end
-
-function ClientTopMenu.updateFps(fps)
-  if not fpsLabel:isVisible() then
-    return
-  end
-
-  text = f(loc'${ClientTopMenuFps}: %s', fps)
-
-  if g_game.isOnline() then
-    local vsync = ClientOptions.getOption('vsync')
-    if fpsEvent == nil and lastSyncValue ~= vsync then
-      fpsEvent = addEvent(function()
-        fpsMin = -1
-        lastSyncValue = vsync
-        fpsEvent = nil
-      end, 2000)
-    end
-
-    if fpsMin == -1 then
-      fpsMin = fps
-      fpsMax = fps
-    end
-
-    if fps > fpsMax then
-      fpsMax = fps
-    end
-
-    if fps < fpsMin then
-      fpsMin = fps
-    end
-
-    local midFps = math.floor((fpsMin + fpsMax) / 2)
-    fpsLabel:setTooltip(f(loc'${ClientTopMenuFpsTooltip}', fpsMin, midFps, fpsMax))
-  else
-    fpsLabel:removeTooltip()
-  end
-
-  fpsLabel:setText(text)
-end
-
-function ClientTopMenu.updatePing(ping) -- See UICreatureButton:updatePing
-  if not pingLabel:isVisible() then
-    return
-  end
-
-  local text
-  local color
-
-  -- Unknown
-  if ping < 0 then
-    text  = loc'${ClientTopMenuFpsInfoPing}: ?'
-    color = 'yellow'
-
-  -- Known
-  else
-    text = f(loc'${ClientTopMenuFpsInfoPing}: %d ${CorelibInfoMs}', ping)
-
-    if ping >= 500 then
-      color = 'red'
-
-    elseif ping >= 250 then
-      color = 'yellow'
-
-    else
-      color = 'green'
-    end
-  end
-
-  pingLabel:setText(text)
-  pingLabel:setColor(color)
-end
-
-function ClientTopMenu.setPingVisible(enable)
-  pingLabel:setVisible(enable)
-end
-
-function ClientTopMenu.setFpsVisible(enable)
-  fpsLabel:setVisible(enable)
+  topMenu:show()
 end
 
 function ClientTopMenu.addLeftButton(id, description, icon, callback, front)

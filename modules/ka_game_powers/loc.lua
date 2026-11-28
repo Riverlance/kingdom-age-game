@@ -1,25 +1,6 @@
 -- Consolidated UTF-8 locale file.
 
 g_locales.addTranslations({
-  GamePowersWindowTitle = {
-    en    = "Powers",
-    ptbr  = "Poderes",
-    ptpt  = "Poderes",
-    es419 = "Poderes",
-    eses  = "Poderes",
-    pl    = "Moce",
-    ru    = "Силы",
-    sv    = "Krafter",
-    nb    = "Krefter",
-    de    = "Kräfte",
-    nlnl  = "Krachten",
-    frfr  = "Pouvoirs",
-    fi    = "Voimat",
-    it    = "Poteri",
-    zhcn  = "力量",
-    ja    = "パワー",
-    ko    = "능력",
-  },
 
   GamePowersButtonInfo = {
     en    = "1. Powers should be used on hotkeys. Open the hotkeys window (%s), select a hotkey row, then drag and drop a power row below into the hotkey slot.\n\n2. Power hotkeys can be pressed and held to boost their potency - this will also increase the mana cost.\n\n3. Some powers require the mouse to be on the game screen to target.\n\nNote: All powers show information according to your character's status. So, your attributes, equipment and other factors can change this information in real time. Also, damage may change according to the target's defense.",

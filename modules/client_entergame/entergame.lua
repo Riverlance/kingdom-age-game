@@ -14,7 +14,6 @@ local loadBox
 local enterGame
 local enterGameButton
 local motdWindow
-local motdButton
 local clientBox
 local protocolLogin
 local motdEnabled = true
@@ -42,7 +41,7 @@ local function onMotd(protocol, motd)
   G.motdNumber = motd:sub(1, separator - 1)
   G.motdMessage = motd:sub(separator + 1)
   if motdEnabled then
-    motdButton:show()
+    ClientCharacterList.updateMotdButton()
   end
 end
 
@@ -93,15 +92,9 @@ local function onCharacterList(protocol, characters, account, otui)
     local lastMotdNumber = g_settings.get('motd')
     if G.motdNumber and G.motdNumber ~= lastMotdNumber then
       g_settings.set('motd', G.motdNumber)
-      motdWindow = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)
-      motdButton:setOn(true)
-      connect(motdWindow, {
-        onOk = function()
-          ClientCharacterList.show()
-          motdButton:setOn(false)
-          motdWindow = nil
-        end
-      })
+      ClientEnterGame.displayMotd(function()
+        ClientCharacterList.show()
+      end)
       ClientCharacterList.hide()
     end
   end
@@ -130,14 +123,7 @@ function ClientEnterGame.init()
   ClientEnterGame.m = modules.client_entergame
 
   enterGame = g_ui.displayUI('entergame')
-  motdButton = ClientTopMenu.addLeftButton('motdButton', loc'${EnterGameMotdTitle}', '/images/ui/top_menu/motd', ClientEnterGame.toggleMotd)
-  motdButton:setOn(false)
-  motdButton:hide()
   g_keyboard.bindKeyDown(EnterGameActionKey, ClientEnterGame.openWindow)
-
-  if motdEnabled and G.motdNumber then
-    motdButton:show()
-  end
 
   local account = g_settings.get('account')
   local password = g_settings.get('password')
@@ -193,11 +179,6 @@ function ClientEnterGame.terminate()
     motdWindow = nil
   end
 
-  if motdButton then
-    motdButton:destroy()
-    motdButton = nil
-  end
-
   if loadBox then
     loadBox:destroy()
     loadBox = nil
@@ -212,7 +193,7 @@ function ClientEnterGame.terminate()
 end
 
 function ClientEnterGame.createEnterGameButton()
-  enterGameButton = ClientTopMenu.addLeftButton('enterGameButton', { loct = '${CharacterListTitle} (${EnterGameActionKey})', locpar = { EnterGameActionKey = EnterGameActionKey } }, '/images/ui/top_menu/login', ClientEnterGame.openWindow, true)
+  enterGameButton = GameInterface.addSideMenuButton('enterGameButton', { loct = '${CharacterListTitle} (${EnterGameActionKey})', locpar = { EnterGameActionKey = EnterGameActionKey } }, '/images/ui/top_menu/login', ClientEnterGame.openWindow)
 end
 
 function ClientEnterGame.toggleLoginButton(on)
@@ -354,19 +335,25 @@ function ClientEnterGame.doLogin()
   end
 end
 
-function ClientEnterGame.displayMotd()
-  if not motdEnabled or motdWindow then
+function ClientEnterGame.displayMotd(onClose)
+  if not motdEnabled or motdWindow or not G.motdMessage then
     return
   end
 
-  motdWindow      = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)
-  motdWindow.onOk = function() motdButton:setOn(false) motdWindow = nil end
-  motdButton:setOn(true)
+  motdWindow = displayInfoBox(loc'${EnterGameMotdTitle}', G.motdMessage)
+  motdWindow.onOk = function()
+    ClientCharacterList.setMotdButtonOn(false)
+    motdWindow = nil
+    if onClose then
+      onClose()
+    end
+  end
+  ClientCharacterList.setMotdButtonOn(true)
 end
 
 function ClientEnterGame.toggleMotd()
   if motdWindow then
-    motdButton:setOn(false)
+    ClientCharacterList.setMotdButtonOn(false)
     motdWindow:destroy()
     motdWindow = nil
   else

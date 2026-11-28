@@ -5,6 +5,6 @@ Module
   website: https://github.com/edubart/otclient
   sandboxed: true
   scripts: [ partylist ]
-  dependencies: [ client_topmenu, game_interface ]
+  dependencies: [ game_interface ]
   @onLoad: GamePartyList.init()
   @onUnload: GamePartyList.terminate()
